@@ -59,10 +59,21 @@ export async function GET() {
             }
         }
 
+        // Calculate user-level premium status FIRST (independent of jar)
+        const userIsPro = isUserPro(user);
+
         if (!user || !activeJar) {
             // If user exists but has no jar, return user only (onboarding state)
             if (user) {
-                return NextResponse.json({ user: { ...user, isCreator: false, hasPartner: false } });
+                return NextResponse.json({
+                    user: {
+                        ...user,
+                        isCreator: false,
+                        hasPartner: false,
+                        isPremium: userIsPro, // User can have premium even without a jar
+                        hasPaid: userIsPro,
+                    }
+                });
             }
             return NextResponse.json({ user: null });
         }
@@ -76,8 +87,7 @@ export async function GET() {
         // For simple couple logic, hasPartner means > 1 member
         hasPartner = members.length > 1;
 
-        // NEW: Check Pro Status
-        const userIsPro = isUserPro(user);
+        // Check jar-level premium and combine with user premium
         const jarIsPremium = isCouplePremium(activeJar);
         const effectivePremium = jarIsPremium || userIsPro;
 
