@@ -12,6 +12,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  // Production optimizations
+  compiler: {
+    // Remove console.log in production (keep error/warn)
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+
+  // Strict mode for better debugging
+  reactStrictMode: true,
 };
 
 export default nextConfig;
