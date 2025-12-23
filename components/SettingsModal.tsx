@@ -59,23 +59,18 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
         setIsLoading(true);
 
         try {
-            // Update couple location
-            const locRes = await fetch(getApiUrl('/api/couple/location'), {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ location }),
-                credentials: 'include',
-            });
-
-            // Update user settings
+            // Update user settings (location + interests)
             const userRes = await fetch(getApiUrl('/api/user/settings'), {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ interests }),
+                body: JSON.stringify({
+                    location,  // Save to user.homeTown
+                    interests
+                }),
                 credentials: 'include',
             });
 
-            if (locRes.ok && userRes.ok) {
+            if (userRes.ok) {
                 onClose();
                 router.refresh();
             } else {

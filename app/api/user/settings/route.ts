@@ -9,12 +9,13 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { interests } = await request.json();
+        const { interests, location } = await request.json();
 
         const updatedUser = await prisma.user.update({
             where: { email: session.user.email },
             data: {
                 interests,
+                homeTown: location, // Save location to homeTown field
             },
         });
 

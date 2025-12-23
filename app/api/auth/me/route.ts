@@ -72,7 +72,7 @@ export async function GET() {
                         hasPartner: false,
                         isPremium: userIsPro, // User can have premium even without a jar
                         hasPaid: userIsPro,
-                        location: null, // No jar means no location
+                        location: user.homeTown, // Use user's personal location
                         coupleReferenceCode: null,
                         isTrialEligible: true,
                         coupleCreatedAt: user.createdAt,
@@ -101,7 +101,7 @@ export async function GET() {
                 ...user,
                 // Map Jar fields to legacy Couple fields for frontend compatibility
                 coupleReferenceCode: activeJar.referenceCode,
-                location: activeJar.location,
+                location: user.homeTown, // Use user's personal location, not jar location
                 isPremium: effectivePremium,
                 hasPaid: effectivePremium,
                 isTrialEligible: activeJar.isTrialEligible,
