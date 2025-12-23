@@ -182,9 +182,15 @@ export default function DashboardPage() {
                     const storedLevel = parseInt(storedLevelStr, 10);
                     if (newLevel > storedLevel) {
                         setShowLevelUp(true);
+                        // Don't update localStorage here - wait for modal close
+                    } else if (newLevel === storedLevel) {
+                        // Level hasn't changed, no action needed
+                    } else {
+                        // Level went down somehow, sync it
+                        localStorage.setItem('datejar_user_level', newLevel.toString());
                     }
-                    localStorage.setItem('datejar_user_level', newLevel.toString()); // Always update
                 } else {
+                    // First time, just store it without showing modal
                     localStorage.setItem('datejar_user_level', newLevel.toString());
                 }
             }
