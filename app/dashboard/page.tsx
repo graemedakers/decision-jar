@@ -153,6 +153,7 @@ export default function DashboardPage() {
                 if (data.user.interests) setInterests(data.user.interests);
                 const userIsPremium = !!data.user.isPremium;
                 setIsPremium(userIsPremium);
+                localStorage.setItem('datejar_is_premium', userIsPremium.toString());
             } else {
                 // Middleware let us through, but API says invalid. Logout and Redirect.
                 console.warn("Invalid session detected on dashboard. Logging out.");
@@ -221,10 +222,12 @@ export default function DashboardPage() {
                 const cachedXp = localStorage.getItem('datejar_xp');
                 const cachedLevel = localStorage.getItem('datejar_user_level');
                 const cachedAch = localStorage.getItem('datejar_achievements');
+                const cachedPremium = localStorage.getItem('datejar_is_premium');
 
                 if (cachedXp) setXp(parseInt(cachedXp, 10));
                 if (cachedLevel) setLevel(parseInt(cachedLevel, 10));
                 if (cachedAch) setAchievements(JSON.parse(cachedAch));
+                if (cachedPremium) setIsPremium(cachedPremium === 'true');
             } catch (e) {
                 // Ignore cache errors
             }
