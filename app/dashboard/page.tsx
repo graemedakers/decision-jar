@@ -557,6 +557,41 @@ export default function DashboardPage() {
 
             </header>
 
+            {/* No Jar Banner */}
+            {userData && (!userData.memberships || userData.memberships.length === 0) && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8 p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 dark:from-purple-500/20 dark:to-pink-500/20 border border-purple-500/20 dark:border-purple-500/30 rounded-2xl"
+                >
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                                <Layers className="w-5 h-5 text-purple-500" />
+                                Welcome! You're not a member of any jar yet.
+                            </h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-300">
+                                To start adding and spinning ideas, you'll need to join an existing jar or create your own.
+                                You can also request an invite from someone who already has a jar.
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            <Button
+                                onClick={() => {
+                                    // Trigger jar switcher to open
+                                    const trigger = document.querySelector('[role="combobox"]');
+                                    if (trigger) (trigger as HTMLElement).click();
+                                }}
+                                className="bg-purple-500 hover:bg-purple-600 text-white"
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Create or Join a Jar
+                            </Button>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
             {/* Premium Banner */}
             {!isLoadingUser && (
                 <div className="mb-4">
