@@ -23,13 +23,25 @@ export default function ExplorePage() {
     const [isDateNightOpen, setIsDateNightOpen] = useState(false);
 
     useEffect(() => {
+        // Optimistically load premium status from cache
+        try {
+            const cachedPremium = localStorage.getItem('datejar_is_premium');
+            if (cachedPremium) {
+                setIsPremium(cachedPremium === 'true');
+            }
+        } catch (e) {
+            // Ignore cache errors
+        }
+
         const fetchUser = async () => {
             try {
                 const res = await fetch(getApiUrl('/api/auth/me'));
                 if (res.ok) {
                     const data = await res.json();
                     if (data?.user) {
-                        setIsPremium(!!data.user.isPremium);
+                        const userIsPremium = !!data.user.isPremium;
+                        setIsPremium(userIsPremium);
+                        localStorage.setItem('datejar_is_premium', userIsPremium.toString());
                         if (data.user.location) setUserLocation(data.user.location);
                         if (data.user.jarType) setJarType(data.user.jarType);
                     }
