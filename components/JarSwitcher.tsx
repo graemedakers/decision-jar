@@ -131,8 +131,8 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                     </>
                                 ) : (
                                     <>
-                                        Dashboard
-                                        <span className="text-base font-normal text-slate-500">(No Jar)</span>
+                                        <span className="text-slate-500 dark:text-slate-400 font-normal">(No Jar Selected)</span>
+                                        <ChevronDown className="w-5 h-5 md:w-6 md:h-6 text-slate-500 group-hover:text-slate-700 dark:group-hover:text-white transition-colors flex-shrink-0" />
                                     </>
                                 )}
                             </h1>
