@@ -63,7 +63,7 @@ export async function GET() {
         const userIsPro = isUserPro(user);
 
         if (!user || !activeJar) {
-            // If user exists but has no jar, return user only (onboarding state)
+            // If user exists but has no jar, return user only (onboarding state)  
             if (user) {
                 return NextResponse.json({
                     user: {
@@ -72,6 +72,10 @@ export async function GET() {
                         hasPartner: false,
                         isPremium: userIsPro, // User can have premium even without a jar
                         hasPaid: userIsPro,
+                        location: null, // No jar means no location
+                        coupleReferenceCode: null,
+                        isTrialEligible: true,
+                        coupleCreatedAt: user.createdAt,
                     }
                 });
             }
