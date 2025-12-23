@@ -1,6 +1,6 @@
-# Date Jar - User Manual
+# Decision Jar - User Manual
 
-Welcome to **Date Jar**, the application designed to spice up your relationship by taking the indecision out of your next date!
+Welcome to **Decision Jar**, the application designed to take the indecision out of your next activity!
 
 ## Table of Contents
 1. [Introduction](#introduction)
