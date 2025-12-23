@@ -23,11 +23,15 @@ export default function ExplorePage() {
     const [isDateNightOpen, setIsDateNightOpen] = useState(false);
 
     useEffect(() => {
-        // Optimistically load premium status from cache
+        // Optimistically load premium status and location from cache
         try {
             const cachedPremium = localStorage.getItem('datejar_is_premium');
             if (cachedPremium) {
                 setIsPremium(cachedPremium === 'true');
+            }
+            const cachedLocation = localStorage.getItem('datejar_user_location');
+            if (cachedLocation) {
+                setUserLocation(cachedLocation);
             }
         } catch (e) {
             // Ignore cache errors
@@ -42,7 +46,10 @@ export default function ExplorePage() {
                         const userIsPremium = !!data.user.isPremium;
                         setIsPremium(userIsPremium);
                         localStorage.setItem('datejar_is_premium', userIsPremium.toString());
-                        if (data.user.location) setUserLocation(data.user.location);
+                        if (data.user.location) {
+                            setUserLocation(data.user.location);
+                            localStorage.setItem('datejar_user_location', data.user.location);
+                        }
                         if (data.user.jarType) setJarType(data.user.jarType);
                     }
                 }

@@ -148,7 +148,10 @@ export default function DashboardPage() {
 
             if (data?.user) {
                 setUserData(data.user);
-                if (data.user.location) setUserLocation(data.user.location);
+                if (data.user.location) {
+                    setUserLocation(data.user.location);
+                    localStorage.setItem('datejar_user_location', data.user.location);
+                }
                 if (data.user.coupleReferenceCode) setInviteCode(data.user.coupleReferenceCode);
                 if (data.user.interests) setInterests(data.user.interests);
                 const userIsPremium = !!data.user.isPremium;
@@ -223,11 +226,13 @@ export default function DashboardPage() {
                 const cachedLevel = localStorage.getItem('datejar_user_level');
                 const cachedAch = localStorage.getItem('datejar_achievements');
                 const cachedPremium = localStorage.getItem('datejar_is_premium');
+                const cachedLocation = localStorage.getItem('datejar_user_location');
 
                 if (cachedXp) setXp(parseInt(cachedXp, 10));
                 if (cachedLevel) setLevel(parseInt(cachedLevel, 10));
                 if (cachedAch) setAchievements(JSON.parse(cachedAch));
                 if (cachedPremium) setIsPremium(cachedPremium === 'true');
+                if (cachedLocation) setUserLocation(cachedLocation);
             } catch (e) {
                 // Ignore cache errors
             }
