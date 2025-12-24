@@ -33,9 +33,9 @@ Date Jar allows you and your partner (or your friend group!) to create shared co
 3.  Enter your name (e.g., "Alex").
 4.  Enter your email address and a secure password.
 5.  **Location:** Enter your city (e.g., "New York, NY"). This helps us suggest relevant ideas.
-6.  Click **"Create Jar"** and choose your type:
-    - **Group (Social):** For friends, family, or teams.
-    - **Personal:** For yourself.
+6.  Click **"Create Jar"**:
+    - Select a **Topic** (e.g., "Food", "Movies", "General") to customize filters and icons.
+    - All new jars are "Social" (Group) type by default, perfect for friends, couples, or families.
 
 **Note:** You can create and join multiple jars! Switch between them easily from the dashboard.
 
@@ -57,7 +57,7 @@ Date Jar allows you and your partner (or your friend group!) to create shared co
 ### Creating a New Jar
 1. Open the Jar Switcher dropdown.
 2. Click **"Create New Jar"**.
-3. Name it (e.g., "The Boyz", "Brunch Club") and select "Group".
+3. Name it (e.g., "The Boyz", "Brunch Club") and select a Topic (e.g., "Food").
 4. *Note: You can only have ONE Romantic jar at a time.*
 
 ### Joining an Existing Jar
