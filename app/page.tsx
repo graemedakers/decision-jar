@@ -396,17 +396,17 @@ export default function Home() {
             <StepCard
               number="1"
               title="Create Your Jar"
-              description="Sign up and create a digital jar. Add your favorite date ideas or use our generator to find some."
+              description="Sign up and create a digital jar. Add your favorite activities or use our generator to find fresh ideas."
             />
             <StepCard
               number="2"
               title="Invite Friends"
-              description="Send a unique invite code to your partner or friends so you can all contribute and spin the jar together."
+              description="Send a unique invite code to your friends, family, or partner so you can all contribute and spin the jar together."
             />
             <StepCard
               number="3"
               title="Spin & Go"
-              description="When date night comes, spin the jar to pick an activity. No more indecision!"
+              description="When it's time to decide, spin the jar to pick an activity. Say goodbye to indecision!"
             />
           </div>
         </div>
