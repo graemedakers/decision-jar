@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Plus, Users, Heart, Check, LogOut, Loader2, MoreVertical, Trash2, Utensils, Film, PartyPopper, CheckSquare, Sparkles, Layers } from "lucide-react";
+import { ChevronDown, Plus, Users, User, Heart, Check, LogOut, Loader2, MoreVertical, Trash2, Utensils, Film, PartyPopper, CheckSquare, Sparkles, Layers } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CreateJarModal } from "./CreateJarModal";
@@ -18,7 +18,7 @@ import {
 interface Jar {
     id: string;
     name: string | null;
-    type: "ROMANTIC" | "SOCIAL";
+    type: "ROMANTIC" | "SOCIAL" | "GENERIC";
     topic?: string | null;
 }
 
@@ -29,7 +29,18 @@ const getJarIcon = (jar: Jar, className?: string) => {
         case "Activities": return <PartyPopper className={className} />;
         case "Chores": return <CheckSquare className={className} />;
         // Fallback or Generic
-        default: return jar.type === 'ROMANTIC' ? <Heart className={className} /> : <Users className={className} />;
+        default:
+            if (jar.type === 'ROMANTIC') return <Heart className={className} />;
+            if (jar.type === 'GENERIC') return <User className={className} />;
+            return <Users className={className} />;
+    }
+};
+
+const getJarColorClasses = (type: Jar['type']) => {
+    switch (type) {
+        case 'ROMANTIC': return "bg-pink-500/10 border-pink-500/20 text-pink-500";
+        case 'GENERIC': return "bg-violet-500/10 border-violet-500/20 text-violet-500";
+        default: return "bg-blue-500/10 border-blue-500/20 text-blue-500";
     }
 };
 
@@ -180,9 +191,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                 <div className="flex items-center gap-3">
                                     <div className={cn(
                                         "w-8 h-8 rounded-full flex items-center justify-center border",
-                                        activeJar.type === 'ROMANTIC'
-                                            ? "bg-pink-500/10 border-pink-500/20 text-pink-400"
-                                            : "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                                        getJarColorClasses(activeJar.type as any)
                                     )}>
                                         {getJarIcon(activeJar, "w-4 h-4")}
                                     </div>
@@ -218,10 +227,8 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className={cn(
-                                            "w-8 h-8 rounded-full flex items-center justify-center border border-transparent",
-                                            membership.jar.type === 'ROMANTIC'
-                                                ? "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                                                : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                            "w-8 h-8 rounded-full flex items-center justify-center border",
+                                            getJarColorClasses(membership.jar.type as any)
                                         )}>
                                             {getJarIcon(membership.jar, "w-4 h-4")}
                                         </div>

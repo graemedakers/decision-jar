@@ -264,6 +264,7 @@ export function SignupForm() {
                                     >
                                         <option value="ROMANTIC">Couple (Romantic)</option>
                                         <option value="SOCIAL">Friends & Family (Social)</option>
+                                        <option value="GENERIC">Solo (Personal)</option>
                                     </select>
                                 </div>
                             </div>

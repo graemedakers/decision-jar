@@ -45,7 +45,7 @@ export async function POST(request: Request) {
                     location: location || 'Unknown',
                     isPremium: false,
                     name: jarName,
-                    type: (type === 'ROMANTIC' || type === 'SOCIAL') ? type : 'SOCIAL',
+                    type: (type === 'ROMANTIC' || type === 'SOCIAL' || type === 'GENERIC') ? type : 'SOCIAL',
                     // @ts-ignore
                     topic: selectedTopic
                 },
