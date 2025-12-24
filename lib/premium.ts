@@ -17,9 +17,20 @@ export function isUserPro(user: User | null | undefined): boolean {
     // 1. Lifetime Pro
     if (user.isLifetimePro) return true;
 
-    // 2. Active Subscription or Trial (including grace period)
+    // 2. Active Subscription or Stripe Trial
     const activeStatuses = ['active', 'trialing', 'past_due'];
     if (user.subscriptionStatus && activeStatuses.includes(user.subscriptionStatus)) {
+        return true;
+    }
+
+    // 3. Automatic 14-Day Grace Period (No Card Required)
+    const now = new Date();
+    const created = new Date(user.createdAt);
+    const diffTime = Math.abs(now.getTime() - created.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Check if within trial period (14 days)
+    if (diffDays <= 14) {
         return true;
     }
 
@@ -29,9 +40,22 @@ export function isUserPro(user: User | null | undefined): boolean {
 export function isCouplePremium(jar: Jar | null | undefined): boolean {
     if (!jar) return false;
 
-    // Check if the jar itself has premium status
-    // This covers manual overrides and legacy one-time payments
-    return jar.isPremium === true;
+    // 1. Manual/Legacy Premium Override
+    if (jar.isPremium === true) return true;
+
+    // 2. Automatic 14-Day Jar Trial (Only if trial eligible)
+    if (jar.isTrialEligible !== false) {
+        const now = new Date();
+        const created = new Date(jar.createdAt);
+        const diffTime = Math.abs(now.getTime() - created.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 14) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 export function getLimits(user: User | null | undefined) {

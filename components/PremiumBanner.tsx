@@ -52,34 +52,37 @@ export function PremiumBanner({ hasPaid, coupleCreatedAt, isTrialEligible = true
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="glass-card relative overflow-hidden p-6 border-yellow-500/30"
+                        className="relative overflow-hidden p-6 rounded-3xl bg-slate-900 border border-yellow-500/20 shadow-2xl shadow-yellow-500/5 group transition-all"
                     >
-                        {/* Background Glow */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                        {/* Background Accents */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-yellow-400/10 transition-colors" />
+                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/5 rounded-full blur-[60px] pointer-events-none" />
 
                         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                            <div className="space-y-2 flex-1">
-                                <div className="flex items-center gap-2 text-yellow-400 font-bold">
-                                    <Sparkles className="w-5 h-5" />
-                                    <span>
-                                        {daysRemaining > 0
-                                            ? `Premium Trial Active: ${daysRemaining} days remaining`
-                                            : "Premium Trial Expired"}
-                                    </span>
+                            <div className="flex items-start gap-5 flex-1">
+                                <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-400 ring-1 ring-yellow-500/30 shrink-0">
+                                    <Sparkles className="w-7 h-7" />
                                 </div>
-                                <p className="text-slate-300 text-sm max-w-xl">
-                                    Unlock the Dining Concierge, Weekend Planner, and more.
-                                    Subscription required after trial.
-                                </p>
+                                <div className="space-y-1">
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                        {daysRemaining > 0
+                                            ? `${daysRemaining} Days of Pro Remaining`
+                                            : "Your Free Trial has Concluded"}
+                                        <span className="text-[10px] bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full uppercase tracking-widest font-black">TRIAL ACTIVE</span>
+                                    </h3>
+                                    <p className="text-slate-400 text-sm max-w-xl leading-relaxed">
+                                        You currently have full access to our AI Suite. Subscribe to maintain your status and unlock unlimited jar growth.
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 w-full md:w-auto">
                                 {!isNative && (
                                     <Button
                                         onClick={() => router.push('/premium')}
-                                        className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:opacity-90 text-white border-none shadow-lg shadow-yellow-500/20"
+                                        className="w-full md:w-auto h-12 px-8 bg-gradient-to-r from-yellow-500 to-orange-500 hover:opacity-90 text-white border-none shadow-xl shadow-yellow-500/20 font-bold rounded-2xl transition-all hover:scale-105 active:scale-95"
                                     >
-                                        Upgrade to Premium
+                                        Unlock Lifetime Access
                                     </Button>
                                 )}
                             </div>

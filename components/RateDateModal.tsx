@@ -137,7 +137,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                             <X className="w-6 h-6" />
                         </button>
 
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Rate your Date</h2>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Rate Experience</h2>
                         <p className="text-slate-600 dark:text-slate-300 mb-6 font-medium text-lg">"{idea?.description}"</p>
 
                         <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
@@ -255,7 +255,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
 
                             <Button type="submit" className="w-full" isLoading={isLoading}>
                                 <Save className="w-4 h-4 mr-2" />
-                                Save Memories
+                                Save Entry
                             </Button>
                         </form>
                     </motion.div>

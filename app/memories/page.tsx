@@ -152,9 +152,9 @@ export default function MemoriesPage() {
                         <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Memories</h1>
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Vault</h1>
                         <p className="text-slate-600 dark:text-slate-400 text-sm">
-                            {isLoading ? 'Loading dates...' : `${memories.length} dates completed`}
+                            {isLoading ? 'Loading records...' : `${memories.length} items completed`}
                         </p>
                     </div>
                 </div>
@@ -164,7 +164,7 @@ export default function MemoriesPage() {
                     onClick={() => setAddingMemory(true)}
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    Add Manual Memory
+                    Add Manual Entry
                 </Button>
                 {/* Mobile FAB */}
                 <button
@@ -180,7 +180,7 @@ export default function MemoriesPage() {
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="glass-card rounded-2xl overflow-hidden h-64 animate-pulse">
                             <div className="h-full w-full bg-slate-200 dark:bg-slate-800/50 flex items-center justify-center">
-                                <div className="text-slate-500 dark:text-slate-600 font-medium">Loading memory...</div>
+                                <div className="text-slate-500 dark:text-slate-600 font-medium">Loading vault...</div>
                             </div>
                         </div>
                     ))}
@@ -190,8 +190,8 @@ export default function MemoriesPage() {
                     <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 mx-auto flex items-center justify-center mb-4">
                         <Check className="w-8 h-8 text-slate-500" />
                     </div>
-                    <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">No Memories Yet</h3>
-                    <p className="text-slate-600 dark:text-slate-400 max-w-xs mx-auto">Spin the jar and complete some dates to see them here!</p>
+                    <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Vault is Empty</h3>
+                    <p className="text-slate-600 dark:text-slate-400 max-w-xs mx-auto">Spin the jar and complete some items to see them here!</p>
                 </div>
             ) : (
                 <div className="space-y-4 max-w-4xl mx-auto">
@@ -229,7 +229,7 @@ export default function MemoriesPage() {
                                             onClick={() => setRatingIdea(idea)}
                                             className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-yellow-600 dark:hover:text-yellow-400 transition-colors px-4 py-1.5 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5"
                                         >
-                                            Rate Date
+                                            Rate Decision
                                         </button>
                                     )}
                                 </div>

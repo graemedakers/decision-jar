@@ -11,7 +11,7 @@ export function BottomNav() {
         { name: "Jar", href: "/dashboard", icon: Home },
         { name: "List", href: "/jar", icon: Layers },
         { name: "Explore", href: "/explore", icon: Compass },
-        { name: "Memories", href: "/memories", icon: History },
+        { name: "Vault", href: "/memories", icon: History },
     ];
 
     // Hide on landing page

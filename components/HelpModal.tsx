@@ -32,7 +32,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "weekend-planner", title: "Weekend Planner", icon: Calendar },
         { id: "spinning", title: "Spinning the Jar", icon: Sparkles },
         { id: "quick-tools", title: "Quick Tools", icon: Dices },
-        { id: "history", title: "History & Logs", icon: History },
+        { id: "history", title: "Archive & History", icon: History },
         { id: "settings", title: "Settings", icon: Settings },
     ];
 
@@ -165,8 +165,8 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <div>
                                 <h4 className="font-bold text-slate-800 dark:text-white text-sm">The Reveal & Locations</h4>
                                 <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
-                                    <li><strong>Accept Date:</strong> Marks the idea as "Selected" and moves it to your history.</li>
-                                    <li><strong>Set Date:</strong> Click <strong>"Set Date for Memory"</strong> to schedule the date in your calendar/memories.</li>
+                                    <li><strong>Accept Selection:</strong> Marks the idea as "Selected" and moves it to your Vault.</li>
+                                    <li><strong>Schedule:</strong> Click <strong>"Set Date for Record"</strong> to schedule the session/item in your calendar/vault.</li>
                                     <li><strong>Find Places:</strong> For generic ideas (e.g., "Go Bowling"), click <strong>"Find Specific Places"</strong> to find top-rated venues near you.</li>
                                     <li><strong>Find Food:</strong> Planning an activity? Use the <strong>"Find food nearby"</strong> button to instantly search for restaurants near that location using the Dining Concierge.</li>
                                 </ul>
@@ -200,10 +200,10 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
             case "history":
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Managing History</h3>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Managing the Vault</h3>
                         <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
-                            <li><strong>Rate & Snap:</strong> Give your completed dates a star rating and upload up to 3 photos to capture the memory.</li>
-                            <li><strong>Add Past Dates:</strong> Have a memory from before you got the app? Click "Add Manual Memory" to log past dates with photos and details.</li>
+                            <li><strong>Rate & Snap:</strong> Give your completed items a star rating and upload up to 3 photos to capture the moment.</li>
+                            <li><strong>Add Past Items:</strong> Have a record from before you got the app? Click "Add Manual Entry" to log past items with photos and details.</li>
                             <li><strong>Repeat:</strong> Click the Copy icon to put an idea back in the jar.</li>
                             <li><strong>Delete:</strong> Click the Trash icon to remove it.</li>
                             <li><strong>Deletion Log:</strong> Check Settings &gt; View Deletion History to see an audit log of removed items.</li>
@@ -220,7 +220,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <div>
                                 <h4 className="font-bold text-slate-800 dark:text-white text-sm">Profile Settings</h4>
                                 <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
-                                    <li><strong>Couple Location:</strong> The general city or area for your dates (e.g., "New York, NY"). This is the default search area for the Concierge.</li>
+                                    <li><strong>Default Location:</strong> The general city or area for your activities (e.g., "New York, NY"). This is the default search area for the Concierge.</li>
                                     <li><strong>Your Interests:</strong> A comma-separated list of things you love (e.g., "Sushi, Hiking, Jazz"). We use this to tailor "Surprise Me" suggestions specifically to you.</li>
                                 </ul>
                             </div>
@@ -243,8 +243,8 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <div>
                                 <h4 className="font-bold text-red-500 dark:text-red-400 text-sm">Danger Zone (Creator Only)</h4>
                                 <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
-                                    <li><strong>Empty Jar:</strong> Permanently deletes ALL ideas and past date history. This cannot be undone.</li>
-                                    <li><strong>Delete Partner/Members:</strong> Removes your partner or group members from the jar and deletes their contributions (if applicable).</li>
+                                    <li><strong>Empty Jar:</strong> Permanently deletes ALL ideas and past history. This cannot be undone.</li>
+                                    <li><strong>Delete Members:</strong> Removes partners or group members from the jar and deletes their contributions.</li>
                                 </ul>
                             </div>
                         </div>

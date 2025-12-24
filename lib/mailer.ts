@@ -15,12 +15,13 @@ export async function sendVerificationEmail(email: string, token: string) {
     return;
   }
 
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com';
+  const verificationUrl = `${baseUrl}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`;
   const resend = getResend();
 
   try {
     await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Decision Jar <onboarding@resend.dev>',
+      from: process.env.EMAIL_FROM || 'Decision Jar <hello@spinthejar.com>',
       to: email,
       subject: 'Verify your email for Decision Jar',
       html: `

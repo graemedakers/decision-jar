@@ -39,14 +39,13 @@ export async function POST(request: Request) {
             }
 
             // Create new Jar
-            const jar = await prisma.jar.create({
+            const jar = await (prisma.jar as any).create({
                 data: {
                     referenceCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
                     location: location || 'Unknown',
                     isPremium: false,
                     name: jarName,
                     type: (type === 'ROMANTIC' || type === 'SOCIAL' || type === 'GENERIC') ? type : 'SOCIAL',
-                    // @ts-ignore
                     topic: selectedTopic
                 },
             });
@@ -108,8 +107,11 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, requiresVerification: true });
 
-    } catch (error) {
-        console.error('Signup error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    } catch (error: any) {
+        console.error('Signup error details:', error);
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            details: error.message
+        }, { status: 500 });
     }
 }

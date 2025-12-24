@@ -89,11 +89,16 @@ export function SignupForm() {
                     router.push("/dashboard");
                 }
             } else {
-                alert(data.error || "Signup failed");
+                const errorMessage = data.details ? `${data.error}: ${data.details}` : (data.error || "Signup failed");
+                alert(errorMessage);
             }
-        } catch (error) {
-            console.error(error);
-            alert("An error occurred");
+        } catch (error: any) {
+            console.error("Signup Fetch Error:", error);
+            if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                alert("Network Error: Could not reach the server. Please ensure your dev server is running and your DATABASE_URL is correct in your local .env file.");
+            } else {
+                alert("An unexpected error occurred: " + (error.message || "Unknown error"));
+            }
         } finally {
             setIsLoading(false);
         }
