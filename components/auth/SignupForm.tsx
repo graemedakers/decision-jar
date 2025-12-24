@@ -273,23 +273,23 @@ export function SignupForm() {
                                     </select>
                                 </div>
                             </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Your Location</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                    <Input
-                                        name="location"
-                                        type="text"
-                                        placeholder="e.g. New York, NY"
-                                        className="pl-12 bg-slate-50 border-slate-200 text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white placeholder:text-slate-400"
-                                        required
-                                    />
-                                </div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">Used to find options near you.</p>
-                            </div>
                         </>
                     )}
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Your Location</label>
+                        <div className="relative">
+                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <Input
+                                name="location"
+                                type="text"
+                                placeholder="e.g. New York, NY"
+                                className="pl-12 bg-slate-50 border-slate-200 text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white placeholder:text-slate-400"
+                                required
+                            />
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">Used to find options near you.</p>
+                    </div>
 
                     <Button
                         type="submit"

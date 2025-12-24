@@ -56,6 +56,7 @@ export async function POST(request: Request) {
                     email,
                     name,
                     passwordHash,
+                    homeTown: location || 'Unknown',
                     activeJarId: jar.id,
                     coupleId: jar.id, // Legacy support
                     hasUsedTrial: false, // Default false until they subscribe/start trial
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
                     email,
                     name,
                     passwordHash,
+                    homeTown: location || 'Unknown',
                     activeJarId: jar.id,
                     coupleId: jar.id, // Legacy support
                     verificationToken,
