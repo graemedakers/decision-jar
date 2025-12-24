@@ -126,10 +126,9 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                             <X className="w-6 h-6" />
                         </button>
 
-                        {/* Title Section */}
                         <div className="flex items-center justify-between pr-12 mb-6">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
-                                {itinerary ? "Date Plan Preview" :
+                                {itinerary ? "Itinerary Preview" :
                                     initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea"}
                             </h2>
                         </div>
@@ -201,7 +200,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         />
                                         {getItinerary(formData.details) && (
                                             <p className="text-[10px] text-slate-400 text-right">
-                                                This is a Date Plan Itinerary. Switch to Preview to view nicely.
+                                                This contains a structured itinerary (Night Out Plan). Switch to Preview to view nicely.
                                             </p>
                                         )}
                                     </div>
