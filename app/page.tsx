@@ -265,13 +265,7 @@ export default function Home() {
               >
                 {user ? "Go to Dashboard" : "Create Your Jar"} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Link
-                href="/science"
-                className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors text-sm font-medium flex items-center gap-2 group"
-              >
-                <Brain className="w-4 h-4 group-hover:text-primary dark:group-hover:text-accent transition-colors" />
-                The science of dating
-              </Link>
+
             </div>
             <div className="pt-4 flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500">
               <div className="flex -space-x-2">
