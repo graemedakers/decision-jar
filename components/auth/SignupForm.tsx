@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion } from "framer-motion";
-import { ArrowRight, Lock, Mail, User, Users, MapPin, AlertCircle, X } from "lucide-react";
+import { ArrowRight, Lock, Mail, User, Users, MapPin, AlertCircle, X, Layers } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -52,6 +52,7 @@ export function SignupForm() {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
         const location = formData.get("location") as string;
+        const topic = formData.get("topic") as string;
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
@@ -69,7 +70,8 @@ export function SignupForm() {
                     email,
                     password,
                     inviteCode,
-                    location
+                    location,
+                    topic
                 }),
             });
 
@@ -229,20 +231,40 @@ export function SignupForm() {
                     </div>
 
                     {!inviteCode && (
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Your Location</label>
-                            <div className="relative">
-                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                <Input
-                                    name="location"
-                                    type="text"
-                                    placeholder="e.g. New York, NY"
-                                    className="pl-12 bg-slate-50 border-slate-200 text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white placeholder:text-slate-400"
-                                    required
-                                />
+                        <>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Jar Topic</label>
+                                <div className="relative">
+                                    <Layers className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <select
+                                        name="topic"
+                                        className="w-full h-10 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-md text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent appearance-none"
+                                        defaultValue="General"
+                                    >
+                                        <option value="General" className="bg-slate-900">General (Anything)</option>
+                                        <option value="Food" className="bg-slate-900">Food & Dining</option>
+                                        <option value="Movies" className="bg-slate-900">Movies & TV</option>
+                                        <option value="Activities" className="bg-slate-900">Activities & Fun</option>
+                                        <option value="Chores" className="bg-slate-900">Chores & Tasks</option>
+                                    </select>
+                                </div>
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">Used to find options near you.</p>
-                        </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Your Location</label>
+                                <div className="relative">
+                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <Input
+                                        name="location"
+                                        type="text"
+                                        placeholder="e.g. New York, NY"
+                                        className="pl-12 bg-slate-50 border-slate-200 text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white placeholder:text-slate-400"
+                                        required
+                                    />
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">Used to find options near you.</p>
+                            </div>
+                        </>
                     )}
 
                     <Button

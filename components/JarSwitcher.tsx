@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Plus, Users, Heart, Check, LogOut, Loader2, MoreVertical, Trash2 } from "lucide-react";
+import { ChevronDown, Plus, Users, Heart, Check, LogOut, Loader2, MoreVertical, Trash2, Utensils, Film, PartyPopper, CheckSquare, Sparkles, Layers } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CreateJarModal } from "./CreateJarModal";
@@ -19,7 +19,19 @@ interface Jar {
     id: string;
     name: string | null;
     type: "ROMANTIC" | "SOCIAL";
+    topic?: string | null;
 }
+
+const getJarIcon = (jar: Jar, className?: string) => {
+    switch (jar.topic) {
+        case "Food": return <Utensils className={className} />;
+        case "Movies": return <Film className={className} />;
+        case "Activities": return <PartyPopper className={className} />;
+        case "Chores": return <CheckSquare className={className} />;
+        // Fallback or Generic
+        default: return jar.type === 'ROMANTIC' ? <Heart className={className} /> : <Users className={className} />;
+    }
+};
 
 interface Membership {
     jarId: string;
@@ -143,11 +155,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                         >
                             {activeJar ? (
                                 <>
-                                    {activeJar.type === 'ROMANTIC' ? (
-                                        <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400/20" />
-                                    ) : (
-                                        <Users className="w-3.5 h-3.5 text-blue-400 fill-blue-400/20" />
-                                    )}
+                                    {getJarIcon(activeJar, "w-3.5 h-3.5 text-slate-500 dark:text-slate-400")}
                                     <span className="text-sm font-medium text-slate-700 dark:text-white max-w-[150px] md:max-w-[120px] truncate">
                                         {activeJar.name || "My Jar"}
                                     </span>
@@ -176,11 +184,11 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                             ? "bg-pink-500/10 border-pink-500/20 text-pink-400"
                                             : "bg-blue-500/10 border-blue-500/20 text-blue-400"
                                     )}>
-                                        {activeJar.type === 'ROMANTIC' ? <Heart className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+                                        {getJarIcon(activeJar, "w-4 h-4")}
                                     </div>
                                     <div className="text-left">
                                         <div className="text-sm font-medium text-slate-900 dark:text-white">{activeJar.name || "My Jar"}</div>
-                                        <div className="text-xs text-slate-500">{activeJar.type === 'ROMANTIC' ? 'Romantic' : 'Group'}</div>
+                                        <div className="text-xs text-slate-500">{activeJar.topic || (activeJar.type === 'ROMANTIC' ? 'Personal' : 'Group')}</div>
                                     </div>
                                 </div>
                                 <button
@@ -215,7 +223,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                                 ? "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                                                 : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                                         )}>
-                                            {membership.jar.type === 'ROMANTIC' ? <Heart className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+                                            {getJarIcon(membership.jar, "w-4 h-4")}
                                         </div>
                                         <div>
                                             <div className="text-sm font-medium text-slate-700 dark:text-slate-300">

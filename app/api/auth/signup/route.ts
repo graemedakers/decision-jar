@@ -8,14 +8,14 @@ import { sendVerificationEmail } from '@/lib/mailer';
 
 export async function POST(request: Request) {
     try {
-        const { name, email: rawEmail, password, inviteCode, location } = await request.json();
+        const { name, email: rawEmail, password, inviteCode, location, topic } = await request.json();
         const email = rawEmail?.toLowerCase().trim();
 
         if (!name || !email || !password) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // Check if user already exists
+        // ... existing user check ...
         const existingUser = await prisma.user.findUnique({
             where: { email },
         });
@@ -30,14 +30,24 @@ export async function POST(request: Request) {
         let user;
 
         if (!inviteCode) {
-            // Create new Jar (formerly Couple)
+            // Determine Name
+            let jarName = `${name}'s Jar`;
+            const selectedTopic = topic || "General";
+
+            if (selectedTopic !== "General") {
+                jarName = `${name}'s ${selectedTopic} Jar`;
+            }
+
+            // Create new Jar
             const jar = await prisma.jar.create({
                 data: {
                     referenceCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
                     location: location || 'Unknown',
                     isPremium: false,
-                    name: `${name}'s Jar`, // Default name
-                    type: "SOCIAL"
+                    name: jarName,
+                    type: "SOCIAL",
+                    // @ts-ignore
+                    topic: selectedTopic
                 },
             });
 

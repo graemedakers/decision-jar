@@ -12,18 +12,19 @@ datasource db {
 enum JarType {
   ROMANTIC
   SOCIAL
+  GENERIC
 }
 
 enum MemberRole {
   ADMIN
   MEMBER
 }
-
 model Jar {
   id            String   @id @default(uuid())
   referenceCode String   @unique
   name          String   @default("Our Jar")
-  type          JarType  @default(ROMANTIC)
+  type          JarType  @default(SOCIAL)
+  topic         String?  @default("General") // e.g. "Movies", "Food"
   
   members       JarMember[]
   ideas         Idea[]

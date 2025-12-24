@@ -21,7 +21,7 @@ interface CreateJarModalProps {
 export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, currentJarCount }: CreateJarModalProps) {
     const [name, setName] = useState("");
     // Default to SOCIAL if user already has a romantic jar, otherwise ROMANTIC
-    const [type, setType] = useState<"ROMANTIC" | "SOCIAL">(hasRomanticJar ? "SOCIAL" : "ROMANTIC");
+    const [topic, setTopic] = useState("General");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -39,7 +39,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             const res = await fetch('/api/jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, type }),
+                body: JSON.stringify({ name, type: "SOCIAL", topic }),
             });
 
             if (res.ok) {
@@ -152,56 +152,19 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                     </div>
 
                     <div className="space-y-3">
-                        <Label>Jar Type</Label>
-                        <RadioGroup value={type} onValueChange={(val) => setType(val as "ROMANTIC" | "SOCIAL")} className="grid grid-cols-2 gap-4">
-                            <div>
-                                <RadioGroupItem value="ROMANTIC" id="romantic" className="peer sr-only" disabled={hasRomanticJar} />
-                                <Label
-                                    htmlFor="romantic"
-                                    className={cn(
-                                        "flex flex-col items-center justify-center rounded-xl border-2 p-4 cursor-pointer transition-all h-full text-center hover:bg-slate-100 dark:hover:bg-slate-800/50",
-                                        type === 'ROMANTIC'
-                                            ? "border-pink-500 bg-pink-500/10 text-slate-900 dark:text-white"
-                                            : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-600",
-                                        hasRomanticJar && "opacity-50 cursor-not-allowed hover:border-slate-200 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800"
-                                    )}
-                                >
-                                    <div className="flex flex-col items-center gap-2">
-                                        <Heart className={cn("w-6 h-6", type === 'ROMANTIC' ? "text-pink-400 fill-pink-400/20" : "text-slate-400")} />
-                                        <div>
-                                            <div className="font-bold text-lg">Romantic</div>
-                                            <div className="text-xs text-slate-400">For you and your partner</div>
-                                        </div>
-                                        {hasRomanticJar && (
-                                            <div className="text-[10px] bg-red-500/20 text-red-200 px-2 py-0.5 rounded-full font-medium mt-1">
-                                                Already Exists
-                                            </div>
-                                        )}
-                                    </div>
-                                </Label>
-                            </div>
-
-                            <div>
-                                <RadioGroupItem value="SOCIAL" id="social" className="peer sr-only" />
-                                <Label
-                                    htmlFor="social"
-                                    className={cn(
-                                        "flex flex-col items-center justify-center rounded-xl border-2 p-4 cursor-pointer transition-all h-full text-center hover:bg-slate-100 dark:hover:bg-slate-800/50",
-                                        type === 'SOCIAL'
-                                            ? "border-blue-500 bg-blue-500/10 text-slate-900 dark:text-white"
-                                            : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-600"
-                                    )}
-                                >
-                                    <div className="flex flex-col items-center gap-2">
-                                        <Users className={cn("w-6 h-6", type === 'SOCIAL' ? "text-blue-400 fill-blue-400/20" : "text-slate-400")} />
-                                        <div>
-                                            <div className="font-bold text-lg">Group</div>
-                                            <div className="text-xs text-slate-400">For friends & circle</div>
-                                        </div>
-                                    </div>
-                                </Label>
-                            </div>
-                        </RadioGroup>
+                        <Label>Jar Topic</Label>
+                        <select
+                            value={topic}
+                            onChange={(e) => setTopic(e.target.value)}
+                            className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
+                        >
+                            <option value="General">General (Anything)</option>
+                            <option value="Food">Food & Dining</option>
+                            <option value="Movies">Movies & TV</option>
+                            <option value="Activities">Activities & Fun</option>
+                            <option value="Chores">Chores & Tasks</option>
+                            <option value="Custom">Custom Topic</option>
+                        </select>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">
@@ -211,7 +174,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                         <Button
                             type="submit"
                             disabled={isLoading}
-                            className={type === 'ROMANTIC' ? "bg-pink-600 hover:bg-pink-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
+                            className="bg-primary hover:bg-primary/90 text-white"
                         >
                             {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                             Create Jar
