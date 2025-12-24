@@ -32,6 +32,7 @@ import { ReviewAppModal } from "@/components/ReviewAppModal";
 import { HelpModal } from "@/components/HelpModal";
 import { HelpCircle } from "lucide-react";
 import { JarSwitcher } from "@/components/JarSwitcher";
+import { getThemeForTopic } from "@/lib/categories";
 
 interface UserData {
     id: string;
@@ -137,6 +138,10 @@ export default function DashboardPage() {
             console.error('Failed to fetch favorites', error);
         }
     };
+
+    const activeMembership = userData?.memberships?.find((m: any) => m.jarId === userData.activeJarId) || userData?.memberships?.[0];
+    const jarTopic = activeMembership?.jar?.topic;
+    const theme = getThemeForTopic(jarTopic);
 
     const refreshUser = async () => {
         try {
@@ -349,8 +354,9 @@ export default function DashboardPage() {
 
     const combinedLocation = userLocation || "";
 
-    const activeMembership = userData?.memberships?.find((m: any) => m.jarId === userData.activeJarId) || userData?.memberships?.[0];
-    const jarTopic = activeMembership?.jar?.topic;
+    // Previously calculated
+    // const activeMembership = ...
+    // const jarTopic = ...
 
     return (
         <main className="min-h-screen p-4 md:p-8 pb-24 relative overflow-hidden w-full max-w-[1600px] mx-auto">
@@ -497,8 +503,8 @@ export default function DashboardPage() {
 
             {/* Background Elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[100px]" />
+                <div className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[100px] transition-all duration-1000 ${theme.bgBlob1}`} />
+                <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[100px] transition-all duration-1000 ${theme.bgBlob2}`} />
             </div>
 
             {/* Header */}

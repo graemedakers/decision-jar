@@ -42,6 +42,74 @@ export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
     ]
 };
 
+export interface TopicTheme {
+    primary: string; // Tailwind color class for text/bg e.g. "red-500"
+    secondary: string;
+    gradientFrom: string;
+    gradientTo: string;
+    bgBlob1: string; // e.g. "bg-red-500/10"
+    bgBlob2: string;
+}
+
+export const TOPIC_THEMES: Record<string, TopicTheme> = {
+    "General": {
+        primary: "pink-500",
+        secondary: "purple-600",
+        gradientFrom: "from-pink-500",
+        gradientTo: "to-purple-600",
+        bgBlob1: "bg-pink-500/10",
+        bgBlob2: "bg-purple-500/10"
+    },
+    "Food": {
+        primary: "orange-500",
+        secondary: "red-500",
+        gradientFrom: "from-orange-400",
+        gradientTo: "to-red-500",
+        bgBlob1: "bg-orange-500/10",
+        bgBlob2: "bg-red-500/10"
+    },
+    "Movies": {
+        primary: "red-600",
+        secondary: "rose-900",
+        gradientFrom: "from-red-600",
+        gradientTo: "to-rose-800",
+        bgBlob1: "bg-red-600/10",
+        bgBlob2: "bg-rose-900/10"
+    },
+    "Activities": {
+        primary: "green-500",
+        secondary: "emerald-700",
+        gradientFrom: "from-green-400",
+        gradientTo: "to-emerald-600",
+        bgBlob1: "bg-green-500/10",
+        bgBlob2: "bg-emerald-600/10"
+    },
+    "Chores": {
+        primary: "cyan-500",
+        secondary: "blue-600",
+        gradientFrom: "from-cyan-400",
+        gradientTo: "to-blue-600",
+        bgBlob1: "bg-cyan-500/10",
+        bgBlob2: "bg-blue-600/10"
+    },
+    "Wellness": {
+        primary: "teal-500",
+        secondary: "green-400",
+        gradientFrom: "from-teal-400",
+        gradientTo: "to-green-400",
+        bgBlob1: "bg-teal-500/10",
+        bgBlob2: "bg-green-400/10"
+    },
+    "Custom": {
+        primary: "violet-500",
+        secondary: "fuchsia-500",
+        gradientFrom: "from-violet-400",
+        gradientTo: "to-fuchsia-500",
+        bgBlob1: "bg-violet-500/10",
+        bgBlob2: "bg-fuchsia-500/10"
+    }
+};
+
 export const getCategoriesForTopic = (topic: string | null | undefined): CategoryDef[] => {
     if (!topic) return TOPIC_CATEGORIES["General"];
     // Case-insensitive match or exact? The DB stores proper case usually, but let's be safe.
@@ -49,4 +117,9 @@ export const getCategoriesForTopic = (topic: string | null | undefined): Categor
 
     // If not found, default to General
     return TOPIC_CATEGORIES[topic] || TOPIC_CATEGORIES["General"];
+};
+
+export const getThemeForTopic = (topic: string | null | undefined): TopicTheme => {
+    if (!topic) return TOPIC_THEMES["General"];
+    return TOPIC_THEMES[topic] || TOPIC_THEMES["General"];
 };
