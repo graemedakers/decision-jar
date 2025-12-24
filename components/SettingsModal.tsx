@@ -85,7 +85,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
     };
 
     const handleEmptyJar = async () => {
-        if (!confirm("Are you sure you want to empty the jar? This will delete ALL ideas, including your history of past dates. This action cannot be undone.")) return;
+        if (!confirm("Are you sure you want to empty the jar? This will delete ALL ideas, including your history of past sessions. This action cannot be undone.")) return;
 
         setIsLoading(true);
         try {
@@ -161,7 +161,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
     };
 
     const handleDeletePartner = async () => {
-        if (!confirm("Are you sure you want to delete your partner? This will remove them from the couple, delete ALL ideas they created, and delete ALL history of past dates. This action cannot be undone.")) return;
+        if (!confirm("Are you sure you want to remove this member? This will remove them from the group, delete ALL ideas they created, and delete ALL related history. This action cannot be undone.")) return;
 
         setIsLoading(true);
         try {
@@ -215,7 +215,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Favourite Dating Location</label>
+                                    <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Default Search Location</label>
                                     <Input
                                         value={location}
                                         onChange={(e) => setLocation(e.target.value)}
@@ -224,7 +224,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                         className="text-slate-900 dark:text-white"
                                     />
                                     <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">
-                                        Used as the default location for date spots.
+                                        Used as the default base for smart suggestions & places.
                                     </p>
                                 </div>
 
