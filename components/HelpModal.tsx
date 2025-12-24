@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -31,6 +31,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
         { id: "weekend-planner", title: "Weekend Planner", icon: Calendar },
         { id: "spinning", title: "Spinning the Jar", icon: Sparkles },
+        { id: "quick-tools", title: "Quick Tools", icon: Dices },
         { id: "history", title: "History & Logs", icon: History },
         { id: "settings", title: "Settings", icon: Settings },
     ];
@@ -169,6 +170,29 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                     <li><strong>Find Places:</strong> For generic ideas (e.g., "Go Bowling"), click <strong>"Find Specific Places"</strong> to find top-rated venues near you.</li>
                                     <li><strong>Find Food:</strong> Planning an activity? Use the <strong>"Find food nearby"</strong> button to instantly search for restaurants near that location using the Dining Concierge.</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case "quick-tools":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Quick Tools</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Sometimes you just need a simple answer right now. Click the dice icon <Dices className="inline w-4 h-4" /> in the top right to access:
+                        </p>
+                        <div className="space-y-4 mt-4">
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-1">Coin Flip</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Heads or Tails? Settle a debate instantly with a 3D coin flip.
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-1">Dice Roll</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Roll a standard 6-sided die. Perfect for board games or picking who goes first.
+                                </p>
                             </div>
                         </div>
                     </div>
