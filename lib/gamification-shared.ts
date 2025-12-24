@@ -11,6 +11,14 @@ export const LEVEL_DEFINITIONS = [
     { level: 10, minXp: 5500, title: "Universe Mind" },
 ];
 
+export const ACHIEVEMENT_DEFINITIONS: Record<string, { title: string, description: string, xp: number }> = {
+    "FIRST_IDEA": { title: "Idea Generator", description: "Added your first idea to the jar.", xp: 50 },
+    "FIRST_SPIN": { title: "First Spin", description: "Spun the jar for the first time.", xp: 50 },
+    "FIRST_DATE": { title: "Making Memories", description: "Completed your first date/activity.", xp: 100 },
+    "HIGH_ROLLER": { title: "High Roller", description: "Rolled a 6 on the quick dice.", xp: 50 },
+    "QUICK_DECIDER": { title: "Quick Decider", description: "Used a quick decision tool.", xp: 30 },
+};
+
 export function getNextLevelProgress(currentXp: number, currentLevel: number) {
     const currentLevelDef = LEVEL_DEFINITIONS.find(l => l.level === currentLevel);
     const nextLevelDef = LEVEL_DEFINITIONS.find(l => l.level === currentLevel + 1);

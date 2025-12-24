@@ -18,6 +18,18 @@ export function QuickDecisionsModal({ isOpen, onClose }: QuickDecisionsModalProp
     const [isAnimating, setIsAnimating] = useState(false);
     const [rotation, setRotation] = useState(0);
 
+    const recordAction = async (action: string, meta?: any) => {
+        try {
+            await fetch('/api/gamification/record-action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, meta }),
+            });
+        } catch (e) {
+            console.error("Failed to record action", e);
+        }
+    };
+
     const flipCoin = () => {
         if (isAnimating) return;
         setIsAnimating(true);
@@ -32,6 +44,7 @@ export function QuickDecisionsModal({ isOpen, onClose }: QuickDecisionsModalProp
         setTimeout(() => {
             setResult(outcome);
             setIsAnimating(false);
+            recordAction("QUICK_TOOL_USED", { tool: "COIN", result: outcome });
         }, 1500); // Animation duration
     };
 
@@ -45,6 +58,8 @@ export function QuickDecisionsModal({ isOpen, onClose }: QuickDecisionsModalProp
             const outcome = Math.floor(Math.random() * 6) + 1;
             setResult(outcome);
             setIsAnimating(false);
+            recordAction("QUICK_TOOL_USED", { tool: "DICE", result: outcome });
+            recordAction("DICE_ROLL", { result: outcome });
         }, 1000);
     };
 

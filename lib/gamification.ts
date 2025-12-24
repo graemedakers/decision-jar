@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { LEVEL_DEFINITIONS } from "./gamification-shared";
+import { LEVEL_DEFINITIONS, ACHIEVEMENT_DEFINITIONS } from "./gamification-shared";
 
 export async function awardXp(jarId: string, amount: number) {
     if (!jarId) return null;
@@ -42,6 +42,44 @@ export async function awardXp(jarId: string, amount: number) {
         };
     } catch (error) {
         console.error("Error awarding XP:", error);
+        return null;
+    }
+}
+
+export async function unlockAchievement(jarId: string, achievementId: string) {
+    if (!jarId || !ACHIEVEMENT_DEFINITIONS[achievementId]) return null;
+
+    try {
+        const existing = await prisma.unlockedAchievement.findUnique({
+            where: {
+                jarId_achievementId: {
+                    jarId,
+                    achievementId
+                }
+            }
+        });
+
+        if (existing) return null; // Already unlocked
+
+        await prisma.unlockedAchievement.create({
+            data: {
+                jarId,
+                achievementId
+            }
+        });
+
+        // Award XP
+        const xpAmount = ACHIEVEMENT_DEFINITIONS[achievementId].xp;
+        const xpResult = await awardXp(jarId, xpAmount);
+
+        return {
+            unlocked: true,
+            achievement: ACHIEVEMENT_DEFINITIONS[achievementId],
+            xpResult
+        };
+
+    } catch (error) {
+        console.error("Error unlocking achievement:", error);
         return null;
     }
 }
