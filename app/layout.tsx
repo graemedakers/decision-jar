@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://decision-jar.com",
+    url: "https://spinthejar.com",
     title: "Decision Jar | Make Decisions Together",
     description: "Stop asking 'What do you want to do?'. Let the Decision Jar decide.",
     siteName: "Decision Jar",
@@ -57,10 +57,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Decision Jar | Make Decisions Together",
     description: "A fun way for friends and families to decide what to do.",
-  },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
   },
 };
 
