@@ -243,7 +243,7 @@ export function SignupForm() {
                                         defaultValue="General"
                                     >
                                         {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom').map(topic => (
-                                            <option key={topic} value={topic} className="bg-slate-900">
+                                            <option key={topic} value={topic}>
                                                 {topic === "General" ? "General (Anything)" : topic}
                                             </option>
                                         ))}
