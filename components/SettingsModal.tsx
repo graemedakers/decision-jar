@@ -315,7 +315,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                         {isNative ? (
                                             <div className="p-3 bg-white/5 rounded-lg border border-white/10">
                                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                    Manage Subscription: Please visit <strong>date-jar.com</strong>
+                                                    Manage Subscription: Please visit <strong>spinthejar.com</strong>
                                                 </p>
                                             </div>
                                         ) : (

@@ -52,7 +52,7 @@ The UI files are bundled *inside* the app. This is faster but requires your Next
 
 **Option B: Web Wrapper (Easier)**
 The app simply loads your live website url.
-1.  Modify `capacitor.config.ts` to set `server.url` to your production website.
+1.  - Open `capacitor.config.ts` and set the `server.url` to `https://spinthejar.com`.
 2.  *Risk:* Apple sometimes rejects apps that are "just websites" unless you add native features (like haptics or push notifications).
 
 #### 3. Build & Sync

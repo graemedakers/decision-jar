@@ -149,7 +149,7 @@ export default function Home() {
       ratingCount: ratingCount,
     },
     featureList: 'Decision Maker, Couple Sync, Weekend Planner, Dining Concierge',
-    screenshot: 'https://date-jar.vercel.app/og-image.jpg',
+    screenshot: 'https://spinthejar.com/og-image.jpg',
     mainEntity: {
       '@type': 'FAQPage',
       mainEntity: [

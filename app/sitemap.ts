@@ -1,21 +1,22 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
+    const baseUrl = 'https://spinthejar.com';
     return [
         {
-            url: 'https://decision-jar.com',
+            url: baseUrl,
             lastModified: new Date(),
             changeFrequency: 'weekly',
             priority: 1,
         },
         {
-            url: 'https://decision-jar.com/login',
+            url: `${baseUrl}/login`,
             lastModified: new Date(),
             changeFrequency: 'monthly',
             priority: 0.8,
         },
         {
-            url: 'https://decision-jar.com/signup',
+            url: `${baseUrl}/signup`,
             lastModified: new Date(),
             changeFrequency: 'monthly',
             priority: 0.8,

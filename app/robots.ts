@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/dashboard/', '/api/'],
         },
-        sitemap: 'https://decision-jar.com/sitemap.xml',
+        sitemap: 'https://spinthejar.com/sitemap.xml',
     };
 }

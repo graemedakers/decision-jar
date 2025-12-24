@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Decision Jar',
   webDir: 'public',
   server: {
-    url: 'https://date-jar.com', // Production domain
+    url: 'https://spinthejar.com', // Production domain
     cleartext: true
   }
 };

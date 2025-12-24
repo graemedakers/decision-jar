@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://decision-jar.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'),
   title: {
     default: "Decision Jar | The Ultimate Decision Maker",
     template: "%s | Decision Jar",
