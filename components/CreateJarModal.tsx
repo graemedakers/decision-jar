@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import { Users, Heart, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { TOPIC_CATEGORIES } from "@/lib/categories";
 
 interface CreateJarModalProps {
     isOpen: boolean;
@@ -158,12 +159,11 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             onChange={(e) => setTopic(e.target.value)}
                             className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
                         >
-                            <option value="General">General (Anything)</option>
-                            <option value="Food">Food & Dining</option>
-                            <option value="Movies">Movies & TV</option>
-                            <option value="Activities">Activities & Fun</option>
-                            <option value="Chores">Chores & Tasks</option>
-                            <option value="Custom">Custom Topic</option>
+                            {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom').map(k => (
+                                <option key={k} value={k}>
+                                    {k === "General" ? "General (Anything)" : k}
+                                </option>
+                            ))}
                         </select>
                     </div>
 

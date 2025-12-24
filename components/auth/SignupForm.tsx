@@ -7,6 +7,7 @@ import { ArrowRight, Lock, Mail, User, Users, MapPin, AlertCircle, X, Layers } f
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { TOPIC_CATEGORIES } from "@/lib/categories";
 
 export function SignupForm() {
     const router = useRouter();
@@ -241,11 +242,11 @@ export function SignupForm() {
                                         className="w-full h-10 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-md text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent appearance-none"
                                         defaultValue="General"
                                     >
-                                        <option value="General" className="bg-slate-900">General (Anything)</option>
-                                        <option value="Food" className="bg-slate-900">Food & Dining</option>
-                                        <option value="Movies" className="bg-slate-900">Movies & TV</option>
-                                        <option value="Activities" className="bg-slate-900">Activities & Fun</option>
-                                        <option value="Chores" className="bg-slate-900">Chores & Tasks</option>
+                                        {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom').map(topic => (
+                                            <option key={topic} value={topic} className="bg-slate-900">
+                                                {topic === "General" ? "General (Anything)" : topic}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
