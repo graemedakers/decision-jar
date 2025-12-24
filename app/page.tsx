@@ -155,7 +155,7 @@ export default function Home() {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'How does the date idea generator work?',
+          name: 'How does the idea generator work?',
           acceptedAnswer: {
             '@type': 'Answer',
             text: "Simply add your own ideas or use our pre-filled categories. When you're ready, filter by budget, time, or energy level, and 'Spin the Jar' to get a random suggestion that fits your mood perfectly."
@@ -171,10 +171,10 @@ export default function Home() {
         },
         {
           '@type': 'Question',
-          name: 'Can I find restaurants for date night?',
+          name: 'Can I find restaurants for dinner?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Absolutely. Our Dining Concierge feature helps you find top-rated romantic restaurants near you, complete with reviews, ratings, and price levels.'
+            text: 'Absolutely. Our Dining Concierge feature helps you find top-rated restaurants near you, complete with reviews, ratings, and price levels.'
           }
         },
         {
@@ -307,7 +307,7 @@ export default function Home() {
             <FeatureCard
               icon={Shuffle}
               title="Spin the Jar"
-              description="Overcome decision paralysis with our random idea generator. Filter by cost, duration, or vibe and let fate decide your next date or hangout."
+              description="Overcome decision paralysis with our random idea generator. Filter by cost, duration, or vibe and let fate decide your next adventure or hangout."
               delay={0.1}
             />
             <FeatureCard
@@ -437,7 +437,7 @@ export default function Home() {
                 {[
                   "1 Active Jar Included",
                   "Up to 4 Members/Jar",
-                  "25 Date Ideas Capacity",
+                  "25 Idea Capacity",
                   "Basic 'Spin' Feature",
                   "Standard Categories"
                 ].map((feature, i) => (
@@ -479,7 +479,7 @@ export default function Home() {
               <ul className="space-y-4 mb-8 flex-1">
                 {[
                   "Unlimited Jars & Members",
-                  "Unlimited Date Ideas",
+                  "Unlimited Ideas",
                   "Smart Weekend Planner (AI)",
                   "Dining Concierge & Bar Scout",
                   "Custom Itinerary Builder",
