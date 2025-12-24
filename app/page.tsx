@@ -427,7 +427,7 @@ export default function Home() {
             <div className="glass-card p-8 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col hover:bg-white/60 dark:hover:bg-white/5 transition-colors">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Free Starter</h3>
-                <p className="text-slate-600 dark:text-slate-400">Perfect for a single couple or small group</p>
+                <p className="text-slate-600 dark:text-slate-400">Perfect for couples, roommates, or small groups</p>
               </div>
               <div className="mb-8">
                 <span className="text-4xl font-bold text-slate-800 dark:text-white">Free</span>
@@ -537,7 +537,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-3xl blur-2xl opacity-20" />
           <div className="glass-card p-12 rounded-3xl text-center relative overflow-hidden border-slate-200 dark:border-white/10">
             <div className="relative z-10 space-y-8">
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white">Ready to spice things up?</h2>
+              <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white">Ready to make better decisions?</h2>
               <p className="text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto">
                 Join thousands of people who are making better decisions, more often. It's free to get started.
               </p>
