@@ -247,15 +247,15 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-accent">
               <Sparkles className="w-3 h-3" />
-              <span>Reignite the spark</span>
+              <span>Stop the indecision</span>
             </div>
             <h1 className="text-3xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-white dark:to-slate-400 tracking-tight leading-[1.1] break-words">
               The Ultimate <br />
               <span className="text-primary dark:text-accent">Decision Maker</span> <br />
-              For Couples & Groups.
+              For Everyone.
             </h1>
             <p className="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto md:mx-0 leading-relaxed break-words">
-              Stop scrolling and start doing. Our <strong>shared app for couples and friend groups</strong> helps you curate, manage, and discover <strong>fun things to do</strong>.
+              Stop scrolling and start doing. Our <strong>shared app for friends and families</strong> helps you curate, manage, and discover <strong>fun things to do</strong>.
               Let fate decide your next adventure or use our <strong>smart planner</strong> for the perfect weekend.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
@@ -319,7 +319,7 @@ export default function Home() {
             <FeatureCard
               icon={Users}
               title="Sync with Anyone"
-              description="Perfect for couples AND friend groups. Invite your partner or your whole group to share a jar and sync ideas instantly."
+              description="Perfect for friends and families. Invite your whole group to share a jar and sync ideas instantly."
               delay={0.2}
             />
             <FeatureCard
@@ -337,14 +337,14 @@ export default function Home() {
             />
             <FeatureCard
               icon={Wine}
-              title="Bar Scout"
-              description="Discover hidden speakeasies and rooftop bars. The best nightlife spots for an intimate drink or a night out with the crew."
+              title="Bar Finder"
+              description="Discover hidden speakeasies and rooftop bars. The best nightlife spots for a drink or a night out with the crew."
               delay={0.5}
             />
             <FeatureCard
               icon={Star}
               title="Rate & Remember"
-              description="Keep a digital scrapbook of your memories. Rate your experiences, upload group photos, and cherish every moment together."
+              description="Keep a digital scrapbook of your memories. Rate your experiences, upload photos, and cherish every moment."
               delay={0.6}
             />
           </div>
@@ -527,7 +527,7 @@ export default function Home() {
             />
             <FaqItem
               question="Can I find restaurants for date night?"
-              answer="Absolutely. Our Dining Concierge feature helps you find top-rated romantic restaurants near you, complete with reviews, ratings, and price levels."
+              answer="Absolutely. Our Dining Concierge feature helps you find top-rated restaurants near you, complete with reviews, ratings, and price levels."
             />
             <FaqItem
               question="Does it sync between multiple phones?"
@@ -545,7 +545,7 @@ export default function Home() {
             <div className="relative z-10 space-y-8">
               <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white">Ready to spice things up?</h2>
               <p className="text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto">
-                Join thousands of couples who are having better dates, more often. It's free to get started.
+                Join thousands of people who are making better decisions, more often. It's free to get started.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button

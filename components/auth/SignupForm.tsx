@@ -139,9 +139,9 @@ export function SignupForm() {
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-2">Invalid Invite Link</h2>
                     <p className="text-slate-400 mb-8">
-                        {codeError === 'This jar is already full'
-                            ? "This jar already has two partners. You can create your own jar instead."
-                            : "This invite link is invalid or has expired. Please ask your partner for a new link, or create your own jar."}
+                        {codeError === 'This jar is full'
+                            ? "This jar handles a maximum number of members. You can create your own jar instead."
+                            : "This invite link is invalid or has expired. Please ask for a new link, or create your own jar."}
                     </p>
                     <Button
                         onClick={() => router.push('/signup')}
@@ -177,10 +177,10 @@ export function SignupForm() {
                         <Users className="w-8 h-8 text-accent fill-accent" />
                     </motion.div>
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                        {inviteCode ? "Join Your Partner" : "Create Account"}
+                        {inviteCode ? "Join Group" : "Create Account"}
                     </h1>
                     <p className="text-slate-600 dark:text-slate-400">
-                        {inviteCode ? "Enter your details to connect" : "Start your journey together"}
+                        {inviteCode ? "Enter your details to join" : "Start deciding together"}
                     </p>
                 </div>
 
@@ -241,7 +241,7 @@ export function SignupForm() {
                                     required
                                 />
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">Used to find date spots near you.</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">Used to find options near you.</p>
                         </div>
                     )}
 

@@ -683,26 +683,26 @@ export default function DashboardPage() {
                             </div>
                         </motion.button>
 
-                        {userData?.jarType !== 'SOCIAL' && (
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setIsSurpriseModalOpen(true)}
-                                className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 cursor-pointer transition-all bg-gradient-to-br from-yellow-500/20 to-orange-600/40 border border-yellow-500/30 hover:border-yellow-500/50 shadow-lg shadow-yellow-900/10 group"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <div className="w-12 h-12 shrink-0 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-200 group-hover:scale-110 transition-transform relative z-10 border border-yellow-500/30">
-                                    <Sparkles className="w-6 h-6" />
-                                </div>
-                                <div className="text-left relative z-10">
-                                    <span className="block text-lg font-bold text-yellow-900 dark:text-white group-hover:text-yellow-700 dark:group-hover:text-yellow-200 transition-colors flex items-center gap-2">
-                                        Surprise Me
-                                        <span className="bg-yellow-500/30 text-yellow-700 dark:text-yellow-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+15 XP</span>
-                                    </span>
-                                    <span className="text-sm text-yellow-700 dark:text-yellow-200/60 group-hover:text-yellow-900 dark:group-hover:text-yellow-200/80 transition-colors leading-tight">Add a secret idea</span>
-                                </div>
-                            </motion.button>
-                        )}
+
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setIsSurpriseModalOpen(true)}
+                            className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 cursor-pointer transition-all bg-gradient-to-br from-yellow-500/20 to-orange-600/40 border border-yellow-500/30 hover:border-yellow-500/50 shadow-lg shadow-yellow-900/10 group"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="w-12 h-12 shrink-0 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-200 group-hover:scale-110 transition-transform relative z-10 border border-yellow-500/30">
+                                <Sparkles className="w-6 h-6" />
+                            </div>
+                            <div className="text-left relative z-10">
+                                <span className="block text-lg font-bold text-yellow-900 dark:text-white group-hover:text-yellow-700 dark:group-hover:text-yellow-200 transition-colors flex items-center gap-2">
+                                    Surprise Me
+                                    <span className="bg-yellow-500/30 text-yellow-700 dark:text-yellow-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+15 XP</span>
+                                </span>
+                                <span className="text-sm text-yellow-700 dark:text-yellow-200/60 group-hover:text-yellow-900 dark:group-hover:text-yellow-200/80 transition-colors leading-tight">Add a secret idea</span>
+                            </div>
+                        </motion.button>
+
 
                         <motion.div
                             whileHover={{ scale: 1.02 }}
@@ -835,30 +835,29 @@ export default function DashboardPage() {
                                 {!isPremium && <Lock className="w-5 h-5 text-slate-400" />}
                             </div>
                             <div>
-                                <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2">Bar Scout</span>
+                                <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2">Bar Key</span>
                                 <span className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed block group-hover:text-pink-700 dark:group-hover:text-pink-200/70 transition-colors">Discover top-rated bars and lounges nearby.</span>
                             </div>
                         </motion.div>
 
-                        {userData?.jarType !== 'SOCIAL' && (
-                            <motion.div
-                                whileHover={{ scale: 1.02, y: -2 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="bg-white dark:bg-slate-900/40 backdrop-blur-md border border-rose-500/20 rounded-2xl p-6 flex flex-col gap-4 cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-500/40 transition-all shadow-lg shadow-black/5 dark:shadow-black/20"
-                                onClick={() => isPremium ? setIsDateNightOpen(true) : setIsPremiumModalOpen(true)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="w-12 h-12 rounded-xl bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-300 ring-1 ring-rose-500/30">
-                                        <Moon className="w-6 h-6" />
-                                    </div>
-                                    {!isPremium && <Lock className="w-5 h-5 text-slate-400" />}
+                        <motion.div
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="bg-white dark:bg-slate-900/40 backdrop-blur-md border border-rose-500/20 rounded-2xl p-6 flex flex-col gap-4 cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-500/40 transition-all shadow-lg shadow-black/5 dark:shadow-black/20"
+                            onClick={() => isPremium ? setIsDateNightOpen(true) : setIsPremiumModalOpen(true)}
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="w-12 h-12 rounded-xl bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-300 ring-1 ring-rose-500/30">
+                                    <Moon className="w-6 h-6" />
                                 </div>
-                                <div>
-                                    <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2">Date Night Planner</span>
-                                    <span className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed block group-hover:text-rose-700 dark:group-hover:text-rose-200/70 transition-colors">Plan a complete evening: Drinks, Dinner & Event.</span>
-                                </div>
-                            </motion.div>
-                        )}
+                                {!isPremium && <Lock className="w-5 h-5 text-slate-400" />}
+                            </div>
+                            <div>
+
+                                <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2">Night Out Planner</span>
+                                <span className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed block group-hover:text-rose-700 dark:group-hover:text-rose-200/70 transition-colors">Plan a complete evening: Drinks, Dinner & Event.</span>
+                            </div>
+                        </motion.div>
                     </div>
                 </div>
 

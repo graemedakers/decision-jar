@@ -36,8 +36,8 @@ export async function POST(request: Request) {
                     referenceCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
                     location: location || 'Unknown',
                     isPremium: false,
-                    name: `${name}'s Decision Jar`, // Default name
-                    type: "ROMANTIC"
+                    name: `${name}'s Jar`, // Default name
+                    type: "SOCIAL"
                 },
             });
 
