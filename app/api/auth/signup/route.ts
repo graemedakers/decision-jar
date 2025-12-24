@@ -8,7 +8,7 @@ import { sendVerificationEmail } from '@/lib/mailer';
 
 export async function POST(request: Request) {
     try {
-        const { name, email: rawEmail, password, inviteCode, location, topic } = await request.json();
+        const { name, email: rawEmail, password, inviteCode, location, topic, type } = await request.json();
         const email = rawEmail?.toLowerCase().trim();
 
         if (!name || !email || !password) {
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
                     location: location || 'Unknown',
                     isPremium: false,
                     name: jarName,
-                    type: "SOCIAL",
+                    type: (type === 'ROMANTIC' || type === 'SOCIAL') ? type : 'SOCIAL',
                     // @ts-ignore
                     topic: selectedTopic
                 },

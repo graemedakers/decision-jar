@@ -54,6 +54,7 @@ export function SignupForm() {
         const password = formData.get("password") as string;
         const location = formData.get("location") as string;
         const topic = formData.get("topic") as string;
+        const type = formData.get("type") as string;
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
@@ -72,7 +73,8 @@ export function SignupForm() {
                     password,
                     inviteCode,
                     location,
-                    topic
+                    topic,
+                    type
                 }),
             });
 
@@ -247,6 +249,21 @@ export function SignupForm() {
                                                 {topic === "General" ? "General (Anything)" : topic}
                                             </option>
                                         ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Jar Type</label>
+                                <div className="relative">
+                                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <select
+                                        name="type"
+                                        className="w-full h-10 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-md text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent appearance-none"
+                                        defaultValue="SOCIAL"
+                                    >
+                                        <option value="ROMANTIC">Couple (Romantic)</option>
+                                        <option value="SOCIAL">Friends & Family (Social)</option>
                                     </select>
                                 </div>
                             </div>

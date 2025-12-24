@@ -23,6 +23,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     const [name, setName] = useState("");
     // Default to SOCIAL if user already has a romantic jar, otherwise ROMANTIC
     const [topic, setTopic] = useState("General");
+    const [type, setType] = useState<string>("SOCIAL");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -40,7 +41,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             const res = await fetch('/api/jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, type: "SOCIAL", topic }),
+                body: JSON.stringify({ name, type, topic }),
             });
 
             if (res.ok) {
@@ -164,6 +165,18 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                     {k === "General" ? "General (Anything)" : k}
                                 </option>
                             ))}
+                        </select>
+                    </div>
+
+                    <div className="space-y-3">
+                        <Label>Jar Type</Label>
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
+                        >
+                            <option value="ROMANTIC">Couple (Romantic)</option>
+                            <option value="SOCIAL">Friends & Family (Social)</option>
                         </select>
                     </div>
 
