@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { PRICING } from "@/lib/config";
 
 function FeatureCard({ icon: Icon, title, description, delay }: { icon: any, title: string, description: string, delay: number }) {
@@ -207,8 +208,8 @@ export default function Home() {
       <nav className="fixed top-0 left-0 w-full z-50 border-b border-slate-200 dark:border-white/5 bg-white/70 dark:bg-slate-950/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-gradient-to-br from-primary to-accent rounded-lg">
-              <Heart className="w-4 h-4 text-white fill-white" />
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+              <Image src="/icon.png" alt="Logo" fill className="object-cover" />
             </div>
             <span className="font-bold text-lg text-slate-800 dark:text-white tracking-tight">Decision Jar</span>
           </div>
@@ -562,7 +563,9 @@ export default function Home() {
       <footer className="py-12 px-6 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <Heart className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            <div className="relative w-6 h-6 rounded-md overflow-hidden">
+              <Image src="/icon.png" alt="Logo" fill className="object-cover" />
+            </div>
             <span className="font-bold text-slate-600 dark:text-slate-400">Decision Jar</span>
           </div>
           <p className="text-slate-500 dark:text-slate-600 text-sm">
