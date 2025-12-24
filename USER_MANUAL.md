@@ -7,13 +7,13 @@ Welcome to **Decision Jar**, the application designed to take the indecision out
 2. [Getting Started](#getting-started)
 3. [Managing Jars (Group Mode)](#managing-jars-group-mode)
 4. [The Dashboard](#the-dashboard)
-5. [Adding Date Ideas](#adding-date-ideas)
-5. [Spinning the Jar](#spinning-the-jar)
+5. [Adding Ideas](#adding-ideas)
+6. [Spinning the Jar](#spinning-the-jar)
 6. [Levels & XP (Gamification)](#levels--xp-gamification)
 7. [Premium Features](#premium-features)
 8. [Concierge Services](#concierge-services)
 9. [Weekend Planner](#weekend-planner)
-10. [Date Night Planner](#date-night-planner)
+10. [Night Out Planner](#night-out-planner)
 11. [Managing History](#managing-history)
 12. [Settings & Configuration](#settings--configuration)
 
@@ -198,10 +198,10 @@ Need a plan for the whole weekend?
 
 ---
 
-## 10. Date Night Planner
+## 10. Night Out Planner
 
 Want a complete evening plan?
-1.  Click **"Plan Date Night"**.
+1.  Click **"Night Out Planner"**.
 2.  Get a timeline with **Drinks**, **Dinner**, and an **Event**.
 3.  Customize venues using "Regenerate" or "Edit".
 4.  View on Map or "Go Tonight".

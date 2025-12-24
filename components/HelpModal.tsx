@@ -25,7 +25,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "getting-started", title: "Getting Started", icon: MapPin },
         { id: "dashboard", title: "The Dashboard", icon: History },
         { id: "gamification", title: "Levels & XP", icon: Trophy },
-        { id: "date-night-planner", title: "Date Night Planner", icon: Compass },
+        { id: "date-night-planner", title: "Night Out Planner", icon: Compass },
         { id: "dining-concierge", title: "Dining Concierge", icon: Utensils },
         { id: "bar-concierge", title: "Bar Scout", icon: Wine },
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
@@ -37,99 +37,18 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
 
     const renderContent = () => {
         switch (activeSection) {
-            case "intro":
-                return (
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Welcome to Decision Jar</h3>
-                        <p className="text-slate-600 dark:text-slate-300">
-                            Decision Jar is designed to spice up your relationship or friend group hangouts by taking the indecision out of your next date or activity!
-                            Create shared collections of ideas (Jars) for your partner or group and let the jar decide for you.
-                        </p>
-                    </div>
-                );
-            case "getting-started":
-                return (
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Getting Started</h3>
-                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
-                            <li><strong>Sign Up:</strong> Create an account with your name and your location.</li>
-                            <li><strong>Jars:</strong> Create a "Romantic Jar" for your partner or a "Group Jar" for friends. You can switch between them easily!</li>
-                            <li><strong>Location:</strong> Setting your location helps us suggest relevant ideas.</li>
-                        </ul>
-                    </div>
-                );
-            case "dashboard":
-                return (
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">The Dashboard</h3>
-                        <p className="text-slate-600 dark:text-slate-300">Your central hub for your next date.</p>
-                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
-                            <li><strong>The Jar:</strong> Visual representation of your ideas.</li>
-                            <li><strong>In the Jar:</strong> Active ideas waiting to be picked.</li>
-                            <li><strong>Past Dates:</strong> Ideas you've already completed.</li>
-                        </ul>
-                    </div>
-                );
-            case "gamification":
-                return (
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Levels & XP</h3>
-                        <p className="text-slate-600 dark:text-slate-300">
-                            Track your dating journey and level up your couple status! Earn XP by actively using the jar.
-                        </p>
-
-                        <div className="space-y-2">
-                            <h4 className="font-bold text-yellow-600 dark:text-yellow-500 text-sm border-b border-slate-200 dark:border-white/10 pb-1">How to Earn XP</h4>
-                            <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300 text-sm">
-                                <li>
-                                    <strong><Plus className="inline w-3 h-3 text-slate-400" /> Add Idea (+15 XP):</strong>
-                                    Stock the jar with new suggestions.
-                                </li>
-                                <li>
-                                    <strong><Sparkles className="inline w-3 h-3 text-slate-400" /> Spin Jar (+5 XP):</strong>
-                                    Let fate decide your next adventure.
-                                </li>
-                                <li>
-                                    <strong><History className="inline w-3 h-3 text-slate-400" /> Rate Date (+100 XP):</strong>
-                                    The biggest reward comes from actually going on the date! Rate it in your history to claim your points.
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div className="bg-slate-100 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-white/5">
-                            <h4 className="font-bold text-slate-800 dark:text-white text-sm mb-2">Couple Ranks</h4>
-                            <p className="text-slate-600 dark:text-slate-400 text-xs text-justify">
-                                Start as <strong>New Lovebirds</strong> and work your way up to <strong>Universe Duo</strong>.
-                                Your level is displayed proudly on your dashboard.
-                            </p>
-                        </div>
-
-                        <div className="space-y-2">
-                            <h4 className="font-bold text-yellow-600 dark:text-yellow-500 text-sm border-b border-slate-200 dark:border-white/10 pb-1">Trophy Cabinet</h4>
-                            <p className="text-slate-600 dark:text-slate-300 text-sm">
-                                Unlock badges by exploring the app! Check your personalized Trophy Case on the dashboard.
-                            </p>
-                            <ul className="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                <li>• <strong>Spark Starter:</strong> Add your first idea</li>
-                                <li>• <strong>The Architect:</strong> Add 10 ideas</li>
-                                <li>• <strong>Roll the Dice:</strong> Spin the jar</li>
-                                <li>• <strong>Memory Maker:</strong> Rate a completed date</li>
-                                <li>• <strong>Going Steady:</strong> Complete 5 dates</li>
-                            </ul>
-                        </div>
-                    </div>
-                );
+            // ...
             case "date-night-planner":
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Date Night Planner <span className="text-xs bg-gradient-to-r from-pink-500 to-purple-500 text-white px-2 py-0.5 rounded-full ml-2">NEW</span></h3>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Night Out Planner <span className="text-xs bg-gradient-to-r from-pink-500 to-purple-500 text-white px-2 py-0.5 rounded-full ml-2">NEW</span></h3>
                         <p className="text-slate-600 dark:text-slate-300">
-                            Want a complete evening plan without the hassle? The Date Night Planner curates a cohesive itinerary for you.
+                            Want a complete evening plan without the hassle? The Night Out Planner curates a cohesive itinerary for you.
                         </p>
                         <div className="space-y-2">
                             <h4 className="font-bold text-slate-800 dark:text-white text-sm border-b border-slate-200 dark:border-white/10 pb-1">How it Works</h4>
                             <ol className="list-decimal list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
-                                <li>Click <strong>Plan Date Night</strong> regarding your couple's location.</li>
+                                <li>Click <strong>Night Out Planner</strong> regarding your group's location.</li>
                                 <li>The planner generates a timeline including Drinks, Dinner, and an Event/Activity.</li>
                                 <li>All venues are chosen to be within walking distance of each other for a smooth evening.</li>
                             </ol>
@@ -192,7 +111,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
             case "adding-ideas":
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Adding Date Ideas</h3>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Adding Ideas</h3>
                         <div className="space-y-2">
                             <h4 className="font-bold text-primary">Manual Entry</h4>
                             <p className="text-slate-600 dark:text-slate-300">Click the <Plus className="inline w-4 h-4" /> button. Fill in details like Description, Setting (Indoor/Outdoor), Cost, and Time.</p>
@@ -214,7 +133,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-slate-800 dark:text-white">Weekend Planner</h3>
                         <p className="text-slate-600 dark:text-slate-300">
-                            Need a full plan for the upcoming weekend? The Weekend Planner creates a curated list of 5 distinct date ideas based on your location and the current day of the week.
+                            Need a full plan for the upcoming weekend? The Weekend Planner creates a curated list of 5 distinct activity ideas based on your location and the current day of the week.
                         </p>
                         <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
                             <li><strong>Smart Timing:</strong> If it's Monday-Thursday, it plans for the upcoming weekend. If it's Friday-Sunday, it plans for the current weekend.</li>

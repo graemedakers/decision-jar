@@ -512,16 +512,16 @@ export default function Home() {
 
           <div className="glass-card p-6 md:p-8 space-y-2">
             <FaqItem
-              question="How does the date idea generator work?"
+              question="How does the decision maker work?"
               answer="Simply add your own ideas or use our pre-filled categories. When you're ready, filter by budget, time, or energy level, and 'Spin the Jar' to get a random suggestion that fits your mood perfectly."
             />
             <FaqItem
               question="Is Decision Jar free?"
-              answer="Yes! You can create unlimited jars (one for your partner, one for the group!), add unlimited ideas, and sync with everyone for free. We also offer a premium tier for advanced features."
+              answer="Yes! You can create unlimited jars (e.g., one for your partner, one for roommates, one for work lunch!), add unlimited ideas, and sync with everyone for free. We also offer a premium tier for advanced features."
             />
             <FaqItem
-              question="Can I find restaurants for date night?"
-              answer="Absolutely. Our Dining Concierge feature helps you find top-rated restaurants near you, complete with reviews, ratings, and price levels."
+              question="Can I find restaurants and bars?"
+              answer="Absolutely. Our Concierge features help you find top-rated restaurants and bars near you, complete with reviews, ratings, and price levels."
             />
             <FaqItem
               question="Does it sync between multiple phones?"
