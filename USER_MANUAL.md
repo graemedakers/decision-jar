@@ -34,12 +34,12 @@ Date Jar allows you and your partner (or your friend group!) to create shared co
 4.  Enter your email address and a secure password.
 5.  **Location:** Enter your city (e.g., "New York, NY"). This helps us suggest relevant ideas.
 6.  Click **"Create Jar"** and choose your type:
-    - **Couple (Romantic):** For you and one partner.
-    - **Group (Social):** For groups of friends.
+    - **Group (Social):** For friends, family, or teams.
+    - **Personal:** For yourself.
 
-**Note:** You can create and join multiple jars! Switch between your Romantic jar and your Group jars easily from the dashboard.
+**Note:** You can create and join multiple jars! Switch between them easily from the dashboard.
 
-**Free Trial:** New couples get a 14-day free trial of all Premium features!
+**Free Trial:** New users get a 14-day free trial of all Premium features!
 
 ---
 
@@ -71,7 +71,7 @@ Date Jar allows you and your partner (or your friend group!) to create shared co
 
 Once logged in, you will see your **Dashboard**.
 - **The Jar:** A 3D representation of your jar. It fills up as you add ideas!
-- **Level Banner:** Displays your current Couple Level, progress bar, and Trophy Case.
+- **Level Banner:** Displays your current Decision Level, progress bar, and Trophy Case.
 - **Stats:** Shows how many ideas are currently in the jar.
 - **Action Buttons:** "Add Idea", "Spin Jar", "Weekend Plan", "Dining Concierge", "Bar Concierge".
 - **Lists:**
@@ -133,7 +133,7 @@ Once the jar picks an idea:
 
 ## 6. Levels & XP (Gamification)
 
-Track your journey as a couple by earning **Experience Points (XP)** and unlocking **Trophies**!
+Track your journey by earning **Experience Points (XP)** and unlocking **Trophies**!
 
 ### How to Earn XP
 Everything you do in the jar helps you grow:
@@ -141,14 +141,14 @@ Everything you do in the jar helps you grow:
 *   **Spin the Jar:** +5 XP
 *   **Rate a Date (Complete):** +100 XP (The biggest reward!)
 
-### Couple Ranks
+### Decision Ranks
 Your progress is shown on the Dashboard. As you earn XP, you unlock new titles:
-1.  **New Lovebirds** (0 XP)
-2.  **Curious Couple** (100 XP)
-3.  **Date Night Explorers** (300 XP)
-4.  **Adventure Seekers** (600 XP)
-5.  **Romance Pros** (1000 XP)
-6.  **Soulmates** (1500 XP)
+1.  **Newbie Decider** (0 XP)
+2.  **Curious Picker** (100 XP)
+3.  **Choice Explorer** (300 XP)
+4.  **Activity Planning Pro** (600 XP)
+5.  **Decision Maker** (1000 XP)
+6.  **Master of Choices** (1500 XP)
 ...and more!
 
 ### Trophy Case
@@ -226,7 +226,7 @@ See a record of deleted items via **Settings > View Deletion History**.
 ## 12. Settings & Configuration
 
 ### Profile Settings
-- **Couple Location:** Default search area.
+- **Jar Location:** Default search area.
 - **Interests:** Used for "Surprise Me" suggestions.
 
 ### Partner Management
