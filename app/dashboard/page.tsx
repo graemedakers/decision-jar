@@ -30,9 +30,10 @@ import { AchievementCase } from "@/components/Gamification/AchievementCase";
 import { CollapsibleTrophyCase } from "@/components/Gamification/CollapsibleTrophyCase";
 import { ReviewAppModal } from "@/components/ReviewAppModal";
 import { HelpModal } from "@/components/HelpModal";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Dices } from "lucide-react";
 import { JarSwitcher } from "@/components/JarSwitcher";
 import { getThemeForTopic } from "@/lib/categories";
+import { QuickDecisionsModal } from "@/components/QuickDecisionsModal";
 
 interface UserData {
     id: string;
@@ -99,6 +100,7 @@ export default function DashboardPage() {
     const [isLoadingUser, setIsLoadingUser] = useState(true);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
     const router = useRouter();
 
     const [diningSearchLocation, setDiningSearchLocation] = useState<string | null>(null);
@@ -433,6 +435,11 @@ export default function DashboardPage() {
                 currentLocation={userLocation ?? undefined}
             />
 
+            <QuickDecisionsModal
+                isOpen={isQuickToolsOpen}
+                onClose={() => setIsQuickToolsOpen(false)}
+            />
+
             <WeekendPlannerModal
                 isOpen={isPlannerOpen}
                 onClose={() => setIsPlannerOpen(false)}
@@ -541,6 +548,9 @@ export default function DashboardPage() {
                         <div className="flex gap-2">
                             <Button variant="ghost" size="sm" className="!p-2 rounded-full hover:bg-white/10 md:hidden" onClick={() => setIsHelpOpen(true)}>
                                 <HelpCircle className="w-5 h-5 text-slate-400" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="!p-2 rounded-full hover:bg-white/10" title="Quick Tools" onClick={() => setIsQuickToolsOpen(true)}>
+                                <Dices className="w-5 h-5 text-slate-400" />
                             </Button>
                             <Button variant="ghost" size="sm" className="!p-2 rounded-full hover:bg-white/10 relative" onClick={() => setIsFavoritesOpen(true)}>
                                 <Heart className="w-5 h-5 text-pink-400" />
