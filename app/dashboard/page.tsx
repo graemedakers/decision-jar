@@ -400,6 +400,7 @@ export default function DashboardPage() {
                 onClose={() => setIsSurpriseModalOpen(false)}
                 onIdeaAdded={fetchIdeas}
                 initialLocation={userLocation || ""}
+                jarTopic={jarTopic}
             />
 
             <SpinFiltersModal

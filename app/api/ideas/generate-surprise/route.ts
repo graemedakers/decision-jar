@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
         const body = await request.json().catch(() => ({}));
         category = body.category;
-        const { activityLevel, cost, timeOfDay, location: inputLocation } = body;
+        const { activityLevel, cost, timeOfDay, location: inputLocation, topic } = body;
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
 
@@ -53,11 +53,12 @@ export async function POST(request: Request) {
         // Actually, let's keep it simple.
 
         const prompt = `
-        Generate a random, creative date idea for a couple.
+        Generate a random, creative ${topic ? topic.toLowerCase() : 'date'} idea for a couple or group of friends.
         
         CONTEXT:
         - Location: ${location}
         - ${userInterests}
+        ${topic ? `- Topic Context: This must be related to "${topic}" (e.g. if specific categories like Restaurant are requested, respect them).` : ''}
         
         CRITICAL:
         - Must be valid JSON.
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
         - activityLevel (string: "LOW", "MEDIUM", "HIGH")
         - cost (string: "FREE", "$", "$$", "$$$")
         - timeOfDay (string: "DAY", "EVENING", "ANY")
-        - category (string: "ACTIVITY", "MEAL", "EVENT")
+        - category (string: the specific category selected, e.g. "${category || 'ACTIVITY'}")
         - url (string)
         `;
 
