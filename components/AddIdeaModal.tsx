@@ -1,5 +1,6 @@
 "use client";
 import { getItinerary, getApiUrl } from "@/lib/utils";
+import { getCategoriesForTopic } from "@/lib/categories";
 
 import { ItineraryPreview } from "./ItineraryPreview";
 import { Button } from "@/components/ui/Button";
@@ -14,9 +15,10 @@ interface AddIdeaModalProps {
     initialData?: any; // If provided, we are in "Edit" mode
     isPremium?: boolean;
     onUpgrade?: () => void;
+    jarTopic?: string | null;
 }
 
-export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade }: AddIdeaModalProps) {
+export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic }: AddIdeaModalProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -58,7 +60,20 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
             }
             setFormData(initialFormData);
         }
+
     }, [isOpen, initialData]);
+
+    const categories = getCategoriesForTopic(jarTopic);
+
+    // Ensure category is valid for topic
+    useEffect(() => {
+        if (isOpen && categories.length > 0) {
+            const isValid = categories.some(c => c.id === formData.category);
+            if (!isValid) {
+                setFormData(prev => ({ ...prev, category: categories[0].id }));
+            }
+        }
+    }, [jarTopic, isOpen, categories]);
 
     const itinerary = getItinerary(formData.details);
 
@@ -126,43 +141,26 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Category</label>
-                                        <div className="flex bg-slate-100 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10">
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, category: 'ACTIVITY' })}
-                                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${formData.category === 'ACTIVITY'
-                                                    ? "bg-primary text-white shadow-lg"
-                                                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
-                                                    }`}
-                                            >
-                                                <Activity className="w-4 h-4" /> Activity
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, category: 'MEAL' })}
-                                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${formData.category === 'MEAL'
-                                                    ? "bg-primary text-white shadow-lg"
-                                                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
-                                                    }`}
-                                            >
-                                                <Utensils className="w-4 h-4" /> Meal
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, category: 'EVENT' })}
-                                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${formData.category === 'EVENT'
-                                                    ? "bg-primary text-white shadow-lg"
-                                                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
-                                                    }`}
-                                            >
-                                                <Calendar className="w-4 h-4" /> Event
-                                            </button>
+                                        <div className="flex bg-slate-100 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10 overflow-x-auto">
+                                            {categories.map((cat) => (
+                                                <button
+                                                    key={cat.id}
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, category: cat.id })}
+                                                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${formData.category === cat.id
+                                                        ? "bg-primary text-white shadow-lg"
+                                                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
+                                                        }`}
+                                                >
+                                                    <cat.icon className="w-4 h-4" /> {cat.label}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">
-                                            {formData.category === 'MEAL' ? "Meal Idea" : formData.category === 'EVENT' ? "Event Name" : "Activity Description"}
+                                            {formData.category === 'MEAL' || formData.category === 'RESTAURANT' ? "Name of place" : "Short Description"}
                                         </label>
                                         <Input
                                             value={formData.description}

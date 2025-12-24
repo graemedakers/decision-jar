@@ -1,4 +1,5 @@
 "use client";
+import { getCategoriesForTopic } from "@/lib/categories";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Filter, ArrowRight } from "lucide-react";
@@ -9,9 +10,10 @@ interface SpinFiltersModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSpin: (filters: { maxDuration?: number; maxCost?: string; maxActivityLevel?: string; timeOfDay?: string; category?: string }) => void;
+    jarTopic?: string | null;
 }
 
-export function SpinFiltersModal({ isOpen, onClose, onSpin }: SpinFiltersModalProps) {
+export function SpinFiltersModal({ isOpen, onClose, onSpin, jarTopic }: SpinFiltersModalProps) {
     const [maxDuration, setMaxDuration] = useState<number | undefined>(undefined);
     const [maxCost, setMaxCost] = useState<string | undefined>(undefined);
     const [maxActivityLevel, setMaxActivityLevel] = useState<string | undefined>(undefined);
@@ -67,16 +69,17 @@ export function SpinFiltersModal({ isOpen, onClose, onSpin }: SpinFiltersModalPr
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Category</label>
                                 <div className="grid grid-cols-3 gap-2">
-                                    {['ACTIVITY', 'MEAL', 'EVENT'].map((cat) => (
+                                    {getCategoriesForTopic(jarTopic).map((cat) => (
                                         <button
-                                            key={cat}
-                                            onClick={() => setCategory(category === cat ? undefined : cat)}
-                                            className={`p-2 rounded-lg text-sm font-medium transition-colors border ${category === cat
+                                            key={cat.id}
+                                            onClick={() => setCategory(category === cat.id ? undefined : cat.id)}
+                                            className={`p-2 rounded-lg text-sm font-medium transition-colors border flex flex-col items-center justify-center gap-1 min-h-[60px] ${category === cat.id
                                                 ? "bg-secondary text-white border-secondary shadow-md"
                                                 : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-800 dark:hover:text-white"
                                                 }`}
                                         >
-                                            {cat === 'ACTIVITY' ? 'Activity' : cat === 'MEAL' ? 'Meal' : 'Event'}
+                                            <cat.icon className="w-4 h-4" />
+                                            <span className="truncate w-full text-center">{cat.label}</span>
                                         </button>
                                     ))}
                                 </div>

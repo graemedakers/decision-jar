@@ -349,6 +349,9 @@ export default function DashboardPage() {
 
     const combinedLocation = userLocation || "";
 
+    const activeMembership = userData?.memberships?.find((m: any) => m.jarId === userData.activeJarId) || userData?.memberships?.[0];
+    const jarTopic = activeMembership?.jar?.topic;
+
     return (
         <main className="min-h-screen p-4 md:p-8 pb-24 relative overflow-hidden w-full max-w-[1600px] mx-auto">
             <PremiumModal
@@ -378,6 +381,7 @@ export default function DashboardPage() {
 
             <AddIdeaModal
                 isOpen={isModalOpen || !!editingIdea}
+                jarTopic={jarTopic}
                 onClose={() => {
                     setIsModalOpen(false);
                     setEditingIdea(null);
@@ -402,6 +406,7 @@ export default function DashboardPage() {
                 isOpen={isFilterModalOpen}
                 onClose={() => setIsFilterModalOpen(false)}
                 onSpin={handleSpinJar}
+                jarTopic={jarTopic}
             />
 
             <SettingsModal
