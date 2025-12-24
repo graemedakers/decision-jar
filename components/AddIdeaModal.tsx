@@ -30,6 +30,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         cost: "$",
         timeOfDay: "ANY",
         category: "ACTIVITY",
+        suggestedBy: "",
     });
 
     useEffect(() => {
@@ -45,6 +46,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     cost: initialData.cost,
                     timeOfDay: initialData.timeOfDay || "ANY",
                     category: initialData.category || "ACTIVITY",
+                    suggestedBy: "",
                 };
             } else {
                 initialFormData = {
@@ -56,6 +58,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     cost: "$",
                     timeOfDay: "ANY",
                     category: "ACTIVITY",
+                    suggestedBy: "",
                 };
             }
             setFormData(initialFormData);
@@ -89,10 +92,30 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
             const url = isEditing ? getApiUrl(`/api/ideas/${initialData.id}`) : getApiUrl("/api/ideas");
             const method = isEditing ? "PUT" : "POST";
 
+            const payload = { ...formData };
+            if (formData.suggestedBy) {
+                payload.description = `${formData.description} (via ${formData.suggestedBy})`;
+                // Remove the extra field before sending to API which expects strict schema usually, 
+                // but since we spread formData, we should be careful. 
+                // Actually the API probably ignores extra fields.
+            }
+
+            // Reconstruct payload to match API expectation
+            const apiBody = {
+                description: payload.description,
+                details: formData.details,
+                indoor: formData.indoor,
+                duration: formData.duration,
+                activityLevel: formData.activityLevel,
+                cost: formData.cost,
+                timeOfDay: formData.timeOfDay,
+                category: formData.category
+            };
+
             const res = await fetch(url, {
                 method: method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(apiBody),
                 credentials: 'include',
             });
 
@@ -170,6 +193,15 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                         "e.g. Build a blanket fort"
                                             }
                                             required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Suggested By (Optional)</label>
+                                        <Input
+                                            value={formData.suggestedBy}
+                                            onChange={(e) => setFormData({ ...formData, suggestedBy: e.target.value })}
+                                            placeholder="e.g. Billy, Sarah (Leave blank for You)"
                                         />
                                     </div>
 
