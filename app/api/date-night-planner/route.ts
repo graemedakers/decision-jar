@@ -40,10 +40,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
         }
 
-        const { date, location, cost, regenerateSlot, currentSchedule, rejectedVenue } = await request.json().catch(() => ({}));
+        const { date, location, cost, regenerateSlot, currentSchedule, rejectedVenue, topic } = await request.json().catch(() => ({}));
 
         const coupleLocation = activeJar.location;
         const targetLocation = location || coupleLocation || "your city";
+
+        // Determine Context
+        const isDateContext = !topic || topic === 'Dates' || topic === 'Romantic';
+        const planTitle = isDateContext ? "Date Night" : `${topic} Itinerary`;
 
         // Fetch partner/squad preferences
         const members = await prisma.jarMember.findMany({
@@ -57,6 +61,50 @@ export async function POST(request: Request) {
         let prompt = "";
         const isRegen = typeof regenerateSlot === 'number';
 
+        // Custom Flow Instructions based on Topic
+        let flowInstructions = `
+               - Part 1: Pre-dinner drinks at a nice bar or lounge.
+               - Part 2: Dinner at a compatible restaurant.
+               - Part 3: The MAIN EVENT or Activity.
+                 - **CRITICAL**: This final slot CANNOT be another bar, club, or restaurant unless it is a specific ticketed event there (e.g. Jazz Club performance). It must be a distinct activity.
+        `;
+
+        let vibeInstructions = isDateContext
+            ? `Date Night Focus: PLEASE PRIORITIZE THE PARTNER'S PREFERENCES below, making it a treat for them, while ensuring the user also enjoys it.
+               Partner Preferences (Primary): ${partnerInterests || "Surprise them with something romantic/fun."}
+               User Preferences (Secondary): ${userInterests}`
+            : `Theme Focus: Create a perfect "${topic}" experience.
+               Group Preferences: ${partnerInterests || "Fun and engaging."} ${userInterests}`;
+
+        if (!isDateContext) {
+            // Relaxed flow for specific topics
+            if (topic === 'Wellness') {
+                flowInstructions = `
+                - Part 1: A relaxing activity or light healthy starter.
+                - Part 2: Main wellness activity (Spa, Massage, Class, etc).
+                - Part 3: A healthy meal or post-activity relaxation spot.
+                `;
+            } else if (topic === 'Food' || topic === 'Restaurants') {
+                flowInstructions = `
+                - Part 1: Aperitif or Starter at a specialized spot.
+                - Part 2: The Main Dining Event (Top tier restaurant).
+                - Part 3: Dessert spot or Digestif bar.
+                `;
+            } else if (topic === 'Bars' || topic === 'Nightlife') {
+                flowInstructions = `
+                - Part 1: Warm-up drinks at a lounge or pub.
+                - Part 2: Main venue (Club, Speakeasy, or Busy Bar).
+                - Part 3: Late night food or Late night venue.
+                `;
+            } else {
+                // Generic
+                flowInstructions = `
+                 - Construct a 3-part flow suitable for a "${topic}" outing.
+                 - Ensure a mix of Activity and Food/Drink.
+                 `;
+            }
+        }
+
         if (isRegen && currentSchedule) {
             // Regeneration Prompt
             const otherItems = currentSchedule.filter((_: any, i: number) => i !== regenerateSlot);
@@ -64,20 +112,20 @@ export async function POST(request: Request) {
             const slotTime = currentSchedule[regenerateSlot].time;
 
             prompt = `
-            The user wants to REPLACE a specific part of their date night in ${targetLocation}.
+            The user wants to REPLACE a specific part of their ${planTitle} in ${targetLocation}.
             
             Current Plan Context (KEEP these, do not change them, just match their vibe/location):
             ${otherItems.map((item: any) => `- ${item.time}: ${item.venue_name} (${item.activity_type}) at ${item.address}`).join('\n')}
             
             The user REJECTED this venue for the ${slotTime} slot: "${rejectedVenue}".
             
-            Task: Suggest a BETTER alternative for the "${slotType}" slot at ${slotTime}.
+            Task: Suggest a BETTER alternative for the "${slotType}" slot at ${slotTime} adhering to the "${topic || 'Date Night'}" theme.
             
             CRITICAL CONSTRAINTS:
             1. LOCATION: Must be within walking distance (or very short public transport hop) of the other venues. MATCH THE NEIGHBORHOOD.
             2. STATUS: Must be currently OPEN for business. Verified.
             3. BUDGET: ${cost || "Medium"}.
-            4. VIBE: ${partnerInterests ? `Appeal to: ${partnerInterests}` : "Romantic and fun"}.
+            4. VIBE: ${vibeInstructions}.
             
             Output strictly as a single JSON object for this one slot:
             {
@@ -93,33 +141,27 @@ export async function POST(request: Request) {
         } else {
             // Standard Full Plan Prompt
             prompt = `
-            Plan a complete "Date Night" itinerary for a couple in ${targetLocation} on ${date || "an upcoming evening"}.
+            Plan a complete "${planTitle}" itinerary for a couple/group in ${targetLocation} on ${date || "an upcoming evening"}.
             Budget: ${cost || "Medium"}.
             
-            Date Night Focus: PLEASE PRIORITIZE THE PARTNER'S PREFERENCES below, making it a treat for them, while ensuring the user also enjoys it.
-            Partner Preferences (Primary): ${partnerInterests || "Surprise them with something romantic/fun."}
-            User Preferences (Secondary): ${userInterests}
+            ${vibeInstructions}
             
             CRITICAL INSTRUCTIONS:
-            1. EVENT FIRST APPROACH: Search for a SPECIFIC, REAL PUBLIC EVENT happening on ${date} (e.g., Concert, Theater, Comedy, Night Market, Festival, Exhibition).
-               - If a great event is found, make it the "Event" slot and build the rest of the night (Dinner/Drinks) nearby to suit it.
-               - IMPORTANT: Ensure you have a valid link for tickets or info for this event.
-               - If no specific event is on, default to a high-quality venue/activity.
+            1. EVENT FIRST APPROACH: Search for a SPECIFIC, REAL PUBLIC EVENT happening on ${date} (e.g., Concert, Theater, Comedy, Night Market, Festival, Exhibition) that fits the theme.
+               - If a great event is found, make it a key slot and build the rest around it.
+               - If no specific event is on, default to high-quality venues/activities fitting the theme.
             
             2. LOCALITY: Choose a SINGLE Neighborhood or District (ideally where the event is) and STICK TO IT. All three venues MUST be walkable or a very short ride apart.
             
-            3. FLOW: The evening must follow this schedule:
-               - Part 1: Pre-dinner drinks at a nice bar or lounge.
-               - Part 2: Dinner at a compatible restaurant.
-               - Part 3: The MAIN EVENT or Activity.
-                 - **CRITICAL**: This final slot CANNOT be another bar, club, or restaurant unless it is a specific ticketed event there (e.g. Jazz Club performance). It must be a distinct activity.
+            3. FLOW:
+            ${flowInstructions}
             
             4. REALITY CHECK: Verify these places exist, are OPEN, and the event is actually happening on ${date}.
                - SKIP venues marked "Permanently Closed".
             
             5. LINKS: You MUST provide a 'booking_link' for every item.
-               - For the EVENT: Direct link to TICKETING or OFFICIAL PAGE.
-               - For Dinner/Drinks: Website or Booking page.
+               - For Events: Direct link to TICKETING or OFFICIAL PAGE.
+               - For Venues: Website or Booking page.
             
             Output strictly as a JSON object with this structure:
             {
@@ -127,7 +169,7 @@ export async function POST(request: Request) {
                 "schedule": [
                     {
                         "time": "String (e.g. 6:00 PM)",
-                        "activity_type": "Drinks", // or Dinner or Event
+                        "activity_type": "Short Type (e.g. Drinks, Dinner, Spa)",
                         "venue_name": "Name",
                         "description": "Short description of the vibe and why it fits.",
                         "address": "Street address",
