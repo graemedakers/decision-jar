@@ -11,15 +11,47 @@ export default function GuideSetup() {
                 Every decision starts with a Jar. Think of a Jar as a shared container for a specific topic or group of people.
             </p>
 
-            <h2 className="text-2xl font-bold mb-4">Creating a Jar</h2>
+            <h2 className="text-2xl font-bold mb-4">Choosing a Topic</h2>
             <p className="mb-6">
-                When you first sign up, you'll be prompted to create your first jar. You can choose from three main types:
+                Every Jar is built around a <strong>Topic</strong>. The topic you choose determines the visual theme and,
+                more importantly, the <strong>Categories</strong> available for your ideas.
             </p>
-            <ul className="list-disc pl-6 mb-8 space-y-2">
-                <li><strong>Romantic / Date Night:</strong> Optimized for couples with categories like "Dining", "Movies", and "Cozy".</li>
-                <li><strong>Social / Group:</strong> Perfect for friends or families. Includes "Social", "Active", and "Competition" categories.</li>
-                <li><strong>Personal / Custom:</strong> A blank slate. You can even define your own custom categories for very specific jars (like "Gym Workouts" or "Book List").</li>
-            </ul>
+            <div className="grid sm:grid-cols-2 gap-4 mb-8">
+                <div className="p-4 rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30">
+                    <h3 className="font-bold text-orange-700 dark:text-orange-400 mb-2">Dining & Drinks</h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                        Choose <strong>Restaurants</strong> for categories like Fine Dining, Casual, and Brunch.
+                        Or pick <strong>Bars</strong> for Cocktail Bars, Speakeasies, and Wine Bars.
+                    </p>
+                </div>
+                <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
+                    <h3 className="font-bold text-emerald-700 dark:text-emerald-400 mb-2">Living Well</h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                        The <strong>Wellness</strong> topic offers Spa, Meditation, and Digital Detox categories.
+                        <strong>Fitness</strong> includes Strength, Cardio, and Yoga.
+                    </p>
+                </div>
+                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/20">
+                    <h3 className="font-bold text-blue-700 dark:text-blue-400 mb-2">Exploration</h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                        Use <strong>Travel</strong> for Road Trips and International trips, or <strong>Hotel Stays</strong>
+                        for Boutique, Luxury, and B&B options.
+                    </p>
+                </div>
+                <div className="p-4 rounded-xl bg-fuchsia-50 dark:bg-fuchsia-950/20 border border-fuchsia-100 dark:border-fuchsia-900/30">
+                    <h3 className="font-bold text-fuchsia-700 dark:text-fuchsia-400 mb-2">Entertainment</h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                        <strong>Movies</strong> covers Cinema and Streaming, while <strong>Nightclubs</strong>
+                        offers Dance Clubs and Live Music Venues.
+                    </p>
+                </div>
+            </div>
+
+            <h2 className="text-2xl font-bold mb-4">Creating your First Jar</h2>
+            <p className="mb-6">
+                When you create your first jar, you'll select one of these topics. This sets the stage for how you'll
+                organize your decisions.
+            </p>
 
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                 <UserPlus className="text-purple-600" /> Inviting Members
