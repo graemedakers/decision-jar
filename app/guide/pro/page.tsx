@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Crown, Brain, MapPin, BarChart3, Star } from 'lucide-react';
+import { ArrowLeft, Crown, Utensils, Calendar, Wine, Moon, Disc, Bed, BarChart3 } from 'lucide-react';
 
 export default function GuidePro() {
     return (
@@ -15,48 +15,68 @@ export default function GuidePro() {
 
             <h2 className="text-2xl font-bold mb-6">AI Concierge Services</h2>
             <p className="mb-8 font-medium">
-                Sometime you want more than a random pick. Pro users get access to our theme-specific AI agents who act as your
-                personal planners:
+                Sometimes you want more than a random pick. Pro users get access to our full suite of theme-specific AI agents
+                who act as your personal planners:
             </p>
 
-            <div className="grid md:grid-cols-2 gap-6 mb-12">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
                     <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4">
-                        <Star className="text-orange-600 w-6 h-6" />
+                        <Utensils className="text-orange-600 w-6 h-6" />
                     </div>
                     <h3 className="font-bold text-lg mb-2">Dining Concierge</h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Find top-rated restaurants near you. AI checks real ratings and website menus to ensure a great meal.
+                        Find the perfect breakfast, lunch, or dinner spot nearby. AI checks real ratings to ensure a great meal.
                     </p>
                 </div>
 
                 <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
                     <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4">
-                        <Brain className="text-purple-600 w-6 h-6" />
+                        <Calendar className="text-purple-600 w-6 h-6" />
                     </div>
-                    <h3 className="font-bold text-lg mb-2">Date Night Planner</h3>
+                    <h3 className="font-bold text-lg mb-2">Weekend Planner</h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Generates a full itinerary (e.g., drinks, dinner, then an activity) tailored to your interests and location.
-                    </p>
-                </div>
-
-                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
-                        <MapPin className="text-blue-600 w-6 h-6" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Weekend Explorer</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Planning a getaway? Get 5-6 curated ideas for weekend trips or day excursions.
+                        Hand-picked events and activities for your next big adventure or weekend getaway.
                     </p>
                 </div>
 
                 <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
                     <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center mb-4">
-                        <Star className="text-pink-600 w-6 h-6" />
+                        <Wine className="text-pink-600 w-6 h-6" />
                     </div>
-                    <h3 className="font-bold text-lg mb-2">Bar & Nightlife</h3>
+                    <h3 className="font-bold text-lg mb-2">Bar Scout</h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Discover hidden bars, speakeasies, or lively dance floors with curated links.
+                        The ultimate guide to hidden bars, speakeasies, and social venues nearby.
+                    </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
+                    <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4">
+                        <Moon className="text-rose-600 w-6 h-6" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">Activity Planner</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Generates step-by-step itineraries for any occasion, from dates to family outings.
+                    </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-4">
+                        <Disc className="text-indigo-600 w-6 h-6" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">Nightclub Scout</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Discover the hottest clubs and dance venues to keep the energy going all night.
+                    </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
+                    <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center mb-4">
+                        <Bed className="text-cyan-600 w-6 h-6" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">Hotel Concierge</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Planning a staycation? Let our AI find the best boutique hotels and unique stays.
                     </p>
                 </div>
             </div>
