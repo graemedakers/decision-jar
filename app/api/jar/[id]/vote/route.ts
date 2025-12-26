@@ -5,14 +5,14 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await getSession();
     if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const jarId = params.id;
+    const { id: jarId } = await params;
     const json = await request.json();
     const { action } = json;
 
@@ -259,9 +259,9 @@ async function handleResolveVote(jarId: string) {
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const jarId = params.id;
+    const { id: jarId } = await params;
     const sessionUrl = await getSession();
     const userId = sessionUrl?.user?.id;
 
