@@ -214,7 +214,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                     </div>
 
                     {topic === 'Custom' && (
-                        <div className="space-y-4 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-slate-800/50">
+                        <div className="space-y-4 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-slate-800/50 animate-in fade-in zoom-in duration-300">
                             <div className="space-y-2">
                                 <Label className="text-xs uppercase text-slate-500">Custom Topic Name</Label>
                                 <Input
@@ -222,6 +222,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                     onChange={(e) => setCustomTopicName(e.target.value)}
                                     placeholder="e.g. Board Games, Work Lunches"
                                     className="bg-white dark:bg-slate-800"
+                                    autoFocus
                                 />
                             </div>
 
