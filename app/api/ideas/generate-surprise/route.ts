@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { getCategoriesForTopic } from '@/lib/categories';
 
 export async function POST(request: Request) {
     let category: string | undefined;
@@ -9,13 +10,13 @@ export async function POST(request: Request) {
     try {
         const session = await getSession();
 
-        if (!session?.user?.email) {
+        if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
-            include: { couple: true },
+            where: { id: session.user.id },
+            include: { memberships: { include: { jar: true } } },
         });
 
         if (!user) {
@@ -26,9 +27,15 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'No active jar selected. Please select or create a jar.' }, { status: 400 });
         }
 
+        const activeJar = user.memberships.find(m => m.jarId === user.activeJarId)?.jar;
+        if (!activeJar) {
+            return NextResponse.json({ error: 'Selected jar not found' }, { status: 404 });
+        }
+
         const body = await request.json().catch(() => ({}));
         category = body.category;
-        const { activityLevel, cost, timeOfDay, location: inputLocation, topic } = body;
+        const { activityLevel, cost, timeOfDay, location: inputLocation } = body;
+        const jarTopic = activeJar.topic;
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
 
@@ -37,7 +44,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'AI Service Unavailable' }, { status: 503 });
         }
 
-        const coupleLocation = (user.couple as any)?.location;
+        const coupleLocation = activeJar.location;
 
         // Determine which location to use
         const fallbackLocations = [coupleLocation].filter(Boolean);
@@ -46,26 +53,24 @@ export async function POST(request: Request) {
         const location = inputLocation || randomFallback;
 
         const userInterests = user.interests ? `User Interests: ${user.interests}` : "";
-        let weatherInfo = "Unknown";
 
-        // Fetch weather if location known (Simplified for brevity, copying robust logic if needed)
-        // For now, let's skip the heavy weather fetch to keep this route fast or trust generic "current weather" if we wanted.
-        // Actually, let's keep it simple.
+        const validCategories = getCategoriesForTopic(jarTopic, (activeJar as any).customCategories);
+        const validCategoryIds = validCategories.map(c => c.id).join(', ');
 
         const prompt = `
-        Generate a random, creative ${topic ? topic.toLowerCase() : 'date'} idea for a couple or group of friends.
+        Generate a random, creative idea for a jar with topic "${jarTopic || 'General'}".
         
         CONTEXT:
         - Location: ${location}
         - ${userInterests}
-        ${topic ? `- Topic Context: This must be related to "${topic}" (e.g. if specific categories like Restaurant are requested, respect them).` : ''}
+        - Topic Context: This MUST be related to "${jarTopic || 'General'}". 
         
         CRITICAL:
         - Must be valid JSON.
         - If possible, find a REAL venue or event in ${location}.
         
         CONSTRAINTS:
-        - Category: ${category || 'Any'}
+        - Category: Must be one of: [${validCategoryIds}]. Requested: ${category || 'Any'}
         ${amountToCost(cost) ? `- Max Cost: ${amountToCost(cost)}` : ''}
         ${activityLevel ? `- Activity Level: ${activityLevel}` : ''}
         ${timeOfDay ? `- Time of Day: ${timeOfDay}` : ''}
@@ -78,7 +83,7 @@ export async function POST(request: Request) {
         - activityLevel (string: "LOW", "MEDIUM", "HIGH")
         - cost (string: "FREE", "$", "$$", "$$$")
         - timeOfDay (string: "DAY", "EVENING", "ANY")
-        - category (string: the specific category selected, e.g. "${category || 'ACTIVITY'}")
+        - category (string: strictly one of [${validCategoryIds}])
         - url (string)
         `;
 
@@ -120,6 +125,5 @@ export async function POST(request: Request) {
 }
 
 function amountToCost(cost: string) {
-    // Helper to format cost constraint if needed
     return cost;
 }

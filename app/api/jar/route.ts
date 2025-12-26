@@ -19,12 +19,11 @@ export async function POST(request: Request) {
     }
 
     try {
-        const { name, type, topic, customCategories } = await request.json();
+        const { name, type, topic, customCategories, selectionMode } = await request.json();
 
         if (!name || !type) {
             return NextResponse.json({ error: "Name and Type are required" }, { status: 400 });
         }
-
         const user = await prisma.user.findUnique({
             where: { email: session.user.email },
         });
@@ -42,7 +41,7 @@ export async function POST(request: Request) {
 
         if (currentJarCount >= limits.maxJars) {
             return NextResponse.json({
-                error: `Limit reached: You can only have ${limits.maxJars} jar(s) on the Free plan. Please upgrade to Pro or leave an existing jar to create a new one.`
+                error: `Limit reached: You can only have ${limits.maxJars} jar(s) on the Free plan. Please upgrade to Pro.`
             }, { status: 403 });
         }
 
@@ -79,6 +78,8 @@ export async function POST(request: Request) {
                 data: {
                     name,
                     type,
+                    // @ts-ignore
+                    selectionMode: selectionMode || 'RANDOM',
                     // @ts-ignore
                     topic: topic || "General",
                     customCategories: customCategories || undefined,

@@ -21,6 +21,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     const [name, setName] = useState("");
     const [topic, setTopic] = useState("Activities");
     const [type, setType] = useState<string>("SOCIAL");
+    const [selectionMode, setSelectionMode] = useState<string>("RANDOM");
 
     // Custom Topic State
     const [customTopicName, setCustomTopicName] = useState("");
@@ -78,7 +79,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             const res = await fetch('/api/jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, type, topic: finalTopic, customCategories: finalCustomCategories }),
+                body: JSON.stringify({ name, type, topic: finalTopic, customCategories: finalCustomCategories, selectionMode }),
             });
 
             if (res.ok) {
@@ -184,17 +185,30 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                         )}
                     </div>
 
-                    <div className="space-y-3">
-                        <Label>Jar Type</Label>
-                        <select
-                            value={type}
-                            onChange={(e) => setType(e.target.value)}
-                            className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
-                        >
-                            <option value="ROMANTIC">Couple (Romantic)</option>
-                            <option value="SOCIAL">Friends & Family (Social)</option>
-                            <option value="GENERIC">Solo (Personal)</option>
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                            <Label>Relationship</Label>
+                            <select
+                                value={type}
+                                onChange={(e) => setType(e.target.value)}
+                                className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            >
+                                <option value="ROMANTIC">Couple</option>
+                                <option value="SOCIAL">Social/Friends</option>
+                                <option value="GENERIC">Solo</option>
+                            </select>
+                        </div>
+                        <div className="space-y-3">
+                            <Label>Mode</Label>
+                            <select
+                                value={selectionMode}
+                                onChange={(e) => setSelectionMode(e.target.value)}
+                                className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            >
+                                <option value="RANDOM">Spin (Lucky Dip)</option>
+                                <option value="VOTING">Vote (Consensus)</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div className="space-y-3">

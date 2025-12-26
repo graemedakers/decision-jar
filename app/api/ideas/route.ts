@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { awardXp } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
+import { isValidCategoryForTopic, getCategoriesForTopic } from '@/lib/categories';
 
 export async function POST(request: Request) {
     const session = await getSession();
@@ -20,6 +21,20 @@ export async function POST(request: Request) {
 
     if (!currentJarId) {
         return NextResponse.json({ error: 'No active jar' }, { status: 400 });
+    }
+
+    const jar = await prisma.jar.findUnique({ where: { id: currentJarId } });
+    if (!jar) {
+        return NextResponse.json({ error: 'Jar not found' }, { status: 404 });
+    }
+
+    // Check if Voting is Active - if so, block adding new ideas
+    const activeVote = await (prisma as any).voteSession.findFirst({
+        where: { jarId: currentJarId, status: 'ACTIVE' }
+    });
+
+    if (activeVote) {
+        return NextResponse.json({ error: "Cannot add new ideas while a vote is in progress. Please wait for the voting round to finish." }, { status: 403 });
     }
 
     const { getLimits } = await import('@/lib/premium');
@@ -40,6 +55,15 @@ export async function POST(request: Request) {
 
         if (!description) {
             return NextResponse.json({ error: 'Description is required' }, { status: 400 });
+        }
+
+        const finalCategory = category || (getCategoriesForTopic(jar.topic, (jar as any).customCategories as any[])[0]?.id || 'ACTIVITY');
+
+        if (!isValidCategoryForTopic(finalCategory, jar.topic, (jar as any).customCategories as any[])) {
+            const allowed = getCategoriesForTopic(jar.topic, (jar as any).customCategories as any[]).map(c => c.label).join(', ');
+            return NextResponse.json({
+                error: `The category "${finalCategory}" is not allowed in this "${jar.topic || 'General'}" jar. Please choose one of: ${allowed}`
+            }, { status: 400 });
         }
 
         const createData: Prisma.IdeaUncheckedCreateInput = {
@@ -114,7 +138,8 @@ export async function GET(request: Request) {
         const allIdeas: any[] = await prisma.$queryRaw`
             SELECT i.*, 
                    json_build_object('id', u.id, 'name', u.name) as "createdBy",
-                   c.type as "jarType"
+                   c.type as "jarType",
+                   c."selectionMode" as "selectionMode"
             FROM "Idea" i
             LEFT JOIN "User" u ON i."createdById" = u.id
             LEFT JOIN "Couple" c ON i."coupleId" = c.id
@@ -127,14 +152,19 @@ export async function GET(request: Request) {
             const isSelected = !!idea.selectedAt;
             const isSurprise = (idea as any).isSurprise;
             const isGroupJar = (idea as any).jarType === 'SOCIAL';
+            const isVotingJar = (idea as any).selectionMode === 'VOTING';
 
             // If it has been selected, show everything.
             if (isSelected) {
                 return idea;
             }
 
-            // In Group Jars, everyone sees everything (except maybe explicit Surprise ideas if we enable them later, but currently Surprise features are hidden for Groups).
-            // User requested "all members see all ideas".
+            // Voting Jars: Everyone sees everything to vote (except surprises if we support them)
+            if (isVotingJar && !isSurprise) {
+                return idea;
+            }
+
+            // In Group Jars, everyone sees everything
             if (isGroupJar && !isSurprise) {
                 return idea;
             }

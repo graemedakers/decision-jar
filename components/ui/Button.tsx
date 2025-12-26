@@ -5,7 +5,7 @@ import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface ButtonProps extends HTMLMotionProps<"button"> {
-    variant?: "primary" | "secondary" | "ghost" | "outline";
+    variant?: "primary" | "secondary" | "ghost" | "outline" | "destructive";
     size?: "sm" | "md" | "lg" | "icon";
     isLoading?: boolean;
     children?: React.ReactNode;
@@ -18,6 +18,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             secondary: "bg-secondary text-white hover:bg-secondary/80 rounded-full font-bold shadow-lg shadow-secondary/30",
             ghost: "text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-full",
             outline: "border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold",
+            destructive: "bg-red-500 text-white hover:bg-red-600 rounded-full font-bold shadow-lg shadow-red-500/30",
         };
 
         const sizes = {

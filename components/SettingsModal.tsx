@@ -30,6 +30,11 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
     const [isNative, setIsNative] = useState(false);
     const [jarType, setJarType] = useState<"ROMANTIC" | "SOCIAL">("ROMANTIC");
 
+    // Premium Invite Logic
+    const [currentUserEmail, setCurrentUserEmail] = useState("");
+    const [premiumInviteToken, setPremiumInviteToken] = useState("");
+    const [includePremiumToken, setIncludePremiumToken] = useState(true);
+
     useEffect(() => {
         setIsNative(isCapacitor());
     }, []);
@@ -49,6 +54,9 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                         setIsPremium(!!data.user.isPremium);
                         setHasPaid(!!data.user.hasPaid);
                         if (data.user.jarType) setJarType(data.user.jarType);
+                        if (data.user.jarType) setJarType(data.user.jarType);
+                        setCurrentUserEmail(data.user.email || "");
+                        setPremiumInviteToken(data.user.premiumInviteToken || "");
                     }
                 });
         }
@@ -125,7 +133,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
             if (res.ok) {
                 const data = await res.json();
                 alert(`Success! Your new invite code is: ${data.newCode}`);
-                // Refresh to update the code in the dashboard
+                setInviteCode(data.newCode); // Update local state
                 router.refresh();
             } else {
                 const data = await res.json();
@@ -134,6 +142,32 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
         } catch (error) {
             console.error(error);
             alert("Error regenerating code");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRegeneratePremiumToken = async () => {
+        if (!confirm("Are you sure? This will invalidate previous premium invite links.")) return;
+        setIsLoading(true);
+        try {
+            const res = await fetch(getApiUrl('/api/user/premium-token'), {
+                method: 'POST',
+                credentials: 'include',
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                alert("Success! Premium token valid.");
+                setPremiumInviteToken(data.token);
+                router.refresh();
+            } else {
+                const data = await res.json();
+                alert(`Failed: ${data.error}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error regenerating token");
         } finally {
             setIsLoading(false);
         }
@@ -245,6 +279,65 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                     Save Changes
                                 </Button>
                             </form>
+
+                            {currentUserEmail === 'graemedakers@gmail.com' && (
+                                <div className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
+                                    <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-purple-500" />
+                                        Premium Invite Link
+                                    </h3>
+                                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-500/30 space-y-3">
+                                        <p className="text-xs text-purple-800 dark:text-purple-200">
+                                            Anyone using this link will join your jar and be <strong>{includePremiumToken ? "automatically upgraded to Premium" : "joined as a Free member"}</strong>.
+                                        </p>
+
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <input
+                                                type="checkbox"
+                                                id="includePremium"
+                                                checked={includePremiumToken}
+                                                onChange={(e) => setIncludePremiumToken(e.target.checked)}
+                                                className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                                            />
+                                            <label htmlFor="includePremium" className="text-xs font-medium text-slate-700 dark:text-slate-300 select-none cursor-pointer">
+                                                Include Premium Gift in Link
+                                            </label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    const params = new URLSearchParams();
+                                                    if (inviteCode) params.set('code', inviteCode);
+                                                    if (includePremiumToken && premiumInviteToken) params.set('pt', premiumInviteToken);
+
+                                                    const url = `${window.location.origin}/signup?${params.toString()}`;
+                                                    navigator.clipboard.writeText(url);
+                                                    alert(includePremiumToken ? "Premium Invite link copied!" : "Standard Invite link copied!");
+                                                }}
+                                                className="font-mono font-bold text-sm text-purple-600 hover:text-purple-800 dark:text-purple-300 dark:hover:text-purple-100 transition-colors flex items-center gap-2 break-all text-left"
+                                            >
+                                                <span className="truncate max-w-[200px]">...signup?code={inviteCode}{includePremiumToken ? `&pt=${premiumInviteToken ? premiumInviteToken.substring(0, 6) + '...' : 'NONE'}` : ''}</span>
+                                                <span className="text-xs bg-white/50 px-2 py-1 rounded shadow-sm whitespace-nowrap">Copy Link</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full text-purple-600 border-purple-200 hover:bg-purple-50"
+                                        onClick={handleRegeneratePremiumToken}
+                                        disabled={isLoading}
+                                    >
+                                        <RefreshCw className="w-3 h-3 mr-2" />
+                                        Regenerate Premium Token
+                                    </Button>
+                                    <p className="text-[10px] text-slate-400">
+                                        Regenerating will invalidate previous premium links (they will still join, but as Free users).
+                                    </p>
+                                </div>
+                            )}
 
                             {isCreator && (
                                 <div className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">

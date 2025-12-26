@@ -1,13 +1,14 @@
 "use client";
 import { getItinerary, getApiUrl } from "@/lib/utils";
-import { getCategoriesForTopic } from "@/lib/categories";
+import { getCategoriesForTopic, TOPIC_CATEGORIES } from "@/lib/categories";
 
 import { ItineraryPreview } from "./ItineraryPreview";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, Utensils, Calendar, ExternalLink } from "lucide-react";
+import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, Utensils, Calendar, ExternalLink, Wand2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { getRandomIdeaForTopic } from "@/lib/sample-ideas";
 
 interface AddIdeaModalProps {
     isOpen: boolean;
@@ -17,9 +18,10 @@ interface AddIdeaModalProps {
     onUpgrade?: () => void;
     jarTopic?: string | null;
     customCategories?: any[];
+    currentUser?: any;
 }
 
-export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories }: AddIdeaModalProps) {
+export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser }: AddIdeaModalProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -33,6 +35,42 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         category: "ACTIVITY",
         suggestedBy: "",
     });
+
+    const [isMagicLoading, setIsMagicLoading] = useState(false);
+
+    const handleRandomize = async () => {
+        setIsMagicLoading(true);
+        try {
+            const res = await fetch(getApiUrl('/api/magic-idea'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: jarTopic,
+                    location: currentUser?.location
+                })
+            });
+            if (res.ok) {
+                const randomIdea = await res.json();
+                if (randomIdea) {
+                    setFormData(prev => ({
+                        ...prev,
+                        description: randomIdea.description,
+                        category: randomIdea.category,
+                        indoor: randomIdea.indoor,
+                        duration: String(randomIdea.duration),
+                        activityLevel: randomIdea.activityLevel,
+                        cost: randomIdea.cost,
+                        timeOfDay: randomIdea.timeOfDay,
+                        details: (randomIdea.details || "") + (randomIdea.website ? `\n\n${randomIdea.website}` : "")
+                    }));
+                }
+            }
+        } catch (e) {
+            console.error("Magic fill failed", e);
+        } finally {
+            setIsMagicLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -151,60 +189,91 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                         </button>
 
                         <div className="flex items-center justify-between pr-12 mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
+                            <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                                 {itinerary ? "Itinerary Preview" :
                                     initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea"}
+                                {(!initialData || !initialData.id) && !itinerary && (
+                                    <button
+                                        type="button"
+                                        onClick={handleRandomize}
+                                        disabled={isMagicLoading}
+                                        className="p-1.5 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-colors disabled:opacity-50"
+                                        title="Auto-fill with random idea"
+                                    >
+                                        {isMagicLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                    </button>
+                                )}
                             </h2>
                         </div>
 
-                        <div className="max-h-[85vh] overflow-y-auto px-4 pb-6">
+                        <div className="max-h-[85vh] overflow-y-auto overflow-x-hidden px-4 pb-6">
                             {itinerary ? (
                                 <ItineraryPreview itinerary={itinerary} />
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Category</label>
-                                        <div className="flex bg-slate-100 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10 overflow-x-auto">
-                                            {categories.map((cat) => (
-                                                <button
-                                                    key={cat.id}
-                                                    type="button"
-                                                    onClick={() => setFormData({ ...formData, category: cat.id })}
-                                                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${formData.category === cat.id
-                                                        ? "bg-primary text-white shadow-lg"
-                                                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
-                                                        }`}
-                                                >
-                                                    <cat.icon className="w-4 h-4" /> {cat.label}
-                                                </button>
-                                            ))}
+                                    <fieldset disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Category</label>
+                                            <div className="flex bg-slate-100 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10 overflow-x-auto">
+                                                {categories.map((cat) => (
+                                                    <button
+                                                        key={cat.id}
+                                                        type="button"
+                                                        onClick={() => setFormData({ ...formData, category: cat.id })}
+                                                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${formData.category === cat.id
+                                                            ? "bg-primary text-white shadow-lg"
+                                                            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
+                                                            }`}
+                                                    >
+                                                        <cat.icon className="w-4 h-4" /> {cat.label}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">
-                                            {formData.category === 'MEAL' || formData.category === 'RESTAURANT' ? "Name of place" : "Short Description"}
-                                        </label>
-                                        <Input
-                                            value={formData.description}
-                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                            placeholder={
-                                                formData.category === 'MEAL' ? "e.g. Try that new Italian place downtown" :
-                                                    formData.category === 'EVENT' ? "e.g. Jazz in the Park" :
-                                                        "e.g. Build a blanket fort"
-                                            }
-                                            required
-                                        />
-                                    </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">
+                                                {formData.category === 'MEAL' || formData.category === 'RESTAURANT' ? "Name of place" : "Short Description"}
+                                            </label>
+                                            <Input
+                                                value={formData.description}
+                                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                                placeholder={
+                                                    (() => {
+                                                        // Normalize topic key
+                                                        const topicKey = jarTopic ? Object.keys(TOPIC_CATEGORIES).find(k => k.toLowerCase() === jarTopic.toLowerCase()) : "Activities";
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Suggested By (Optional)</label>
-                                        <Input
-                                            value={formData.suggestedBy}
-                                            onChange={(e) => setFormData({ ...formData, suggestedBy: e.target.value })}
-                                            placeholder="e.g. Billy, Sarah (Leave blank for You)"
-                                        />
-                                    </div>
+                                                        switch (topicKey) {
+                                                            case "Movies": return "e.g. Watch 'Inception'";
+                                                            case "Restaurants": return "e.g. Dinner at Luigi's";
+                                                            case "Bars": return "e.g. Drinks at The Blind Tiger";
+                                                            case "Nightclubs": return "e.g. VIP table at Club X";
+                                                            case "Wellness": return "e.g. Couples Massage";
+                                                            case "Fitness": return "e.g. Morning 5k Run";
+                                                            case "Travel": return "e.g. Weekend in Paris";
+                                                            case "Hotel Stays": return "e.g. Stay at The Ritz";
+                                                            case "Custom": return "e.g. Custom Activity";
+                                                            default:
+                                                                // Fallback based on category
+                                                                if (formData.category === 'MEAL' || formData.category === 'RESTAURANT') return "e.g. Try that new Italian place";
+                                                                return "e.g. Build a blanket fort";
+                                                        }
+                                                    })()
+                                                }
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Suggested By (Optional)</label>
+                                            <Input
+                                                value={formData.suggestedBy}
+                                                onChange={(e) => setFormData({ ...formData, suggestedBy: e.target.value })}
+                                                placeholder="e.g. Billy, Sarah (Leave blank for You)"
+                                            />
+                                        </div>
+
+                                    </fieldset>
 
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center">
@@ -226,10 +295,22 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                             )}
                                         </div>
                                         <textarea
+                                            disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)}
                                             value={formData.details}
                                             onChange={(e) => setFormData({ ...formData, details: e.target.value })}
-                                            placeholder="Add more info, e.g. what to bring, specific location..."
-                                            className={`glass-input w-full min-h-[80px] py-2 px-3 resize-none text-slate-800 dark:text-white placeholder:text-slate-400 ${getItinerary(formData.details) ? 'font-mono text-xs opacity-70' : ''}`}
+                                            placeholder={
+                                                (() => {
+                                                    const topicKey = jarTopic ? Object.keys(TOPIC_CATEGORIES).find(k => k.toLowerCase() === jarTopic.toLowerCase()) : "Activities";
+                                                    switch (topicKey) {
+                                                        case "Movies": return "e.g. Streaming platform, release year, or cinema location...";
+                                                        case "Restaurants": return "e.g. Reservation time, dress code, or parking info...";
+                                                        case "Travel": return "e.g. Flight numbers, hotel confirmation, or packing list...";
+                                                        case "Wellness": return "e.g. What to wear, arrival time...";
+                                                        default: return "Add more info, e.g. what to bring, specific location...";
+                                                    }
+                                                })()
+                                            }
+                                            className={`glass-input w-full min-h-[80px] py-2 px-3 resize-none text-slate-800 dark:text-white placeholder:text-slate-400 disabled:opacity-80 ${getItinerary(formData.details) ? 'font-mono text-xs opacity-70' : ''}`}
                                         />
                                         {getItinerary(formData.details) && (
                                             <p className="text-[10px] text-slate-400 text-right">
@@ -238,117 +319,125 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         )}
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <fieldset disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80">
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Setting</label>
+                                                <div className="flex bg-slate-100 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData({ ...formData, indoor: true })}
+                                                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${formData.indoor
+                                                            ? "bg-primary text-white shadow-lg"
+                                                            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
+                                                            }`}
+                                                    >
+                                                        <Home className="w-4 h-4" /> Indoor
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData({ ...formData, indoor: false })}
+                                                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${!formData.indoor
+                                                            ? "bg-primary text-white shadow-lg"
+                                                            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
+                                                            }`}
+                                                    >
+                                                        <Trees className="w-4 h-4" /> Outdoor
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Duration</label>
+                                                <div className="relative">
+                                                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                    <select
+                                                        value={formData.duration}
+                                                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                                                        className="glass-input pl-10 appearance-none cursor-pointer w-full text-slate-800 dark:text-white"
+                                                    >
+                                                        <option value="0.25">15 mins</option>
+                                                        <option value="0.5">30 mins</option>
+                                                        <option value="1.0">1 hour</option>
+                                                        <option value="2.0">2 hours</option>
+                                                        <option value="4.0">Half Day</option>
+                                                        <option value="8.0">Full Day</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Cost</label>
+                                                <div className="relative">
+                                                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                    <select
+                                                        value={formData.cost}
+                                                        onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+                                                        className="glass-input pl-10 appearance-none cursor-pointer w-full text-slate-800 dark:text-white"
+                                                    >
+                                                        <option value="FREE">Free</option>
+                                                        <option value="$">$ (Cheap)</option>
+                                                        <option value="$$">$$ (Moderate)</option>
+                                                        <option value="$$$">$$$ (Expensive)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Energy</label>
+                                                <div className="relative">
+                                                    <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                    <select
+                                                        value={formData.activityLevel}
+                                                        onChange={(e) => setFormData({ ...formData, activityLevel: e.target.value })}
+                                                        className="glass-input pl-10 appearance-none cursor-pointer w-full text-slate-800 dark:text-white"
+                                                    >
+                                                        <option value="LOW">Chill</option>
+                                                        <option value="MEDIUM">Moderate</option>
+                                                        <option value="HIGH">Active</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Setting</label>
+                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Time of Day</label>
                                             <div className="flex bg-slate-100 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setFormData({ ...formData, indoor: true })}
-                                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${formData.indoor
-                                                        ? "bg-primary text-white shadow-lg"
-                                                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
-                                                        }`}
-                                                >
-                                                    <Home className="w-4 h-4" /> Indoor
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setFormData({ ...formData, indoor: false })}
-                                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${!formData.indoor
-                                                        ? "bg-primary text-white shadow-lg"
-                                                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
-                                                        }`}
-                                                >
-                                                    <Trees className="w-4 h-4" /> Outdoor
-                                                </button>
+                                                {['ANY', 'DAY', 'EVENING'].map((time) => (
+                                                    <button
+                                                        key={time}
+                                                        type="button"
+                                                        onClick={() => setFormData({ ...formData, timeOfDay: time })}
+                                                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${formData.timeOfDay === time
+                                                            ? "bg-secondary text-white shadow-lg"
+                                                            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
+                                                            }`}
+                                                    >
+                                                        {time === 'ANY' ? 'Anytime' : time === 'DAY' ? 'Day' : 'Evening'}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Duration</label>
-                                            <div className="relative">
-                                                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                                <select
-                                                    value={formData.duration}
-                                                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                                                    className="glass-input pl-10 appearance-none cursor-pointer w-full text-slate-800 dark:text-white"
-                                                >
-                                                    <option value="0.25">15 mins</option>
-                                                    <option value="0.5">30 mins</option>
-                                                    <option value="1.0">1 hour</option>
-                                                    <option value="2.0">2 hours</option>
-                                                    <option value="4.0">Half Day</option>
-                                                    <option value="8.0">Full Day</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Cost</label>
-                                            <div className="relative">
-                                                <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                                <select
-                                                    value={formData.cost}
-                                                    onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-                                                    className="glass-input pl-10 appearance-none cursor-pointer w-full text-slate-800 dark:text-white"
-                                                >
-                                                    <option value="FREE">Free</option>
-                                                    <option value="$">$ (Cheap)</option>
-                                                    <option value="$$">$$ (Moderate)</option>
-                                                    <option value="$$$">$$$ (Expensive)</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Energy</label>
-                                            <div className="relative">
-                                                <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                                <select
-                                                    value={formData.activityLevel}
-                                                    onChange={(e) => setFormData({ ...formData, activityLevel: e.target.value })}
-                                                    className="glass-input pl-10 appearance-none cursor-pointer w-full text-slate-800 dark:text-white"
-                                                >
-                                                    <option value="LOW">Chill</option>
-                                                    <option value="MEDIUM">Moderate</option>
-                                                    <option value="HIGH">Active</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Time of Day</label>
-                                        <div className="flex bg-slate-100 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10">
-                                            {['ANY', 'DAY', 'EVENING'].map((time) => (
-                                                <button
-                                                    key={time}
-                                                    type="button"
-                                                    onClick={() => setFormData({ ...formData, timeOfDay: time })}
-                                                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${formData.timeOfDay === time
-                                                        ? "bg-secondary text-white shadow-lg"
-                                                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
-                                                        }`}
-                                                >
-                                                    {time === 'ANY' ? 'Anytime' : time === 'DAY' ? 'Day' : 'Evening'}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
+                                    </fieldset>
 
                                     <div className="flex gap-3 pt-2">
                                         <button
                                             type="submit"
-                                            className="w-full inline-flex items-center justify-center transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none glass-button px-8 py-3 text-base"
-                                            disabled={isLoading}
+                                            className="w-full inline-flex items-center justify-center transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none glass-button px-4 py-3 text-sm font-medium"
+                                            disabled={isLoading || (initialData?.id && (!currentUser || initialData.createdById !== currentUser.id))}
                                         >
                                             {isLoading ? (
                                                 <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                                             ) : null}
-                                            {initialData && initialData.id ? "Save Changes" : <><Plus className="w-5 h-5 mr-2" /> Add to Jar</>}
+                                            {initialData && initialData.id
+                                                ? ((!currentUser || initialData.createdById !== currentUser.id)
+                                                    ? "View Only (Creator Access Required)"
+                                                    : "Save Changes")
+                                                : <><Plus className="w-5 h-5 mr-2" /> Add to Jar</>
+                                            }
                                         </button>
                                     </div>
                                 </form>

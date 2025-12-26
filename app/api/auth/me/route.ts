@@ -115,9 +115,11 @@ export async function GET() {
                 jarName: activeJar.name,
                 jarType: activeJar.type,
                 jarTopic: activeJar.topic,
+                jarSelectionMode: (activeJar as any).selectionMode,
                 customCategories: (activeJar as any).customCategories,
                 isCreator,
-                hasPartner
+                hasPartner,
+                premiumInviteToken: user.premiumInviteToken,
             }
         });
     } catch (error) {

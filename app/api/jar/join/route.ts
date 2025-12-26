@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     }
 
     try {
-        const { code } = await request.json();
+        const { code, premiumToken } = await request.json();
 
         if (!code) {
             return NextResponse.json({ error: "Code is required" }, { status: 400 });
@@ -97,6 +97,22 @@ export async function POST(request: Request) {
             }
         }
 
+        // Check Premium Token from invite
+        let isPremiumGifted = false;
+        try {
+            if (premiumToken) {
+                const inviter = await prisma.user.findFirst({
+                    where: { premiumInviteToken: premiumToken }
+                });
+
+                if (inviter && inviter.email === 'graemedakers@gmail.com') {
+                    isPremiumGifted = true;
+                }
+            }
+        } catch (e) {
+            console.error("Error validating premium token during join", e);
+        }
+
         // Join
         await prisma.$transaction(async (tx) => {
             await tx.jarMember.create({
@@ -109,11 +125,14 @@ export async function POST(request: Request) {
 
             await tx.user.update({
                 where: { id: session.user.id },
-                data: { activeJarId: jar.id }
+                data: {
+                    activeJarId: jar.id,
+                    ...(isPremiumGifted ? { isLifetimePro: true } : {})
+                }
             });
         });
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, premiumGifted: isPremiumGifted });
 
     } catch (error) {
         console.error("Join Jar Error:", error);

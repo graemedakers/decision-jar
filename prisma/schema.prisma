@@ -24,6 +24,7 @@ model Jar {
   referenceCode String   @unique
   name          String   @default("Our Jar")
   type          JarType  @default(SOCIAL)
+  selectionMode SelectionMode @default(RANDOM)
   topic         String?  @default("General") // e.g. "Movies", "Food"
   customCategories Json? // Array of { id: string, label: string }
   
@@ -51,6 +52,7 @@ model Jar {
   deletedLogs   DeletedLog[]
   favorites     FavoriteVenue[]
   achievements  UnlockedAchievement[]
+  voteSessions  VoteSession[]
 
   @@map("Couple") // Keep table name for now to simplify migration (optional, but good practice)
 }
@@ -120,6 +122,8 @@ model User {
   subscriptionStatus     String?   // "active", "trialing", "canceled", "past_due"
   isLifetimePro          Boolean   @default(false)
   subscriptionEndsAt     DateTime?
+  premiumInviteToken     String?   // For graemedakers@gmail.com premium invite links
+  votes                  Vote[]
 }
 
 model Idea {
@@ -157,6 +161,8 @@ model Idea {
   isSurprise     Boolean  @default(false)
 
   ratings        Rating[]
+  wonSessions    VoteSession[] @relation("SessionWinner")
+  votes          Vote[]
 }
 
 model Rating {
@@ -201,4 +207,58 @@ model AppReview {
   comment   String
   isPublic  Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+enum SelectionMode {
+  RANDOM
+  VOTING
+}
+
+enum VoteStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TieBreakerMode {
+  RANDOM_PICK
+  RE_VOTE
+}
+
+model VoteSession {
+  id              String         @id @default(uuid())
+  jarId           String         @map("coupleId")
+  jar             Jar            @relation(fields: [jarId], references: [id])
+  
+  status          VoteStatus     @default(ACTIVE)
+  startTime       DateTime       @default(now())
+  endTime         DateTime?
+  tieBreakerMode  TieBreakerMode @default(RANDOM_PICK)
+  round           Int            @default(1)
+  
+  winnerId        String?
+  winner          Idea?          @relation("SessionWinner", fields: [winnerId], references: [id])
+  
+  eligibleIdeaIds String[]       // If empty, all available ideas in jar are eligible
+  
+  votes           Vote[]
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model Vote {
+  id            String      @id @default(uuid())
+  sessionId     String
+  session       VoteSession @relation(fields: [sessionId], references: [id])
+  
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  
+  ideaId        String
+  idea          Idea        @relation(fields: [ideaId], references: [id])
+  
+  createdAt     DateTime    @default(now())
+  
+  @@unique([sessionId, userId]) // One vote per user per session
 }

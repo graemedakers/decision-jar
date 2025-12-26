@@ -12,6 +12,10 @@ export function LoginForm() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const inviteCode = searchParams?.get('code');
+    const premiumToken = searchParams?.get('pt');
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -38,8 +42,35 @@ export function LoginForm() {
             const data = await res.json();
 
             if (res.ok) {
-                // Use hard redirect to ensure cookies are fully propogated and middleware intercepts correctly
-                // This prevents the 'Home Page Flicker' by forcing a fresh server request
+                // If invite code exists, try to join the jar
+                if (inviteCode) {
+                    try {
+                        const joinRes = await fetch('/api/jar/join', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                code: inviteCode,
+                                premiumToken
+                            }),
+                        });
+                        const joinData = await joinRes.json();
+                        if (joinRes.ok) {
+                            if (joinData.premiumGifted) {
+                                alert("Login successful! You have joined the jar and been upgraded to Premium via the invite link.");
+                            } else {
+                                alert("Login successful! You have joined the jar.");
+                            }
+                        } else {
+                            // If join failed, alert but still let them login
+                            console.error("Join failed:", joinData.error);
+                            // Optional: alert(`Login successful, but failed to join jar: ${joinData.error}`);
+                        }
+                    } catch (joinError) {
+                        console.error("Error joining jar:", joinError);
+                    }
+                }
+
+                // Use hard redirect to ensure cookies are fully propogated
                 window.location.href = "/dashboard";
             } else {
                 alert(data.error || "Login failed");

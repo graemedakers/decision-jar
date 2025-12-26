@@ -13,6 +13,7 @@ export function SignupForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const inviteCode = searchParams.get("code");
+    const premiumToken = searchParams.get("pt");
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState(!!inviteCode);
     const [codeError, setCodeError] = useState<string | null>(null);
@@ -74,13 +75,20 @@ export function SignupForm() {
                     inviteCode,
                     location,
                     topic,
-                    type
+                    type,
+                    premiumToken
                 }),
             });
 
             const data = await res.json();
 
             if (res.ok) {
+                if (data.premiumGifted) {
+                    alert("Welcome! You have been upgraded to Premium via the invite link.");
+                } else if (data.premiumTokenInvalid) {
+                    alert("Account created, but the Premium link was invalid or expired. You are on the Free plan.");
+                }
+
                 if (data.requiresVerification) {
                     setIsVerificationSent(true);
                 } else if (data.checkoutUrl) {
@@ -304,7 +312,10 @@ export function SignupForm() {
                 <div className="mt-8 text-center">
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
                         Already have an account?{" "}
-                        <Link href="/login" className="text-accent hover:text-accent/80 font-bold transition-colors">
+                        <Link
+                            href={`/login${inviteCode ? `?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : ''}`}
+                            className="text-accent hover:text-accent/80 font-bold transition-colors"
+                        >
                             Sign in
                         </Link>
                     </p>

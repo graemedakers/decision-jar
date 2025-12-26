@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { isValidCategoryForTopic, getCategoriesForTopic } from '@/lib/categories';
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await getSession();
@@ -23,6 +24,19 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
         if (idea.jarId !== currentJarId) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        // Restrict Deletion: Author OR Admin
+        if (idea.createdById !== session.user.id) {
+            const membership = await prisma.jarMember.findUnique({
+                where: {
+                    userId_jarId: { userId: session.user.id, jarId: currentJarId }
+                }
+            });
+
+            if (membership?.role !== 'ADMIN') {
+                return NextResponse.json({ error: 'Only the author or an admin can delete this idea' }, { status: 403 });
+            }
         }
 
         // Create deletion log
@@ -61,6 +75,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         // Verify ownership
         const idea = await prisma.idea.findUnique({
             where: { id },
+            include: { jar: true }
         });
 
         if (!idea) {
@@ -69,6 +84,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
         if (idea.jarId !== currentJarId) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        // Restrict Modification: Author Only
+        if (idea.createdById !== session.user.id) {
+            return NextResponse.json({ error: 'Only the author can modify this idea' }, { status: 403 });
+        }
+
+        // Validate Category
+        if (category && !isValidCategoryForTopic(category, idea.jar.topic, (idea.jar as any).customCategories)) {
+            const allowed = getCategoriesForTopic(idea.jar.topic, (idea.jar as any).customCategories).map(c => c.label).join(', ');
+            return NextResponse.json({
+                error: `Category "${category}" is not relevant to this "${idea.jar.topic}" jar. Allowed: ${allowed}`
+            }, { status: 400 });
         }
 
         const updatedIdea = await prisma.idea.update({
@@ -108,14 +136,28 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         // Verify ownership
         const idea = await prisma.idea.findUnique({
             where: { id },
+            include: { jar: true }
         });
 
         if (!idea) {
-            return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Idea find (PATCH) not found' }, { status: 404 });
         }
 
         if (idea.jarId !== currentJarId) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        // Restrict Modification: Author Only
+        if (idea.createdById !== session.user.id) {
+            return NextResponse.json({ error: 'Only the author can modify this idea' }, { status: 403 });
+        }
+
+        // Validate Category if present
+        if (body.category && !isValidCategoryForTopic(body.category, idea.jar.topic, (idea.jar as any).customCategories)) {
+            const allowed = getCategoriesForTopic(idea.jar.topic, (idea.jar as any).customCategories).map(c => c.label).join(', ');
+            return NextResponse.json({
+                error: `Category "${body.category}" is not relevant to this "${idea.jar.topic}" jar. Allowed: ${allowed}`
+            }, { status: 400 });
         }
 
         const updatedIdea = await prisma.idea.update({

@@ -8,7 +8,7 @@ import { sendVerificationEmail } from '@/lib/mailer';
 
 export async function POST(request: Request) {
     try {
-        const { name, email: rawEmail, password, inviteCode, location, topic, type } = await request.json();
+        const { name, email: rawEmail, password, inviteCode, location, topic, type, premiumToken } = await request.json();
         const email = rawEmail?.toLowerCase().trim();
 
         if (!name || !email || !password) {
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
         const passwordHash = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
+        let isPremiumGifted = false;
         let user;
 
         if (!inviteCode) {
@@ -80,6 +81,23 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: 'Invalid invite code' }, { status: 400 });
             }
 
+            // Check Premium Token
+            // The request body doesn't possess premiumToken yet, we need to add it to destructuring
+            // But I will access it from 'const body = await request.json()' if I refactor slightly
+            // or just assume 'premiumToken' is in the destructured vars.
+            // Let's assume the user of this tool will add it to the destructuring list.
+
+            if (premiumToken) {
+                const inviter = await prisma.user.findFirst({
+                    where: { premiumInviteToken: premiumToken }
+                });
+
+                // Verify it is indeed the allowed user (extra security)
+                if (inviter && inviter.email === 'graemedakers@gmail.com') {
+                    isPremiumGifted = true;
+                }
+            }
+
             // Create User linked to existing jar
             user = await prisma.user.create({
                 data: {
@@ -91,6 +109,7 @@ export async function POST(request: Request) {
                     coupleId: jar.id, // Legacy support
                     verificationToken,
                     emailVerified: null,
+                    isLifetimePro: isPremiumGifted, // Grant Premium
                     memberships: {
                         create: {
                             jarId: jar.id,
@@ -104,10 +123,14 @@ export async function POST(request: Request) {
         // Send verification email
         await sendVerificationEmail(email, verificationToken);
 
-        // DO NOT LOGIN YET
-        // await login(user);
+        const premiumTokenInvalid = !!premiumToken && !isPremiumGifted;
 
-        return NextResponse.json({ success: true, requiresVerification: true });
+        return NextResponse.json({
+            success: true,
+            requiresVerification: true,
+            premiumGifted: isPremiumGifted,
+            premiumTokenInvalid
+        });
 
     } catch (error: any) {
         console.error('Signup error details:', error);

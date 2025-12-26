@@ -188,6 +188,11 @@ export const getCategoriesForTopic = (topic: string | null | undefined, customCa
     return foundKey ? TOPIC_CATEGORIES[foundKey] : TOPIC_CATEGORIES["Activities"];
 };
 
+export const isValidCategoryForTopic = (category: string, topic: string | null | undefined, customCategories?: any[]): boolean => {
+    const validCategories = getCategoriesForTopic(topic, customCategories);
+    return validCategories.some(c => c.id === category);
+};
+
 export const getThemeForTopic = (topic: string | null | undefined): TopicTheme => {
     if (!topic) return TOPIC_THEMES["Activities"];
 

@@ -36,6 +36,7 @@ import { HelpCircle, Dices } from "lucide-react";
 import { JarSwitcher } from "@/components/JarSwitcher";
 import { getThemeForTopic } from "@/lib/categories";
 import { QuickDecisionsModal } from "@/components/QuickDecisionsModal";
+import { VotingManager } from "@/components/VotingManager";
 
 interface UserData {
     id: string;
@@ -146,6 +147,8 @@ export default function DashboardPage() {
     };
 
     const jarTopic = userData?.jarTopic;
+    const jarSelectionMode = userData?.jarSelectionMode;
+    const isVotingMode = jarSelectionMode === 'VOTING';
     const theme = getThemeForTopic(jarTopic);
 
     const refreshUser = async () => {
@@ -413,6 +416,7 @@ export default function DashboardPage() {
                         setIsModalOpen(false);
                         setIsPremiumModalOpen(true);
                     }}
+                    currentUser={userData}
                 />
 
                 <SurpriseMeModal
@@ -688,39 +692,41 @@ export default function DashboardPage() {
                 {/* Main Layout Grid */}
                 <div className="flex flex-col gap-12">
 
-                    {/* Mobile: Spin Button at Top - Compact Banner Style */}
+                    {/* Mobile: Spin Button at Top - Compact Banner Style (Hide if Voting) */}
                     <div className="xl:hidden">
-                        <motion.button
-                            whileHover={availableIdeasCount > 0 ? { scale: 1.02 } : {}}
-                            whileTap={availableIdeasCount > 0 ? { scale: 0.95 } : {}}
-                            onClick={() => availableIdeasCount > 0 && setIsFilterModalOpen(true)}
-                            className={`w-full relative overflow-hidden rounded-xl p-4 flex items-center justify-between transition-all cursor-pointer border shadow-lg group ${availableIdeasCount > 0
-                                ? 'bg-gradient-to-r from-pink-600/20 to-pink-900/40 border-pink-500/30 hover:border-pink-500/50 shadow-pink-900/10'
-                                : 'bg-slate-800/20 border-slate-700 opacity-50 grayscale cursor-not-allowed'}`}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        {!isVotingMode && (
+                            <motion.button
+                                whileHover={availableIdeasCount > 0 ? { scale: 1.02 } : {}}
+                                whileTap={availableIdeasCount > 0 ? { scale: 0.95 } : {}}
+                                onClick={() => availableIdeasCount > 0 && setIsFilterModalOpen(true)}
+                                className={`w-full relative overflow-hidden rounded-xl p-4 flex items-center justify-between transition-all cursor-pointer border shadow-lg group ${availableIdeasCount > 0
+                                    ? 'bg-gradient-to-r from-pink-600/20 to-pink-900/40 border-pink-500/30 hover:border-pink-500/50 shadow-pink-900/10'
+                                    : 'bg-slate-800/20 border-slate-700 opacity-50 grayscale cursor-not-allowed'}`}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                            <div className="flex items-center gap-3 relative z-10">
-                                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center border transition-transform group-hover:scale-110 ${availableIdeasCount > 0 ? 'bg-pink-500/20 text-pink-200 border-pink-500/30' : 'bg-slate-700 text-slate-400 border-slate-600'}`}>
-                                    <Sparkles className={`w-4 h-4 ${isSpinning ? 'animate-spin' : ''}`} />
+                                <div className="flex items-center gap-3 relative z-10">
+                                    <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center border transition-transform group-hover:scale-110 ${availableIdeasCount > 0 ? 'bg-pink-500/20 text-pink-200 border-pink-500/30' : 'bg-slate-700 text-slate-400 border-slate-600'}`}>
+                                        <Sparkles className={`w-4 h-4 ${isSpinning ? 'animate-spin' : ''}`} />
+                                    </div>
+                                    <div className="text-left">
+                                        <span className={`block text-base font-bold transition-colors flex items-center gap-2 ${availableIdeasCount > 0 ? 'text-pink-900 dark:text-white group-hover:text-pink-700 dark:group-hover:text-pink-200' : 'text-slate-400'}`}>
+                                            {isSpinning ? 'Spinning...' : 'Spin the Jar'}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="text-left">
-                                    <span className={`block text-base font-bold transition-colors flex items-center gap-2 ${availableIdeasCount > 0 ? 'text-pink-900 dark:text-white group-hover:text-pink-700 dark:group-hover:text-pink-200' : 'text-slate-400'}`}>
-                                        {isSpinning ? 'Spinning...' : 'Spin the Jar'}
-                                    </span>
-                                </div>
-                            </div>
 
-                            {/* Right Side Info */}
-                            <div className="relative z-10 flex items-center gap-2">
-                                {!isSpinning && availableIdeasCount > 0 && (
-                                    <span className="bg-pink-500/30 text-pink-200 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
-                                        +5 XP
-                                    </span>
-                                )}
-                                <Sparkles className="w-4 h-4 text-pink-500/50" />
-                            </div>
-                        </motion.button>
+                                {/* Right Side Info */}
+                                <div className="relative z-10 flex items-center gap-2">
+                                    {!isSpinning && availableIdeasCount > 0 && (
+                                        <span className="bg-pink-500/30 text-pink-200 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
+                                            +5 XP
+                                        </span>
+                                    )}
+                                    <Sparkles className="w-4 h-4 text-pink-500/50" />
+                                </div>
+                            </motion.button>
+                        )}
                     </div>
 
                     {/* Upper Section: Jar Control Center */}
@@ -788,55 +794,74 @@ export default function DashboardPage() {
 
                         {/* Center Column: The Visualization */}
                         <div className="order-1 xl:order-2 flex flex-col items-center justify-center relative py-8">
-                            <div className="relative w-full aspect-square max-w-[450px] flex items-center justify-center">
-                                {/* Cinematic Podium / Stage */}
-                                <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[70%] h-[15%] rounded-[100%] bg-gradient-to-t from-slate-200 dark:from-white/10 to-transparent blur-md opacity-50" />
-                                <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[40%] h-[20px] rounded-[100%] bg-slate-400/20 dark:bg-white/5 blur-sm" />
-
-                                {/* Decorative Rings */}
-                                <div className="absolute inset-0 border-[1px] border-slate-200 dark:border-white/5 rounded-full scale-[0.85] opacity-50 animate-[spin_20s_linear_infinite]" />
-                                <div className="absolute inset-0 border-[1px] border-slate-200 dark:border-white/5 rounded-full scale-[0.95] opacity-20 animate-[spin_30s_linear_infinite_reverse]" />
-
-                                <div className="relative z-10 scale-110 transform transition-all hover:scale-125 duration-700 cursor-help">
-                                    <Jar3D />
+                            {isVotingMode && userData ? (
+                                <div className="w-full max-w-md">
+                                    <VotingManager
+                                        jarId={userData.activeJarId!}
+                                        isAdmin={userData.isCreator}
+                                        userId={userData.id}
+                                        onVoteComplete={() => {
+                                            refreshUser();
+                                            fetchIdeas();
+                                        }}
+                                        onAddIdea={() => setIsModalOpen(true)}
+                                    />
                                 </div>
-                            </div>
-                            <div className="mt-4 relative z-10 text-center">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="flex flex-col items-center"
-                                >
-                                    <p className="text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">{availableIdeasCount}</p>
-                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mt-1">Ready for Selection</p>
-                                </motion.div>
-                            </div>
+                            ) : (
+                                <>
+                                    <div className="relative w-full aspect-square max-w-[450px] flex items-center justify-center">
+                                        {/* Cinematic Podium / Stage */}
+                                        <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[70%] h-[15%] rounded-[100%] bg-gradient-to-t from-slate-200 dark:from-white/10 to-transparent blur-md opacity-50" />
+                                        <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[40%] h-[20px] rounded-[100%] bg-slate-400/20 dark:bg-white/5 blur-sm" />
+
+                                        {/* Decorative Rings */}
+                                        <div className="absolute inset-0 border-[1px] border-slate-200 dark:border-white/5 rounded-full scale-[0.85] opacity-50 animate-[spin_20s_linear_infinite]" />
+                                        <div className="absolute inset-0 border-[1px] border-slate-200 dark:border-white/5 rounded-full scale-[0.95] opacity-20 animate-[spin_30s_linear_infinite_reverse]" />
+
+                                        <div className="relative z-10 scale-110 transform transition-all hover:scale-125 duration-700 cursor-help">
+                                            <Jar3D />
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 relative z-10 text-center">
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="flex flex-col items-center"
+                                        >
+                                            <p className="text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">{availableIdeasCount}</p>
+                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mt-1">Ready for Selection</p>
+                                        </motion.div>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         {/* Right Column: Action & History */}
                         <div className="space-y-6 order-3 xl:order-3">
                             {/* Desktop Spin Button (Hidden on Mobile) */}
                             <div className="hidden xl:block">
-                                <motion.button
-                                    whileHover={availableIdeasCount > 0 ? { scale: 1.02 } : {}}
-                                    whileTap={availableIdeasCount > 0 ? { scale: 0.95 } : {}}
-                                    onClick={() => availableIdeasCount > 0 && setIsFilterModalOpen(true)}
-                                    className={`w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 transition-all cursor-pointer border shadow-lg group ${availableIdeasCount > 0
-                                        ? 'bg-gradient-to-br from-pink-600/20 to-pink-900/40 border-pink-500/30 hover:border-pink-500/50 shadow-pink-900/10'
-                                        : 'bg-slate-800/20 border-slate-700 opacity-50 grayscale cursor-not-allowed'}`}
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <div className={`w-12 h-12 shrink-0 rounded-full flex items-center justify-center relative z-10 border transition-transform group-hover:scale-110 ${availableIdeasCount > 0 ? 'bg-pink-500/20 text-pink-200 border-pink-500/30' : 'bg-slate-700 text-slate-400 border-slate-600'}`}>
-                                        <Sparkles className={`w-6 h-6 ${isSpinning ? 'animate-spin' : ''}`} />
-                                    </div>
-                                    <div className="text-left relative z-10">
-                                        <span className={`block text-lg font-bold transition-colors flex items-center gap-2 ${availableIdeasCount > 0 ? 'text-pink-900 dark:text-white group-hover:text-pink-700 dark:group-hover:text-pink-200' : 'text-slate-400'}`}>
-                                            {isSpinning ? 'Spinning...' : 'Spin the Jar'}
-                                            {!isSpinning && availableIdeasCount > 0 && <span className="bg-pink-500/30 text-pink-700 dark:text-pink-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+5 XP</span>}
-                                        </span>
-                                        <span className={`text-sm transition-colors leading-tight ${availableIdeasCount > 0 ? 'text-pink-700 dark:text-pink-200/60 group-hover:text-pink-900 dark:group-hover:text-pink-200/80' : 'text-slate-500'}`}>Let fate decide</span>
-                                    </div>
-                                </motion.button>
+                                {!isVotingMode && (
+                                    <motion.button
+                                        whileHover={availableIdeasCount > 0 ? { scale: 1.02 } : {}}
+                                        whileTap={availableIdeasCount > 0 ? { scale: 0.95 } : {}}
+                                        onClick={() => availableIdeasCount > 0 && setIsFilterModalOpen(true)}
+                                        className={`w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 transition-all cursor-pointer border shadow-lg group ${availableIdeasCount > 0
+                                            ? 'bg-gradient-to-br from-pink-600/20 to-pink-900/40 border-pink-500/30 hover:border-pink-500/50 shadow-pink-900/10'
+                                            : 'bg-slate-800/20 border-slate-700 opacity-50 grayscale cursor-not-allowed'}`}
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className={`w-12 h-12 shrink-0 rounded-full flex items-center justify-center relative z-10 border transition-transform group-hover:scale-110 ${availableIdeasCount > 0 ? 'bg-pink-500/20 text-pink-200 border-pink-500/30' : 'bg-slate-700 text-slate-400 border-slate-600'}`}>
+                                            <Sparkles className={`w-6 h-6 ${isSpinning ? 'animate-spin' : ''}`} />
+                                        </div>
+                                        <div className="text-left relative z-10">
+                                            <span className={`block text-lg font-bold transition-colors flex items-center gap-2 ${availableIdeasCount > 0 ? 'text-pink-900 dark:text-white group-hover:text-pink-700 dark:group-hover:text-pink-200' : 'text-slate-400'}`}>
+                                                {isSpinning ? 'Spinning...' : 'Spin the Jar'}
+                                                {!isSpinning && availableIdeasCount > 0 && <span className="bg-pink-500/30 text-pink-700 dark:text-pink-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+5 XP</span>}
+                                            </span>
+                                            <span className={`text-sm transition-colors leading-tight ${availableIdeasCount > 0 ? 'text-pink-700 dark:text-pink-200/60 group-hover:text-pink-900 dark:group-hover:text-pink-200/80' : 'text-slate-500'}`}>Let fate decide</span>
+                                        </div>
+                                    </motion.button>
+                                )}
                             </div>
 
                             <motion.div
