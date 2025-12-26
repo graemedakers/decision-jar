@@ -128,7 +128,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="glass-card w-full max-w-md relative max-h-[90vh] overflow-y-auto"
+                        className="glass-card w-full max-w-md relative max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10"
                     >
                         <button
                             onClick={onClose}
@@ -152,7 +152,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                                             className="focus:outline-none transition-transform hover:scale-110"
                                         >
                                             <Star
-                                                className={`w-8 h-8 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-slate-200 dark:text-slate-600"}`}
+                                                className={`w-8 h-8 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-slate-300 dark:text-slate-600"}`}
                                             />
                                         </button>
                                     ))}
