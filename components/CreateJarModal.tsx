@@ -19,7 +19,7 @@ interface CreateJarModalProps {
 
 export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, currentJarCount }: CreateJarModalProps) {
     const [name, setName] = useState("");
-    const [topic, setTopic] = useState("General");
+    const [topic, setTopic] = useState("Activities");
     const [type, setType] = useState<string>("SOCIAL");
 
     // Custom Topic State
@@ -204,9 +204,9 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             onChange={(e) => setTopic(e.target.value)}
                             className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
                         >
-                            {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom').map(k => (
+                            {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom' && k !== 'General').map(k => (
                                 <option key={k} value={k}>
-                                    {k === "General" ? "General (Anything)" : k}
+                                    {k}
                                 </option>
                             ))}
                             <option value="Custom">Other / Custom...</option>

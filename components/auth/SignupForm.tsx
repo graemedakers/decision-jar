@@ -263,11 +263,11 @@ export function SignupForm() {
                                     <select
                                         name="topic"
                                         className="w-full h-10 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-md text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent appearance-none"
-                                        defaultValue="General"
+                                        defaultValue="Activities"
                                     >
-                                        {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom').map(topic => (
+                                        {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom' && k !== 'General').map(topic => (
                                             <option key={topic} value={topic}>
-                                                {topic === "General" ? "General (Anything)" : topic}
+                                                {topic}
                                             </option>
                                         ))}
                                     </select>
