@@ -1,5 +1,4 @@
-
-import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users } from "lucide-react";
+import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap } from "lucide-react";
 
 export interface CategoryDef {
     id: string;
@@ -8,32 +7,36 @@ export interface CategoryDef {
 }
 
 export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
-    "General": [
-        { id: "ACTIVITY", label: "Activity", icon: Activity },
-        { id: "MEAL", label: "Meal", icon: Utensils },
-        { id: "EVENT", label: "Event", icon: Calendar },
+    "Activities": [
+        { id: "OUTDOOR", label: "Adventure", icon: Activity },
+        { id: "INDOOR", label: "Chill/Home", icon: Home },
+        { id: "SOCIAL", label: "Event", icon: PartyPopper },
+        { id: "CULTURAL", label: "Museum/Art", icon: Ticket },
     ],
-    "Food": [
-        { id: "RESTAURANT", label: "Restaurant", icon: Utensils },
-        { id: "CAFE", label: "Cafe", icon: Coffee },
-        { id: "COOKING", label: "Home Cook", icon: Home },
-        { id: "DRINKS", label: "Drinks", icon: Beer },
+    "Restaurants": [
+        { id: "FINE_DINING", label: "Fine Dining", icon: ChefHat },
+        { id: "CASUAL", label: "Casual", icon: Utensils },
+        { id: "BRUNCH", label: "Brunch", icon: Coffee },
+        { id: "FAST_FOOD", label: "Quick Bite", icon: Pizza },
+        { id: "INTERNATIONAL", label: "Exotic", icon: Map },
+    ],
+    "Bars": [
+        { id: "COCKTAIL", label: "Cocktail Bar", icon: Martini },
+        { id: "PUB", label: "Pub/Dive", icon: Beer },
+        { id: "WINE_BAR", label: "Wine Bar", icon: Wine },
+        { id: "ROOFTOP", label: "Rooftop", icon: Star },
+        { id: "SPEAKEASY", label: "Speakeasy", icon: Moon },
+    ],
+    "Nightclubs": [
+        { id: "DANCE_CLUB", label: "Dance Club", icon: Disc },
+        { id: "LOUNGE", label: "Lounge", icon: Utensils },
+        { id: "LIVE_MUSIC", label: "Live Venue", icon: Speaker },
+        { id: "RAVE", label: "Rave/Techno", icon: Zap },
     ],
     "Movies": [
         { id: "CINEMA", label: "Cinema", icon: Popcorn },
         { id: "STREAMING", label: "Streaming", icon: Clapperboard },
         { id: "SERIES", label: "TV Series", icon: Activity },
-    ],
-    "Activities": [
-        { id: "OUTDOOR", label: "Adventure", icon: Activity },
-        { id: "INDOOR", label: "Chill/Home", icon: Home },
-        { id: "SOCIAL", label: "Event", icon: PartyPopper },
-    ],
-    "Chores": [
-        { id: "CLEANING", label: "Cleaning", icon: Sparkles },
-        { id: "ORGANIZE", label: "Organize", icon: Briefcase },
-        { id: "ERRAND", label: "Errand", icon: ShoppingBag },
-        { id: "TASK", label: "Task", icon: CheckSquare },
     ],
     "Wellness": [
         { id: "MEDITATION", label: "Meditation", icon: Moon },
@@ -47,35 +50,11 @@ export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
         { id: "YOGA", label: "Yoga", icon: Leaf },
         { id: "OUTDOOR_SPORT", label: "Sport", icon: Trophy },
     ],
-    "Books": [
-        { id: "FICTION", label: "Fiction", icon: Book },
-        { id: "NON_FICTION", label: "Non-Fiction", icon: Book },
-        { id: "SCIFI", label: "Sci-Fi/Fantasy", icon: Sparkles },
-        { id: "THRILLER", label: "Thriller", icon: Book },
-    ],
     "Travel": [
         { id: "WEEKEND", label: "Weekend Trip", icon: Car },
         { id: "ABROAD", label: "International", icon: Plane },
         { id: "STAYCATION", label: "Staycation", icon: Home },
         { id: "ROADTRIP", label: "Road Trip", icon: Map },
-    ],
-    "Music": [
-        { id: "LISTEN", label: "Listening", icon: Headphones },
-        { id: "CONCERT", label: "Concert", icon: Ticket },
-        { id: "DISCOVER", label: "New Music", icon: Music },
-        { id: "PLAY_INSTRUMENT", label: "Jam Session", icon: Music },
-    ],
-    "Video Games": [
-        { id: "RPG", label: "RPG", icon: Gamepad2 },
-        { id: "FPS", label: "Action/FPS", icon: Gamepad2 },
-        { id: "COZY", label: "Cozy/Puzzle", icon: Coffee },
-        { id: "MULTIPLAYER", label: "Multiplayer", icon: Users },
-    ],
-    "Board Games": [
-        { id: "STRATEGY", label: "Strategy", icon: Brain },
-        { id: "PARTY", label: "Party", icon: PartyPopper },
-        { id: "COOP", label: "Co-op", icon: Users },
-        { id: "CARD", label: "Card Game", icon: Ticket },
     ],
     "Custom": [
         { id: "OPTION_A", label: "Option 1", icon: Activity },
@@ -94,30 +73,6 @@ export interface TopicTheme {
 }
 
 export const TOPIC_THEMES: Record<string, TopicTheme> = {
-    "General": {
-        primary: "pink-500",
-        secondary: "purple-600",
-        gradientFrom: "from-pink-500",
-        gradientTo: "to-purple-600",
-        bgBlob1: "bg-pink-500/10",
-        bgBlob2: "bg-purple-500/10"
-    },
-    "Food": {
-        primary: "orange-500",
-        secondary: "red-500",
-        gradientFrom: "from-orange-400",
-        gradientTo: "to-red-500",
-        bgBlob1: "bg-orange-500/10",
-        bgBlob2: "bg-red-500/10"
-    },
-    "Movies": {
-        primary: "red-600",
-        secondary: "rose-900",
-        gradientFrom: "from-red-600",
-        gradientTo: "to-rose-800",
-        bgBlob1: "bg-red-600/10",
-        bgBlob2: "bg-rose-900/10"
-    },
     "Activities": {
         primary: "green-500",
         secondary: "emerald-700",
@@ -126,13 +81,37 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
         bgBlob1: "bg-green-500/10",
         bgBlob2: "bg-emerald-600/10"
     },
-    "Chores": {
-        primary: "cyan-500",
-        secondary: "blue-600",
-        gradientFrom: "from-cyan-400",
-        gradientTo: "to-blue-600",
-        bgBlob1: "bg-cyan-500/10",
-        bgBlob2: "bg-blue-600/10"
+    "Restaurants": {
+        primary: "orange-500",
+        secondary: "red-500",
+        gradientFrom: "from-orange-400",
+        gradientTo: "to-red-500",
+        bgBlob1: "bg-orange-500/10",
+        bgBlob2: "bg-red-500/10"
+    },
+    "Bars": {
+        primary: "purple-500",
+        secondary: "indigo-600",
+        gradientFrom: "from-purple-400",
+        gradientTo: "to-indigo-600",
+        bgBlob1: "bg-purple-500/10",
+        bgBlob2: "bg-indigo-600/10"
+    },
+    "Nightclubs": {
+        primary: "fuchsia-500",
+        secondary: "pink-600",
+        gradientFrom: "from-fuchsia-400",
+        gradientTo: "to-pink-600",
+        bgBlob1: "bg-fuchsia-500/10",
+        bgBlob2: "bg-pink-600/10"
+    },
+    "Movies": {
+        primary: "red-600",
+        secondary: "rose-900",
+        gradientFrom: "from-red-600",
+        gradientTo: "to-rose-800",
+        bgBlob1: "bg-red-600/10",
+        bgBlob2: "bg-rose-900/10"
     },
     "Wellness": {
         primary: "teal-500",
@@ -150,14 +129,6 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
         bgBlob1: "bg-orange-500/10",
         bgBlob2: "bg-red-600/10"
     },
-    "Books": {
-        primary: "indigo-500",
-        secondary: "blue-600",
-        gradientFrom: "from-indigo-400",
-        gradientTo: "to-blue-600",
-        bgBlob1: "bg-indigo-500/10",
-        bgBlob2: "bg-blue-600/10"
-    },
     "Travel": {
         primary: "sky-500",
         secondary: "cyan-600",
@@ -165,30 +136,6 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
         gradientTo: "to-cyan-600",
         bgBlob1: "bg-sky-500/10",
         bgBlob2: "bg-cyan-600/10"
-    },
-    "Music": {
-        primary: "fuchsia-500",
-        secondary: "purple-600",
-        gradientFrom: "from-fuchsia-400",
-        gradientTo: "to-purple-600",
-        bgBlob1: "bg-fuchsia-500/10",
-        bgBlob2: "bg-purple-600/10"
-    },
-    "Video Games": {
-        primary: "violet-500",
-        secondary: "indigo-500",
-        gradientFrom: "from-violet-400",
-        gradientTo: "to-indigo-500",
-        bgBlob1: "bg-violet-500/10",
-        bgBlob2: "bg-indigo-500/10"
-    },
-    "Board Games": {
-        primary: "amber-500",
-        secondary: "orange-500",
-        gradientFrom: "from-amber-400",
-        gradientTo: "to-orange-500",
-        bgBlob1: "bg-amber-500/10",
-        bgBlob2: "bg-orange-500/10"
     },
     "Custom": {
         primary: "violet-500",
@@ -203,7 +150,7 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
 // Helper to map icon name to component
 const getIconComponent = (iconName: string) => {
     // Basic mapping for common icons, fallback to Sparkles
-    const map: any = { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users };
+    const map: any = { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza };
     return map[iconName] || Sparkles;
 };
 
