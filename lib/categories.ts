@@ -163,22 +163,22 @@ export const getCategoriesForTopic = (topic: string | null | undefined, customCa
         }));
     }
 
-    if (!topic) return TOPIC_CATEGORIES["General"];
+    if (!topic) return TOPIC_CATEGORIES["Activities"];
 
     // Case-insensitive match 
     const foundKey = Object.keys(TOPIC_CATEGORIES).find(
         key => key.toLowerCase() === topic.toLowerCase()
     );
 
-    return foundKey ? TOPIC_CATEGORIES[foundKey] : TOPIC_CATEGORIES["General"];
+    return foundKey ? TOPIC_CATEGORIES[foundKey] : TOPIC_CATEGORIES["Activities"];
 };
 
 export const getThemeForTopic = (topic: string | null | undefined): TopicTheme => {
-    if (!topic) return TOPIC_THEMES["General"];
+    if (!topic) return TOPIC_THEMES["Activities"];
 
     const foundKey = Object.keys(TOPIC_THEMES).find(
         key => key.toLowerCase() === topic.toLowerCase()
     );
 
-    return foundKey ? TOPIC_THEMES[foundKey] : TOPIC_THEMES["General"];
+    return foundKey ? TOPIC_THEMES[foundKey] : TOPIC_THEMES["Activities"];
 };

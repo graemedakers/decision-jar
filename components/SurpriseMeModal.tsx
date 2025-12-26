@@ -24,7 +24,7 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
         activityLevel: "MEDIUM",
         cost: "$",
         timeOfDay: "ANY",
-        category: categories[0].id, // Default to first valid category
+        category: categories.length > 0 ? categories[0].id : "", // Default to first valid category or empty
     });
 
     useEffect(() => {
