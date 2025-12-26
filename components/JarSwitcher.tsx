@@ -106,7 +106,23 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
 
     // ... rest of handlers ...
     const handleLeaveJar = async (jarId: string) => {
-        if (!confirm("Are you sure you want to leave this Jar? You will lose access to its ideas.")) return;
+        // First check if user is the last member
+        let isLastMember = false;
+        try {
+            const checkRes = await fetch(`/api/jar/${jarId}/check-membership`);
+            if (checkRes.ok) {
+                const data = await checkRes.json();
+                isLastMember = data.memberCount <= 1;
+            }
+        } catch (e) {
+            console.error("Failed to check membership", e);
+        }
+
+        const message = isLastMember
+            ? "WARNING: You are the last member of this Jar. If you leave, the Jar and all its ideas/history will be PERMANENTLY DELETED. Are you sure?"
+            : "Are you sure you want to leave this Jar? You will lose access to its ideas.";
+
+        if (!confirm(message)) return;
 
         setIsLoading(true);
         try {
