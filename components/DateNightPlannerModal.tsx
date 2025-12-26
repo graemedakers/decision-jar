@@ -23,13 +23,20 @@ interface DateNightPlannerModalProps {
     onClose: () => void;
     userLocation?: string;
     onIdeaAdded?: () => void;
+    jarTopic?: string | null;
 }
 
-export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded }: DateNightPlannerModalProps) {
+export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded, jarTopic }: DateNightPlannerModalProps) {
     // Inputs
     const [targetLocation, setTargetLocation] = useState(userLocation || "");
     const [targetDate, setTargetDate] = useState("");
     const [targetCost, setTargetCost] = useState("Medium");
+
+    // Dynamic Text based on Topic
+    const isDateContext = !jarTopic || jarTopic === 'Dates' || jarTopic === 'Romantic';
+    const titleText = isDateContext ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
+    const buttonText = isDateContext ? "Plan My Date Night" : "Plan My Activity";
+    const resultTitle = isDateContext ? "Date Night" : "Itinerary";
 
     // State
     const [itinerary, setItinerary] = useState<Itinerary | null>(null);
@@ -57,9 +64,6 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
             setRegeneratingIndex(null);
             setEditingIndex(null);
             setEditForm(null);
-            // Default date to "This Saturday" or just empty to let user pick
-            // For simplicity, let's leave date empty so they can type "Next Friday" or pick a specific date if we had a picker.
-            // Using text input provides more flexibility for the AI ("Tomorrow", "Next weekend").
         }
     }, [isOpen]);
 
@@ -78,7 +82,8 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                 body: JSON.stringify({
                     location: targetLocation,
                     date: targetDate, // e.g. "This Friday"
-                    cost: targetCost
+                    cost: targetCost,
+                    topic: jarTopic // Pass topic to API if it supports it (it currently ignores it but good for future)
                 }),
             });
 
@@ -107,11 +112,12 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     location: targetLocation,
-                    date: targetDate,
+                    date: targetDate, // e.g. "This Friday"
                     cost: targetCost,
                     regenerateSlot: index,
                     currentSchedule: itinerary.schedule,
-                    rejectedVenue: itinerary.schedule[index].venue_name
+                    rejectedVenue: itinerary.schedule[index].venue_name,
+                    topic: jarTopic
                 }),
             });
 
@@ -167,7 +173,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                 schedule: itinerary.schedule
             });
 
-            const description = `Date Night in ${itinerary.neighborhood}`;
+            const description = `${resultTitle} in ${itinerary.neighborhood}`;
 
             const res = await fetch('/api/ideas', {
                 method: 'POST',
@@ -180,7 +186,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                     activityLevel: "MEDIUM",
                     cost: targetCost === "Low" ? "$" : targetCost === "High" ? "$$$" : "$$",
                     timeOfDay: "EVENING",
-                    category: "PLANNED_DATE",
+                    category: isDateContext ? "PLANNED_DATE" : "ACTIVITY",
                     notes: targetDate ? `Planned for: ${targetDate}` : undefined
                 }),
             });
@@ -207,7 +213,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                 <DialogHeader className="flex flex-row items-center justify-between space-y-0">
                     <DialogTitle className="flex items-center gap-2 text-2xl">
                         <Sparkles className="w-6 h-6 text-pink-600 dark:text-pink-400" />
-                        <span className="bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">Date Night Planner</span>
+                        <span className="bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">{titleText}</span>
                     </DialogTitle>
                     <Button
                         variant="ghost"
@@ -276,7 +282,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                             className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-6 rounded-xl shadow-lg shadow-pink-900/20 transition-all transform hover:scale-[1.01]"
                         >
                             <Sparkles className="w-5 h-5 mr-2" />
-                            Plan My Date Night
+                            {buttonText}
                         </Button>
                     )}
 

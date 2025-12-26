@@ -518,6 +518,7 @@ export default function DashboardPage() {
                     onClose={() => setIsDateNightOpen(false)}
                     userLocation={userLocation || undefined}
                     onIdeaAdded={handleContentUpdate}
+                    jarTopic={jarTopic}
                 />
 
                 <RateDateModal
