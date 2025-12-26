@@ -76,6 +76,8 @@ export async function DELETE(request: Request) {
 }
 
 
+import { Prisma } from '@prisma/client';
+
 export async function GET(request: Request) {
     try {
         const session = await getSession();
@@ -84,19 +86,37 @@ export async function GET(request: Request) {
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: session.user.id }
+            where: { id: session.user.id },
+            include: { memberships: true }
         });
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-        const currentJarId = user.activeJarId || user.coupleId;
+        // Collect all jar IDs the user is a member of
+        const myJarIds = user.memberships.map(m => m.jarId);
+        if (user.coupleId && !myJarIds.includes(user.coupleId)) {
+            myJarIds.push(user.coupleId);
+        }
 
-        // Using raw SQL to bypass valid Prisma Client generation issues
-        const favorites = await prisma.$queryRaw<any[]>`
-            SELECT * FROM "FavoriteVenue" 
-            WHERE "coupleId" = ${currentJarId} 
-            AND ("userId" = ${session.user.id} OR "isShared" = true)
-            ORDER BY "createdAt" DESC
-        `;
+        // If no jars, just get personal favorites (though user logic implies they are in a jar usually)
+        // But sql requires non-empty list for IN clause, so handle empty case
+        let favorites;
+
+        if (myJarIds.length > 0) {
+            favorites = await prisma.$queryRaw<any[]>`
+                SELECT * FROM "FavoriteVenue" 
+                WHERE 
+                    "userId" = ${session.user.id} 
+                    OR 
+                    ("coupleId" IN (${Prisma.join(myJarIds)}) AND "isShared" = true)
+                ORDER BY "createdAt" DESC
+            `;
+        } else {
+            favorites = await prisma.$queryRaw<any[]>`
+                SELECT * FROM "FavoriteVenue" 
+                WHERE "userId" = ${session.user.id} 
+                ORDER BY "createdAt" DESC
+            `;
+        }
 
         const enhancedFavorites = favorites.map((fav: any) => ({
             ...fav,
