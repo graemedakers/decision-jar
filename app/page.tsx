@@ -213,21 +213,26 @@ export default function Home() {
             </div>
             <span className="font-bold text-lg text-slate-800 dark:text-white tracking-tight">Decision Jar</span>
           </div>
-          <div className="flex items-center gap-4">
-            {user ? (
-              <Button onClick={() => router.push('/dashboard')} size="sm" className="bg-slate-200/50 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 border-none text-slate-800 dark:text-white">
-                Go to Dashboard
-              </Button>
-            ) : (
-              <>
-                <Link href="/login" className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-                  Sign In
-                </Link>
-                <Button onClick={() => router.push('/signup')} size="sm" className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 border-none hidden sm:flex">
-                  Get Started
+          <div className="flex items-center gap-6">
+            <Link href="/guide" className="hidden md:block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+              How it Works
+            </Link>
+            <div className="flex items-center gap-4">
+              {user ? (
+                <Button onClick={() => router.push('/dashboard')} size="sm" className="bg-slate-200/50 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 border-none text-slate-800 dark:text-white">
+                  Go to Dashboard
                 </Button>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link href="/login" className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    Sign In
+                  </Link>
+                  <Button onClick={() => router.push('/signup')} size="sm" className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 border-none hidden sm:flex">
+                    Get Started
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>
@@ -266,7 +271,11 @@ export default function Home() {
               >
                 {user ? "Go to Dashboard" : "Create Your First Jar"} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-
+              <Link href="/guide" className="w-full sm:w-auto">
+                <Button variant="outline" className="h-14 px-8 text-lg border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 w-full">
+                  Learn How it Works
+                </Button>
+              </Link>
             </div>
             <div className="pt-4 flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500">
               <div className="flex -space-x-2">

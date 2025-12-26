@@ -56,7 +56,7 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
             const res = await fetch(`/api/ideas?jarId=${jarId}`);
             if (res.ok) {
                 const data = await res.json();
-                setVoteIdeas(data.ideas);
+                setVoteIdeas(Array.isArray(data) ? data : data.ideas || []);
             }
         } catch (e) {
             console.error("Failed to fetch ideas", e);
@@ -228,7 +228,7 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
     }
 
     // SCENARIO 2: Active Vote exist
-    const session = status.session;
+    const session = status?.session;
 
     // User hasn't voted yet
     if (!status.hasVoted) {
@@ -240,12 +240,12 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                         Cast Your Vote
                     </h3>
                     <div className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
-                        Round {session.round}
+                        Round {session?.round || 1}
                     </div>
                 </div>
 
                 <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
-                    {voteIdeas.filter(i => !session.eligibleIdeaIds || session.eligibleIdeaIds.length === 0 || session.eligibleIdeaIds.includes(i.id)).map(idea => (
+                    {voteIdeas?.filter(i => !session?.eligibleIdeaIds || session.eligibleIdeaIds.length === 0 || session.eligibleIdeaIds.includes(i.id)).map(idea => (
                         <div
                             key={idea.id}
                             onClick={() => setSelectedIdeaId(idea.id)}
