@@ -1,18 +1,17 @@
-
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(
-    request: Request,
-    { params }: { params: Promise<{ id: string }> }
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
 ) {
     const session = await getSession();
     if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id: jarId } = await params;
+    const { id: jarId } = await context.params;
     const json = await request.json();
     const { action } = json;
 
@@ -124,7 +123,7 @@ async function handleCastVote(jarId: string, userId: string, data: any) {
         return NextResponse.json({ error: "Idea not found" }, { status: 404 });
     }
 
-    if (idea.authorId === userId) {
+    if (idea.createdById === userId) {
         return NextResponse.json({ error: "You cannot vote for your own idea!" }, { status: 400 });
     }
 
@@ -258,10 +257,10 @@ async function handleResolveVote(jarId: string) {
 }
 
 export async function GET(
-    request: Request,
-    { params }: { params: Promise<{ id: string }> }
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
 ) {
-    const { id: jarId } = await params;
+    const { id: jarId } = await context.params;
     const sessionUrl = await getSession();
     const userId = sessionUrl?.user?.id;
 
