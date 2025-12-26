@@ -119,7 +119,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                         </div>
                         <div className="space-y-2">
                             <h4 className="font-bold text-secondary">Surprise Me</h4>
-                            <p className="text-slate-600 dark:text-slate-300">Stuck on what to do? The assistant can generate custom date ideas tailored to your location and interests.</p>
+                            <p className="text-slate-600 dark:text-slate-300">Stuck on what to do? The assistant can generate custom jar ideas tailored to your location and interests.</p>
                             <ol className="list-decimal list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm mt-2">
                                 <li>Click the <strong><Sparkles className="inline w-3 h-3 text-yellow-400" /> Surprise Me</strong> button on the dashboard.</li>
                                 <li>Select your preferences (Category, Cost, Energy, Time).</li>
@@ -236,7 +236,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <div>
                                 <h4 className="font-bold text-slate-800 dark:text-white text-sm">Data & Privacy</h4>
                                 <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
-                                    <li><strong>Deletion History:</strong> View a log of who deleted which date ideas and when.</li>
+                                    <li><strong>Deletion History:</strong> View a log of who deleted which ideas and when.</li>
                                 </ul>
                             </div>
 

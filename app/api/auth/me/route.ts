@@ -114,6 +114,8 @@ export async function GET() {
                 activeJarId: activeJar.id,
                 jarName: activeJar.name,
                 jarType: activeJar.type,
+                jarTopic: activeJar.topic,
+                customCategories: (activeJar as any).customCategories,
                 isCreator,
                 hasPartner
             }

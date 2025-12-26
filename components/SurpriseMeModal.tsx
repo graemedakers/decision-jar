@@ -13,10 +13,11 @@ interface SurpriseMeModalProps {
     onIdeaAdded: () => void;
     initialLocation?: string;
     jarTopic?: string | null;
+    customCategories?: any[];
 }
 
-export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation, jarTopic }: SurpriseMeModalProps) {
-    const categories = getCategoriesForTopic(jarTopic);
+export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation, jarTopic, customCategories }: SurpriseMeModalProps) {
+    const categories = getCategoriesForTopic(jarTopic, customCategories);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         location: "",
@@ -90,7 +91,7 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                             </div>
 
                             <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
-                                Set your preferences and we'll generate a secret date idea. It will remain hidden in your jar until you spin it!
+                                Set your preferences and we'll generate a secret jar idea. It will remain hidden in your jar until you spin it!
                             </p>
                         </div>
 
@@ -201,7 +202,7 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                                         ) : (
                                             <div className="flex items-center gap-2">
                                                 <Sparkles className="w-5 h-5 fill-white" />
-                                                Create Secret Surprise Idea
+                                                Create Secret Surprise
                                             </div>
                                         )}
                                     </Button>

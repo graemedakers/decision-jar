@@ -17,6 +17,7 @@ export default function JarPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [ideaToDelete, setIdeaToDelete] = useState<string | null>(null);
     const [isPremium, setIsPremium] = useState(false);
+    const [hasPartner, setHasPartner] = useState(true);
     const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
     const fetchIdeas = async () => {
@@ -41,6 +42,7 @@ export default function JarPage() {
                 const data = await res.json();
                 if (data?.user) {
                     setIsPremium(!!data.user.isPremium);
+                    setHasPartner(!!data.user.hasPartner);
                 }
             }
         } catch (error) {
@@ -142,7 +144,7 @@ export default function JarPage() {
                             <Plus className="w-8 h-8 text-slate-500" />
                         </div>
                         <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Jar is Empty</h3>
-                        <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-xs mx-auto">Start adding your favorite date ideas to fill up your jar.</p>
+                        <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-xs mx-auto">Start adding your favorite ideas to fill up your jar.</p>
                         <Button onClick={() => setIsModalOpen(true)}>Add First Idea</Button>
                     </div>
                 ) : (
@@ -198,7 +200,7 @@ export default function JarPage() {
                                 <h3 className={`font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 ${idea.isMasked ? 'italic text-slate-500 dark:text-slate-400' : ''}`}>
                                     {idea.isMasked
                                         ? (idea.isSurprise
-                                            ? "✨ Shared Surprise"
+                                            ? (hasPartner ? "✨ Shared Surprise" : "✨ Surprise")
                                             : `${idea.createdBy?.name || "Partner"}'s Secret`)
                                         : idea.description}
                                 </h3>

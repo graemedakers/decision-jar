@@ -264,7 +264,7 @@ export default function Home() {
                 onClick={() => router.push(user ? '/dashboard' : '/signup')}
                 className="h-14 px-8 text-lg bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity shadow-lg shadow-primary/25 w-full sm:w-auto"
               >
-                {user ? "Go to Dashboard" : "Create Your Jar"} <ArrowRight className="w-5 h-5 ml-2" />
+                {user ? "Go to Dashboard" : "Create Your First Jar"} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
 
             </div>
@@ -547,7 +547,7 @@ export default function Home() {
                   onClick={() => router.push('/signup')}
                   className="h-14 px-8 text-lg bg-white text-slate-900 hover:bg-slate-200 border-none w-full sm:w-auto"
                 >
-                  Create Your Jar Now
+                  Create Your First Jar Now
                 </Button>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-500 dark:text-slate-400">

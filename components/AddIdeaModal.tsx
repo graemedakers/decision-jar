@@ -16,9 +16,10 @@ interface AddIdeaModalProps {
     isPremium?: boolean;
     onUpgrade?: () => void;
     jarTopic?: string | null;
+    customCategories?: any[];
 }
 
-export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic }: AddIdeaModalProps) {
+export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories }: AddIdeaModalProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -66,7 +67,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
     }, [isOpen, initialData]);
 
-    const categories = getCategoriesForTopic(jarTopic);
+    const categories = getCategoriesForTopic(jarTopic, customCategories);
 
     // Ensure category is valid for topic
     useEffect(() => {

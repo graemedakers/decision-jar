@@ -25,6 +25,7 @@ model Jar {
   name          String   @default("Our Jar")
   type          JarType  @default(SOCIAL)
   topic         String?  @default("General") // e.g. "Movies", "Food"
+  customCategories Json? // Array of { id: string, label: string }
   
   members       JarMember[]
   ideas         Idea[]

@@ -5,10 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
-import { Users, Heart, Loader2 } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
 
 interface CreateJarModalProps {
@@ -21,9 +19,13 @@ interface CreateJarModalProps {
 
 export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, currentJarCount }: CreateJarModalProps) {
     const [name, setName] = useState("");
-    // Default to SOCIAL if user already has a romantic jar, otherwise ROMANTIC
     const [topic, setTopic] = useState("General");
     const [type, setType] = useState<string>("SOCIAL");
+
+    // Custom Topic State
+    const [customTopicName, setCustomTopicName] = useState("");
+    const [customCategories, setCustomCategories] = useState<string[]>(["", "", ""]);
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -32,16 +34,51 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     const maxJars = isPro ? 50 : 1;
     const isLimitReached = currentJarCount >= maxJars;
 
+    const addCategory = () => setCustomCategories([...customCategories, ""]);
+    const updateCategory = (index: number, value: string) => {
+        const newCats = [...customCategories];
+        newCats[index] = value;
+        setCustomCategories(newCats);
+    };
+    const removeCategory = (index: number) => {
+        setCustomCategories(customCategories.filter((_, i) => i !== index));
+    };
+
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError(null);
 
+        let finalTopic = topic;
+        let finalCustomCategories = undefined;
+
+        if (topic === 'Custom') {
+            if (!customTopicName.trim()) {
+                setError("Please enter a name for your custom topic.");
+                setIsLoading(false);
+                return;
+            }
+            // Filter empty
+            const validCats = customCategories.filter(c => c.trim() !== "");
+            if (validCats.length === 0) {
+                setError("Please add at least one category.");
+                setIsLoading(false);
+                return;
+            }
+
+            finalTopic = customTopicName;
+            finalCustomCategories = validCats.map((label, idx) => ({
+                id: `CUSTOM_${idx}_${Date.now()}`,
+                label: label,
+                icon: 'Sparkles' // Default icon
+            }));
+        }
+
         try {
             const res = await fetch('/api/jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, type, topic }),
+                body: JSON.stringify({ name, type, topic: finalTopic, customCategories: finalCustomCategories }),
             });
 
             if (res.ok) {
@@ -93,7 +130,6 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             You have reached the maximum number of Jars for your current plan.
                         </DialogDescription>
                     </DialogHeader>
-
                     <div className="py-6 text-center space-y-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                             <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">Current Usage</p>
@@ -103,18 +139,13 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             To create more jars, please upgrade to Pro or leave an existing jar.
                         </p>
                     </div>
-
                     <div className="flex justify-end gap-3">
                         <Button variant="ghost" onClick={onClose}>
                             Close
                         </Button>
                         <Button
                             className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white border-0"
-                            onClick={() => {
-                                // Close this modal, and let the user find the upgrade button in dashboard 
-                                // (or we could trigger a callback to open premium modal)
-                                onClose();
-                            }}
+                            onClick={() => onClose()}
                         >
                             Got it
                         </Button>
@@ -126,14 +157,14 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
+            <DialogContent className="sm:max-w-[425px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold flex items-center gap-2">
                         <span>New Jar</span>
                         <span className="text-2xl">✨</span>
                     </DialogTitle>
                     <DialogDescription className="text-slate-600 dark:text-slate-400">
-                        Create a new collection of date ideas.
+                        Create a new collection of ideas.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -142,30 +173,15 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                         <Label htmlFor="name">Jar Name</Label>
                         <Input
                             id="name"
-                            placeholder="e.g. Weekend Adventures, Summer 2024"
+                            placeholder="e.g. Weekend Adventures"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
-                            className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400"
+                            className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                         />
                         {error && (
                             <p className="text-sm text-red-400 mt-1">{error}</p>
                         )}
-                    </div>
-
-                    <div className="space-y-3">
-                        <Label>Jar Topic</Label>
-                        <select
-                            value={topic}
-                            onChange={(e) => setTopic(e.target.value)}
-                            className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
-                        >
-                            {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom').map(k => (
-                                <option key={k} value={k}>
-                                    {k === "General" ? "General (Anything)" : k}
-                                </option>
-                            ))}
-                        </select>
                     </div>
 
                     <div className="space-y-3">
@@ -180,6 +196,73 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             <option value="GENERIC">Solo (Personal)</option>
                         </select>
                     </div>
+
+                    <div className="space-y-3">
+                        <Label>Jar Topic</Label>
+                        <select
+                            value={topic}
+                            onChange={(e) => setTopic(e.target.value)}
+                            className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
+                        >
+                            {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom').map(k => (
+                                <option key={k} value={k}>
+                                    {k === "General" ? "General (Anything)" : k}
+                                </option>
+                            ))}
+                            <option value="Custom">Other / Custom...</option>
+                        </select>
+                    </div>
+
+                    {topic === 'Custom' && (
+                        <div className="space-y-4 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-slate-800/50">
+                            <div className="space-y-2">
+                                <Label className="text-xs uppercase text-slate-500">Custom Topic Name</Label>
+                                <Input
+                                    value={customTopicName}
+                                    onChange={(e) => setCustomTopicName(e.target.value)}
+                                    placeholder="e.g. Board Games, Work Lunches"
+                                    className="bg-white dark:bg-slate-800"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs uppercase text-slate-500">Categories</Label>
+                                <div className="space-y-2">
+                                    {customCategories.map((cat, idx) => (
+                                        <div key={idx} className="flex gap-2">
+                                            <Input
+                                                value={cat}
+                                                onChange={(e) => updateCategory(idx, e.target.value)}
+                                                placeholder={`Category ${idx + 1}`}
+                                                className="bg-white dark:bg-slate-800"
+                                            />
+                                            {customCategories.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => removeCategory(idx)}
+                                                    className="shrink-0 text-slate-400 hover:text-red-400"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={addCategory}
+                                    className="w-full mt-2 border-dashed"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Category
+                                </Button>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>

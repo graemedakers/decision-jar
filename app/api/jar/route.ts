@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     }
 
     try {
-        const { name, type, topic } = await request.json();
+        const { name, type, topic, customCategories } = await request.json();
 
         if (!name || !type) {
             return NextResponse.json({ error: "Name and Type are required" }, { status: 400 });
@@ -81,6 +81,7 @@ export async function POST(request: Request) {
                     type,
                     // @ts-ignore
                     topic: topic || "General",
+                    customCategories: customCategories || undefined,
                     referenceCode: code,
                     isPremium: false // Default to free
                 }

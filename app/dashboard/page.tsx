@@ -141,8 +141,7 @@ export default function DashboardPage() {
         }
     };
 
-    const activeMembership = userData?.memberships?.find((m: any) => m.jarId === userData.activeJarId) || userData?.memberships?.[0];
-    const jarTopic = activeMembership?.jar?.topic;
+    const jarTopic = userData?.jarTopic;
     const theme = getThemeForTopic(jarTopic);
 
     const refreshUser = async () => {
@@ -398,6 +397,7 @@ export default function DashboardPage() {
                 <AddIdeaModal
                     isOpen={isModalOpen || !!editingIdea}
                     jarTopic={jarTopic}
+                    customCategories={userData?.customCategories}
                     onClose={() => {
                         setIsModalOpen(false);
                         setEditingIdea(null);
@@ -417,6 +417,7 @@ export default function DashboardPage() {
                     onIdeaAdded={fetchIdeas}
                     initialLocation={userLocation || ""}
                     jarTopic={jarTopic}
+                    customCategories={userData?.customCategories}
                 />
 
                 <SpinFiltersModal
