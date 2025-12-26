@@ -1,4 +1,4 @@
-import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap } from "lucide-react";
+import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap, Bed } from "lucide-react";
 
 export interface CategoryDef {
     id: string;
@@ -55,6 +55,13 @@ export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
         { id: "ABROAD", label: "International", icon: Plane },
         { id: "STAYCATION", label: "Staycation", icon: Home },
         { id: "ROADTRIP", label: "Road Trip", icon: Map },
+    ],
+    "Hotel Stays": [
+        { id: "BOUTIQUE", label: "Boutique", icon: Bed },
+        { id: "RESORT", label: "Resort", icon: Sparkles },
+        { id: "BUDGET", label: "Budget", icon: Home },
+        { id: "LUXURY", label: "Luxury", icon: Star },
+        { id: "BNB", label: "B&B", icon: Coffee },
     ],
     "Custom": [
         { id: "OPTION_A", label: "Option 1", icon: Activity },
@@ -136,6 +143,14 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
         gradientTo: "to-cyan-600",
         bgBlob1: "bg-sky-500/10",
         bgBlob2: "bg-cyan-600/10"
+    },
+    "Hotel Stays": {
+        primary: "cyan-500",
+        secondary: "blue-600",
+        gradientFrom: "from-cyan-400",
+        gradientTo: "to-blue-600",
+        bgBlob1: "bg-cyan-500/10",
+        bgBlob2: "bg-blue-600/10"
     },
     "Custom": {
         primary: "violet-500",
