@@ -176,9 +176,30 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
                         </div>
 
                         {jar.membershipStatus === 'ACTIVE' && (
-                            <Button variant="outline" className="w-full mt-4" onClick={() => router.push('/dashboard')}>
-                                Go to Jar Dashboard
-                            </Button>
+                            <div className="space-y-3 mt-4">
+                                <Button variant="outline" className="w-full" onClick={() => router.push('/dashboard')}>
+                                    Go to Jar Dashboard
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    className="w-full text-red-500 hover:text-red-700 hover:bg-red-50"
+                                    onClick={async () => {
+                                        if (!confirm("Are you sure you want to leave this community?")) return;
+                                        try {
+                                            const res = await fetch(`/api/jars/${id}/leave`, { method: 'POST' });
+                                            if (res.ok) {
+                                                setJar(prev => prev ? { ...prev, membershipStatus: 'NONE' } : null);
+                                                router.refresh();
+                                            } else {
+                                                const data = await res.json();
+                                                alert(data.error || "Failed to leave.");
+                                            }
+                                        } catch (e) { console.error(e); }
+                                    }}
+                                >
+                                    Leave Community
+                                </Button>
+                            </div>
                         )}
                     </div>
                 </div>

@@ -2,6 +2,7 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 import { NextResponse } from 'next/server';
+import { checkAndPromoteWaitlist } from '@/lib/community';
 
 export async function PUT(
     req: Request,
@@ -36,6 +37,12 @@ export async function PUT(
             await prisma.jarMember.delete({
                 where: { userId_jarId: { userId: targetUserId, jarId } }
             });
+
+            // Trigger Waitlist Promotion
+            // We don't await this to keep response fast? Or maybe we should to ensure it happens safely?
+            // Let's await it to be safe for now
+            await checkAndPromoteWaitlist(jarId);
+
             return NextResponse.json({ success: true, status: 'REJECTED' });
         }
 
