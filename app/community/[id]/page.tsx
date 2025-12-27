@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { Users, Lock, ArrowLeft, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CommunityAdminModal } from "@/components/CommunityAdminModal";
+import { Shield } from "lucide-react";
 
 interface CommunityDetail {
     id: string;
@@ -24,6 +26,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
     const [jar, setJar] = useState<CommunityDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isJoining, setIsJoining] = useState(false);
+    const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -180,6 +183,27 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
                     </div>
                 </div>
             </div>
+            {/* Admin Modal */}
+            {jar && (
+                <CommunityAdminModal
+                    isOpen={isAdminModalOpen}
+                    onClose={() => setIsAdminModalOpen(false)}
+                    jarId={jar.id}
+                    jarName={jar.name}
+                />
+            )}
+
+            {/* Admin Floating Button */}
+            {jar?.isAdmin && (
+                <div className="fixed bottom-6 right-6 z-40">
+                    <Button
+                        onClick={() => setIsAdminModalOpen(true)}
+                        className="h-14 px-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-2xl font-bold flex items-center gap-2 hover:scale-105 transition-transform"
+                    >
+                        <Shield className="w-5 h-5" /> Admin Dashboard
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
