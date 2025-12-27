@@ -14,6 +14,7 @@ export default function CreateCommunityPage() {
         description: "",
         memberLimit: "", // Empty string for unlimited initially (or manageable input)
         imageUrl: "", // For now, maybe just a text input or we handle upload separately
+        topic: "General",
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +29,8 @@ export default function CreateCommunityPage() {
                     name: formData.name,
                     description: formData.description,
                     memberLimit: formData.memberLimit ? parseInt(formData.memberLimit) : null,
-                    imageUrl: formData.imageUrl
+                    imageUrl: formData.imageUrl,
+                    topic: formData.topic
                 }),
             });
 
@@ -116,6 +118,25 @@ export default function CreateCommunityPage() {
                                         placeholder="https://..."
                                     />
                                 </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">Category / Topic</label>
+                                <select
+                                    value={formData.topic}
+                                    onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                                    className="glass-input w-full px-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-violet-500 outline-none transition-all appearance-none"
+                                >
+                                    <option value="General">General Interest</option>
+                                    <option value="Social">Social & Fun</option>
+                                    <option value="Food">Food & Dining</option>
+                                    <option value="Fitness">Fitness & Sports</option>
+                                    <option value="Wellness">Wellness & Health</option>
+                                    <option value="Arts">Arts & Culture</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Education">Education & Learning</option>
+                                    <option value="Travel">Travel & Adventure</option>
+                                </select>
                             </div>
 
                             <div className="bg-slate-50 dark:bg-slate-950/50 p-6 rounded-2xl border border-slate-200 dark:border-white/5 space-y-4">

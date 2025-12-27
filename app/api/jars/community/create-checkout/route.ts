@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { name, description, memberLimit, imageUrl } = body;
+        const { name, description, memberLimit, imageUrl, topic } = body;
 
         if (!name || !description) {
             return NextResponse.json({ error: "Name and Description are required" }, { status: 400 });
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
                 description,
                 imageUrl,
                 memberLimit,
+                topic: topic || "General",
                 referenceCode: generateRefCode(),
                 isCommunityJar: true,
                 selectionMode: 'RANDOM',

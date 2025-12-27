@@ -21,17 +21,23 @@ export default function CommunityIndexPage() {
     const [jars, setJars] = useState<CommunityJar[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const [currentTopic, setCurrentTopic] = useState("All");
+    const [sort, setSort] = useState("newest");
     const router = useRouter();
 
     useEffect(() => {
         fetchJars();
     }, []);
 
-    const fetchJars = async (query?: string) => {
+    const fetchJars = async (query?: string, topic?: string, sortBy?: string) => {
         setIsLoading(true);
         try {
-            const url = query ? `/api/jars/community?q=${encodeURIComponent(query)}` : '/api/jars/community';
-            const res = await fetch(url);
+            const params = new URLSearchParams();
+            if (query) params.append('q', query);
+            if (topic && topic !== 'All') params.append('topic', topic);
+            if (sortBy) params.append('sort', sortBy);
+
+            const res = await fetch(`/api/jars/community?${params.toString()}`);
             if (res.ok) {
                 setJars(await res.json());
             }
@@ -44,7 +50,7 @@ export default function CommunityIndexPage() {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        fetchJars(search);
+        fetchJars(search, currentTopic, sort);
     };
 
     return (
@@ -90,6 +96,42 @@ export default function CommunityIndexPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Filters */}
+                <div className="max-w-7xl mx-auto mt-8 flex flex-col md:flex-row items-center gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
+                        {['All', 'Social', 'Food', 'Fitness', 'Wellness', 'Arts', 'Entertainment', 'Education', 'Travel'].map((topic) => (
+                            <button
+                                key={topic}
+                                onClick={() => {
+                                    setCurrentTopic(topic);
+                                    fetchJars(search, topic, sort);
+                                }}
+                                className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${currentTopic === topic
+                                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                                        : 'bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                                    }`}
+                            >
+                                {topic}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="ml-auto flex items-center gap-2 w-full md:w-auto">
+                        <span className="text-sm font-medium text-slate-500 hidden md:inline">Sort by:</span>
+                        <select
+                            value={sort}
+                            onChange={(e) => {
+                                setSort(e.target.value);
+                                fetchJars(search, currentTopic, e.target.value);
+                            }}
+                            className="bg-slate-100 dark:bg-white/5 border-none rounded-lg px-3 py-2 text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-violet-500 w-full md:w-auto"
+                        >
+                            <option value="newest">Newest First</option>
+                            <option value="members">Most Popular</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {/* Grid */}
@@ -101,7 +143,7 @@ export default function CommunityIndexPage() {
                 ) : jars.length === 0 ? (
                     <div className="text-center py-20">
                         <p className="text-slate-500 dark:text-slate-400 text-lg">No communities found matching your search.</p>
-                        <Button variant="ghost" className="mt-4" onClick={() => { setSearch(""); fetchJars(); }}>
+                        <Button variant="ghost" className="mt-4" onClick={() => { setSearch(""); setCurrentTopic("All"); fetchJars("", "All", sort); }}>
                             Clear Search
                         </Button>
                     </div>
