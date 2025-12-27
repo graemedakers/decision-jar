@@ -81,7 +81,7 @@ export default function GuideSelection() {
                     href="/guide/pro"
                     className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold transition-all"
                 >
-                    Next: AI & Pro <ArrowRight className="w-5 h-5" />
+                    Next: Premium Features <ArrowRight className="w-5 h-5" />
                 </Link>
             </div>
         </div>

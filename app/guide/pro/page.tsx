@@ -10,12 +10,12 @@ export default function GuidePro() {
                 <Crown className="text-yellow-500 w-10 h-10" /> Decision Jar Pro
             </h1>
             <p className="text-xl text-slate-600 dark:text-slate-400 mb-12">
-                Unlock the full power of AI-driven decision making and premium jar management.
+                Unlock the full power of smart decision making and premium jar management.
             </p>
 
-            <h2 className="text-2xl font-bold mb-6">AI Concierge Services</h2>
+            <h2 className="text-2xl font-bold mb-6">Concierge Services</h2>
             <p className="mb-8 font-medium">
-                Sometimes you want more than a random pick. Pro users get access to our full suite of theme-specific AI agents
+                Sometimes you want more than a random pick. Pro users get access to our full suite of theme-specific tools
                 who act as your personal planners:
             </p>
 
@@ -26,7 +26,7 @@ export default function GuidePro() {
                     </div>
                     <h3 className="font-bold text-lg mb-2">Dining Concierge</h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Find the perfect breakfast, lunch, or dinner spot nearby. AI checks real ratings to ensure a great meal.
+                        Find the perfect breakfast, lunch, or dinner spot nearby. Our system checks real ratings to ensure a great meal.
                     </p>
                 </div>
 
@@ -76,7 +76,7 @@ export default function GuidePro() {
                     </div>
                     <h3 className="font-bold text-lg mb-2">Hotel Concierge</h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Planning a staycation? Let our AI find the best boutique hotels and unique stays.
+                        Planning a staycation? Let our system find the best boutique hotels and unique stays.
                     </p>
                 </div>
             </div>

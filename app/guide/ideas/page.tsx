@@ -25,20 +25,20 @@ export default function GuideIdeas() {
             </ul>
 
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                <Wand2 className="text-purple-500" /> Magic Fill (AI Powered)
+                <Wand2 className="text-purple-500" /> Magic Fill (Smart Suggestions)
             </h2>
             <p className="mb-4">
                 Feeling uninspired? Use the <strong>Magic Fill</strong> feature. Look for the magic wand icon in the "Add Idea" modal.
             </p>
             <p className="mb-6">
-                When you click it, our AI looks at your jar's topic and your current location to suggest a <strong>real, high-quality</strong>
+                When you click it, our system looks at your jar's topic and your current location to suggest a <strong>real, high-quality</strong>
                 venue or activity. It automatically fills in the name, description, website link, and even the estimated cost and duration for you.
             </p>
 
             <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 mb-8 shadow-xl">
                 <Image
                     src="/guide/magic-fill.png"
-                    alt="Magic Fill AI Feature"
+                    alt="Magic Fill Feature"
                     width={800}
                     height={600}
                     className="w-full"

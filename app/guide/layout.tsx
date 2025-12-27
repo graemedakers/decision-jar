@@ -12,7 +12,7 @@ export default function GuideLayout({
         { href: '/guide/setup', label: 'Setup & Jars' },
         { href: '/guide/ideas', label: 'Adding Ideas' },
         { href: '/guide/selection', label: 'Making Choices' },
-        { href: '/guide/pro', label: 'AI & Pro' },
+        { href: '/guide/pro', label: 'Premium Features' },
     ];
 
     return (
