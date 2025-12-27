@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import Stripe from 'stripe';
 
 export async function GET(req: NextRequest) {
+    // ...
+
     const sessionCookie = await getSession();
     if (!sessionCookie?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -51,7 +54,7 @@ export async function GET(req: NextRequest) {
                         subscriptionStatus: 'ACTIVE',
                         stripeCustomerId: session.customer as string,
                         stripeSubscriptionId: subscriptionId,
-                        subscriptionRenewsAt: new Date(sub.current_period_end * 1000)
+                        subscriptionRenewsAt: new Date((sub as any).current_period_end * 1000)
                     }
                 });
             }
