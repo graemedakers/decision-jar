@@ -39,7 +39,23 @@ export async function GET(req: NextRequest) {
 
         // Determine status
         // For subscription:
-        if (session.mode === 'subscription') {
+        if (session.metadata?.type === 'COMMUNITY_JAR_CREATION') {
+            const jarId = session.metadata.jarId;
+            if (jarId && session.mode === 'subscription') {
+                const subscriptionId = session.subscription as string;
+                const sub = await stripe.subscriptions.retrieve(subscriptionId);
+
+                await prisma.jar.update({
+                    where: { id: jarId },
+                    data: {
+                        subscriptionStatus: 'ACTIVE',
+                        stripeCustomerId: session.customer as string,
+                        stripeSubscriptionId: subscriptionId,
+                        subscriptionRenewsAt: new Date(sub.current_period_end * 1000)
+                    }
+                });
+            }
+        } else if (session.mode === 'subscription') {
             await prisma.user.update({
                 where: { id: userId },
                 data: {

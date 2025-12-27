@@ -19,6 +19,21 @@ enum MemberRole {
   ADMIN
   MEMBER
 }
+
+enum MemberStatus {
+  ACTIVE
+  PENDING
+  WAITLISTED
+  INVITED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALLING
+}
+
 model Jar {
   id            String   @id @default(uuid())
   referenceCode String   @unique
@@ -39,10 +54,18 @@ model Jar {
   isPremium     Boolean  @default(false)
   isTrialEligible Boolean @default(true)
   
-  // Subscription Fields
+  // Community / Public Jar Fields
+  isCommunityJar Boolean @default(false)
+  description    String? // Public description
+  imageUrl       String? // Public banner/icon
+  memberLimit    Int?    // Max members, null = unlimited
+  
+  // Subscription Fields (Platform / Community)
   stripeCustomerId String?
   stripeSubscriptionId String?
   subscriptionStatus String? // "active", "trialing", "past_due", "canceled"
+  subscriptionRenewsAt DateTime?
+  
   isLegacyPremium Boolean @default(false) // For grandfathering existing users
   
   // Gamification
@@ -54,7 +77,7 @@ model Jar {
   achievements  UnlockedAchievement[]
   voteSessions  VoteSession[]
 
-  @@map("Couple") // Keep table name for now to simplify migration (optional, but good practice)
+  @@map("Couple")
 }
 
 model UnlockedAchievement {
@@ -83,6 +106,7 @@ model JarMember {
   jarId     String
   jar       Jar        @relation(fields: [jarId], references: [id])
   role      MemberRole @default(MEMBER)
+  status    MemberStatus @default(ACTIVE)
   joinedAt  DateTime   @default(now())
 
   @@unique([userId, jarId])
