@@ -20,29 +20,25 @@ export default function GuideSetup() {
                 <div className="p-4 rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30">
                     <h3 className="font-bold text-orange-700 dark:text-orange-400 mb-2">Dining & Drinks</h3>
                     <p className="text-xs text-slate-600 dark:text-slate-400">
-                        Choose <strong>Restaurants</strong> for categories like Fine Dining, Casual, and Brunch.
-                        Or pick <strong>Bars</strong> for Cocktail Bars, Speakeasies, and Wine Bars.
+                        <strong>James & Emily</strong> chose <strong>Restaurants</strong> for their Friday date nights, giving them quick access to categories like Fine Dining and Casual.
                     </p>
                 </div>
                 <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
                     <h3 className="font-bold text-emerald-700 dark:text-emerald-400 mb-2">Living Well</h3>
                     <p className="text-xs text-slate-600 dark:text-slate-400">
-                        The <strong>Wellness</strong> topic offers Spa, Meditation, and Digital Detox categories.
-                        <strong>Fitness</strong> includes Strength, Cardio, and Yoga.
+                        The <strong>Millers</strong> used the <strong>Wellness</strong> topic for their reward ideas, focusing on things like "Walk in the Park" or "Extra Play Time".
                     </p>
                 </div>
                 <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/20">
                     <h3 className="font-bold text-blue-700 dark:text-blue-400 mb-2">Exploration</h3>
                     <p className="text-xs text-slate-600 dark:text-slate-400">
-                        Use <strong>Travel</strong> for Road Trips and International trips, or <strong>Hotel Stays</strong>
-                        for Boutique, Luxury, and B&B options.
+                        Ideal for <strong>Travel</strong> and <strong>Hotel Stays</strong>. Perfect for planning anything from local staycations to international adventures.
                     </p>
                 </div>
                 <div className="p-4 rounded-xl bg-fuchsia-50 dark:bg-fuchsia-950/20 border border-fuchsia-100 dark:border-fuchsia-900/30">
                     <h3 className="font-bold text-fuchsia-700 dark:text-fuchsia-400 mb-2">Entertainment</h3>
                     <p className="text-xs text-slate-600 dark:text-slate-400">
-                        <strong>Movies</strong> covers Cinema and Streaming, while <strong>Nightclubs</strong>
-                        offers Dance Clubs and Live Music Venues.
+                        <strong>Sarah's Book Club</strong> use the <strong>Custom</strong> topic to define their own categories for different genres (Fiction, Non-Fiction, Sci-Fi).
                     </p>
                 </div>
             </div>
