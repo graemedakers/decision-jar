@@ -45,25 +45,32 @@ Date Jar allows you and your partner (or your friend group!) to create shared co
 
 ---
 
-## 3. Managing Jars (Group Mode)
+## 3. Jars: Private & Community
 
-**Date Jar** now supports multiple jars! You can have one dedicated Romantic jar for your partner, and multiple Group jars for different friend groups.
+**Decision Jar** supports both private groups and public communities.
 
-### Switching Jars
-- On the Dashboard, click the **Jar Name/Icon** in the top header.
-- A dropdown will appear showing all your memberships.
-- Click a jar to switch your active view.
+### Private Jars (Group Mode)
+Perfect for partners or friend groups.
+- **Switching:** Click the Jar Name in the top header to switch your active view.
+- **Creating:** Open the Switcher > "Create New Jar". Select a topic (e.g., "The Boyz").
+- **Joining:** Creating a jar gives you a 6-character code. Share this with friends to let them join.
 
-### Creating a New Jar
-1. Open the Jar Switcher dropdown.
-2. Click **"Create New Jar"**.
-3. Name it (e.g., "The Boyz", "Brunch Club") and select a Topic (e.g., "Food").
-4. *Note: You can only have ONE Romantic jar at a time.*
+### Community Jars
+Public jars centered around shared interests like "Hiking", "Foodies", or "Board Games".
 
-### Joining an Existing Jar
-1. Open the Jar Switcher dropdown.
-2. Click **"Join Existing Jar"**.
-3. Enter the 6-character code provided by the jar's admin.
+#### Finding & Joining
+1. Navigate to the **Community Index** via the main menu or "Discover Communities" on the dashboard.
+2. **Search:** Filter by Topic (e.g., Social, Food) or sort by Popularity.
+3. **Join:**
+    *   **Open Jars:** Click "Join" to enter immediately.
+    *   **Waitlisted Jars:** If a jar is full, click "Join Waitlist". You will be automatically promoted (and emailed!) when a spot opens up.
+
+#### Managing Membership
+*   **Leave:** Go to the Community Detail page and click **"Leave Community"**. This automatically opens a spot for the next person on the waitlist!
+
+#### Admin Tools (Creator Only)
+*   **Member Management:** Use the **Admin Dashboard** (shield icon) on the community page to approve/reject members and view the waitlist.
+*   **Creating:** Premium users can create their own public jars with custom member limits.
 
 ---
 

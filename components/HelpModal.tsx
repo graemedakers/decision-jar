@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -23,6 +23,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
     const sections = [
         { id: "intro", title: "Introduction", icon: BookOpen },
         { id: "getting-started", title: "Getting Started", icon: MapPin },
+        { id: "community", title: "Communities", icon: Users },
         { id: "dashboard", title: "The Dashboard", icon: History },
         { id: "gamification", title: "Levels & XP", icon: Trophy },
         { id: "date-night-planner", title: "Night Out Planner", icon: Compass },
@@ -39,6 +40,32 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
     const renderContent = () => {
         switch (activeSection) {
             // ...
+            case "community":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Communities</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Join public jars to share ideas with people who share your interests, or create your own community!
+                        </p>
+                        <div className="space-y-4 mt-4">
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-1">Joining a Community</h4>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                    <li><strong>Discover:</strong> Browse the Community Index to find jars by topic (e.g., Hiking, Food).</li>
+                                    <li><strong>Waitlists:</strong> If a jar is full, join the waitlist. You'll be automatically promoted and notified when a spot opens!</li>
+                                    <li><strong>Leave:</strong> You can leave a community at any time from its detail page.</li>
+                                </ul>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-1">Creating & Managing</h4>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                    <li><strong>Create:</strong> Premium users can create public jars with custom member limits.</li>
+                                    <li><strong>Admin Dashboard:</strong> Creators have access to a dashboard to approve new members and manage the waitlist.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                );
             case "date-night-planner":
                 return (
                     <div className="space-y-4">
