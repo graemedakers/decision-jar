@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/Input";
 import { getApiUrl, isCapacitor } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteLogModal } from "@/components/DeleteLogModal";
-import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles } from "lucide-react";
+import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -434,6 +434,18 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                         Upgrade to Pro
                                     </Button>
                                 )}
+                            </div>
+
+                            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="w-full justify-start text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white"
+                                    onClick={() => router.push('/community')}
+                                >
+                                    <Users className="w-4 h-4 mr-2" />
+                                    Discover Communities
+                                </Button>
                             </div>
 
                             {isCreator && (
