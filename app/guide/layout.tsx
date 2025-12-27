@@ -1,6 +1,15 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: {
+        template: '%s | Decision Jar Guide',
+        default: 'User Guide | Decision Jar',
+    },
+    description: 'Learn how to use Decision Jar to make group decisions, find date ideas, and organize social outings.',
+};
 
 export default function GuideLayout({
     children,
