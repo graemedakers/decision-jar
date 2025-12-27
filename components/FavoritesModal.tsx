@@ -82,7 +82,7 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">Your Favorites</h2>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400">Places you want to remember</p>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">Ideas you want to remember</p>
                                 </div>
                             </div>
                             <button
