@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import canvasConfetti from 'canvas-confetti';
 
-export default function CommunitySuccessPage() {
+function CommunitySuccessContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
@@ -100,5 +100,17 @@ export default function CommunitySuccessPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function CommunitySuccessPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+                <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
+            </div>
+        }>
+            <CommunitySuccessContent />
+        </Suspense>
     );
 }
