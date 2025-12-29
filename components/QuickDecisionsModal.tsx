@@ -149,7 +149,7 @@ export function QuickDecisionsModal({ isOpen, onClose }: QuickDecisionsModalProp
                                             className="w-32 h-32 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border-2 border-slate-200 dark:border-white/10 flex items-center justify-center relative"
                                         >
                                             {result === null ? (
-                                                <span className="text-6xl font-bold text-slate-200">?</span>
+                                                <span className="text-6xl font-bold text-slate-300 dark:text-slate-700">?</span>
                                             ) : (
                                                 <motion.span
                                                     key={result as number}

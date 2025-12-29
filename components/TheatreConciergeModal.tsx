@@ -212,7 +212,7 @@ export function TheatreConciergeModal({ isOpen, onClose, userLocation, onIdeaAdd
                                                     <Button size="sm" onClick={() => handleAddToJar(rec)} className="text-xs bg-slate-100 dark:bg-white/10">
                                                         <Plus className="w-4 h-4 mr-1" /> Jar
                                                     </Button>
-                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-purple-400/20 to-indigo-400/20 text-purple-200 border border-purple-400/30">
+                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-purple-400/20 to-indigo-400/20 text-purple-700 dark:text-purple-200 border border-purple-400/30">
                                                         <Calendar className="w-4 h-4 mr-1" /> Plan It
                                                     </Button>
                                                 </div>

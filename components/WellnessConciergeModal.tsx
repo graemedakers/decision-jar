@@ -202,7 +202,7 @@ export function WellnessConciergeModal({ isOpen, onClose, userLocation, onIdeaAd
                                                 <div className="flex flex-wrap sm:flex-col gap-2 justify-start sm:justify-end">
                                                     {rec.website && (<Button size="sm" variant="ghost" className="text-xs" onClick={() => window.open(rec.website, '_blank')}><ExternalLink className="w-4 h-4 mr-1" /> Web</Button>)}
                                                     <Button size="sm" onClick={() => handleAddToJar(rec)} className="text-xs bg-slate-100 dark:bg-white/10"><Plus className="w-4 h-4 mr-1" /> Jar</Button>
-                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-emerald-400/20 to-teal-400/20 text-emerald-200 border border-emerald-400/30"><Zap className="w-4 h-4 mr-1" /> Book</Button>
+                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-emerald-400/20 to-teal-400/20 text-emerald-700 dark:text-emerald-200 border border-emerald-400/30"><Zap className="w-4 h-4 mr-1" /> Book</Button>
                                                 </div>
                                             </div>
                                         ))}

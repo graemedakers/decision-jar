@@ -406,7 +406,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                 {hasPaid ? (
                                     <>
                                         {isNative ? (
-                                            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                                            <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
                                                 <p className="text-xs text-slate-500 dark:text-slate-400">
                                                     Manage Subscription: Please visit <strong>spinthejar.com</strong>
                                                 </p>
@@ -450,7 +450,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
 
                             {isCreator && (
                                 <div className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10">
-                                    <h3 className="text-sm font-bold text-red-400 mb-4 flex items-center gap-2">
+                                    <h3 className="text-sm font-bold text-red-600 dark:text-red-400 mb-4 flex items-center gap-2">
                                         <Trash2 className="w-4 h-4" />
                                         Danger Zone
                                     </h3>

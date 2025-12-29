@@ -53,7 +53,7 @@ export function PremiumModal({ isOpen, onClose, title, description }: PremiumMod
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="glass-card w-full max-w-md relative overflow-hidden border-primary/50 shadow-2xl shadow-primary/20"
+                        className="glass-card w-full max-w-md relative overflow-hidden border-primary/50 shadow-2xl shadow-primary/20 bg-white dark:bg-slate-900"
                     >
                         {/* Background Glow */}
                         <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 animate-spin-slow pointer-events-none" />
@@ -130,7 +130,7 @@ export function PremiumModal({ isOpen, onClose, title, description }: PremiumMod
                                         View Plans
                                     </Button>
                                     <p className="text-xs text-slate-500 mt-4 mb-2 text-center">
-                                        Starts from <span className="text-white font-bold">{PRICING.MONTHLY}/mo</span> with a {PRICING.TRIAL_DAYS}-day free trial.
+                                        Starts from <span className="text-slate-900 dark:text-white font-bold">{PRICING.MONTHLY}/mo</span> with a {PRICING.TRIAL_DAYS}-day free trial.
                                         <br />
                                         <span className="text-yellow-500">Lifetime Access</span> also available.
                                     </p>

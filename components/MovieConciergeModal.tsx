@@ -209,7 +209,7 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
                                                     <Button size="sm" onClick={() => handleAddToJar(rec)} className="text-xs bg-slate-100 dark:bg-white/10">
                                                         <Plus className="w-4 h-4 mr-1" /> Jar
                                                     </Button>
-                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-red-400/20 to-rose-400/20 text-red-200 border border-red-400/30">
+                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-red-400/20 to-rose-400/20 text-red-700 dark:text-red-200 border border-red-400/30">
                                                         <Popcorn className="w-4 h-4 mr-1" /> Watch Now
                                                     </Button>
                                                 </div>

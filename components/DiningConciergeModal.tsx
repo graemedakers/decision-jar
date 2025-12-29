@@ -270,7 +270,7 @@ export function DiningConciergeModal({ isOpen, onClose, userLocation, onIdeaAdde
                                                     <Button size="sm" onClick={() => handleAddToJar(rec)} className="text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20">
                                                         <Plus className="w-4 h-4 mr-1" /> Jar
                                                     </Button>
-                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-yellow-400/20 to-orange-400/20 text-yellow-200 border border-yellow-400/30 hover:bg-yellow-400/30">
+                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-yellow-400/20 to-orange-400/20 text-yellow-700 dark:text-yellow-200 border border-yellow-400/30 hover:bg-yellow-400/30">
                                                         <Zap className="w-4 h-4 mr-1" /> Go Tonight
                                                     </Button>
                                                 </div>
