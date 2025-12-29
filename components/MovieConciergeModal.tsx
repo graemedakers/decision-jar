@@ -116,6 +116,22 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
 
                         <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 space-y-6 px-7">
                             <div className="space-y-4">
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Location to Search</label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            type="text"
+                                            value={location}
+                                            onChange={(e) => setLocation(e.target.value)}
+                                            placeholder="Current location, Neighborhood, or City"
+                                            className="glass-input w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-slate-500">Edit this to search in a specific area.</p>
+                                </div>
+
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Genres (Select multiple)</label>
                                     <div className="flex flex-wrap gap-2">
