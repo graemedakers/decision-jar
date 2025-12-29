@@ -105,7 +105,7 @@ export function useConciergeActions({
         }
     };
 
-    const handleFavorite = async (rec: any, type: "BAR" | "RESTAURANT" | "CLUB" | "HOTEL" | "MOVIE" | "WELLNESS" | "FITNESS") => {
+    const handleFavorite = async (rec: any, type: "BAR" | "RESTAURANT" | "CLUB" | "HOTEL" | "MOVIE" | "WELLNESS" | "FITNESS" | "THEATRE") => {
         try {
             if (rec.isFavorite) {
                 const res = await fetch(`/api/favorites?name=${encodeURIComponent(rec.name)}`, {

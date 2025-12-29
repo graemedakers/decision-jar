@@ -2,7 +2,7 @@
 
 import { Jar3D } from "@/components/Jar3D";
 import { Button } from "@/components/ui/Button";
-import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell } from "lucide-react";
+import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -384,10 +384,16 @@ export default function Home() {
               delay={0.6}
             />
             <FeatureCard
+              icon={Ticket}
+              title="Theatre Scout"
+              description="Discover plays, musicals, and performances. Find the best seats in the house for a night of culture."
+              delay={0.65}
+            />
+            <FeatureCard
               icon={Star}
               title="Rate & Remember"
               description="Keep a digital scrapbook. Rate your experiences, upload photos, and cherish every moment."
-              delay={0.65}
+              delay={0.7}
             />
           </div>
         </div>

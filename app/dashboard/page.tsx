@@ -22,7 +22,8 @@ import { HotelConciergeModal } from "@/components/HotelConciergeModal";
 import { MovieConciergeModal } from "@/components/MovieConciergeModal";
 import { WellnessConciergeModal } from "@/components/WellnessConciergeModal";
 import { FitnessConciergeModal } from "@/components/FitnessConciergeModal";
-import { Wine, Disc, Bed, Clapperboard, Leaf, Dumbbell } from "lucide-react";
+import { TheatreConciergeModal } from "@/components/TheatreConciergeModal";
+import { Wine, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket } from "lucide-react";
 import { PremiumBanner } from "@/components/PremiumBanner";
 import { DateNightPlannerModal } from "@/components/DateNightPlannerModal";
 import { Moon, Heart } from "lucide-react";
@@ -105,6 +106,7 @@ export default function DashboardPage() {
     const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
     const [isWellnessModalOpen, setIsWellnessModalOpen] = useState(false);
     const [isFitnessModalOpen, setIsFitnessModalOpen] = useState(false);
+    const [isTheatreModalOpen, setIsTheatreModalOpen] = useState(false);
     const [isDateNightOpen, setIsDateNightOpen] = useState(false);
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isSurpriseModalOpen, setIsSurpriseModalOpen] = useState(false);
@@ -553,6 +555,19 @@ export default function DashboardPage() {
                     isOpen={isFitnessModalOpen}
                     onClose={() => {
                         setIsFitnessModalOpen(false);
+                    }}
+                    userLocation={combinedLocation || undefined}
+                    onIdeaAdded={handleContentUpdate}
+                    onGoTonight={(idea) => {
+                        setSelectedIdea(idea);
+                    }}
+                    onFavoriteUpdated={fetchFavorites}
+                />
+
+                <TheatreConciergeModal
+                    isOpen={isTheatreModalOpen}
+                    onClose={() => {
+                        setIsTheatreModalOpen(false);
                     }}
                     userLocation={combinedLocation || undefined}
                     onIdeaAdded={handleContentUpdate}
@@ -1115,6 +1130,27 @@ export default function DashboardPage() {
                                     <div>
                                         <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Fitness</span>
                                         <span className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed block">Gyms, trails, and classes to get you moving.</span>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                whileHover={{ scale: 1.02, y: -4 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="group relative h-full"
+                                onClick={() => isPremium ? setIsTheatreModalOpen(true) : setIsPremiumModalOpen(true)}
+                            >
+                                <div className="absolute -inset-0.5 bg-gradient-to-b from-purple-500/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition duration-500" />
+                                <div className="relative h-full bg-white dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-3xl p-8 flex flex-col gap-6 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/10 transition-all">
+                                    <div className="flex items-center justify-between">
+                                        <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/20 group-hover:bg-purple-500 group-hover:text-white transition-all duration-500 shadow-inner">
+                                            <Ticket className="w-7 h-7" />
+                                        </div>
+                                        {!isPremium && <Lock className="w-5 h-5 text-slate-300 dark:text-slate-600" />}
+                                    </div>
+                                    <div>
+                                        <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Theatre Scout</span>
+                                        <span className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed block">Discover plays, musicals, and live performances.</span>
                                     </div>
                                 </div>
                             </motion.div>
