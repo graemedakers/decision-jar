@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -27,8 +27,15 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "dashboard", title: "The Dashboard", icon: History },
         { id: "gamification", title: "Levels & XP", icon: Trophy },
         { id: "date-night-planner", title: "Night Out Planner", icon: Compass },
+        { id: "activity-planner", title: "Activity Planner", icon: Brain },
         { id: "dining-concierge", title: "Dining Concierge", icon: Utensils },
         { id: "bar-concierge", title: "Bar Scout", icon: Wine },
+        { id: "nightclub-concierge", title: "Nightclub Scout", icon: Disc },
+        { id: "theatre-concierge", title: "Theatre Scout", icon: Ticket },
+        { id: "movie-concierge", title: "Movie Scout", icon: Clapperboard },
+        { id: "hotel-concierge", title: "Hotel Finder", icon: Bed },
+        { id: "wellness-concierge", title: "Wellness & Spa", icon: Leaf },
+        { id: "fitness-concierge", title: "Fitness Finder", icon: Dumbbell },
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
         { id: "weekend-planner", title: "Weekend Planner", icon: Calendar },
         { id: "spinning", title: "Spinning the Jar", icon: Sparkles },
@@ -133,6 +140,101 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <li><strong>Vibe:</strong> Choose the atmosphere (e.g., "Speakeasy", "Rooftop", "Dive Bar").</li>
                             <li><strong>Top Picks:</strong> Get curated recommendations with ratings and reviews.</li>
                             <li><strong>Go Tonight:</strong> Instantly pick a spot for your evening out.</li>
+                        </ul>
+                    </div>
+                );
+            case "nightclub-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Nightclub Scout <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Ready to dance? Find the hottest clubs and venues near you.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Music:</strong> Filter by genre (e.g., "House", "Hip Hop", "Latin").</li>
+                            <li><strong>Vibe:</strong> Choose the energy (e.g., "High Energy", "Exclusive", "Chill Lounge").</li>
+                            <li><strong>Guest Lists:</strong> Find spots perfect for your group size.</li>
+                        </ul>
+                    </div>
+                );
+            case "theatre-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Theatre Scout <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Experience the magic of live performance. Find plays, musicals, comedy, and more.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Genre:</strong> Filter by Musicals, Plays, Comedy, Opera, and more.</li>
+                            <li><strong>Mood:</strong> Choose a show that fits your mood (e.g., "Spectacular", "Funny", "Thought-Provoking").</li>
+                            <li><strong>Tickets:</strong> Get direct links to book tickets for upcoming performances.</li>
+                        </ul>
+                    </div>
+                );
+            case "movie-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Movie Scout <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Find the perfect movie for tonight, whether in theaters or streaming.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Genre & Vibe:</strong> Filter by specific genres or the mood you're in.</li>
+                            <li><strong>Showtimes:</strong> See what's playing in cinemas near you.</li>
+                            <li><strong>Trailers & Ratings:</strong> Make an informed choice with ratings and descriptions.</li>
+                        </ul>
+                    </div>
+                );
+            case "hotel-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Hotel Finder <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Planning a staycation or getaway? Find the perfect place to stay.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Style:</strong> Filter by Boutique, Luxury, Resort, or Budget.</li>
+                            <li><strong>Amenities:</strong> Look for specific features like "Pool", "Spa", "Rooftop Bar".</li>
+                            <li><strong>Booking:</strong> Get direct links to book your stay.</li>
+                        </ul>
+                    </div>
+                );
+            case "wellness-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Wellness & Spa <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Relax and recharge. Find the best wellness spots near you.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Type:</strong> Find Spas, Yoga Studios, Meditation Centers, and more.</li>
+                            <li><strong>Service:</strong> Look for specific treatments like Massage, Sauna, or Classes.</li>
+                        </ul>
+                    </div>
+                );
+            case "fitness-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Fitness Finder <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Get moving! Find gyms, trails, and fitness classes wherever you are.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Activity:</strong> Filter by Gym, Hiking, Crossfit, Pilates, etc.</li>
+                            <li><strong>Intensity:</strong> Choose from light active recovery to high-intensity workouts.</li>
+                        </ul>
+                    </div>
+                );
+            case "activity-planner":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Activity Planner <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Need a custom plan for the day? The Activity Planner creates a broader itinerary than the Night Out Planner.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Occasion:</strong> Plan for "Family Day", "Romantic Date", "Solo Adventure", etc.</li>
+                            <li><strong>Custom AI:</strong> The planner uses advanced AI to build a unique schedule based on your specific request.</li>
                         </ul>
                     </div>
                 );

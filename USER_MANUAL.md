@@ -183,6 +183,7 @@ Date Jar Premium unlocks powerful tools to enhance your dating life.
 ---
 
 ## 8. Concierge Services
+The Executive Decision Suite offers premium access to AI-powered scouts.
 
 ### Dining Concierge
 1.  Click **"Dining Concierge"** (Utensils icon).
@@ -190,28 +191,56 @@ Date Jar Premium unlocks powerful tools to enhance your dating life.
 3.  Browse top-rated picks with **Google Ratings**.
 4.  **"Go Tonight":** Instantly lock it in.
 
-### Bar Concierge
-1.  Click **"Bar Concierge"** (Wine icon).
-2.  Find top-rated bars and lounges near you.
+### Bar Scout
+1.  Click **"Bar Scout"**.
+2.  Find top-rated bars, speakeasies, and rooftop lounges.
+
+### Nightclub Scout
+1.  Click **"Nightclub Scout"**.
+2.  Find the hottest dance floors, clubs, and late-night venues.
+3.  Filter by music genre (House, Hip Hop, etc.) and vibe.
+
+### Theatre Scout
+1.  Click **"Theatre Scout"**.
+2.  Discover live performances: **Musicals, Plays, Comedy, Opera**.
+3.  Filter by mood (Spectacular, Intimate, Funny).
+4.  Get booking links for tickets.
+
+### Movie Scout
+1.  Click **"Movie Scout"**.
+2.  Find what's showing in cinemas nearby or get streaming recommendations.
+3.  Filter by Genre and Vibe.
+
+### Hotel Finder
+1.  Click **"Hotel Finder"**.
+2.  Plan your staycation or trip. Find Boutique, Luxury, or Budget stays.
+
+### Wellness & Fitness
+- **Wellness:** Find spas, yoga studios, and relaxation spots.
+- **Fitness:** Locate gyms, trails, and classes.
 
 ---
 
-## 9. Weekend Planner
+## 9. Planners
 
+### Weekend Planner
 Need a plan for the whole weekend?
 1.  Click **"Weekend Plan"** (Calendar icon).
 2.  The planner generates a list of 5 activities tailored to your location.
 3.  Add ideas directly to your jar.
 
----
-
-## 10. Night Out Planner
-
+### Night Out Planner
 Want a complete evening plan?
 1.  Click **"Night Out Planner"**.
 2.  Get a timeline with **Drinks**, **Dinner**, and an **Event**.
 3.  Customize venues using "Regenerate" or "Edit".
 4.  View on Map or "Go Tonight".
+
+### Activity Planner
+Need a custom itinerary for a specific occasion?
+1.  Click **"Activity Planner"**.
+2.  Describe your perfect day (e.g., "Family day out with toddlers", "Romantic anniversary").
+3.  Let the AI build a custom step-by-step schedule.
 
 ---
 
