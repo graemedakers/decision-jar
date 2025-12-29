@@ -2,7 +2,7 @@
 
 import { Jar3D } from "@/components/Jar3D";
 import { Button } from "@/components/ui/Button";
-import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain } from "lucide-react";
+import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -317,39 +317,77 @@ export default function Home() {
             <FeatureCard
               icon={Shuffle}
               title="Spin the Jar"
-              description="Overcome decision paralysis with our random idea generator. Filter by cost, duration, or vibe and let fate decide your next adventure or hangout."
+              description="Overcome decision paralysis. Filter by cost, duration, or vibe and let fate decide your next adventure."
               delay={0.1}
             />
             <FeatureCard
               icon={Users}
-              title="Sync with Anyone"
-              description="Perfect for friends and families. Invite your whole group to share a jar and sync ideas instantly."
-              delay={0.2}
+              title="Sync & Collaborate"
+              description="Perfect for couples and groups. Invite friends to a shared jar and sync ideas instantly across devices."
+              delay={0.15}
             />
             <FeatureCard
               icon={Calendar}
               title="Weekend Planner"
-              description="Build a complete itinerary for two or ten. Our smart planner finds real, live events happening nearby to create a custom weekend plan."
-              delay={0.3}
+              description="Build a complete itinerary. Our smart AI planner finds live events and activities for a perfect weekend."
+              delay={0.2}
             />
 
             <FeatureCard
               icon={Utensils}
               title="Dining Concierge"
-              description="Find top-rated restaurants nearby. Get curated recommendations perfect for a romantic dinner or a lively group meal."
-              delay={0.4}
+              description="Find top-rated restaurants nearby. Curated recommendations for breakfast, lunch, or dinner."
+              delay={0.25}
             />
             <FeatureCard
               icon={Wine}
-              title="Bar Finder"
-              description="Discover hidden speakeasies and rooftop bars. The best nightlife spots for a drink or a night out with the crew."
+              title="Bar Scout"
+              description="Discover hidden speakeasies and rooftop bars. The best nightlife spots for a drink with the crew."
+              delay={0.3}
+            />
+            <FeatureCard
+              icon={Disc}
+              title="Nightclub Scout"
+              description="Find the hottest clubs and dance venues. Get the party started with top-rated nightlife picks."
+              delay={0.35}
+            />
+
+            <FeatureCard
+              icon={Clapperboard}
+              title="Movie Scout"
+              description="See what's playing nearby. Find cinemas, showtimes, and the perfect movie for date night."
+              delay={0.4}
+            />
+            <FeatureCard
+              icon={Brain}
+              title="Activity Planner"
+              description="Step-by-step itineraries for any occasion. Let AI create a custom schedule for your day out."
+              delay={0.45}
+            />
+            <FeatureCard
+              icon={Bed}
+              title="Hotel Finder"
+              description="Find the perfect stay. Discover top-rated hotels and getaways for your next trip."
               delay={0.5}
+            />
+
+            <FeatureCard
+              icon={Leaf}
+              title="Wellness & Spa"
+              description="Relax and recharge. Find the best spas, yoga studios, and wellness centers near you."
+              delay={0.55}
+            />
+            <FeatureCard
+              icon={Dumbbell}
+              title="Fitness Finder"
+              description="Get moving. Locate gyms, hiking trails, and fitness classes wherever you are."
+              delay={0.6}
             />
             <FeatureCard
               icon={Star}
               title="Rate & Remember"
-              description="Keep a digital scrapbook of your memories. Rate your experiences, upload photos, and cherish every moment."
-              delay={0.6}
+              description="Keep a digital scrapbook. Rate your experiences, upload photos, and cherish every moment."
+              delay={0.65}
             />
           </div>
         </div>
