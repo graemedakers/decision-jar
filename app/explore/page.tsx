@@ -162,7 +162,7 @@ export default function ExplorePage() {
     };
 
     return (
-        <main className="min-h-screen p-4 pb-24 relative w-full max-w-2xl mx-auto">
+        <main className="min-h-screen p-4 pb-24 relative w-full max-w-2xl mx-auto bg-slate-950">
             <h1 className="text-3xl font-bold text-white mb-2">Explore</h1>
             <p className="text-slate-400 mb-8">Tools to plan your perfect date.</p>
 
@@ -174,7 +174,7 @@ export default function ExplorePage() {
                             key={tool.title}
                             whileTap={{ scale: 0.98 }}
                             onClick={tool.action}
-                            className={`w-full text-left bg-slate-900/40 backdrop-blur-md border rounded-2xl p-5 flex items-start gap-4 transition-all shadow-lg ${styles.border} ${styles.hover}`}
+                            className={`w-full text-left bg-slate-900 border rounded-2xl p-5 flex items-start gap-4 transition-all shadow-lg ${styles.border} ${styles.hover}`}
                         >
                             <div className={`w-12 h-12 shrink-0 rounded-xl flex items-center justify-center ${styles.bgIcons}`}>
                                 <tool.icon className="w-6 h-6" />
@@ -184,7 +184,7 @@ export default function ExplorePage() {
                                     <span className="font-bold text-white text-lg">{tool.title}</span>
                                     {!isPremium && <Lock className="w-4 h-4 text-slate-500" />}
                                 </div>
-                                <p className="text-sm text-slate-400 leading-snug">{tool.desc}</p>
+                                <p className="text-sm text-slate-300 leading-snug">{tool.desc}</p>
                             </div>
                         </motion.button>
                     )
