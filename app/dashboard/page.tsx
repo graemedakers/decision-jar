@@ -928,7 +928,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Lower Section: Smart Tools Grid */}
-                    <div className="hidden md:block">
+                    <div>
                         <h3 className="text-center text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mb-8">Executive Decision Suite</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                             <motion.div
