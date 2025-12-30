@@ -16,14 +16,20 @@ export async function middleware(request: NextRequest) {
     // Redirect logged-in users from landing page to dashboard
     if (request.nextUrl.pathname === '/') {
         const session = request.cookies.get('session')?.value;
+        const nextAuthSession = request.cookies.get('next-auth.session-token')?.value ||
+            request.cookies.get('__Secure-next-auth.session-token')?.value;
+
         if (session) {
             try {
                 await decrypt(session);
                 return NextResponse.redirect(new URL('/dashboard', request.url));
             } catch (error) {
                 // Session invalid, let them stay on landing page
-                return NextResponse.next();
             }
+        }
+
+        if (nextAuthSession) {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
         }
     }
 
@@ -32,14 +38,13 @@ export async function middleware(request: NextRequest) {
         request.nextUrl.pathname.startsWith('/jar') ||
         request.nextUrl.pathname.startsWith('/memories')) {
         const session = request.cookies.get('session')?.value;
+        const nextAuthSession = request.cookies.get('next-auth.session-token')?.value ||
+            request.cookies.get('__Secure-next-auth.session-token')?.value;
 
-        if (!session) {
+        if (!session && !nextAuthSession) {
             return NextResponse.redirect(new URL('/', request.url));
         }
 
-        // OPTIMIZATION: We allow the request to proceed if a session cookie exists,
-        // skipping Edge-based decryption which can be flaky with env vars.
-        // The /api/auth endpoints (Node runtime) will perform the strict validation.
         return NextResponse.next();
     }
 

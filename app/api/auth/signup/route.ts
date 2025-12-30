@@ -30,7 +30,9 @@ export async function POST(request: Request) {
         let isPremiumGifted = false;
         let user;
 
-        if (!inviteCode) {
+        const shouldCreateJar = !inviteCode && (topic || type);
+
+        if (shouldCreateJar) {
             // Determine Name
             let jarName = `${name}'s Jar`;
             const selectedTopic = topic || "General";
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
                     homeTown: location || 'Unknown',
                     activeJarId: jar.id,
                     coupleId: jar.id, // Legacy support
-                    hasUsedTrial: false, // Default false until they subscribe/start trial
+                    hasUsedTrial: false,
                     verificationToken,
                     emailVerified: null,
                     memberships: {
@@ -70,6 +72,18 @@ export async function POST(request: Request) {
                         }
                     }
                 },
+            });
+        } else if (!inviteCode) {
+            // Create user WITHOUT a jar
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    name,
+                    passwordHash,
+                    homeTown: location || 'Unknown',
+                    verificationToken,
+                    emailVerified: null,
+                }
             });
         } else {
             // JOINING EXISTING JAR (via code)

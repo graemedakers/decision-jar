@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from './prisma';
 
 const secretKey = process.env.AUTH_SECRET || "secret-key-change-me-in-prod";
 const key = new TextEncoder().encode(secretKey);
@@ -39,7 +40,24 @@ export async function login(userData: any) {
 export async function logout() {
     // Destroy the session
     const isProduction = process.env.NODE_ENV === 'production';
-    (await cookies()).set('session', '', {
+    const cookieStore = await cookies();
+
+    // Clear custom session
+    cookieStore.set('session', '', {
+        expires: new Date(0),
+        path: '/',
+        sameSite: 'lax',
+        secure: isProduction
+    });
+
+    // Clear NextAuth sessions
+    cookieStore.set('next-auth.session-token', '', {
+        expires: new Date(0),
+        path: '/',
+        sameSite: 'lax',
+        secure: isProduction
+    });
+    cookieStore.set('__Secure-next-auth.session-token', '', {
         expires: new Date(0),
         path: '/',
         sameSite: 'lax',
@@ -48,13 +66,51 @@ export async function logout() {
 }
 
 export async function getSession() {
-    const session = (await cookies()).get('session')?.value;
-    if (!session) return null;
-    try {
-        return await decrypt(session);
-    } catch (error) {
-        return null;
+    // 1. Check custom jose session
+    const sessionCookie = (await cookies()).get('session')?.value;
+    if (sessionCookie) {
+        try {
+            const payload = await decrypt(sessionCookie);
+            if (payload) return payload;
+        } catch (error) {
+            // Fall through to NextAuth
+        }
     }
+
+    // 2. Check NextAuth session
+    try {
+        const { getServerSession } = await import('next-auth');
+        const { authOptions } = await import('./auth-options');
+        const nextAuthSession = await getServerSession(authOptions);
+
+        console.log("NextAuth Session check:", !!nextAuthSession, nextAuthSession?.user?.email);
+
+        if (nextAuthSession?.user?.email) {
+            // Map NextAuth session to match custom session structure
+            const user = await (prisma as any).user.findUnique({
+                where: { email: nextAuthSession.user.email }
+            });
+
+            console.log("Database user lookup for NextAuth:", !!user);
+
+            if (user) {
+                return {
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        activeJarId: user.activeJarId,
+                        coupleId: user.coupleId
+                    },
+                    expires: nextAuthSession.expires
+                };
+            }
+        }
+    } catch (error) {
+        console.error("Error checking NextAuth session:", error);
+    }
+
+    return null;
 }
 
 export async function updateSession(request: NextRequest) {
