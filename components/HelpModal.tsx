@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -34,6 +34,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "theatre-concierge", title: "Theatre Scout", icon: Ticket },
         { id: "movie-concierge", title: "Movie Scout", icon: Clapperboard },
         { id: "hotel-concierge", title: "Hotel Finder", icon: Bed },
+        { id: "game-concierge", title: "Game Scout", icon: Gamepad2 },
         { id: "wellness-concierge", title: "Wellness & Spa", icon: Leaf },
         { id: "fitness-concierge", title: "Fitness Finder", icon: Dumbbell },
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
@@ -196,6 +197,20 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <li><strong>Style:</strong> Filter by Boutique, Luxury, Resort, or Budget.</li>
                             <li><strong>Amenities:</strong> Look for specific features like "Pool", "Spa", "Rooftop Bar".</li>
                             <li><strong>Booking:</strong> Get direct links to book your stay.</li>
+                        </ul>
+                    </div>
+                );
+            case "game-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Game Scout <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Planning a game night? Find the perfect board game or video game for your group.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Preferences:</strong> Filter by Genre (e.g., Strategy, Party), Player Count, Budget, and Duration.</li>
+                            <li><strong>Recommendations:</strong> Get curated picks with descriptions, difficulty levels, and price estimates.</li>
+                            <li><strong>Add to Jar:</strong> Save games to your jar to play later!</li>
                         </ul>
                     </div>
                 );

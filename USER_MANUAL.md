@@ -215,6 +215,11 @@ The Executive Decision Suite offers premium access to AI-powered scouts.
 1.  Click **"Hotel Finder"**.
 2.  Plan your staycation or trip. Find Boutique, Luxury, or Budget stays.
 
+### Game Scout
+1.  Click **"Game Scout"**.
+2.  Plan your game night with the perfect Board Game or Video Game.
+3.  Filter by Genre (Strategy, Party, etc.), Player Count, and Budget.
+
 ### Wellness & Fitness
 - **Wellness:** Find spas, yoga studios, and relaxation spots.
 - **Fitness:** Locate gyms, trails, and classes.
