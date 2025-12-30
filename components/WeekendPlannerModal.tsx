@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { Sparkles, Calendar, MapPin, Loader2, ExternalLink, Plus, Check, ArrowRight, X, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
+import { getCurrentLocation } from "@/lib/utils";
 
 interface Suggestion {
     title: string;
@@ -190,7 +191,24 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                     {!hasGenerated && !isLoading ? (
                         <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Where are you this weekend?</label>
+                                <div className="flex justify-between items-center mr-1">
+                                    <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Where are you this weekend?</label>
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            try {
+                                                const currentLoc = await getCurrentLocation();
+                                                setCustomLocation(currentLoc);
+                                            } catch (err) {
+                                                alert("Could not get location. Please check permissions.");
+                                            }
+                                        }}
+                                        className="text-[10px] uppercase tracking-wider font-bold text-secondary hover:text-secondary/80 transition-colors flex items-center gap-1"
+                                    >
+                                        <MapPin className="w-3 h-3" />
+                                        Use GPS
+                                    </button>
+                                </div>
                                 <div className="relative">
                                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                     <Input

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, Loader2, DollarSign, MapPin, Activity } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getCategoriesForTopic } from "@/lib/categories";
+import { getCurrentLocation } from "@/lib/utils";
 
 interface SurpriseMeModalProps {
     isOpen: boolean;
@@ -98,7 +99,24 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                         <div className="overflow-y-auto overflow-x-hidden px-1 -mx-1 pb-4 custom-scrollbar">
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Location</label>
+                                    <div className="flex justify-between items-center mr-1">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Location</label>
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                try {
+                                                    const currentLoc = await getCurrentLocation();
+                                                    setFormData({ ...formData, location: currentLoc });
+                                                } catch (err) {
+                                                    alert("Could not get location. Please check permissions.");
+                                                }
+                                            }}
+                                            className="text-[10px] uppercase tracking-wider font-bold text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 transition-colors flex items-center gap-1"
+                                        >
+                                            <MapPin className="w-3 h-3" />
+                                            Use GPS
+                                        </button>
+                                    </div>
                                     <div className="relative">
                                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                         <input

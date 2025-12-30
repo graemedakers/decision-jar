@@ -39,3 +39,40 @@ export function isCapacitor() {
     }
     return false;
 }
+
+export async function getCurrentLocation(): Promise<string> {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error("Geolocation is not supported by your browser"));
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                try {
+                    // Use OpenStreetMap Nominatim for free reverse geocoding
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`);
+                    const data = await res.json();
+
+                    if (data.address) {
+                        const city = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
+                        const state = data.address.state || data.address.country || "";
+                        if (city && state) resolve(`${city}, ${state}`);
+                        else if (city || state) resolve(city || state);
+                        else resolve(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                    } else {
+                        resolve(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                    }
+                } catch (error) {
+                    // Fallback to coordinates
+                    resolve(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                }
+            },
+            (error) => {
+                reject(error);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    });
+}

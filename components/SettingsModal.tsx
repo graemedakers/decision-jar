@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { getApiUrl, isCapacitor } from "@/lib/utils";
+import { getApiUrl, isCapacitor, getCurrentLocation } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteLogModal } from "@/components/DeleteLogModal";
 import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown } from "lucide-react";
@@ -265,7 +265,24 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Default Search Location</label>
+                                    <div className="flex justify-between items-center ml-1">
+                                        <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Default Search Location</label>
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                try {
+                                                    const currentLoc = await getCurrentLocation();
+                                                    setLocation(currentLoc);
+                                                } catch (err) {
+                                                    alert("Could not get location. Please ensure site permissions are enabled.");
+                                                }
+                                            }}
+                                            className="text-[10px] uppercase tracking-wider font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                        >
+                                            <MapPin className="w-3 h-3" />
+                                            Locate Me
+                                        </button>
+                                    </div>
                                     <Input
                                         value={location}
                                         onChange={(e) => setLocation(e.target.value)}

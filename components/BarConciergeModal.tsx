@@ -15,6 +15,7 @@ interface BarConciergeModalProps {
 }
 
 import { useConciergeActions } from "@/hooks/useConciergeActions";
+import { getCurrentLocation } from "@/lib/utils";
 
 export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: BarConciergeModalProps) {
     const [isLoading, setIsLoading] = useState(false);
@@ -126,7 +127,24 @@ export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, 
                         <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 space-y-6 px-7">
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Location to Search</label>
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Location to Search</label>
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                try {
+                                                    const currentLoc = await getCurrentLocation();
+                                                    setLocation(currentLoc);
+                                                } catch (err) {
+                                                    alert("Could not get location. Please check permissions.");
+                                                }
+                                            }}
+                                            className="text-[10px] uppercase tracking-wider font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 transition-colors flex items-center gap-1"
+                                        >
+                                            <MapPin className="w-3 h-3" />
+                                            Use GPS
+                                        </button>
+                                    </div>
                                     <div className="relative">
                                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                         <input
