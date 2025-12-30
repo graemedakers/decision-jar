@@ -11,10 +11,11 @@ import { ChevronDown } from "lucide-react";
 interface AddMemoryModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
     isPro?: boolean;
 }
 
-export function AddMemoryModal({ isOpen, onClose, isPro }: AddMemoryModalProps) {
+export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro }: AddMemoryModalProps) {
     const router = useRouter();
     const [description, setDescription] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -139,6 +140,7 @@ export function AddMemoryModal({ isOpen, onClose, isPro }: AddMemoryModalProps) 
                 setPhotoUrls([]);
 
                 onClose();
+                if (onSuccess) onSuccess();
                 router.refresh();
             } else {
                 const data = await res.json();

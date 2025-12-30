@@ -313,6 +313,7 @@ export default function MemoriesPage() {
             <AddMemoryModal
                 isOpen={addingMemory}
                 onClose={() => setAddingMemory(false)}
+                onSuccess={fetchIdeas}
                 isPro={isPremium}
             />
         </main>
