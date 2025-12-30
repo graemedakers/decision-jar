@@ -52,15 +52,25 @@ export async function getCurrentLocation(): Promise<string> {
                 const { latitude, longitude } = position.coords;
                 try {
                     // Use OpenStreetMap Nominatim for free reverse geocoding
-                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`);
+                    // Use zoom 18 for max precision (building/road level)
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
                     const data = await res.json();
 
                     if (data.address) {
-                        const city = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
+                        const suburb = data.address.suburb || data.address.neighbourhood || data.address.residential || "";
+                        const city = data.address.city || data.address.town || data.address.village || "";
                         const state = data.address.state || data.address.country || "";
-                        if (city && state) resolve(`${city}, ${state}`);
-                        else if (city || state) resolve(city || state);
-                        else resolve(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+
+                        let locationParts = [];
+                        if (suburb) locationParts.push(suburb);
+                        if (city) locationParts.push(city);
+                        if (!suburb && !city && state) locationParts.push(state);
+
+                        if (locationParts.length > 0) {
+                            resolve(locationParts.join(", "));
+                        } else {
+                            resolve(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                        }
                     } else {
                         resolve(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
                     }
