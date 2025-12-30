@@ -23,6 +23,12 @@ export async function POST(request: Request) {
         }
 
         // Check password
+        if (!user.passwordHash) {
+            return NextResponse.json({
+                error: 'This account was created using Google or Facebook. Please use social login to continue.'
+            }, { status: 401 });
+        }
+
         const isValid = await bcrypt.compare(password, user.passwordHash);
 
         if (!isValid) {
