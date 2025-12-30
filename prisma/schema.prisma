@@ -148,6 +148,7 @@ model User {
   subscriptionEndsAt     DateTime?
   premiumInviteToken     String?   // For graemedakers@gmail.com premium invite links
   votes                  Vote[]
+  rateLimit              RateLimit?
 }
 
 model Idea {
@@ -293,4 +294,13 @@ model AICache {
   value     String   // The JSON response
   createdAt DateTime @default(now())
   expiresAt DateTime
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  count     Int      @default(0)
+  windowStart DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

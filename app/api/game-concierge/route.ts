@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { isCouplePremium, isUserPro } from '@/lib/premium';
 import { reliableGeminiCall } from '@/lib/gemini';
 import { getExcludedNames } from '@/lib/concierge';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 
 export async function POST(request: Request) {
@@ -39,6 +40,11 @@ export async function POST(request: Request) {
 
         if (!isCouplePremium(activeJar) && !isUserPro(user)) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
+        }
+
+        const rateLimit = await checkRateLimit(user);
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ error: 'Rate limit exceeded', details: rateLimit.error }, { status: 429 });
         }
 
         const { genre, players, budget, duration } = await request.json().catch(() => ({}));

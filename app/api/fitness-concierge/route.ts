@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { isCouplePremium, isUserPro } from '@/lib/premium';
 import { reliableGeminiCall } from '@/lib/gemini';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { getExcludedNames } from '@/lib/concierge';
 
 
@@ -39,6 +40,11 @@ export async function POST(request: Request) {
 
         if (!isCouplePremium(activeJar) && !isUserPro(user)) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
+        }
+
+        const rateLimit = await checkRateLimit(user);
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ error: 'Rate limit exceeded', details: rateLimit.error }, { status: 429 });
         }
 
         const { workoutType, vibe, budget, location } = await request.json().catch(() => ({}));
