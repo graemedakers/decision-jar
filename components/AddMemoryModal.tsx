@@ -3,9 +3,10 @@
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Star, Save, Camera, Loader2, Trash2, Calendar } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GooglePhotosPicker } from "./GooglePhotosPicker";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 
 interface AddMemoryModalProps {
     isOpen: boolean;
@@ -19,9 +20,47 @@ export function AddMemoryModal({ isOpen, onClose, isPro }: AddMemoryModalProps) 
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [rating, setRating] = useState(0);
     const [notes, setNotes] = useState("");
+    const [category, setCategory] = useState("");
+    const [allowedCategories, setAllowedCategories] = useState<{ id: string, label: string }[]>([]);
     const [photoUrls, setPhotoUrls] = useState<string[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            // Fetch current jar topic to get valid categories
+            fetch('/api/auth/me')
+                .then(res => res.json())
+                .then(data => {
+                    if (data?.user) {
+                        const topic = data.user.jarTopic;
+                        const custom = data.user.customCategories;
+                        // We need getCategoriesForTopic but let's just use the API's validation logic or fetch them
+                        // Actually, I'll just import it since this is a client component
+                    }
+                });
+        }
+    }, [isOpen]);
+
+    // Better: Import and use directly
+    const fetchCategories = async () => {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (data.user) {
+            const { getCategoriesForTopic } = await import('@/lib/categories');
+            const cats = getCategoriesForTopic(data.user.jarTopic, data.user.customCategories);
+            setAllowedCategories(cats);
+            if (!category && cats.length > 0) {
+                setCategory(cats[0].id);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchCategories();
+        }
+    }, [isOpen]);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -80,8 +119,8 @@ export function AddMemoryModal({ isOpen, onClose, isPro }: AddMemoryModalProps) 
                     rating,
                     notes,
                     photoUrls,
+                    category: category || undefined, // Send selected category
                     // Defaults
-                    category: 'ACTIVITY',
                     cost: 'FREE',
                     duration: 2,
                     indoor: false,
@@ -176,6 +215,24 @@ export function AddMemoryModal({ isOpen, onClose, isPro }: AddMemoryModalProps) 
                                     ))}
                                 </div>
                             </div>
+
+                            {allowedCategories.length > 0 && (
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-400">Category</label>
+                                    <div className="relative">
+                                        <select
+                                            value={category}
+                                            onChange={(e) => setCategory(e.target.value)}
+                                            className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white appearance-none focus:outline-none focus:border-primary/50"
+                                        >
+                                            {allowedCategories.map(cat => (
+                                                <option key={cat.id} value={cat.id} className="bg-slate-50 dark:bg-slate-900">{cat.label}</option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-700 dark:text-slate-400">Notes (Optional)</label>

@@ -13,6 +13,13 @@ export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
         { id: "SOCIAL", label: "Event", icon: PartyPopper },
         { id: "CULTURAL", label: "Museum/Art", icon: Ticket },
     ],
+    "Romantic": [
+        { id: "ACTIVITY", label: "Activity", icon: Activity },
+        { id: "DINING", label: "Dining", icon: Utensils },
+        { id: "NIGHTLIFE", label: "Nightlife", icon: Martini },
+        { id: "STAYCATION", label: "Staycation", icon: Bed },
+        { id: "CULTURAL", label: "Art & Culture", icon: Ticket },
+    ],
     "Restaurants": [
         { id: "FINE_DINING", label: "Fine Dining", icon: ChefHat },
         { id: "CASUAL", label: "Casual", icon: Utensils },
@@ -87,6 +94,14 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
         gradientTo: "to-emerald-600",
         bgBlob1: "bg-green-500/10",
         bgBlob2: "bg-emerald-600/10"
+    },
+    "Romantic": {
+        primary: "pink-500",
+        secondary: "rose-600",
+        gradientFrom: "from-pink-400",
+        gradientTo: "to-rose-600",
+        bgBlob1: "bg-pink-500/10",
+        bgBlob2: "bg-rose-600/10"
     },
     "Restaurants": {
         primary: "orange-500",

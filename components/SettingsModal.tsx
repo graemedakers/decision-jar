@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/Input";
 import { getApiUrl, isCapacitor } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteLogModal } from "@/components/DeleteLogModal";
-import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users } from "lucide-react";
+import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -29,6 +29,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
     const [hasPaid, setHasPaid] = useState(false);
     const [isNative, setIsNative] = useState(false);
     const [jarType, setJarType] = useState<"ROMANTIC" | "SOCIAL">("ROMANTIC");
+    const [jarName, setJarName] = useState("");
+    const [jarTopic, setJarTopic] = useState("");
 
     // Premium Invite Logic
     const [currentUserEmail, setCurrentUserEmail] = useState("");
@@ -54,7 +56,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                         setIsPremium(!!data.user.isPremium);
                         setHasPaid(!!data.user.hasPaid);
                         if (data.user.jarType) setJarType(data.user.jarType);
-                        if (data.user.jarType) setJarType(data.user.jarType);
+                        setJarName(data.user.jarName || "");
+                        setJarTopic(data.user.jarTopic || "");
                         setCurrentUserEmail(data.user.email || "");
                         setPremiumInviteToken(data.user.premiumInviteToken || "");
                     }
@@ -77,6 +80,19 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                 }),
                 credentials: 'include',
             });
+
+            // Update Jar settings if creator
+            if (isCreator) {
+                await fetch(getApiUrl('/api/jar/settings'), {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: jarName,
+                        topic: jarTopic,
+                    }),
+                    credentials: 'include',
+                });
+            }
 
             if (userRes.ok) {
                 onClose();
@@ -274,6 +290,50 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                         Comma separated. Used to personalize smart suggestions.
                                     </p>
                                 </div>
+
+                                {isCreator && (
+                                    <div className="space-y-6 pt-6 border-t border-slate-200 dark:border-white/10">
+                                        <h3 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                            <Sparkles className="w-4 h-4 text-primary" />
+                                            Jar Configuration
+                                        </h3>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Jar Name</label>
+                                            <Input
+                                                value={jarName}
+                                                onChange={(e) => setJarName(e.target.value)}
+                                                placeholder="Our Great Ideas"
+                                                className="text-slate-900 dark:text-white"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Jar Topic</label>
+                                            <div className="relative">
+                                                <select
+                                                    value={jarTopic}
+                                                    onChange={(e) => setJarTopic(e.target.value)}
+                                                    className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white appearance-none focus:outline-none focus:border-primary/50"
+                                                >
+                                                    <option value="General" className="bg-white dark:bg-slate-900">General (Activities)</option>
+                                                    <option value="Romantic" className="bg-white dark:bg-slate-900">Date Night (Romantic)</option>
+                                                    <option value="Restaurants" className="bg-white dark:bg-slate-900">Restaurants</option>
+                                                    <option value="Bars" className="bg-white dark:bg-slate-900">Bars & Pubs</option>
+                                                    <option value="Nightclubs" className="bg-white dark:bg-slate-900">Nightclubs</option>
+                                                    <option value="Movies" className="bg-white dark:bg-slate-900">Movies</option>
+                                                    <option value="Wellness" className="bg-white dark:bg-slate-900">Wellness</option>
+                                                    <option value="Fitness" className="bg-white dark:bg-slate-900">Fitness</option>
+                                                    <option value="Travel" className="bg-white dark:bg-slate-900">Travel</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                                            </div>
+                                            <p className="text-[10px] text-slate-500 ml-1">
+                                                The topic determines which categories (Activity, Dining, etc) are available.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <Button type="submit" className="w-full" isLoading={isLoading}>
                                     Save Changes
