@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-    // Configure Cloudinary inside the handler to avoid build-time evaluation errors
+    // Dynamically import cloudinary to prevent build-time evaluation of env variables
+    const { v2: cloudinary } = await import('cloudinary');
+
+    // Configure Cloudinary inside the handler
     cloudinary.config({
         cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
         api_key: process.env.CLOUDINARY_API_KEY,
