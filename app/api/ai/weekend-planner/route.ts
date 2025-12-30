@@ -87,6 +87,28 @@ export async function POST(request: Request) {
             });
         }
 
+        // --- CACHE CHECK ---
+        const cacheKey = `weekend-planner-${location.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${targetDateStr.replace(/\s+/g, '-')}`;
+
+        try {
+            // Using raw query to bypass potential Prisma Client generation issues in dev
+            const cached: any[] = await prisma.$queryRaw`
+                SELECT value FROM "AICache" 
+                WHERE key = ${cacheKey} 
+                AND "expiresAt" > NOW()
+                LIMIT 1
+            `;
+
+            if (cached.length > 0) {
+                console.log("Serving from cache:", cacheKey);
+                const suggestions = JSON.parse(cached[0].value);
+                return NextResponse.json({ suggestions, cached: true });
+            }
+        } catch (e) {
+            console.warn("Cache check failed:", e);
+        }
+        // -------------------
+
         const prompt = `
         I need 5 distinct date ideas for a couple in ${location} for ${context} (${targetDateStr}).
         ${userInterests}
@@ -118,6 +140,26 @@ export async function POST(request: Request) {
 
         try {
             const suggestions = await reliableGeminiCall(prompt);
+
+            // --- SAVE TO CACHE ---
+            try {
+                // Expire in 24 hours
+                const expiresAt = new Date();
+                expiresAt.setHours(expiresAt.getHours() + 24);
+
+                // Using raw query for insert/upsert
+                await prisma.$executeRaw`
+                    INSERT INTO "AICache" (id, key, value, "createdAt", "expiresAt")
+                    VALUES (${crypto.randomUUID()}, ${cacheKey}, ${JSON.stringify(suggestions)}, NOW(), ${expiresAt})
+                    ON CONFLICT (key) DO UPDATE SET
+                    value = ${JSON.stringify(suggestions)},
+                    "expiresAt" = ${expiresAt}
+                `;
+            } catch (e) {
+                console.warn("Failed to write to cache:", e);
+            }
+            // ---------------------
+
             return NextResponse.json({ suggestions });
         } catch (error: any) {
             console.error("Gemini failed, falling back to mock", error);

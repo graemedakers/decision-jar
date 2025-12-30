@@ -17,9 +17,10 @@ interface MovieConciergeModalProps {
 
 export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: MovieConciergeModalProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
-    const [location, setLocation] = useState(userLocation || "");
+    const [selectedDecades, setSelectedDecades] = useState<string[]>([]);
     const [recommendations, setRecommendations] = useState<any[]>([]);
     const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -34,12 +35,22 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
         "Scary", "Educational", "Inspirational", "Funny"
     ];
 
+    const PLATFORM_OPTIONS = [
+        "Netflix", "Prime Video", "Disney+", "Hulu",
+        "Max", "Apple TV+", "Peacock", "Paramount+"
+    ];
+
+    const DECADE_OPTIONS = [
+        "New Releases", "2020s", "2010s", "2000s", "90s", "80s", "Classics (Pre-80s)"
+    ];
+
     const [prevOpen, setPrevOpen] = useState(false);
 
     if (isOpen && !prevOpen) {
-        setLocation(userLocation || "");
+        setSelectedPlatforms([]);
         setSelectedGenres([]);
         setSelectedVibes([]);
+        setSelectedDecades([]);
         setRecommendations([]);
         setPrevOpen(true);
     } else if (!isOpen && prevOpen) {
@@ -71,7 +82,8 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
                 body: JSON.stringify({
                     genre: selectedGenres.join(", "),
                     vibe: selectedVibes.join(", "),
-                    location
+                    platforms: selectedPlatforms.join(", "),
+                    decades: selectedDecades.join(", ")
                 }),
             });
 
@@ -118,18 +130,39 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
                             <div className="space-y-4">
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Location to Search</label>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                        <input
-                                            type="text"
-                                            value={location}
-                                            onChange={(e) => setLocation(e.target.value)}
-                                            placeholder="Current location, Neighborhood, or City"
-                                            className="glass-input w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
-                                        />
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Streaming Platforms (Select multiple)</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {PLATFORM_OPTIONS.map((p) => (
+                                            <button
+                                                key={p}
+                                                onClick={() => toggleSelection(p, selectedPlatforms, setSelectedPlatforms)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedPlatforms.includes(p)
+                                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
+                                                    : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                                                    }`}
+                                            >
+                                                {p}
+                                            </button>
+                                        ))}
                                     </div>
-                                    <p className="text-xs text-slate-500">Edit this to search in a specific area.</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Era / Decade (Select multiple)</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {DECADE_OPTIONS.map((d) => (
+                                            <button
+                                                key={d}
+                                                onClick={() => toggleSelection(d, selectedDecades, setSelectedDecades)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedDecades.includes(d)
+                                                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                                                    : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                                                    }`}
+                                            >
+                                                {d}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-2">

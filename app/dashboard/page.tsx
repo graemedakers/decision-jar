@@ -23,7 +23,8 @@ import { MovieConciergeModal } from "@/components/MovieConciergeModal";
 import { WellnessConciergeModal } from "@/components/WellnessConciergeModal";
 import { FitnessConciergeModal } from "@/components/FitnessConciergeModal";
 import { TheatreConciergeModal } from "@/components/TheatreConciergeModal";
-import { Wine, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket } from "lucide-react";
+import { GameConciergeModal } from "@/components/GameConciergeModal";
+import { Wine, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Gamepad2 } from "lucide-react";
 import { PremiumBanner } from "@/components/PremiumBanner";
 import { DateNightPlannerModal } from "@/components/DateNightPlannerModal";
 import { Moon, Heart } from "lucide-react";
@@ -107,6 +108,7 @@ export default function DashboardPage() {
     const [isWellnessModalOpen, setIsWellnessModalOpen] = useState(false);
     const [isFitnessModalOpen, setIsFitnessModalOpen] = useState(false);
     const [isTheatreModalOpen, setIsTheatreModalOpen] = useState(false);
+    const [isGameModalOpen, setIsGameModalOpen] = useState(false);
     const [isDateNightOpen, setIsDateNightOpen] = useState(false);
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isSurpriseModalOpen, setIsSurpriseModalOpen] = useState(false);
@@ -470,6 +472,7 @@ export default function DashboardPage() {
                     onClose={() => setIsPlannerOpen(false)}
                     userLocation={combinedLocation || undefined}
                     onIdeaAdded={handleContentUpdate}
+                    onFavoriteUpdated={fetchFavorites}
                 />
 
                 <DiningConciergeModal
@@ -570,6 +573,18 @@ export default function DashboardPage() {
                         setIsTheatreModalOpen(false);
                     }}
                     userLocation={combinedLocation || undefined}
+                    onIdeaAdded={handleContentUpdate}
+                    onGoTonight={(idea) => {
+                        setSelectedIdea(idea);
+                    }}
+                    onFavoriteUpdated={fetchFavorites}
+                />
+
+                <GameConciergeModal
+                    isOpen={isGameModalOpen}
+                    onClose={() => {
+                        setIsGameModalOpen(false);
+                    }}
                     onIdeaAdded={handleContentUpdate}
                     onGoTonight={(idea) => {
                         setSelectedIdea(idea);
@@ -1151,6 +1166,27 @@ export default function DashboardPage() {
                                     <div>
                                         <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Theatre Scout</span>
                                         <span className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed block">Discover plays, musicals, and live performances.</span>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                whileHover={{ scale: 1.02, y: -4 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="group relative h-full"
+                                onClick={() => isPremium ? setIsGameModalOpen(true) : setIsPremiumModalOpen(true)}
+                            >
+                                <div className="absolute -inset-0.5 bg-gradient-to-b from-indigo-500/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition duration-500" />
+                                <div className="relative h-full bg-white dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-3xl p-8 flex flex-col gap-6 cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 transition-all">
+                                    <div className="flex items-center justify-between">
+                                        <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500 shadow-inner">
+                                            <Gamepad2 className="w-7 h-7" />
+                                        </div>
+                                        {!isPremium && <Lock className="w-5 h-5 text-slate-300 dark:text-slate-600" />}
+                                    </div>
+                                    <div>
+                                        <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Game Scout</span>
+                                        <span className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed block">Find online digital games to play solo or with friends.</span>
                                     </div>
                                 </div>
                             </motion.div>

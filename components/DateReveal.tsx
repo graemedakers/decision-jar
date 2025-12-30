@@ -1,7 +1,7 @@
 import { getItinerary, getApiUrl } from "@/lib/utils";
 import { ItineraryPreview } from "./ItineraryPreview"; // Keep this import
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Clock, Sparkles, Loader2, MapPin, ExternalLink, Star, Utensils, Check } from "lucide-react"; // Removed DollarSign, Activity
+import { X, Calendar, Clock, Sparkles, Loader2, MapPin, ExternalLink, Star, Utensils, Check, Popcorn } from "lucide-react"; // Removed DollarSign, Activity
 import { Button } from "./ui/Button";
 import { useState } from "react";
 import { Confetti } from "./Confetti";
@@ -14,10 +14,10 @@ interface Idea {
     activityLevel: string;
     cost: string;
     timeOfDay: string;
-    // Optional fields for Dining Concierge
+    // Optional fields for Concierge Items (Dining, Movies, Wellness)
     website?: string;
-    address?: string;
-    openingHours?: string;
+    address?: string; // For Movies: "Streaming" or "Cinema Name"
+    openingHours?: string; // For Movies: Runtime
     googleRating?: number;
     details?: string;
 }
@@ -165,19 +165,26 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                     {idea.address && (
                                         <div className="flex items-start gap-3">
                                             <div className="p-2 bg-white dark:bg-white/10 rounded-full shrink-0 shadow-sm dark:shadow-none">
-                                                <MapPin className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                                                {idea.address === 'Streaming'
+                                                    ? <Popcorn className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                                                    : <MapPin className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                                                }
                                             </div>
                                             <div>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">Address</p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">
+                                                    {idea.address === 'Streaming' || idea.address === 'Cinema' ? 'Watch On' : 'Address'}
+                                                </p>
                                                 <p className="text-sm text-slate-800 dark:text-white">{idea.address}</p>
-                                                <a
-                                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(idea.description + " " + idea.address)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-xs text-secondary hover:underline mt-1 inline-block"
-                                                >
-                                                    View on Google Maps
-                                                </a>
+                                                {idea.address !== 'Streaming' && (
+                                                    <a
+                                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(idea.description + " " + idea.address)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs text-secondary hover:underline mt-1 inline-block"
+                                                    >
+                                                        View on Google Maps
+                                                    </a>
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -188,7 +195,9 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                                 <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">Opening Hours</p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">
+                                                    {idea.address === 'Streaming' || idea.address === 'Cinema' ? 'Runtime' : 'Opening Hours'}
+                                                </p>
                                                 <p className="text-sm text-slate-800 dark:text-white">{idea.openingHours}</p>
                                             </div>
                                         </div>
@@ -222,7 +231,8 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                             className="w-full mt-2 bg-white text-slate-900 hover:bg-slate-100 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white border border-slate-200 dark:border-transparent shadow-sm dark:shadow-none"
                                         >
                                             <ExternalLink className="w-4 h-4 mr-2" />
-                                            Make Reservation / Visit Website
+                                            {idea.address === 'Streaming' ? `Watch on ${idea.cost !== '$' && idea.cost !== 'Free' ? 'Streaming' : 'Service'}` :
+                                                idea.address === 'Cinema' ? 'Get Tickets' : 'Make Reservation / Visit Website'}
                                         </Button>
                                     )}
                                 </div>

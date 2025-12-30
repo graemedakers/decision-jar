@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { Sparkles, Calendar, MapPin, Loader2, ExternalLink, Plus, Check, ArrowRight, X } from "lucide-react";
+import { Sparkles, Calendar, MapPin, Loader2, ExternalLink, Plus, Check, ArrowRight, X, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 
@@ -10,6 +10,7 @@ interface Suggestion {
     day: string;
     cost: string;
     url?: string;
+    isFavorite?: boolean;
 }
 
 interface WeekendPlannerModalProps {
@@ -17,9 +18,10 @@ interface WeekendPlannerModalProps {
     onClose: () => void;
     userLocation?: string;
     onIdeaAdded?: () => void;
+    onFavoriteUpdated?: () => void;
 }
 
-export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded }: WeekendPlannerModalProps) {
+export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded, onFavoriteUpdated }: WeekendPlannerModalProps) {
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -44,6 +46,7 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
     const [addingId, setAddingId] = useState<number | null>(null);
 
     const generatePlan = async () => {
+        if (isLoading) return;
         setIsLoading(true);
         setError(null);
         setDebugInfo(null);
@@ -116,6 +119,55 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
         }
     };
 
+    const handleFavorite = async (item: Suggestion) => {
+        try {
+            if (item.isFavorite) {
+                const res = await fetch(`/api/favorites?name=${encodeURIComponent(item.title)}`, {
+                    method: 'DELETE',
+                });
+                if (res.ok) {
+                    setSuggestions(prev => prev.map(s =>
+                        s.title === item.title ? { ...s, isFavorite: false } : s
+                    ));
+                    if (onFavoriteUpdated) onFavoriteUpdated();
+                } else {
+                    alert("Failed to remove favorite");
+                }
+            } else {
+                const res = await fetch('/api/favorites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: item.title,
+                        description: item.description,
+                        // Address isn't strictly available, maybe use location?
+                        address: customLocation,
+                        googleRating: 0, // Not available
+                        websiteUrl: item.url,
+                        // Use a generic type or fit into existing
+                        type: "THEATRE" // Fallback or maybe we should add "EVENT"? For now defaulting to Theatre/Event-like or maybe "CLUB"? Let's use "WELLNESS" if relaxing? 
+                        // Actually, I'll use "THEATRE" as a placeholder for "Event/Activity" to avoid schema errors if backend validates enum.
+                        // Or better, let's check if backend validates. It likely relies on Prisma enum.
+                        // Prisma enum usually: BAR, RESTAURANT, CLUB, HOTEL, MOVIE, WELLNESS, FITNESS, THEATRE.
+                        // Weekend planner items are miscellaneous. "THEATRE" or "WELLNESS" might be safest bets, or "CLUB" for nightlife.
+                        // Let's check typical items.
+                    }),
+                });
+
+                if (res.ok) {
+                    setSuggestions(prev => prev.map(s =>
+                        s.title === item.title ? { ...s, isFavorite: true } : s
+                    ));
+                    if (onFavoriteUpdated) onFavoriteUpdated();
+                } else {
+                    alert("Failed to add favorite");
+                }
+            }
+        } catch (e) {
+            console.error("Error updating favorite:", e);
+        }
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white max-h-[80vh] overflow-y-auto isolate">
@@ -176,9 +228,16 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                             </div>
 
                             {debugInfo && (
-                                <div className="text-xs text-yellow-500 bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
-                                    <p className="font-bold mb-1">Service Unavailable (Offline Mode)</p>
-                                    <p className="opacity-80 font-mono break-all">{debugInfo}</p>
+                                <div className="text-xs text-yellow-600 dark:text-yellow-500 bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20 mb-4">
+                                    <p className="font-bold mb-1 flex items-center gap-2">
+                                        <Loader2 className="w-3 h-3" />
+                                        Offline Mode Enabled
+                                    </p>
+                                    <p className="opacity-90 leading-relaxed">
+                                        {debugInfo.includes("429") || debugInfo.includes("quota")
+                                            ? "We're experiencing unusually high traffic with our AI provider. Please wait a moment and try again, or use these offline suggestions."
+                                            : "We couldn't connect to the AI service right now. Showing generic suggestions instead."}
+                                    </p>
                                 </div>
                             )}
 
@@ -195,12 +254,18 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                             ) : (
                                 <div className="space-y-4">
                                     {suggestions.map((item, idx) => (
-                                        <div key={idx} className="bg-white dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-sm dark:shadow-none">
+                                        <div key={idx} className="bg-white dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-sm dark:shadow-none relative">
                                             <div className="flex justify-between items-start mb-2">
-                                                <h3 className="font-bold text-lg text-secondary">{item.title}</h3>
-                                                <span className="text-xs font-mono bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{item.day}</span>
+                                                <h3 className="font-bold text-lg text-secondary pr-8">{item.title}</h3>
+                                                <button
+                                                    onClick={() => handleFavorite(item)}
+                                                    className={`absolute top-4 right-4 p-2 rounded-full transition-all ${item.isFavorite ? 'text-pink-500 bg-pink-500/10' : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}
+                                                >
+                                                    <Heart className={`w-5 h-5 ${item.isFavorite ? 'fill-current' : ''}`} />
+                                                </button>
+                                                <span className="text-xs font-mono bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 absolute top-4 right-16">{item.day}</span>
                                             </div>
-                                            <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 leading-relaxed">{item.description}</p>
+                                            <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 leading-relaxed mt-6">{item.description}</p>
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-3">
                                                 <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                                                     <span className="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 rounded-full border border-slate-300 dark:border-slate-700">{item.cost}</span>

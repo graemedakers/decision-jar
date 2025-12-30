@@ -41,7 +41,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
         }
 
-        const { activityType, vibe, location } = await request.json().catch(() => ({}));
+        const { activityType, vibe, budget, location } = await request.json().catch(() => ({}));
 
         const coupleLocation = activeJar.location;
         let targetLocation = location;
@@ -82,6 +82,7 @@ export async function POST(request: Request) {
         Recommend 5 distinct wellness activities or venues based on:
         - Activity Type: ${activityType || "Any (Spa, Yoga, Nature, etc)"}
         - Vibe: ${vibe || "Any"}
+        - Budget: ${budget || "Any"}
         
         ${extraInstructions}
         

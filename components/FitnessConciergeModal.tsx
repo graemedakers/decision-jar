@@ -19,6 +19,7 @@ export function FitnessConciergeModal({ isOpen, onClose, userLocation, onIdeaAdd
     const [isLoading, setIsLoading] = useState(false);
     const [selectedWorkouts, setSelectedWorkouts] = useState<string[]>([]);
     const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
+    const [selectedBudget, setSelectedBudget] = useState<string[]>([]);
     const [location, setLocation] = useState(userLocation || "");
     const [recommendations, setRecommendations] = useState<any[]>([]);
     const resultsRef = useRef<HTMLDivElement>(null);
@@ -33,12 +34,17 @@ export function FitnessConciergeModal({ isOpen, onClose, userLocation, onIdeaAdd
         "Outdoor", "Intense", "Beginner Friendly"
     ];
 
+    const BUDGET_OPTIONS = [
+        "Free", "$ (Cheap)", "$$ (Moderate)", "$$$ (Premium)"
+    ];
+
     const [prevOpen, setPrevOpen] = useState(false);
 
     if (isOpen && !prevOpen) {
         setLocation(userLocation || "");
         setSelectedWorkouts([]);
         setSelectedVibes([]);
+        setSelectedBudget([]);
         setRecommendations([]);
         setPrevOpen(true);
     } else if (!isOpen && prevOpen) {
@@ -70,6 +76,7 @@ export function FitnessConciergeModal({ isOpen, onClose, userLocation, onIdeaAdd
                 body: JSON.stringify({
                     workoutType: selectedWorkouts.join(", "),
                     vibe: selectedVibes.join(", "),
+                    budget: selectedBudget.join(", "),
                     location
                 }),
             });
@@ -160,6 +167,24 @@ export function FitnessConciergeModal({ isOpen, onClose, userLocation, onIdeaAdd
                                                     }`}
                                             >
                                                 {v}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Budget (Select multiple)</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {BUDGET_OPTIONS.map((b) => (
+                                            <button
+                                                key={b}
+                                                onClick={() => toggleSelection(b, selectedBudget, setSelectedBudget)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedBudget.includes(b)
+                                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
+                                                    : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                                                    }`}
+                                            >
+                                                {b}
                                             </button>
                                         ))}
                                     </div>

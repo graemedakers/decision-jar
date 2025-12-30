@@ -41,7 +41,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
         }
 
-        const { workoutType, vibe, location } = await request.json().catch(() => ({}));
+        const { workoutType, vibe, budget, location } = await request.json().catch(() => ({}));
 
         const coupleLocation = activeJar.location;
         let targetLocation = location;
@@ -82,6 +82,7 @@ export async function POST(request: Request) {
         Recommend 5 distinct fitness activities, gyms, trails, or classes based on:
         - Workout Type: ${workoutType || "Any"}
         - Vibe: ${vibe || "Any"}
+        - Budget: ${budget || "Any"}
         
         ${extraInstructions}
         

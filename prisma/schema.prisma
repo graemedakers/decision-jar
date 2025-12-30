@@ -286,3 +286,11 @@ model Vote {
   
   @@unique([sessionId, userId]) // One vote per user per session
 }
+
+model AICache {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // The JSON response
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}

@@ -18,7 +18,7 @@ export async function POST(request: Request) {
             where: { email: session.user.email },
             include: {
                 memberships: { include: { jar: true } },
-                couple: true // Legacy fallback
+                couple: true
             },
         });
 
@@ -41,25 +41,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
         }
 
-        const { genre, vibe, platforms, decades } = await request.json().catch(() => ({}));
-
-        const userInterests = (user as any).interests;
+        const { genre, players, budget, duration } = await request.json().catch(() => ({}));
 
         let extraInstructions = "";
-
-        if (userInterests) {
-            extraInstructions += `The user is interested in: ${userInterests}. Consider this when selecting movies.\n`;
-        }
-
-        if (platforms) {
-            extraInstructions += `PRIORITY: Limit recommendations to movies available on: ${platforms}. If a movie is not on these, do not suggest it unless it is currently In Theaters.\n`;
-        }
-
         const excludeNames = await getExcludedNames(activeJar.id);
         if (excludeNames.length > 0) {
-            extraInstructions += `\nEXCLUSION LIST: Do NOT recommend these movies again: ${excludeNames.join(', ')}. Find NEW alternatives.\n`;
+            extraInstructions += `\nEXCLUSION LIST: Do NOT recommend these games again: ${excludeNames.join(', ')}. Find NEW alternatives.\n`;
         }
-        // -------------------------------------------------------------
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
 
@@ -69,50 +57,51 @@ export async function POST(request: Request) {
             return NextResponse.json({
                 recommendations: [
                     {
-                        name: "Inception",
-                        description: "A thief who steals corporate secrets through the use of dream-sharing technology.",
-                        cuisine: "Sci-Fi",
-                        price: "Netflix", // Mock platform
-                        address: "Streaming",
-                        google_rating: 4.8
+                        name: "Among Us",
+                        description: "A multiplayer game of teamwork and betrayal.",
+                        cuisine: "Social Deduction",
+                        price: "Free / $5",
+                        address: "PC / Mobile / Console",
+                        opening_hours: "15-20 mins per round",
+                        google_rating: 4.5
                     }
                 ]
             });
         }
 
         const prompt = `
-        Act as a movie critic and concierge.
-        Recommend 5 distinct movies based on the following preferences:
+        Act as a gaming concierge.
+        Recommend 5 distinct online digital games (playable alone or with friends remotely) based on:
         - Genre: ${genre || "Any"}
-        - Vibe/Mood: ${vibe || "Any"}
-        - Streaming Platforms: ${platforms || "Any (Suggest best available)"}
-        - Era / Decade: ${decades || "Any"}
+        - Minimum Players: ${players || "Any"}
+        - Budget: ${budget || "Any"}
+        - Typical Duration: ${duration || "Any"}
         
         ${extraInstructions}
         
-        For each movie, provide:
+        For each game, provide:
         - Name (Title)
-        - A brief, intriguing synopsis (1 sentence)
+        - A brief, intriguing description
         - Genre
-        - "Price": The specific streaming platform name (e.g. Netflix, Prime) OR "In Theaters"
-        - "Address": If "In Theaters", say "Cinema". If streaming, say "Streaming".
-        - A likely website URL (IMDB or Rotten Tomatoes or Streaming Link)
-        - "Opening Hours": Runtime (e.g. "2h 15m")
-        - Rotten Tomatoes or IMDB Score (e.g. 8.5)
+        - Price (e.g. Free, $15, $60)
+        - "Address": Platform (e.g. Steam, Browser, Mobile, Cross-platform)
+        - A likely website URL (Official site or Store page)
+        - "Opening Hours": Typical session duration (e.g. "30 mins", "∞")
+        - Rating (e.g. 9/10 or 4.5/5)
         
         Return the result as a JSON object with a "recommendations" array.
         Example format:
         {
             "recommendations": [
                 {
-                    "name": "Movie Title",
-                    "description": "Intriguing summary.",
-                    "cuisine": "Sci-Fi / Thriller",
-                    "price": "Netflix",
-                    "address": "Streaming",
-                    "website": "https://imdb.com/...",
-                    "opening_hours": "120 min",
-                    "google_rating": 8.5
+                    "name": "Game Title",
+                    "description": "Fun game description.",
+                    "cuisine": "Strategy",
+                    "price": "Free",
+                    "address": "Web Browser",
+                    "website": "https://...",
+                    "opening_hours": "30 mins",
+                    "google_rating": 4.5
                 }
             ]
         }
@@ -122,7 +111,7 @@ export async function POST(request: Request) {
         return NextResponse.json(result);
 
     } catch (error: any) {
-        console.error('Movie Concierge error:', error);
-        return NextResponse.json({ error: "Failed to fetch movies" }, { status: 500 });
+        console.error('Game Concierge error:', error);
+        return NextResponse.json({ error: "Failed to fetch games" }, { status: 500 });
     }
 }
