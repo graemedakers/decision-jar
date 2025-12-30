@@ -64,8 +64,21 @@ export async function POST(request: Request) {
             case 'travel':
                 promptContext = `Recommend a specific weekend getaway destination or hotel within driving distance of ${location}.`;
                 break;
-            default:
+            case 'fitness':
+                promptContext = `Recommend a specific fitness activity, workout, or gym class in or near ${location}.`;
+                break;
+            case 'activities':
+            case 'general':
+            case 'dates':
+            case 'romantic':
+            case undefined:
+            case null:
                 promptContext = `Recommend a specific fun date activity or interesting place to visit in or near ${location}.`;
+                break;
+            default:
+                // Handle custom topics (e.g. "Cleaning", "Chores", "Work", "Kids")
+                promptContext = `Recommend a specific activity, task, or idea strictly related to the topic "${topic}". Do NOT suggest a date idea unless the topic implies it. For example if the topic is "Cleaning", suggest a specific cleaning task. If it is "Gardening", suggest a gardening task. Apply this logic to the topic: ${topic}.`;
+                break;
         }
 
         const prompt = `

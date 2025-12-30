@@ -37,6 +37,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
     const titleText = isDateContext ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
     const buttonText = isDateContext ? "Plan My Date Night" : "Plan My Activity";
     const resultTitle = isDateContext ? "Date Night" : "Itinerary";
+    const loadingText = isDateContext ? "Curating the perfect evening..." : `Curating the perfect ${jarTopic && jarTopic !== 'General' ? jarTopic.toLowerCase() : "activity"} plan...`;
 
     // State
     const [itinerary, setItinerary] = useState<Itinerary | null>(null);
@@ -293,7 +294,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                                 <div className="absolute inset-0 bg-pink-500/20 blur-xl rounded-full animate-pulse" />
                                 <Loader2 className="w-12 h-12 text-pink-400 animate-spin relative z-10" />
                             </div>
-                            <p className="text-slate-400 animate-pulse font-medium">Curating the perfect evening...</p>
+                            <p className="text-slate-400 animate-pulse font-medium">{loadingText}</p>
                         </div>
                     )}
 
