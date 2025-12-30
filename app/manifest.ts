@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Decision Jar',
-        short_name: 'DecisionJar',
+        name: 'Spin the Jar',
+        short_name: 'SpinTheJar',
         description: 'The Ultimate Decision Maker for groups and couples.',
         start_url: '/',
         display: 'standalone',

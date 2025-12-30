@@ -19,17 +19,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'),
   title: {
-    default: "Decision Jar | The Ultimate Decision Maker",
-    template: "%s | Decision Jar",
+    default: "Spin the Jar | The Ultimate Decision Maker",
+    template: "%s | Spin the Jar",
   },
   description: "Stop asking \"what should we do?\" Spin the jar for ideas, sync with friends, and decide together. Perfect for groups, families, and solo decisions.",
   keywords: [
     "decision maker", "random picker", "group activities", "what to do", "idea generator",
     "social planner", "activity picker", "choice maker", "randomizer", "community jars", "social decision making", "public groups"
   ],
-  authors: [{ name: "Decision Jar Team" }],
-  creator: "Decision Jar",
-  applicationName: "Decision Jar",
+  authors: [{ name: "Spin the Jar Team" }],
+  creator: "Spin the Jar",
+  applicationName: "Spin the Jar",
   alternates: {
     canonical: '/',
   },
@@ -48,13 +48,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://spinthejar.com",
-    title: "Decision Jar | Make Decisions Together",
-    description: "Stop asking 'What do you want to do?'. Let the Decision Jar decide.",
-    siteName: "Decision Jar",
+    title: "Spin the Jar | Make Decisions Together",
+    description: "Stop asking 'What do you want to do?'. Let the Spin the Jar decide.",
+    siteName: "Spin the Jar",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Decision Jar | Make Decisions Together",
+    title: "Spin the Jar | Make Decisions Together",
     description: "A fun way for friends and families to decide what to do.",
   },
 };

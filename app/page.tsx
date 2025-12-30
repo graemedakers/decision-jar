@@ -135,7 +135,7 @@ export default function Home() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Decision Jar',
+    name: 'Spin the Jar',
     applicationCategory: 'LifestyleApplication',
     operatingSystem: 'Web',
     offers: {
@@ -164,7 +164,7 @@ export default function Home() {
         },
         {
           '@type': 'Question',
-          name: 'Is Decision Jar free for couples?',
+          name: 'Is Spin the Jar free for couples?',
           acceptedAnswer: {
             '@type': 'Answer',
             text: 'Yes! You can create a jar, add unlimited ideas, and sync with your partner or group for free. We also offer a premium tier for advanced features like the Smart Weekend Planner and Dining Concierge.'
@@ -211,7 +211,7 @@ export default function Home() {
             <div className="relative w-8 h-8 rounded-lg overflow-hidden">
               <Image src="/icon.png" alt="Logo" fill className="object-cover" />
             </div>
-            <span className="font-bold text-lg text-slate-800 dark:text-white tracking-tight">Decision Jar</span>
+            <span className="font-bold text-lg text-slate-800 dark:text-white tracking-tight">Spin the Jar</span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/guide" className="hidden md:block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
@@ -309,7 +309,7 @@ export default function Home() {
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-3xl md:text-5xl font-bold text-slate-800 dark:text-white">Everything You Need for <br /><span className="text-primary dark:text-accent">Better Decisions</span></h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              We've packed Decision Jar with features designed to take the stress out of planning and put the fun back into spending time together.
+              We've packed Spin the Jar with features designed to take the stress out of planning and put the fun back into spending time together.
             </p>
           </div>
 
@@ -404,7 +404,7 @@ export default function Home() {
         <section className="py-24 px-6 relative">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white mb-4">Users Love Decision Jar</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white mb-4">Users Love Spin the Jar</h2>
               <p className="text-slate-600 dark:text-slate-400">See what users are saying.</p>
             </div>
 
@@ -427,7 +427,7 @@ export default function Home() {
                     <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center">
                       <User className="w-4 h-4 text-slate-400" />
                     </div>
-                    <span className="text-sm font-medium text-slate-800 dark:text-white">{review.user?.name || "Decision Jar User"}</span>
+                    <span className="text-sm font-medium text-slate-800 dark:text-white">{review.user?.name || "Spin the Jar User"}</span>
                   </div>
                 </motion.div>
               ))}
@@ -515,7 +515,7 @@ export default function Home() {
                 RECOMMENDED
               </div>
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Decision Jar Pro</h3>
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Spin the Jar Pro</h3>
                 <p className="text-slate-600 dark:text-slate-400">For the ultimate social life</p>
               </div>
               <div className="mb-8 space-y-2">
@@ -570,7 +570,7 @@ export default function Home() {
               answer="Simply add your own ideas or use our pre-filled categories. When you're ready, filter by budget, time, or energy level, and 'Spin the Jar' to get a random suggestion that fits your mood perfectly."
             />
             <FaqItem
-              question="Is Decision Jar free?"
+              question="Is Spin the Jar free?"
               answer="Yes! You can create unlimited jars (e.g., one for your partner, one for roommates, one for work lunch!), add unlimited ideas, and sync with everyone for free. We also offer a premium tier for advanced features."
             />
             <FaqItem
@@ -619,10 +619,10 @@ export default function Home() {
             <div className="relative w-6 h-6 rounded-md overflow-hidden">
               <Image src="/icon.png" alt="Logo" fill className="object-cover" />
             </div>
-            <span className="font-bold text-slate-600 dark:text-slate-400">Decision Jar</span>
+            <span className="font-bold text-slate-600 dark:text-slate-400">Spin the Jar</span>
           </div>
           <p className="text-slate-500 dark:text-slate-600 text-sm">
-            © {new Date().getFullYear()} Decision Jar. Built for fun.
+            © {new Date().getFullYear()} Spin the Jar. Built for fun.
           </p>
           <div className="flex gap-6 text-sm text-slate-500 dark:text-slate-500">
             <Link href="/privacy" className="hover:text-slate-900 dark:hover:text-white transition-colors">Privacy</Link>

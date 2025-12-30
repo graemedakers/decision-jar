@@ -5,4 +5,4 @@ export const PRICING = {
     CURRENCY: "AUD"
 };
 
-export const APP_NAME = "Decision Jar";
+export const APP_NAME = "Spin the Jar";

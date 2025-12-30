@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
         {
             icon: <Lock className="w-6 h-6 text-accent" />,
             title: "How We Use Your Data",
-            content: "Your data is used to provide the Decision Jar service, personalize your experience, and sync jars between your devices. We do not sell your personal information to third parties."
+            content: "Your data is used to provide the Spin the Jar service, personalize your experience, and sync jars between your devices. We do not sell your personal information to third parties."
         },
         {
             icon: <Database className="w-6 h-6 text-purple-500" />,
@@ -119,7 +119,7 @@ export default function PrivacyPolicyPage() {
 
             {/* Simple Footer */}
             <footer className="max-w-4xl mx-auto px-6 py-12 border-t border-slate-200 dark:border-white/5 text-center text-sm text-slate-500">
-                &copy; {new Date().getFullYear()} Decision Jar. All rights reserved.
+                &copy; {new Date().getFullYear()} Spin the Jar. All rights reserved.
             </footer>
         </div>
     );
