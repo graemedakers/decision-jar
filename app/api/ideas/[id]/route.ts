@@ -5,14 +5,26 @@ import { isValidCategoryForTopic, getCategoriesForTopic } from '@/lib/categories
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await getSession();
-    if (!session || (!session.user.activeJarId && !session.user.coupleId)) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const currentJarId = session.user.activeJarId || session.user.coupleId;
 
     const { id } = await params;
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id }
+        });
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        const currentJarId = user.activeJarId || user.coupleId;
+        if (!currentJarId) {
+            return NextResponse.json({ error: 'No active jar' }, { status: 400 });
+        }
+
         // Verify ownership
         const idea = await prisma.idea.findUnique({
             where: { id },
@@ -26,7 +38,9 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        // Restrict Deletion: Author OR Admin
+        // Allow deletion if:
+        // 1. User is the author
+        // 2. User is an admin in the jar
         if (idea.createdById !== session.user.id) {
             const membership = await prisma.jarMember.findUnique({
                 where: {
@@ -35,7 +49,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             });
 
             if (membership?.role !== 'ADMIN') {
-                return NextResponse.json({ error: 'Only the author or an admin can delete this idea' }, { status: 403 });
+                return NextResponse.json({ error: 'Forbidden: You do not have permission to delete this idea' }, { status: 403 });
             }
         }
 
@@ -61,14 +75,26 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await getSession();
-    if (!session || (!session.user.activeJarId && !session.user.coupleId)) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const currentJarId = session.user.activeJarId || session.user.coupleId;
 
     const { id } = await params;
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id }
+        });
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        const currentJarId = user.activeJarId || user.coupleId;
+        if (!currentJarId) {
+            return NextResponse.json({ error: 'No active jar' }, { status: 400 });
+        }
+
         const body = await request.json();
         const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category } = body;
 
@@ -86,9 +112,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        // Restrict Modification: Author Only
-        if (idea.createdById !== session.user.id) {
-            return NextResponse.json({ error: 'Only the author can modify this idea' }, { status: 403 });
+        // Allow modification if:
+        // 1. User is the author
+        // 2. It is a memory (selected) and the user is in the same jar
+        // 3. User is an admin in the jar
+        if (idea.createdById !== session.user.id && !idea.selectedAt) {
+            const membership = await prisma.jarMember.findUnique({
+                where: {
+                    userId_jarId: { userId: session.user.id, jarId: currentJarId }
+                }
+            });
+
+            if (membership?.role !== 'ADMIN') {
+                return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this idea' }, { status: 403 });
+            }
         }
 
         // Validate Category
@@ -118,19 +155,30 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         console.error('Error updating idea:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
-
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await getSession();
-    if (!session || (!session.user.activeJarId && !session.user.coupleId)) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const currentJarId = session.user.activeJarId || session.user.coupleId;
 
     const { id } = await params;
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id }
+        });
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        const currentJarId = user.activeJarId || user.coupleId;
+        if (!currentJarId) {
+            return NextResponse.json({ error: 'No active jar' }, { status: 400 });
+        }
+
         const body = await request.json();
 
         // Verify ownership
@@ -140,16 +188,27 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         });
 
         if (!idea) {
-            return NextResponse.json({ error: 'Idea find (PATCH) not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
         }
 
         if (idea.jarId !== currentJarId) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        // Restrict Modification: Author Only
-        if (idea.createdById !== session.user.id) {
-            return NextResponse.json({ error: 'Only the author can modify this idea' }, { status: 403 });
+        // Allow modification if:
+        // 1. User is the author
+        // 2. It is a memory (selected) and the user is in the same jar
+        // 3. User is an admin in the jar
+        if (idea.createdById !== session.user.id && !idea.selectedAt) {
+            const membership = await prisma.jarMember.findUnique({
+                where: {
+                    userId_jarId: { userId: session.user.id, jarId: currentJarId }
+                }
+            });
+
+            if (membership?.role !== 'ADMIN') {
+                return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this idea' }, { status: 403 });
+            }
         }
 
         // Validate Category if present
