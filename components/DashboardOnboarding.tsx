@@ -25,6 +25,7 @@ export function DashboardOnboarding({ onJarCreated, isPro }: DashboardOnboarding
                 onClose={() => setIsCreateOpen(false)}
                 currentJarCount={0}
                 isPro={!!isPro}
+                hasRomanticJar={false}
             />
             <JoinJarModal
                 isOpen={isJoinOpen}
