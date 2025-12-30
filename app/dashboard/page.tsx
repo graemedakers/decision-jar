@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { getApiUrl } from "@/lib/utils";
 import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { motion } from "framer-motion";
-import { Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers } from "lucide-react";
+import { Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Jar3D } from "@/components/Jar3D";
 import { useRouter } from "next/navigation";
@@ -729,6 +729,14 @@ export default function DashboardPage() {
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
                                     Create or Join a Jar
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => router.push('/community')}
+                                    className="border-purple-500/30 hover:bg-purple-500/10 text-slate-700 dark:text-white"
+                                >
+                                    <Users className="w-4 h-4 mr-2" />
+                                    Browse Communities
                                 </Button>
                             </div>
                         </div>

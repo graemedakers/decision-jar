@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CreateJarModal } from "./CreateJarModal";
 import { JoinJarModal } from "./JoinJarModal";
+import { JarManagerModal } from "./JarManagerModal";
+import { Settings } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -68,6 +70,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
     // ... state ...
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+    const [isManagerOpen, setIsManagerOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
@@ -263,6 +266,13 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                         </>
                     )}
 
+                    <DropdownMenuItem onClick={() => setIsManagerOpen(true)} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                            <Settings className="w-4 h-4 text-slate-400" />
+                        </div>
+                        <span className="text-slate-600 dark:text-slate-300">Manage My Jars</span>
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem onClick={handleCreateJar} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
                             <Plus className="w-4 h-4 text-slate-400" />
@@ -275,6 +285,13 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                             <LogOut className="w-4 h-4 text-slate-400 rotate-180" />
                         </div>
                         <span className="text-slate-600 dark:text-slate-300">Join Existing Jar</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem onClick={() => router.push('/community')} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                            <Users className="w-4 h-4 text-slate-400" />
+                        </div>
+                        <span className="text-slate-600 dark:text-slate-300">Discover Communities</span>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -290,6 +307,11 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
             <JoinJarModal
                 isOpen={isJoinModalOpen}
                 onClose={() => setIsJoinModalOpen(false)}
+            />
+
+            <JarManagerModal
+                isOpen={isManagerOpen}
+                onClose={() => setIsManagerOpen(false)}
             />
         </div>
     );

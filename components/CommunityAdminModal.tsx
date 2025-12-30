@@ -73,6 +73,28 @@ export function CommunityAdminModal({ isOpen, onClose, jarId, jarName }: Communi
         }
     };
 
+    const handleUpdateRole = async (userId: string, role: 'ADMIN') => {
+        if (!confirm("Promote this member to Admin? They will have full control over the jar.")) return;
+
+        try {
+            const res = await fetch(`/api/jars/${jarId}/members/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role })
+            });
+
+            if (res.ok) {
+                setMembers(prev => prev.map(m => m.userId === userId ? { ...m, role: 'ADMIN' } : m));
+            } else {
+                const data = await res.json();
+                alert(data.error || "Action failed");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error updating role");
+        }
+    };
+
     const pendingCount = members.filter(m => m.status === 'PENDING').length;
     const waitlistCount = members.filter(m => m.status === 'WAITLISTED').length;
 
@@ -178,14 +200,25 @@ export function CommunityAdminModal({ isOpen, onClose, jarId, jarName }: Communi
                                                         </Button>
                                                     </>
                                                 ) : member.status === 'ACTIVE' && member.role !== 'ADMIN' ? (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        className="text-red-500 hover:text-red-700"
-                                                        onClick={() => handleUpdateStatus(member.userId, 'REJECTED')}
-                                                    >
-                                                        Remove
-                                                    </Button>
+                                                    <>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="text-violet-600 hover:text-violet-700 hover:bg-violet-50 mr-1"
+                                                            onClick={() => handleUpdateRole(member.userId, 'ADMIN')}
+                                                            title="Promote to Admin"
+                                                        >
+                                                            <Shield className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="text-red-500 hover:text-red-700"
+                                                            onClick={() => handleUpdateStatus(member.userId, 'REJECTED')}
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    </>
                                                 ) : null}
                                             </div>
                                         </div>
@@ -198,4 +231,5 @@ export function CommunityAdminModal({ isOpen, onClose, jarId, jarName }: Communi
             )}
         </AnimatePresence>
     );
+
 }

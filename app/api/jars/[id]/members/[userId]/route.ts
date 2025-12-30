@@ -16,10 +16,13 @@ export async function PUT(
         }
 
         const body = await req.json();
-        const { status } = body; // 'ACTIVE', 'REJECTED' (delete)
+        const { status, role } = body;
 
-        if (!['ACTIVE', 'REJECTED'].includes(status)) {
+        if (status && !['ACTIVE', 'REJECTED'].includes(status)) {
             return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+        }
+        if (role && !['ADMIN', 'MEMBER'].includes(role)) {
+            return NextResponse.json({ error: "Invalid role" }, { status: 400 });
         }
 
         // Verify Admin Access
@@ -39,14 +42,12 @@ export async function PUT(
             });
 
             // Trigger Waitlist Promotion
-            // We don't await this to keep response fast? Or maybe we should to ensure it happens safely?
-            // Let's await it to be safe for now
             await checkAndPromoteWaitlist(jarId);
 
             return NextResponse.json({ success: true, status: 'REJECTED' });
         }
 
-        // Handle Approval (PENDING/WAITLISTED -> ACTIVE)
+        // Handle Updates
         const member = await prisma.jarMember.findUnique({
             where: { userId_jarId: { userId: targetUserId, jarId } },
             include: { user: true, jar: true }
@@ -56,8 +57,10 @@ export async function PUT(
             return NextResponse.json({ error: "Member not found" }, { status: 404 });
         }
 
+        const dataToUpdate: any = {};
+
         // Check limits if moving to Active
-        if (status === 'ACTIVE') {
+        if (status === 'ACTIVE' && member.status !== 'ACTIVE') {
             const currentCount = await prisma.jarMember.count({
                 where: { jarId, status: 'ACTIVE' }
             });
@@ -65,11 +68,16 @@ export async function PUT(
             if (member.jar.memberLimit && currentCount >= member.jar.memberLimit) {
                 return NextResponse.json({ error: "Member limit reached. Increase limit or remove members." }, { status: 400 });
             }
+            dataToUpdate.status = 'ACTIVE';
+        }
+
+        if (role) {
+            dataToUpdate.role = role;
         }
 
         await prisma.jarMember.update({
             where: { userId_jarId: { userId: targetUserId, jarId } },
-            data: { status: 'ACTIVE' }
+            data: dataToUpdate
         });
 
         // Send Email Notification

@@ -39,6 +39,22 @@ export async function POST(request: Request) {
             where: { jarId }
         });
 
+        // Prevent leaving if last admin and other members exist
+        if (membership.role === 'ADMIN' && memberCount > 1) {
+            const adminCount = await prisma.jarMember.count({
+                where: {
+                    jarId,
+                    role: 'ADMIN'
+                }
+            });
+
+            if (adminCount <= 1) {
+                return NextResponse.json({
+                    error: "You are the only Admin. Promote another member to Admin before leaving, or delete the Jar."
+                }, { status: 403 });
+            }
+        }
+
         await prisma.$transaction(async (tx) => {
             // Delete membership
             await tx.jarMember.delete({

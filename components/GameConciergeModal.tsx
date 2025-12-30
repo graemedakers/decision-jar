@@ -91,11 +91,12 @@ export function GameConciergeModal({ isOpen, onClose, onIdeaAdded, onGoTonight, 
                 const data = await res.json();
                 setRecommendations(data.recommendations);
             } else {
-                alert("Failed to get recommendations.");
+                const errorData = await res.json().catch(() => ({}));
+                alert(errorData.error || "Failed to get recommendations.");
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred.");
+            alert("An error occurred. Please try again.");
         } finally {
             setIsLoading(false);
         }

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket } from "lucide-react";
+import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Users } from "lucide-react";
 import { PremiumModal } from "@/components/PremiumModal";
+import { useRouter } from "next/navigation";
 import { WeekendPlannerModal } from "@/components/WeekendPlannerModal";
 import { DiningConciergeModal } from "@/components/DiningConciergeModal";
 import { BarConciergeModal } from "@/components/BarConciergeModal";
@@ -25,6 +26,7 @@ export default function ExplorePage() {
     const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
     const [isPlannerOpen, setIsPlannerOpen] = useState(false);
     const [isDiningModalOpen, setIsDiningModalOpen] = useState(false);
+    const router = useRouter();
     const [isBarModalOpen, setIsBarModalOpen] = useState(false);
     const [isDateNightOpen, setIsDateNightOpen] = useState(false);
     const [isNightClubModalOpen, setIsNightClubModalOpen] = useState(false);
@@ -73,6 +75,13 @@ export default function ExplorePage() {
     }, []);
 
     const tools = [
+        {
+            title: "Community Finder",
+            desc: "Join public jars and find your squad.",
+            icon: Users,
+            action: () => router.push('/community'),
+            color: "blue"
+        },
         {
             title: "Weekend Planner",
             desc: "Discover great ideas of what to do in your area this weekend",
@@ -148,6 +157,7 @@ export default function ExplorePage() {
     const getColorClasses = (color: string) => {
         const map: Record<string, any> = {
             purple: { border: "border-purple-200 dark:border-purple-500/20", bgIcons: "bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-300", hover: "hover:bg-purple-50 dark:hover:bg-purple-900/20" },
+            blue: { border: "border-blue-200 dark:border-blue-500/20", bgIcons: "bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300", hover: "hover:bg-blue-50 dark:hover:bg-blue-900/20" },
             orange: { border: "border-orange-200 dark:border-orange-500/20", bgIcons: "bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-300", hover: "hover:bg-orange-50 dark:hover:bg-orange-900/20" },
             pink: { border: "border-pink-200 dark:border-pink-500/20", bgIcons: "bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-300", hover: "hover:bg-pink-50 dark:hover:bg-pink-900/20" },
             rose: { border: "border-rose-200 dark:border-rose-500/20", bgIcons: "bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300", hover: "hover:bg-rose-50 dark:hover:bg-rose-900/20" },

@@ -16,7 +16,7 @@ export async function GET(req: Request) {
         const jars = await prisma.jar.findMany({
             where: {
                 isCommunityJar: true,
-                subscriptionStatus: 'ACTIVE', // Only active paid jars
+                // subscriptionStatus: 'ACTIVE', // Only active paid jars
                 topic: topic && topic !== 'All' ? topic : undefined,
                 OR: query ? [
                     { name: { contains: query, mode: 'insensitive' } },

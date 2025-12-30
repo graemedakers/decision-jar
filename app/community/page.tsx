@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Search, Users, Plus, Loader2, Lock, ArrowRight } from "lucide-react";
+import { Search, Users, Plus, Loader2, Lock, ArrowRight, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -59,6 +59,9 @@ export default function CommunityIndexPage() {
             <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 pt-24 pb-12 px-4 md:px-8">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="max-w-2xl">
+                        <Link href="/dashboard" className="inline-flex items-center text-sm font-bold text-slate-500 hover:text-violet-600 dark:text-slate-400 dark:hover:text-violet-400 mb-6 transition-colors">
+                            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+                        </Link>
                         <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">
                             Discover Communities
                         </h1>
@@ -108,8 +111,8 @@ export default function CommunityIndexPage() {
                                     fetchJars(search, topic, sort);
                                 }}
                                 className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${currentTopic === topic
-                                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                                        : 'bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                                    : 'bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
                                     }`}
                             >
                                 {topic}

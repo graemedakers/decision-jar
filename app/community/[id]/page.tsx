@@ -177,7 +177,18 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
 
                         {jar.membershipStatus === 'ACTIVE' && (
                             <div className="space-y-3 mt-4">
-                                <Button variant="outline" className="w-full" onClick={() => router.push('/dashboard')}>
+                                <Button variant="outline" className="w-full" onClick={async () => {
+                                    try {
+                                        await fetch('/api/auth/switch-jar', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ jarId: jar.id }),
+                                        });
+                                    } catch (e) {
+                                        console.error(e);
+                                    }
+                                    router.push('/dashboard');
+                                }}>
                                     Go to Jar Dashboard
                                 </Button>
                                 <Button
