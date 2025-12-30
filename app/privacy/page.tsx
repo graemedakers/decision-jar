@@ -28,6 +28,11 @@ export default function PrivacyPolicyPage() {
             icon: <Globe className="w-6 h-6 text-blue-500" />,
             title: "Authentication",
             content: "We use NextAuth.js to handle secure logins. When using Google or Facebook login, we only request the minimum required permissions (email and public profile) to create your account."
+        },
+        {
+            icon: <Shield className="w-6 h-6 text-red-500" />,
+            title: "Data Deletion",
+            content: "You have the right to request the deletion of your account and all associated data at any time. To do so, please contact us at support@decisionjar.com or use the 'Delete Account' option within your account settings."
         }
     ];
 
