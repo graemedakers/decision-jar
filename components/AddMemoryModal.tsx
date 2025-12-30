@@ -13,9 +13,10 @@ interface AddMemoryModalProps {
     onClose: () => void;
     onSuccess?: () => void;
     isPro?: boolean;
+    initialData?: any;
 }
 
-export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro }: AddMemoryModalProps) {
+export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData }: AddMemoryModalProps) {
     const router = useRouter();
     const [description, setDescription] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -27,31 +28,19 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro }: AddMemoryM
     const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        if (isOpen) {
-            // Fetch current jar topic to get valid categories
-            fetch('/api/auth/me')
-                .then(res => res.json())
-                .then(data => {
-                    if (data?.user) {
-                        const topic = data.user.jarTopic;
-                        const custom = data.user.customCategories;
-                        // We need getCategoriesForTopic but let's just use the API's validation logic or fetch them
-                        // Actually, I'll just import it since this is a client component
-                    }
-                });
-        }
-    }, [isOpen]);
-
     // Better: Import and use directly
-    const fetchCategories = async () => {
+    const fetchCategories = async (initialCat?: string) => {
         const res = await fetch('/api/auth/me');
         const data = await res.json();
         if (data.user) {
             const { getCategoriesForTopic } = await import('@/lib/categories');
             const cats = getCategoriesForTopic(data.user.jarTopic, data.user.customCategories);
             setAllowedCategories(cats);
-            if (!category && cats.length > 0) {
+
+            // Priority: provided initial category, else current category if valid, else first available
+            if (initialCat && cats.some(c => c.id === initialCat)) {
+                setCategory(initialCat);
+            } else if (!category && cats.length > 0) {
                 setCategory(cats[0].id);
             }
         }
@@ -59,9 +48,23 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro }: AddMemoryM
 
     useEffect(() => {
         if (isOpen) {
-            fetchCategories();
+            if (initialData) {
+                setDescription(initialData.description || "");
+                setDate(new Date(initialData.selectedDate || initialData.selectedAt || new Date()).toISOString().split('T')[0]);
+                setRating(initialData.rating || 0);
+                setNotes(initialData.notes || "");
+                setPhotoUrls(initialData.photoUrls || []);
+                fetchCategories(initialData.category);
+            } else {
+                setDescription("");
+                setDate(new Date().toISOString().split('T')[0]);
+                setRating(0);
+                setNotes("");
+                setPhotoUrls([]);
+                fetchCategories();
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -110,18 +113,21 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro }: AddMemoryM
         setIsLoading(true);
 
         try {
-            const res = await fetch('/api/ideas', {
-                method: 'POST',
+            const url = initialData?.id ? `/api/ideas/${initialData.id}` : '/api/ideas';
+            const method = initialData?.id ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     description,
-                    selectedAt: new Date(date).toISOString(), // Mark as selected/completed
+                    selectedAt: method === 'POST' ? new Date(date).toISOString() : undefined,
                     selectedDate: new Date(date).toISOString(),
                     rating,
                     notes,
                     photoUrls,
-                    category: category || undefined, // Send selected category
-                    // Defaults
+                    category: category || undefined,
+                    // Defaults for new entries
                     cost: 'FREE',
                     duration: 2,
                     indoor: false,
@@ -171,7 +177,9 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro }: AddMemoryM
                             <X className="w-6 h-6" />
                         </button>
 
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Add Past Memory</h2>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                            {initialData ? "Edit Memory" : "Add Past Memory"}
+                        </h2>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
@@ -330,7 +338,7 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro }: AddMemoryM
 
                             <Button type="submit" className="w-full" isLoading={isLoading}>
                                 <Save className="w-4 h-4 mr-2" />
-                                Save to History
+                                {initialData ? "Update Memory" : "Save to History"}
                             </Button>
                         </form>
                     </motion.div>

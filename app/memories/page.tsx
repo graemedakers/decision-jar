@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Star, Copy, Trash2, Eye, Camera, Plus, Heart } from "lucide-react";
+import { ArrowLeft, Check, Star, Copy, Trash2, Eye, Camera, Plus, Heart, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { RateDateModal } from "@/components/RateDateModal";
 import { AddIdeaModal } from "@/components/AddIdeaModal";
@@ -19,6 +19,7 @@ export default function MemoriesPage() {
     const [duplicatingIdea, setDuplicatingIdea] = useState<any>(null);
     const [ideaToDelete, setIdeaToDelete] = useState<string | null>(null);
     const [addingMemory, setAddingMemory] = useState(false);
+    const [editingMemory, setEditingMemory] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isPremium, setIsPremium] = useState(false);
 
@@ -265,6 +266,13 @@ export default function MemoriesPage() {
                                     <Copy className="w-5 h-5" />
                                 </button>
                                 <button
+                                    onClick={() => setEditingMemory(idea)}
+                                    className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"
+                                    title="Edit Entry"
+                                >
+                                    <Pencil className="w-5 h-5" />
+                                </button>
+                                <button
                                     onClick={() => handleDeleteClick(idea.id)}
                                     className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                                     title="Delete"
@@ -311,9 +319,10 @@ export default function MemoriesPage() {
             />
 
             <AddMemoryModal
-                isOpen={addingMemory}
-                onClose={() => setAddingMemory(false)}
+                isOpen={addingMemory || !!editingMemory}
+                onClose={() => { setAddingMemory(false); setEditingMemory(null); }}
                 onSuccess={fetchIdeas}
+                initialData={editingMemory}
                 isPro={isPremium}
             />
         </main>
