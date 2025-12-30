@@ -118,7 +118,7 @@ export function GameConciergeModal({ isOpen, onClose, onIdeaAdded, onGoTonight, 
                                     <Gamepad2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Game Scout</h2>
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Game Finder</h2>
                                     <p className="text-sm text-slate-500 dark:text-slate-400">Discover digital games</p>
                                 </div>
                             </div>
@@ -215,7 +215,7 @@ export function GameConciergeModal({ isOpen, onClose, onIdeaAdded, onGoTonight, 
                                     className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20"
                                 >
                                     {isLoading ? (
-                                        <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Scouting Games...</>
+                                        <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Searching Games...</>
                                     ) : (
                                         <><Sparkles className="w-5 h-5 mr-2" /> Find Games</>
                                     )}

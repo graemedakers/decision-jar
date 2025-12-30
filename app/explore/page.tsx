@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Users } from "lucide-react";
+import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Users, Gamepad2 } from "lucide-react";
 import { PremiumModal } from "@/components/PremiumModal";
 import { useRouter } from "next/navigation";
 import { WeekendPlannerModal } from "@/components/WeekendPlannerModal";
@@ -15,6 +15,7 @@ import { HotelConciergeModal } from "@/components/HotelConciergeModal";
 import { WellnessConciergeModal } from "@/components/WellnessConciergeModal";
 import { FitnessConciergeModal } from "@/components/FitnessConciergeModal";
 import { TheatreConciergeModal } from "@/components/TheatreConciergeModal";
+import { GameConciergeModal } from "@/components/GameConciergeModal";
 import { getApiUrl } from "@/lib/utils";
 
 export default function ExplorePage() {
@@ -35,6 +36,7 @@ export default function ExplorePage() {
     const [isWellnessModalOpen, setIsWellnessModalOpen] = useState(false);
     const [isFitnessModalOpen, setIsFitnessModalOpen] = useState(false);
     const [isTheatreModalOpen, setIsTheatreModalOpen] = useState(false);
+    const [isGameModalOpen, setIsGameModalOpen] = useState(false);
 
     useEffect(() => {
         // Optimistically load premium status and location from cache
@@ -88,6 +90,13 @@ export default function ExplorePage() {
             icon: Calendar,
             action: () => isPremium ? setIsPlannerOpen(true) : setIsPremiumModalOpen(true),
             color: "purple"
+        },
+        {
+            title: "Game Finder",
+            desc: "Find online digital games to play solo or with friends.",
+            icon: Gamepad2,
+            action: () => isPremium ? setIsGameModalOpen(true) : setIsPremiumModalOpen(true),
+            color: "indigo"
         },
         {
             title: "Dining Concierge",
@@ -253,6 +262,10 @@ export default function ExplorePage() {
                 isOpen={isFitnessModalOpen}
                 onClose={() => setIsFitnessModalOpen(false)}
                 userLocation={userLocation || undefined}
+            />
+            <GameConciergeModal
+                isOpen={isGameModalOpen}
+                onClose={() => setIsGameModalOpen(false)}
             />
         </main>
     );

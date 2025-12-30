@@ -1167,7 +1167,7 @@ export default function DashboardPage() {
                                                 {!isPremium && <Lock className="w-5 h-5 text-slate-300 dark:text-slate-600" />}
                                             </div>
                                             <div>
-                                                <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Game Scout</span>
+                                                <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Game Finder</span>
                                                 <span className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed block">Find online digital games to play solo or with friends.</span>
                                             </div>
                                         </div>
