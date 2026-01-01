@@ -47,6 +47,7 @@ import { QuickDecisionsModal } from "@/components/QuickDecisionsModal";
 import { VotingManager } from "@/components/VotingManager";
 import { DashboardOnboarding } from "@/components/DashboardOnboarding";
 import { BarCrawlPlannerModal } from "@/components/BarCrawlPlannerModal";
+import { AdminControlsModal } from "@/components/AdminControlsModal";
 
 interface UserData {
     id: string;
@@ -123,6 +124,7 @@ export default function DashboardPage() {
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
+    const [isAdminControlsOpen, setIsAdminControlsOpen] = useState(false);
     const router = useRouter();
 
     const [diningSearchLocation, setDiningSearchLocation] = useState<string | null>(null);
@@ -168,6 +170,7 @@ export default function DashboardPage() {
     const jarTopic = userData?.jarTopic;
     const jarSelectionMode = userData?.jarSelectionMode;
     const isVotingMode = jarSelectionMode === 'VOTING';
+    const isAllocationMode = jarSelectionMode === 'ALLOCATION';
     const theme = getThemeForTopic(jarTopic);
     const activityPlannerTitle = (jarTopic === 'Dates' || jarTopic === 'Romantic') ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
 
@@ -396,7 +399,7 @@ export default function DashboardPage() {
         setIsModalOpen(true);
     };
 
-    const availableIdeasCount = ideas.filter(i => !i.selectedAt).length;
+    const availableIdeasCount = ideas.filter(i => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
 
     const combinedLocation = userLocation || "";
 
@@ -616,6 +619,13 @@ export default function DashboardPage() {
                         setSelectedIdea(idea);
                     }}
                     onFavoriteUpdated={fetchFavorites}
+                />
+
+                <AdminControlsModal
+                    isOpen={isAdminControlsOpen}
+                    onClose={() => setIsAdminControlsOpen(false)}
+                    jarId={userData?.activeJarId || ""}
+                    onAllocated={handleContentUpdate}
                 />
 
                 <GameConciergeModal
@@ -938,7 +948,17 @@ export default function DashboardPage() {
                                 <div className="space-y-6 order-3 xl:order-3">
                                     {/* Desktop Spin Button (Hidden on Mobile) */}
                                     <div className="hidden xl:block">
-                                        {!isVotingMode && (
+                                        {userData?.jarSelectionMode === 'ALLOCATION' && userData?.memberships?.find((m: any) => m.jarId === userData.activeJarId)?.role === 'ADMIN' && (
+                                            <Button
+                                                onClick={() => setIsAdminControlsOpen(true)}
+                                                className="w-full mb-4 bg-slate-800 hover:bg-slate-700 text-white border-2 border-slate-700 hover:border-slate-600 h-16 rounded-2xl text-lg font-bold shadow-lg shadow-black/20"
+                                            >
+                                                <Users className="w-6 h-6 mr-2" />
+                                                Distribute Tasks
+                                            </Button>
+                                        )}
+
+                                        {!isVotingMode && !isAllocationMode && (
                                             <motion.button
                                                 whileHover={availableIdeasCount > 0 ? { scale: 1.02 } : {}}
                                                 whileTap={availableIdeasCount > 0 ? { scale: 0.95 } : {}}
@@ -959,6 +979,23 @@ export default function DashboardPage() {
                                                     <span className={`text-sm transition-colors leading-tight ${availableIdeasCount > 0 ? 'text-pink-700 dark:text-pink-200/60 group-hover:text-pink-900 dark:group-hover:text-pink-200/80' : 'text-slate-500'}`}>Let fate decide</span>
                                                 </div>
                                             </motion.button>
+                                        )}
+
+                                        {isAllocationMode && (
+                                            <Button
+                                                onClick={() => router.push('/jar')}
+                                                className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 transition-all cursor-pointer border shadow-lg group bg-gradient-to-br from-emerald-600/20 to-emerald-900/40 border-emerald-500/30 hover:border-emerald-500/50 h-auto"
+                                            >
+                                                <div className="w-12 h-12 shrink-0 rounded-full flex items-center justify-center bg-emerald-500/20 text-emerald-200 border border-emerald-500/30">
+                                                    <Layers className="w-6 h-6" />
+                                                </div>
+                                                <div className="text-left">
+                                                    <span className="block text-lg font-bold text-emerald-100">View My Tasks</span>
+                                                    <span className="text-sm text-emerald-200/60">
+                                                        You have {availableIdeasCount} assigned tasks
+                                                    </span>
+                                                </div>
+                                            </Button>
                                         )}
                                     </div>
 

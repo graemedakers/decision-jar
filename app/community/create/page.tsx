@@ -136,6 +136,7 @@ export default function CreateCommunityPage() {
                                     <option value="Entertainment">Entertainment</option>
                                     <option value="Education">Education & Learning</option>
                                     <option value="Travel">Travel & Adventure</option>
+                                    <option value="System Development">System Development</option>
                                 </select>
                             </div>
 

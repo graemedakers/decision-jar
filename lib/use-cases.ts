@@ -1,4 +1,4 @@
-import { Heart, Users, Briefcase, User, Film, Dumbbell, Plane, Smile, Utensils, Megaphone } from "lucide-react";
+import { Heart, Users, Briefcase, User, Film, Dumbbell, Plane, Smile, Utensils, Megaphone, Shield } from "lucide-react";
 
 export interface UseCaseStep {
     title: string;
@@ -289,6 +289,33 @@ export const USE_CASES: UseCase[] = [
             choose: {
                 title: "Fan Interaction",
                 description: "Followers use your jar to decide where to go. They get your expertise, gamified."
+            }
+        }
+    },
+    {
+        slug: "chore-master",
+        title: "The Chore Master",
+        description: "End the arguments over who does what. Fairly distribute family or roommate chores.",
+        icon: Shield,
+        color: "text-emerald-500",
+        jarType: "SOCIAL",
+        cta: "Allocate Tasks",
+        steps: {
+            create: {
+                title: "Create an Allocation Jar",
+                description: "Select 'Task Allocation' as your selection mode. This enables the private task distribution engine."
+            },
+            invite: {
+                title: "Invite the Household",
+                description: "Share the code with roommates or family members. Everyone needs to be in the jar before allocation starts."
+            },
+            add: {
+                title: "List the Chores",
+                description: "Add everything that needs doing: 'Vacuuming', 'Dishes', 'Bins', 'Mow Lawn'. Use details for specific instructions."
+            },
+            choose: {
+                title: "Automated Distribution",
+                description: "Administrators click 'Distribute Tasks'. Choose how many chores per person, and the jar assigns them randomly. No more picking favorites!"
             }
         }
     }

@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Decision Jar
 
-## Getting Started
+Decision Jar is a powerful, interactive tool designed to end indecision. Whether you're planning a date night, managing household chores, or coordinating team activities, Decision Jar makes it fun and fair.
+
+## 🚀 Key Features
+
+- **Classic Spin**: Randomly select an idea from your jar based on budget, time, and energy filters.
+- **Task Allocation**: Distribute chores or responsibilities fairly and privately among group members.
+- **AI Planners**: Generate comprehensive itineraries for weekends and nights out.
+- **Concierge Services**: AI-powered scouts for dining, nightlife, and local events.
+- **Gamification**: Earn XP and level up as you make decisions and complete activities.
+
+## 🛠️ Getting Started
 
 First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📖 Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [User Manual](./USER_MANUAL.md) - Comprehensive guide for users.
+- [Mobile App Guide](./MOBILE_APP_GUIDE.md) - Guide for the Capacitor-based mobile build.
+- [Group Jar Use Cases](./GROUP_JAR_USE_CASES.md) - Explore ways to use the app in shared mode.
 
-## Learn More
+## 🚢 Deployment
 
-To learn more about Next.js, take a look at the following resources:
+The project is optimized for deployment on [Vercel](https://vercel.com). Ensure you have configured your environment variables and Prisma database correctly.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built for fun and fairness.

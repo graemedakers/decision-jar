@@ -34,7 +34,7 @@ Decision Jar allows you to create shared collections of activity ideas with your
 5.  **Create Jar:**
     - Choose a **Name** and **Topic** (e.g., "Food", "Movies", "General").
     - Select a **Type** (Romantic, Community, or Social).
-    - Select a **Selection Mode** (Random spin or Voting).
+    - Select a **Selection Mode** (Random spin, Voting Session, or Task Allocation).
 
 **Note:** You can create and join multiple jars! Switch between them easily using the header menu.
 
@@ -107,7 +107,28 @@ If a match is found, the result is displayed with all its details. You can:
 
 ---
 
-## 7. Levels & XP (Gamification)
+---
+
+## 7. Jar Modes (Allocation & Voting)
+
+### Random Spin (Classic)
+The default mode. Anyone can spin the jar to pick a random idea from the entire pool. Completed ideas move to the Vault.
+
+### Task Allocation Mode (System)
+Perfect for chores or assigning specific responsibilities.
+1.  **Admin Distribution:** The Jar Administrator clicks **"Distribute Tasks"** to randomly assign a set number of tasks (e.g., 3 tasks) to *each* member.
+2.  **My Tasks:** Members see a **"View My Tasks"** button instead of a Spin button. They can only see the tasks assigned to them.
+3.  **Completion:** Members select their assigned tasks to mark them as done.
+
+### Voting Mode
+Great for group decisions on Movie Night or Dinner.
+1.  **Start Vote:** Admin starts a session with a set of random options.
+2.  **Vote:** Everyone votes "Yes" or "No" on their own device.
+3.  **Result:** The best match is revealed to everyone instantly.
+
+---
+
+## 8. Levels & XP (Gamification)
 
 Earn XP to level up your "Decision Rank"!
 *   **Add an Idea:** +15 XP
@@ -118,7 +139,7 @@ Unlock custom **Trophies** in your trophy case by achieving milestones like addi
 
 ---
 
-## 8. Premium Features
+## 9. Premium Features
 
 Decision Jar Premium unlocks a suite of AI-powered scouts and planners:
 - **Concierge Services:** Scouts for Dining, Bars, Clubs, Movies, Theatre, and more.
@@ -127,7 +148,7 @@ Decision Jar Premium unlocks a suite of AI-powered scouts and planners:
 
 ---
 
-## 9. Concierge Services
+## 10. Concierge Services
 
 Our Premium Concierge tools help you find specific venues near you:
 *   **Dining Concierge:** Find top restaurants with Google ratings and "Go Tonight" integration.
@@ -139,7 +160,7 @@ Our Premium Concierge tools help you find specific venues near you:
 
 ---
 
-## 10. Planners
+## 11. Planners
 
 ### Night Out Planner
 Creates a cohesive timeline for an evening, typically including Drinks, Dinner, and an Event. You can regenerate individual items until the plan is perfect.
@@ -149,7 +170,7 @@ Generates a curated list of 5 activity ideas for the upcoming (or current) weeke
 
 ---
 
-## 11. Managing History & Memories
+## 12. Managing History & Memories
 
 ### The Vault
 Once an idea is completed, it moves to the **Vault** (or Memories page). 
@@ -162,7 +183,7 @@ Once an idea is completed, it moves to the **Vault** (or Memories page).
 
 ---
 
-## 12. Settings & Configuration
+## 13. Settings & Configuration
 
 ### Profile
 Update your **Default Location** and **Interests** to help the AI suggest things you'll actually love.

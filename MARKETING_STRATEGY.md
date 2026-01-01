@@ -6,8 +6,13 @@ Focus on the pain point of *indecision* in relationships and the *excitement* of
 
 ## 2. Target Audience
 *   **Primary:** Couples (Gen Z & Millennials, ages 18-35) in long-term relationships.
-*   **Secondary:** People newly dating who want to impress; Married couples looking to "re-spark" the romance.
-*   **Interests:** Dating advice, relationship memes, travel, foodies, budget tips.
+*   **Secondary:** Roommates and Families looking for fair task distribution; people newly dating who want to impress.
+*   **Interests:** Dating advice, relationship memes, travel, organization/lifestyle tips, budget tips.
+
+## 2.1 Marketing Angles
+*   **Romantic Spark:** Saving date night from indecision.
+*   **Roommate Harmony:** Using **Task Allocation** to end chore wars (e.g., "The Jar decided you're doing the dishes").
+*   **Family Fun:** Crowdsourcing weekend plans with kids.
 
 ## 3. Platform Strategy
 

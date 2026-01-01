@@ -212,6 +212,18 @@ export async function GET(request: Request) {
                 }
             }
 
+            // Allocation Mode:
+            // If assigned to someone else, hide it or mark as "Assigned to X".
+            const assignedToId = (idea as any).assignedToId;
+            if (assignedToId && assignedToId !== session.user.id && !isAdmin) {
+                processedIdea = {
+                    ...idea,
+                    description: "Secret Task",
+                    details: "This task is assigned to another member.",
+                    isMasked: true,
+                };
+            }
+
             // Append permission flags
             return {
                 ...processedIdea,

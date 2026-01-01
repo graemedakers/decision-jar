@@ -5,7 +5,7 @@ Beyond the standard "Squad Mode" (friends hanging out), the shared Jar architect
 ## 1. The "Household Operations" Jar
 Solving domestic disputes and decision fatigue.
 *   **The Dinner Dilemma:** A shared jar for couples/families populated with *recipes* or *local takeout spots*. Spin to decide dinner.
-*   **Gamified Chores:** A "Chore Jar". Spin to see who cleans the bathroom this week. Or, if a child wants screen time, they must spin the jar and complete the task first.
+*   **Gamified Chores:** A "Chore Jar". Use **Task Allocation Mode** to fairly distribute the week's chores across the whole household in seconds. No more picking favorites—let the AI handle the split.
 *   **The "I'm Bored" Jar (Kids):** Parents populate it with screen-free activities ("Build a fort", "Draw a cat"). Kids spin when they complain of boredom.
 
 ## 2. The "Office & Team Culture" Jar

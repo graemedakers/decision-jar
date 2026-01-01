@@ -152,6 +152,7 @@ model User {
   premiumInviteToken     String?   // For graemedakers@gmail.com premium invite links
   votes                  Vote[]
   rateLimit              RateLimit?
+  assignedTasks          Idea[]    @relation("AssignedTo")
 }
 
 model Account {
@@ -228,6 +229,9 @@ model Idea {
   weather        String   @default("ANY") // ANY, SUNNY, RAINY, COLD
   requiresTravel Boolean  @default(false) // If true, it's an "Outing"
 
+  assignedToId   String?
+  assignedTo     User?    @relation("AssignedTo", fields: [assignedToId], references: [id])
+
   ratings        Rating[]
   wonSessions    VoteSession[] @relation("SessionWinner")
   votes          Vote[]
@@ -280,6 +284,7 @@ model AppReview {
 enum SelectionMode {
   RANDOM
   VOTING
+  ALLOCATION
 }
 
 enum VoteStatus {

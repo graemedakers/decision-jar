@@ -207,6 +207,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             >
                                 <option value="RANDOM">Spin (Lucky Dip)</option>
                                 <option value="VOTING">Vote (Consensus)</option>
+                                <option value="ALLOCATION">Allocation (Tasks)</option>
                             </select>
                         </div>
                     </div>

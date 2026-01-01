@@ -343,6 +343,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                                     <option value="Wellness" className="bg-white dark:bg-slate-900">Wellness</option>
                                                     <option value="Fitness" className="bg-white dark:bg-slate-900">Fitness</option>
                                                     <option value="Travel" className="bg-white dark:bg-slate-900">Travel</option>
+                                                    <option value="System Development" className="bg-white dark:bg-slate-900">System Development</option>
                                                 </select>
                                                 <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
                                             </div>

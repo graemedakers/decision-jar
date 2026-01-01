@@ -150,7 +150,7 @@ export default function Home() {
       ratingValue: ratingValue,
       ratingCount: ratingCount,
     },
-    featureList: 'Decision Maker, Couple Sync, Weekend Planner, Dining Concierge',
+    featureList: 'Decision Maker, Couple Sync, Task Allocation, Weekend Planner, Dining Concierge',
     screenshot: `${process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'}/og-image.jpg`,
     mainEntity: {
       '@type': 'FAQPage',
@@ -185,6 +185,14 @@ export default function Home() {
           acceptedAnswer: {
             '@type': 'Answer',
             text: 'Yes. Decision Jar is designed for couples and groups. Once you invite your partner or friends using your unique code, your jars are instantly linked. Any idea added or removed on one phone appears on the others immediately.'
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'What is Task Allocation mode?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Allocation mode allows administrators to randomly distribute a set number of tasks to each jar member. Once assigned, these tasks are private to the assigned user until they are completed or marked as done.'
           }
         }
       ]
@@ -610,8 +618,8 @@ export default function Home() {
                 </Button>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 dark:text-green-400" /> Free 14-day trial of premium features</span>
-                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-yellow-500 dark:text-yellow-400" /> Then just AU$2.50 / month per person</span>
+                <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 dark:text-green-400" /> Free {PRICING.TRIAL_DAYS}-day trial of premium features</span>
+                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-yellow-500 dark:text-yellow-400" /> Then just {PRICING.MONTHLY} / month</span>
               </div>
             </div>
           </div>

@@ -8,7 +8,7 @@ import { sendVerificationEmail } from '@/lib/mailer';
 
 export async function POST(request: Request) {
     try {
-        const { name, email: rawEmail, password, inviteCode, location, topic, type, premiumToken } = await request.json();
+        const { name, email: rawEmail, password, inviteCode, location, topic, type, premiumToken, selectionMode } = await request.json();
         const email = rawEmail?.toLowerCase().trim();
 
         if (!name || !email || !password) {
@@ -41,6 +41,8 @@ export async function POST(request: Request) {
                 jarName = `${name}'s ${selectedTopic} Jar`;
             }
 
+            const validSelectionMode = (selectionMode === 'VOTING' || selectionMode === 'ALLOCATION') ? selectionMode : 'RANDOM';
+
             // Create new Jar
             const jar = await (prisma.jar as any).create({
                 data: {
@@ -49,7 +51,8 @@ export async function POST(request: Request) {
                     isPremium: false,
                     name: jarName,
                     type: (type === 'ROMANTIC' || type === 'SOCIAL' || type === 'GENERIC') ? type : 'SOCIAL',
-                    topic: selectedTopic
+                    topic: selectedTopic,
+                    selectionMode: validSelectionMode
                 },
             });
 

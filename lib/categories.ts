@@ -206,7 +206,7 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
 // Helper to map icon name to component
 const getIconComponent = (iconName: string) => {
     // Basic mapping for common icons, fallback to Sparkles
-    const map: any = { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map: MapIcon, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza };
+    const map: any = { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map: MapIcon, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Code, Bug, Search, FileText, PenTool };
     return map[iconName] || Sparkles;
 };
 

@@ -103,7 +103,7 @@ export default function CommunityIndexPage() {
                 {/* Filters */}
                 <div className="max-w-7xl mx-auto mt-8 flex flex-col md:flex-row items-center gap-4">
                     <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
-                        {['All', 'Social', 'Food', 'Fitness', 'Wellness', 'Arts', 'Entertainment', 'Education', 'Travel'].map((topic) => (
+                        {['All', 'Social', 'Food', 'Fitness', 'Wellness', 'Arts', 'Entertainment', 'Education', 'Travel', 'System Development'].map((topic) => (
                             <button
                                 key={topic}
                                 onClick={() => {
