@@ -20,6 +20,8 @@ export default function JarPage() {
     const [hasPartner, setHasPartner] = useState(true);
     const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
+    const [currentUser, setCurrentUser] = useState<any>(null);
+
     const fetchIdeas = async () => {
         setIsLoading(true);
         try {
@@ -43,6 +45,7 @@ export default function JarPage() {
                 if (data?.user) {
                     setIsPremium(!!data.user.isPremium);
                     setHasPartner(!!data.user.hasPartner);
+                    setCurrentUser(data.user);
                 }
             }
         } catch (error) {
@@ -252,6 +255,7 @@ export default function JarPage() {
                     setIsModalOpen(false);
                     setIsPremiumModalOpen(true);
                 }}
+                currentUser={currentUser}
             />
 
             <DeleteConfirmModal

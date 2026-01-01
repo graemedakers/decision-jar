@@ -468,13 +468,13 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         <button
                                             type="submit"
                                             className="w-full inline-flex items-center justify-center transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none glass-button px-4 py-3 text-sm font-medium"
-                                            disabled={isLoading || (initialData?.id && (!currentUser || initialData.createdById !== currentUser.id))}
+                                            disabled={isLoading || (initialData?.id && !(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)))}
                                         >
                                             {isLoading ? (
                                                 <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                                             ) : null}
                                             {initialData && initialData.id
-                                                ? ((!currentUser || initialData.createdById !== currentUser.id)
+                                                ? (!(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id))
                                                     ? "View Only (Creator Access Required)"
                                                     : "Save Changes")
                                                 : <><Plus className="w-5 h-5 mr-2" /> Add to Jar</>

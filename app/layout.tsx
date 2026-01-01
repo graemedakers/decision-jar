@@ -44,19 +44,43 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    google: "google-site-verification-id", // Placeholder
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: process.env.NEXT_PUBLIC_APP_URL || "https://spinthejar.com",
     title: "Spin the Jar | Make Decisions Together",
-    description: "Stop asking 'What do you want to do?'. Let the Spin the Jar decide.",
+    description: "Stop asking 'What do you want to do?'. Let Spin the Jar decide.",
     siteName: "Spin the Jar",
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Spin the Jar Preview',
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Spin the Jar | Make Decisions Together",
     description: "A fun way for friends and families to decide what to do.",
+    images: ['/opengraph-image.png'],
   },
+  category: "lifestyle",
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Spin the Jar",
+  "url": "https://spinthejar.com",
+  "logo": "https://spinthejar.com/icon.png",
+  "sameAs": [
+    "https://twitter.com/spinthejar"
+  ]
 };
 
 export const viewport: Viewport = {
@@ -77,6 +101,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {children}
         <BottomNav />
         <UserStatus />
