@@ -183,7 +183,7 @@ export default function ExplorePage() {
     return (
         <main className="min-h-screen p-4 pb-24 relative w-full max-w-2xl mx-auto bg-slate-50 dark:bg-slate-950">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Explore</h1>
-            <p className="text-slate-500 dark:text-slate-400 mb-8">Tools to plan your perfect date.</p>
+            <p className="text-slate-500 dark:text-slate-400 mb-8">Discover ideas to fill your jar or do right now.</p>
 
             <div className="grid grid-cols-1 gap-4">
                 {tools.map((tool) => {

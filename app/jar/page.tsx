@@ -125,7 +125,7 @@ export default function JarPage() {
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">In the Jar</h1>
-                        <p className="text-slate-600 dark:text-slate-400 text-sm">{activeIdeas.length} ideas waiting</p>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm">{isLoading ? '...' : activeIdeas.length} ideas waiting</p>
                     </div>
                 </div>
             </div>

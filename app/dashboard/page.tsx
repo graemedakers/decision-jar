@@ -116,6 +116,7 @@ export default function DashboardPage() {
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isSurpriseModalOpen, setIsSurpriseModalOpen] = useState(false);
     const [isLoadingUser, setIsLoadingUser] = useState(true);
+    const [isLoadingIdeas, setIsLoadingIdeas] = useState(true);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
@@ -144,6 +145,8 @@ export default function DashboardPage() {
             }
         } catch (error) {
             console.error('Failed to fetch ideas', error);
+        } finally {
+            setIsLoadingIdeas(false);
         }
     };
 
@@ -770,7 +773,7 @@ export default function DashboardPage() {
                                             </div>
                                             <div className="text-left">
                                                 <span className={`block text-base font-bold transition-colors flex items-center gap-2 ${availableIdeasCount > 0 ? 'text-pink-900 dark:text-white group-hover:text-pink-700 dark:group-hover:text-pink-200' : 'text-slate-400'}`}>
-                                                    {isSpinning ? 'Spinning...' : 'Spin the Jar'}
+                                                    {isSpinning ? 'Spinning...' : isLoadingIdeas ? 'Loading...' : 'Spin the Jar'}
                                                 </span>
                                             </div>
                                         </div>
@@ -844,7 +847,9 @@ export default function DashboardPage() {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Open Jar</h3>
-                                            <p className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-300 transition-colors">View {ideas.filter(i => !i.selectedAt).length} ideas</p>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-300 transition-colors">
+                                                {isLoadingIdeas ? "Loading..." : `View ${ideas.filter(i => !i.selectedAt).length} ideas`}
+                                            </p>
                                         </div>
                                         <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
                                     </motion.div>
@@ -887,7 +892,17 @@ export default function DashboardPage() {
                                                     animate={{ opacity: 1, y: 0 }}
                                                     className="flex flex-col items-center"
                                                 >
-                                                    <p className="text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">{availableIdeasCount}</p>
+                                                    {isLoadingIdeas ? (
+                                                        <div className="h-12 flex items-center justify-center">
+                                                            <div className="flex gap-1">
+                                                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">{availableIdeasCount}</p>
+                                                    )}
                                                     <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mt-1">Ready for Selection</p>
                                                 </motion.div>
                                             </div>
@@ -914,8 +929,8 @@ export default function DashboardPage() {
                                                 </div>
                                                 <div className="text-left relative z-10">
                                                     <span className={`block text-lg font-bold transition-colors flex items-center gap-2 ${availableIdeasCount > 0 ? 'text-pink-900 dark:text-white group-hover:text-pink-700 dark:group-hover:text-pink-200' : 'text-slate-400'}`}>
-                                                        {isSpinning ? 'Spinning...' : 'Spin the Jar'}
-                                                        {!isSpinning && availableIdeasCount > 0 && <span className="bg-pink-500/30 text-pink-700 dark:text-pink-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+5 XP</span>}
+                                                        {isSpinning ? 'Spinning...' : isLoadingIdeas ? 'Loading...' : 'Spin the Jar'}
+                                                        {!isSpinning && !isLoadingIdeas && availableIdeasCount > 0 && <span className="bg-pink-500/30 text-pink-700 dark:text-pink-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+5 XP</span>}
                                                     </span>
                                                     <span className={`text-sm transition-colors leading-tight ${availableIdeasCount > 0 ? 'text-pink-700 dark:text-pink-200/60 group-hover:text-pink-900 dark:group-hover:text-pink-200/80' : 'text-slate-500'}`}>Let fate decide</span>
                                                 </div>
@@ -934,7 +949,9 @@ export default function DashboardPage() {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Vault</h3>
-                                            <p className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-300 transition-colors">{ideas.filter(i => i.selectedAt).length} completed</p>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-300 transition-colors">
+                                                {isLoadingIdeas ? "Loading..." : `${ideas.filter(i => i.selectedAt).length} completed`}
+                                            </p>
                                         </div>
                                         <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
                                     </motion.div>
