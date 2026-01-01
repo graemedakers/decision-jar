@@ -47,7 +47,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Rate limit exceeded', details: rateLimit.error }, { status: 429 });
         }
 
-        const { genre, vibe, platforms, decades } = await request.json().catch(() => ({}));
+        const { genre, vibe, platforms, decades, location } = await request.json().catch(() => ({}));
 
         const userInterests = (user as any).interests;
 
@@ -58,7 +58,10 @@ export async function POST(request: Request) {
         }
 
         if (platforms) {
-            extraInstructions += `PRIORITY: Limit recommendations to movies available on: ${platforms}. If a movie is not on these, do not suggest it unless it is currently In Theaters.\n`;
+            extraInstructions += `PRIORITY: Limit recommendations to movies available on: ${platforms}.\n`;
+            if (platforms.includes("Cinemas (Local)")) {
+                extraInstructions += `IMPORTANT: Since 'Cinemas (Local)' is selected, include at least 2 movies currently playing in theaters near ${location || 'the user'}. Provide cinema names or broad session info in the 'address' field.\n`;
+            }
         }
 
         const excludeNames = await getExcludedNames(activeJar.id);
@@ -69,29 +72,13 @@ export async function POST(request: Request) {
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
 
-        if (!apiKey) {
-            // Mock response
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            return NextResponse.json({
-                recommendations: [
-                    {
-                        name: "Inception",
-                        description: "A thief who steals corporate secrets through the use of dream-sharing technology.",
-                        cuisine: "Sci-Fi",
-                        price: "Netflix", // Mock platform
-                        address: "Streaming",
-                        google_rating: 4.8
-                    }
-                ]
-            });
-        }
-
         const prompt = `
-        Act as a movie critic and concierge.
+        Act as a movie critic and local cinema guide.
         Recommend 5 distinct movies based on the following preferences:
         - Genre: ${genre || "Any"}
         - Vibe/Mood: ${vibe || "Any"}
-        - Streaming Platforms: ${platforms || "Any (Suggest best available)"}
+        - Platforms/Cinemas: ${platforms || "Any (Suggest best available)"}
+        - User Location: ${location || "Not provided (assume general if cinema is selected)"}
         - Era / Decade: ${decades || "Any"}
         
         ${extraInstructions}
@@ -100,9 +87,9 @@ export async function POST(request: Request) {
         - Name (Title)
         - A brief, intriguing synopsis (1 sentence)
         - Genre
-        - "Price": The specific streaming platform name (e.g. Netflix, Prime) OR "In Theaters"
-        - "Address": If "In Theaters", say "Cinema". If streaming, say "Streaming".
-        - A likely website URL (IMDB or Rotten Tomatoes or Streaming Link)
+        - "Price": The specific streaming platform name OR "In Theaters"
+        - "Address": If "In Theaters", say "At Cinemas (e.g. Acme Cinema ${location || ''})". If streaming, say "Streaming".
+        - A likely website URL (IMDB, Fandango for theaters, or Streaming Link)
         - "Opening Hours": Runtime (e.g. "2h 15m")
         - Rotten Tomatoes or IMDB Score (e.g. 8.5)
         
@@ -114,9 +101,9 @@ export async function POST(request: Request) {
                     "name": "Movie Title",
                     "description": "Intriguing summary.",
                     "cuisine": "Sci-Fi / Thriller",
-                    "price": "Netflix",
-                    "address": "Streaming",
-                    "website": "https://imdb.com/...",
+                    "price": "In Theaters",
+                    "address": "At Cinemas near ${location || 'you'}",
+                    "website": "https://fandango.com/...",
                     "opening_hours": "120 min",
                     "google_rating": 8.5
                 }

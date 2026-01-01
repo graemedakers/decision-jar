@@ -222,6 +222,7 @@ model Idea {
   photoUrls      String[]
   
   isSurprise     Boolean  @default(false)
+  isPrivate      Boolean  @default(false)
 
   ratings        Rating[]
   wonSessions    VoteSession[] @relation("SessionWinner")

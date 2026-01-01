@@ -6,7 +6,7 @@ import { ItineraryPreview } from "./ItineraryPreview";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, Utensils, Calendar, ExternalLink, Wand2 } from "lucide-react";
+import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, Utensils, Calendar, ExternalLink, Wand2, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getRandomIdeaForTopic } from "@/lib/sample-ideas";
 
@@ -34,6 +34,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         timeOfDay: "ANY",
         category: "ACTIVITY",
         suggestedBy: "",
+        isPrivate: false,
     });
 
     const [isMagicLoading, setIsMagicLoading] = useState(false);
@@ -86,6 +87,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     timeOfDay: initialData.timeOfDay || "ANY",
                     category: initialData.category || "ACTIVITY",
                     suggestedBy: "",
+                    isPrivate: initialData.isPrivate || false,
                 };
             } else {
                 initialFormData = {
@@ -98,6 +100,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     timeOfDay: "ANY",
                     category: "ACTIVITY",
                     suggestedBy: "",
+                    isPrivate: false,
                 };
             }
             setFormData(initialFormData);
@@ -148,7 +151,8 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                 activityLevel: formData.activityLevel,
                 cost: formData.cost,
                 timeOfDay: formData.timeOfDay,
-                category: formData.category
+                category: formData.category,
+                isPrivate: formData.isPrivate
             };
 
             const res = await fetch(url, {
@@ -422,6 +426,25 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                             </div>
                                         </div>
                                     </fieldset>
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/10 group cursor-pointer transition-all hover:bg-slate-200 dark:hover:bg-black/30"
+                                            onClick={() => setFormData({ ...formData, isPrivate: !formData.isPrivate })}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${formData.isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
+                                                    <Lock className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-slate-900 dark:text-white">Keep it a secret?</p>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">Other users won't see this until it's selected.</p>
+                                                </div>
+                                            </div>
+                                            <div className={`w-12 h-6 rounded-full relative transition-colors ${formData.isPrivate ? 'bg-amber-500' : 'bg-slate-300 dark:bg-white/10'}`}>
+                                                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.isPrivate ? 'left-7' : 'left-1'}`} />
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div className="flex gap-3 pt-2">
                                         <button

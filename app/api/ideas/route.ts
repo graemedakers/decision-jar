@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, selectedAt, notes, address, website, googleRating, openingHours, rating, photoUrls, selectedDate } = body;
+        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, selectedAt, notes, address, website, googleRating, openingHours, rating, photoUrls, selectedDate, isPrivate } = body;
 
         if (!description) {
             return NextResponse.json({ error: 'Description is required' }, { status: 400 });
@@ -86,6 +86,7 @@ export async function POST(request: Request) {
             openingHours: openingHours || null,
             rating: rating ? parseInt(String(rating)) : null,
             photoUrls: photoUrls || [],
+            isPrivate: Boolean(isPrivate),
         };
 
         const idea = await prisma.idea.create({
@@ -137,6 +138,7 @@ export async function GET(request: Request) {
         // Fetch all ideas for the couple (jar) and include jar type
         const allIdeas: any[] = await prisma.$queryRaw`
             SELECT i.*, 
+                   i."isPrivate",
                    json_build_object('id', u.id, 'name', u.name) as "createdBy",
                    c.type as "jarType",
                    c."selectionMode" as "selectionMode"
@@ -151,6 +153,7 @@ export async function GET(request: Request) {
             const isMyIdea = idea.createdById === session.user.id;
             const isSelected = !!idea.selectedAt;
             const isSurprise = (idea as any).isSurprise;
+            const isPrivate = (idea as any).isPrivate;
             const isGroupJar = (idea as any).jarType === 'SOCIAL';
             const isVotingJar = (idea as any).selectionMode === 'VOTING';
 
@@ -159,37 +162,33 @@ export async function GET(request: Request) {
                 return idea;
             }
 
-            // Voting Jars: Everyone sees everything to vote (except surprises if we support them)
-            if (isVotingJar && !isSurprise) {
+            // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
+            if (isVotingJar && !isSurprise && !isPrivate) {
                 return idea;
             }
 
-            // In Group Jars, everyone sees everything
-            if (isGroupJar && !isSurprise) {
+            // In Group Jars, everyone sees everything (unless specifically private or a surprise)
+            if (isGroupJar && !isSurprise && !isPrivate) {
                 return idea;
             }
 
-            // If it is a "Surprise Idea" created via the specific feature, hide from everyone until selected.
-            if (isSurprise) {
-                return {
-                    ...idea,
-                    description: "Surprise Idea",
-                    details: "This idea will be revealed when you spin the jar!",
-                    isMasked: true,
-                };
-            }
-
-            // If it's my idea (and not a special surprise), show it.
+            // If it's my idea, show it.
             if (isMyIdea) {
                 return idea;
             }
 
-            // Otherwise (it's partner's unselected normal idea), hide the description
-            return {
-                ...idea,
-                description: "??? (Partner's Idea)",
-                isMasked: true,
-            };
+            // If it is marked as private OR a Surprise Idea, hide from others until selected.
+            if (isPrivate || isSurprise) {
+                return {
+                    ...idea,
+                    description: isSurprise ? "Surprise Idea" : "??? (Secret Idea)",
+                    details: isSurprise ? "This idea will be revealed when you spin the jar!" : "shhh... it's a secret!",
+                    isMasked: true,
+                };
+            }
+
+            // Otherwise, if not private and not owned by me, show it (as requested: "If they chose not to keep it a secret, it should be visible")
+            return idea;
         });
 
         return NextResponse.json(maskedIdeas);

@@ -96,7 +96,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const body = await request.json();
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category } = body;
+        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, isPrivate } = body;
 
         // Verify ownership
         const idea = await prisma.idea.findUnique({
@@ -147,6 +147,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
                 cost,
                 timeOfDay,
                 category,
+                isPrivate: typeof isPrivate === 'boolean' ? isPrivate : undefined
             },
         });
 

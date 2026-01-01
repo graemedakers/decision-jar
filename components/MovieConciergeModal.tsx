@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Film, Clapperboard, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Heart, Popcorn } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
+import { getCurrentLocation } from "@/lib/utils";
 
 interface MovieConciergeModalProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
     const [selectedDecades, setSelectedDecades] = useState<string[]>([]);
+    const [location, setLocation] = useState(userLocation || "");
     const [recommendations, setRecommendations] = useState<any[]>([]);
     const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +38,7 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
     ];
 
     const PLATFORM_OPTIONS = [
-        "Netflix", "Prime Video", "Disney+", "Hulu",
+        "Cinemas (Local)", "Netflix", "Prime Video", "Disney+", "Hulu",
         "Max", "Apple TV+", "Peacock", "Paramount+"
     ];
 
@@ -51,6 +53,7 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
         setSelectedGenres([]);
         setSelectedVibes([]);
         setSelectedDecades([]);
+        setLocation(userLocation || "");
         setRecommendations([]);
         setPrevOpen(true);
     } else if (!isOpen && prevOpen) {
@@ -83,7 +86,8 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
                     genre: selectedGenres.join(", "),
                     vibe: selectedVibes.join(", "),
                     platforms: selectedPlatforms.join(", "),
-                    decades: selectedDecades.join(", ")
+                    decades: selectedDecades.join(", "),
+                    location: location
                 }),
             });
 
@@ -130,7 +134,39 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
                             <div className="space-y-4">
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Streaming Platforms (Select multiple)</label>
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Location (for local cinemas)</label>
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                try {
+                                                    const currentLoc = await getCurrentLocation();
+                                                    setLocation(currentLoc);
+                                                } catch (err) {
+                                                    alert("Could not get location. Please check permissions.");
+                                                }
+                                            }}
+                                            className="text-[10px] uppercase tracking-wider font-bold text-red-600 dark:text-red-400 hover:text-red-700 transition-colors flex items-center gap-1"
+                                        >
+                                            <MapPin className="w-3 h-3" />
+                                            Use GPS
+                                        </button>
+                                    </div>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            type="text"
+                                            value={location}
+                                            onChange={(e) => setLocation(e.target.value)}
+                                            placeholder="Current location, Neighborhood, or City"
+                                            className="glass-input w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-slate-500">Only needed if you select 'Cinemas (Local)' below.</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Platforms or Cinemas (Select multiple)</label>
                                     <div className="flex flex-wrap gap-2">
                                         {PLATFORM_OPTIONS.map((p) => (
                                             <button
