@@ -17,26 +17,30 @@ export function useConciergeActions({
     setRecommendations
 }: ConciergeActionProps) {
 
-    const handleAddToJar = async (rec: any) => {
+    const handleAddToJar = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
         try {
             const res = await fetch('/api/ideas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     description: rec.name,
-                    details: `${rec.description}\n\nAddress: ${rec.address}\nPrice: ${rec.price}\nWebsite: ${rec.website || 'N/A'}`,
+                    details: `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
                     indoor: true,
                     duration: "2.0",
                     activityLevel: "LOW",
-                    cost: rec.price.length > 2 ? "$$$" : rec.price.length > 1 ? "$$" : "$",
+                    cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
                     timeOfDay: "EVENING",
-                    category: "MEAL"
+                    category: category,
+                    isPrivate: isPrivate
                 }),
             });
 
             if (res.ok) {
                 if (onIdeaAdded) onIdeaAdded();
                 alert("Added to jar!");
+            } else {
+                const err = await res.json();
+                alert(`Failed to add: ${err.error || 'Server error'}`);
             }
         } catch (error) {
             console.error(error);
@@ -44,20 +48,21 @@ export function useConciergeActions({
         }
     };
 
-    const handleGoTonight = async (rec: any) => {
+    const handleGoTonight = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
         const ideaData = {
             description: rec.name,
-            details: `${rec.description}\n\nAddress: ${rec.address}\nPrice: ${rec.price}\nWebsite: ${rec.website || 'N/A'}\nHours: ${rec.opening_hours || 'N/A'}\nRating: ${rec.google_rating || 'N/A'}`,
+            details: `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}\nHours: ${rec.opening_hours || 'N/A'}\nRating: ${rec.google_rating || 'N/A'}`,
             indoor: true,
             duration: 2.0,
             activityLevel: "LOW",
-            cost: rec.price.length > 2 ? "$$$" : rec.price.length > 1 ? "$$" : "$",
+            cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
             timeOfDay: "EVENING",
-            category: "MEAL",
+            category: category,
             website: rec.website,
             address: rec.address,
             openingHours: rec.opening_hours,
             googleRating: rec.google_rating,
+            isPrivate: isPrivate
         };
 
         try {

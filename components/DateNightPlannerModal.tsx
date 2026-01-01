@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { Sparkles, MapPin, Loader2, ExternalLink, Calendar, DollarSign, Wine, Utensils, Ticket, Clock, Check, Plus, RefreshCcw, Pencil, X, Save } from "lucide-react";
+import { Sparkles, MapPin, Loader2, ExternalLink, Calendar, DollarSign, Wine, Utensils, Ticket, Clock, Check, Plus, RefreshCcw, Pencil, X, Save, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface ScheduleItem {
@@ -31,6 +31,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
     const [targetLocation, setTargetLocation] = useState(userLocation || "");
     const [targetDate, setTargetDate] = useState("");
     const [targetCost, setTargetCost] = useState("Medium");
+    const [isPrivate, setIsPrivate] = useState(true);
 
     // Dynamic Text based on Topic
     const isDateContext = !jarTopic || jarTopic === 'Dates' || jarTopic === 'Romantic';
@@ -65,6 +66,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
             setRegeneratingIndex(null);
             setEditingIndex(null);
             setEditForm(null);
+            setIsPrivate(true);
         }
     }, [isOpen]);
 
@@ -188,7 +190,8 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                     cost: targetCost === "Low" ? "$" : targetCost === "High" ? "$$$" : "$$",
                     timeOfDay: "EVENING",
                     category: isDateContext ? "PLANNED_DATE" : "ACTIVITY",
-                    notes: targetDate ? `Planned for: ${targetDate}` : undefined
+                    notes: targetDate ? `Planned for: ${targetDate}` : undefined,
+                    isPrivate: isPrivate
                 }),
             });
 
@@ -210,7 +213,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto isolate">
                 <DialogHeader className="flex flex-row items-center justify-between space-y-0">
                     <DialogTitle className="flex items-center gap-2 text-2xl">
                         <Sparkles className="w-6 h-6 text-pink-600 dark:text-pink-400" />
@@ -327,132 +330,143 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                                 <MapPin className="w-4 h-4" /> View Full Route on Map
                             </a>
 
-                            <div className="relative border-l-2 border-slate-700 ml-4 space-y-8 pl-8 py-2">
-                                {itinerary.schedule.map((item, idx) => {
-                                    const activityType = item.activity_type || "";
-                                    let Icon = Clock;
-                                    if (activityType.toLowerCase().includes("drink")) Icon = Wine;
-                                    if (activityType.toLowerCase().includes("dinner") || activityType.toLowerCase().includes("food")) Icon = Utensils;
-                                    if (activityType.toLowerCase().includes("event") || activityType.toLowerCase().includes("show")) Icon = Ticket;
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white">Your Itinerary</h4>
+                                    <button
+                                        onClick={() => setIsPrivate(!isPrivate)}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-500'}`}
+                                    >
+                                        <Lock className="w-3.5 h-3.5" />
+                                        {isPrivate ? "Secret Mode On" : "Public Mode"}
+                                    </button>
+                                </div>
 
-                                    const isRegenerating = regeneratingIndex === idx;
-                                    const isEditing = editingIndex === idx;
+                                <div className="relative border-l-2 border-slate-700 ml-4 space-y-8 pl-8 py-2">
+                                    {itinerary.schedule.map((item, idx) => {
+                                        const activityType = item.activity_type || "";
+                                        let Icon = Clock;
+                                        if (activityType.toLowerCase().includes("drink")) Icon = Wine;
+                                        if (activityType.toLowerCase().includes("dinner") || activityType.toLowerCase().includes("food")) Icon = Utensils;
+                                        if (activityType.toLowerCase().includes("event") || activityType.toLowerCase().includes("show")) Icon = Ticket;
 
-                                    return (
-                                        <div key={idx} className="relative">
-                                            {/* Timeline Dot */}
-                                            <div className="absolute -left-[41px] top-0 w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-pink-500 flex items-center justify-center z-10">
-                                                <div className="w-2 h-2 rounded-full bg-pink-500" />
-                                            </div>
+                                        const isRegenerating = regeneratingIndex === idx;
+                                        const isEditing = editingIndex === idx;
 
-                                            <div className={`bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl transition-colors group ${isEditing ? 'bg-slate-50 dark:bg-slate-800 border-pink-500/50 ring-1 ring-pink-500/50' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                                        return (
+                                            <div key={idx} className="relative">
+                                                {/* Timeline Dot */}
+                                                <div className="absolute -left-[41px] top-0 w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-pink-500 flex items-center justify-center z-10">
+                                                    <div className="w-2 h-2 rounded-full bg-pink-500" />
+                                                </div>
 
-                                                {isEditing && editForm ? (
-                                                    <div className="space-y-3">
-                                                        <div>
-                                                            <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1 block">Venue Name</label>
-                                                            <input
-                                                                value={editForm.venue_name}
-                                                                onChange={e => setEditForm({ ...editForm, venue_name: e.target.value })}
-                                                                className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-pink-500 outline-none"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1 block">Description</label>
-                                                            <textarea
-                                                                value={editForm.description}
-                                                                onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                                                                className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-pink-500 outline-none h-20 resize-none"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1 block">Booking / Access Link (URL)</label>
-                                                            <input
-                                                                value={editForm.booking_link}
-                                                                onChange={e => setEditForm({ ...editForm, booking_link: e.target.value })}
-                                                                className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-blue-600 dark:text-blue-300 focus:border-pink-500 outline-none"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1 block">Address</label>
-                                                            <input
-                                                                value={editForm.address}
-                                                                onChange={e => setEditForm({ ...editForm, address: e.target.value })}
-                                                                className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-pink-500 outline-none"
-                                                            />
-                                                        </div>
+                                                <div className={`bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl transition-colors group ${isEditing ? 'bg-slate-50 dark:bg-slate-800 border-pink-500/50 ring-1 ring-pink-500/50' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
 
-                                                        <div className="flex gap-2 pt-2">
-                                                            <Button size="sm" onClick={handleSaveEdit} className="bg-green-600 hover:bg-green-700 text-white h-8">
-                                                                <Save className="w-3 h-3 mr-1" /> Save
-                                                            </Button>
-                                                            <Button size="sm" onClick={handleCancelEdit} variant="ghost" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white h-8">
-                                                                <X className="w-3 h-3 mr-1" /> Cancel
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div className="flex justify-between items-start mb-2">
+                                                    {isEditing && editForm ? (
+                                                        <div className="space-y-3">
                                                             <div>
-                                                                <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-300 mb-1 border border-pink-200 dark:border-pink-500/20">
-                                                                    {item.time}
-                                                                </span>
-                                                                <h4 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                                                    <Icon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                                                                    {item.venue_name}
-                                                                </h4>
+                                                                <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1 block">Venue Name</label>
+                                                                <input
+                                                                    value={editForm.venue_name}
+                                                                    onChange={e => setEditForm({ ...editForm, venue_name: e.target.value })}
+                                                                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-pink-500 outline-none"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1 block">Description</label>
+                                                                <textarea
+                                                                    value={editForm.description}
+                                                                    onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                                                                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-pink-500 outline-none h-20 resize-none"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1 block">Booking / Access Link (URL)</label>
+                                                                <input
+                                                                    value={editForm.booking_link}
+                                                                    onChange={e => setEditForm({ ...editForm, booking_link: e.target.value })}
+                                                                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-blue-600 dark:text-blue-300 focus:border-pink-500 outline-none"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1 block">Address</label>
+                                                                <input
+                                                                    value={editForm.address}
+                                                                    onChange={e => setEditForm({ ...editForm, address: e.target.value })}
+                                                                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-pink-500 outline-none"
+                                                                />
                                                             </div>
 
-                                                            <div className="flex gap-1">
-                                                                {/* Edit Button */}
-                                                                <button
-                                                                    onClick={() => handleEditItem(idx)}
-                                                                    disabled={isRegenerating || isAdding}
-                                                                    className="p-2 rounded-full bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-blue-100 dark:hover:bg-blue-500/20 hover:border-blue-200 dark:hover:border-blue-500/30 border border-transparent transition-all"
-                                                                    title="Edit Details"
-                                                                >
-                                                                    <Pencil className="w-4 h-4" />
-                                                                </button>
-                                                                {/* Reject / Regenerate Button */}
-                                                                <button
-                                                                    onClick={() => handleRegenerateItem(idx)}
-                                                                    disabled={isRegenerating || isAdding}
-                                                                    className="p-2 rounded-full bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-red-100 dark:hover:bg-red-500/20 hover:border-red-200 dark:hover:border-red-500/30 border border-transparent transition-all"
-                                                                    title="Reject & Find Alternative"
-                                                                >
-                                                                    {isRegenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
-                                                                </button>
+                                                            <div className="flex gap-2 pt-2">
+                                                                <Button size="sm" onClick={handleSaveEdit} className="bg-green-600 hover:bg-green-700 text-white h-8">
+                                                                    <Save className="w-3 h-3 mr-1" /> Save
+                                                                </Button>
+                                                                <Button size="sm" onClick={handleCancelEdit} variant="ghost" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white h-8">
+                                                                    <X className="w-3 h-3 mr-1" /> Cancel
+                                                                </Button>
                                                             </div>
                                                         </div>
-                                                        <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 leading-relaxed">{item.description}</p>
-                                                        <div className="flex flex-col sm:flex-row gap-3 text-xs text-slate-500 dark:text-slate-400 mt-2">
-                                                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {item.address}</span>
-                                                            <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> {item.cost_estimate || "N/A"}</span>
-                                                        </div>
-                                                        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/50 flex flex-wrap gap-4">
-                                                            {item.booking_link && (
-                                                                <a href={item.booking_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-pink-600 dark:text-pink-300 hover:text-pink-700 dark:hover:text-pink-200 hover:underline">
-                                                                    Book / Info <ExternalLink className="w-3 h-3" />
+                                                    ) : (
+                                                        <>
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div>
+                                                                    <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-300 mb-1 border border-pink-200 dark:border-pink-500/20">
+                                                                        {item.time}
+                                                                    </span>
+                                                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                                        <Icon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                                                                        {item.venue_name}
+                                                                    </h4>
+                                                                </div>
+
+                                                                <div className="flex gap-1">
+                                                                    {/* Edit Button */}
+                                                                    <button
+                                                                        onClick={() => handleEditItem(idx)}
+                                                                        disabled={isRegenerating || isAdding}
+                                                                        className="p-2 rounded-full bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-blue-100 dark:hover:bg-blue-500/20 hover:border-blue-200 dark:hover:border-blue-500/30 border border-transparent transition-all"
+                                                                        title="Edit Details"
+                                                                    >
+                                                                        <Pencil className="w-4 h-4" />
+                                                                    </button>
+                                                                    {/* Reject / Regenerate Button */}
+                                                                    <button
+                                                                        onClick={() => handleRegenerateItem(idx)}
+                                                                        disabled={isRegenerating || isAdding}
+                                                                        className="p-2 rounded-full bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-red-100 dark:hover:bg-red-500/20 hover:border-red-200 dark:hover:border-red-500/30 border border-transparent transition-all"
+                                                                        title="Reject & Find Alternative"
+                                                                    >
+                                                                        {isRegenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 leading-relaxed">{item.description}</p>
+                                                            <div className="flex flex-col sm:flex-row gap-3 text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                                                <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {item.address}</span>
+                                                                <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> {item.cost_estimate || "N/A"}</span>
+                                                            </div>
+                                                            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/50 flex flex-wrap gap-4">
+                                                                {item.booking_link && (
+                                                                    <a href={item.booking_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-pink-600 dark:text-pink-300 hover:text-pink-700 dark:hover:text-pink-200 hover:underline">
+                                                                        Book / Info <ExternalLink className="w-3 h-3" />
+                                                                    </a>
+                                                                )}
+                                                                <a
+                                                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.venue_name + " " + item.address)}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-200 hover:underline"
+                                                                >
+                                                                    View Map <MapPin className="w-3 h-3" />
                                                                 </a>
-                                                            )}
-                                                            <a
-                                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.venue_name + " " + item.address)}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-200 hover:underline"
-                                                            >
-                                                                View Map <MapPin className="w-3 h-3" />
-                                                            </a>
-                                                        </div>
-                                                    </>
-                                                )}
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-
-
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
 
                             {/* Actions */}

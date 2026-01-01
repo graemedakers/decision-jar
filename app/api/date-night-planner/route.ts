@@ -21,16 +21,12 @@ export async function POST(request: Request) {
             },
         });
 
-        let activeJar = null;
-        if (user) {
-            if (user.activeJarId) {
-                activeJar = user.memberships.find(m => m.jarId === user.activeJarId)?.jar;
-            } else if (user.coupleId) {
-                activeJar = user.couple;
-            } else if (user.memberships.length > 0) {
-                activeJar = user.memberships[0].jar;
-            }
-        }
+        // Determine the Active Jar
+        // Priority: 1. activeJarId, 2. First membership, 3. Legacy couple
+        const activeJar = (user?.activeJarId ? user.memberships.find(m => m.jarId === user.activeJarId)?.jar : null) ||
+            user?.memberships?.[0]?.jar ||
+            user?.couple;
+
 
         if (!user || !activeJar) {
             return NextResponse.json({ error: 'No active jar found' }, { status: 400 });

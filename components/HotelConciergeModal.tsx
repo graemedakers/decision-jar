@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Bed, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Heart, Wifi, Car, Waves, Dumbbell, Coffee, Martini } from "lucide-react";
+import { X, Bed, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Heart, Wifi, Car, Waves, Dumbbell, Coffee, Martini, Lock } from "lucide-react";
 import { Button } from "./ui/Button";
+import { useConciergeActions } from "@/hooks/useConciergeActions";
+import { getCurrentLocation } from "@/lib/utils";
 
 interface HotelConciergeModalProps {
     isOpen: boolean;
@@ -14,9 +16,6 @@ interface HotelConciergeModalProps {
     onFavoriteUpdated?: () => void;
 }
 
-import { useConciergeActions } from "@/hooks/useConciergeActions";
-import { getCurrentLocation } from "@/lib/utils";
-
 export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: HotelConciergeModalProps) {
     const [isLoading, setIsLoading] = useState(false);
 
@@ -25,6 +24,7 @@ export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
     const [selectedType, setSelectedType] = useState<string>("any");
     const [budget, setBudget] = useState("any");
     const [location, setLocation] = useState(userLocation || "");
+    const [isPrivate, setIsPrivate] = useState(true);
 
     const [recommendations, setRecommendations] = useState<any[]>([]);
     const resultsRef = useRef<HTMLDivElement>(null);
@@ -38,7 +38,7 @@ export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
         { id: "WiFi", icon: Wifi },
         { id: "Breakfast", icon: Coffee },
         { id: "Bar/Lounge", icon: Martini },
-        { id: "Pet Friendly", icon: Heart }, // Heart as placeholder for pet
+        { id: "Pet Friendly", icon: Heart },
     ];
 
     const TYPE_OPTIONS = [
@@ -52,6 +52,7 @@ export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
         setLocation(userLocation || "");
         setSelectedFacilities([]);
         setRecommendations([]);
+        setIsPrivate(true);
         setPrevOpen(true);
     } else if (!isOpen && prevOpen) {
         setPrevOpen(false);
@@ -231,7 +232,16 @@ export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
 
                             {recommendations.length > 0 && (
                                 <div ref={resultsRef} className="space-y-4 pt-4">
-                                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Top Picks for You</h3>
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Top Picks for You</h3>
+                                        <button
+                                            onClick={() => setIsPrivate(!isPrivate)}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-500'}`}
+                                        >
+                                            <Lock className="w-3.5 h-3.5" />
+                                            {isPrivate ? "Secret Mode On" : "Public Mode"}
+                                        </button>
+                                    </div>
                                     <div className="grid grid-cols-1 gap-4">
                                         {recommendations.map((rec, index) => (
                                             <div key={index} className="glass p-4 rounded-xl flex flex-col sm:flex-row gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors relative bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
@@ -278,7 +288,7 @@ export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
                                                             <ExternalLink className="w-4 h-4 mr-1" /> Web
                                                         </Button>
                                                     )}
-                                                    <Button size="sm" onClick={() => handleAddToJar(rec)} className="text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20">
+                                                    <Button size="sm" onClick={() => handleAddToJar(rec, "ACTIVITY", isPrivate)} className="text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20">
                                                         <Plus className="w-4 h-4 mr-1" /> Jar
                                                     </Button>
                                                 </div>

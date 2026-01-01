@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { Sparkles, Calendar, MapPin, Loader2, ExternalLink, Plus, Check, ArrowRight, X, Heart } from "lucide-react";
+import { Sparkles, Calendar, MapPin, Loader2, ExternalLink, Plus, Check, ArrowRight, X, Heart, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 import { getCurrentLocation } from "@/lib/utils";
@@ -28,6 +28,7 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
     const [error, setError] = useState<string | null>(null);
     const [debugInfo, setDebugInfo] = useState<string | null>(null);
     const [addedIdeas, setAddedIdeas] = useState<Set<number>>(new Set());
+    const [isPrivate, setIsPrivate] = useState(true);
 
     // New state for location override
     const [customLocation, setCustomLocation] = useState(userLocation || "");
@@ -41,6 +42,7 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
             setSuggestions([]);
             setAddedIdeas(new Set());
             setError(null);
+            setIsPrivate(true);
         }
     }, [isOpen, userLocation]);
 
@@ -101,12 +103,13 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                     duration: 2.0,
                     activityLevel: "MEDIUM",
                     cost: cost,
-                    timeOfDay: "ANY"
+                    timeOfDay: "ANY",
+                    category: "ACTIVITY",
+                    isPrivate: isPrivate
                 }),
             });
 
             if (res.ok) {
-                // alert("Added to jar!"); // Removed alert
                 setAddedIdeas(prev => new Set(prev).add(idx));
                 if (onIdeaAdded) onIdeaAdded();
             } else {
@@ -141,17 +144,10 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                     body: JSON.stringify({
                         name: item.title,
                         description: item.description,
-                        // Address isn't strictly available, maybe use location?
                         address: customLocation,
-                        googleRating: 0, // Not available
+                        googleRating: 0,
                         websiteUrl: item.url,
-                        // Use a generic type or fit into existing
-                        type: "THEATRE" // Fallback or maybe we should add "EVENT"? For now defaulting to Theatre/Event-like or maybe "CLUB"? Let's use "WELLNESS" if relaxing? 
-                        // Actually, I'll use "THEATRE" as a placeholder for "Event/Activity" to avoid schema errors if backend validates enum.
-                        // Or better, let's check if backend validates. It likely relies on Prisma enum.
-                        // Prisma enum usually: BAR, RESTAURANT, CLUB, HOTEL, MOVIE, WELLNESS, FITNESS, THEATRE.
-                        // Weekend planner items are miscellaneous. "THEATRE" or "WELLNESS" might be safest bets, or "CLUB" for nightlife.
-                        // Let's check typical items.
+                        type: "THEATRE"
                     }),
                 });
 
@@ -271,6 +267,16 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                                 </div>
                             ) : (
                                 <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Weekend Picks</h3>
+                                        <button
+                                            onClick={() => setIsPrivate(!isPrivate)}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-500'}`}
+                                        >
+                                            <Lock className="w-3.5 h-3.5" />
+                                            {isPrivate ? "Secret Mode On" : "Public Mode"}
+                                        </button>
+                                    </div>
                                     {suggestions.map((item, idx) => (
                                         <div key={idx} className="bg-white dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-sm dark:shadow-none relative">
                                             <div className="flex justify-between items-start mb-2">

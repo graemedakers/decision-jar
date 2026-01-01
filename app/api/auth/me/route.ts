@@ -53,9 +53,19 @@ export async function GET() {
             } else if (user.memberships.length > 0) {
                 // Fallback to first jar
                 activeJar = user.memberships[0].jar;
+                // Auto-persist the active jar choice for future consistency
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { activeJarId: activeJar.id }
+                });
             } else if (user.couple) {
                 // Legacy Fallback
                 activeJar = user.couple;
+                // Auto-persist the active jar choice for future consistency
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { activeJarId: activeJar.id }
+                });
             }
         }
 

@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
         const body = await request.json().catch(() => ({}));
         category = body.category;
-        const { activityLevel, cost, timeOfDay, location: inputLocation } = body;
+        const { activityLevel, cost, timeOfDay, location: inputLocation, isPrivate } = body;
         const jarTopic = activeJar.topic;
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
@@ -105,6 +105,7 @@ export async function POST(request: Request) {
 
                 jarId: user.activeJarId!,
                 createdById: user.id,
+                isPrivate: isPrivate !== undefined ? isPrivate : true,
             }
         });
 

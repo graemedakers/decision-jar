@@ -12,12 +12,19 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        include: { memberships: true }
+    });
+
     if (!user) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const currentJarId = user.activeJarId || user.coupleId;
+    // Priority: 1. activeJarId, 2. First membership, 3. Legacy coupleId
+    const currentJarId = user.activeJarId ||
+        (user.memberships?.[0]?.jarId) ||
+        user.coupleId;
 
     if (!currentJarId) {
         return NextResponse.json({ error: 'No active jar' }, { status: 400 });
@@ -112,14 +119,16 @@ export async function GET(request: Request) {
 
     // Fetch fresh user to get up-to-date activeJarId
     const user = await prisma.user.findUnique({
-        where: { id: session.user.id }
+        where: { id: session.user.id },
+        include: { memberships: true }
     });
-
     if (!user) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const currentJarId = user.activeJarId || user.coupleId;
+    const currentJarId = user.activeJarId ||
+        (user.memberships?.[0]?.jarId) ||
+        user.coupleId;
 
     if (!currentJarId) {
         return NextResponse.json([]); // No jar, no ideas

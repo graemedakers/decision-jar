@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Users, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Disc, Heart, Shirt } from "lucide-react";
+import { X, Disc, Music, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Heart, Lock, Shirt } from "lucide-react";
 import { Button } from "./ui/Button";
 
 interface NightClubConciergeModalProps {
@@ -24,6 +24,7 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
     const [selectedAge, setSelectedAge] = useState<string>("any");
     const [location, setLocation] = useState(userLocation || "");
     const [price, setPrice] = useState("any");
+    const [isPrivate, setIsPrivate] = useState(true);
     const [recommendations, setRecommendations] = useState<any[]>([]);
     const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -170,8 +171,8 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                                                     key={c}
                                                     onClick={() => toggleSelection(c, selectedMusic, setSelectedMusic)}
                                                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedMusic.includes(c)
-                                                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                                                        : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
+                                                            ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                                                            : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
                                                         }`}
                                                 >
                                                     {c}
@@ -187,8 +188,8 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                                                     key={v}
                                                     onClick={() => toggleSelection(v, selectedCrowd, setSelectedCrowd)}
                                                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCrowd.includes(v)
-                                                        ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
-                                                        : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
+                                                            ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
+                                                            : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
                                                         }`}
                                                 >
                                                     {v}
@@ -244,15 +245,24 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
 
                             {recommendations.length > 0 && (
                                 <div ref={resultsRef} className="space-y-4 pt-4">
-                                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Top Picks for You</h3>
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Top Picks</h3>
+                                        <button
+                                            onClick={() => setIsPrivate(!isPrivate)}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-500'}`}
+                                        >
+                                            <Lock className="w-3.5 h-3.5" />
+                                            {isPrivate ? "Secret Mode On" : "Public Mode"}
+                                        </button>
+                                    </div>
                                     <div className="grid grid-cols-1 gap-4">
                                         {recommendations.map((rec, index) => (
                                             <div key={index} className="glass p-4 rounded-xl flex flex-col sm:flex-row gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors relative bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
                                                 <button
                                                     onClick={() => handleFavorite(rec, "CLUB")}
                                                     className={`absolute top-3 right-3 p-2 rounded-full transition-all z-10 ${rec.isFavorite
-                                                        ? 'text-pink-500 bg-pink-500/10'
-                                                        : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/5'
+                                                            ? 'text-pink-500 bg-pink-500/10'
+                                                            : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/5'
                                                         }`}
                                                 >
                                                     <Heart className={`w-5 h-5 ${rec.isFavorite ? 'fill-current' : ''}`} />
@@ -294,10 +304,10 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                                                             <ExternalLink className="w-4 h-4 mr-1" /> Web
                                                         </Button>
                                                     )}
-                                                    <Button size="sm" onClick={() => handleAddToJar(rec)} className="text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20">
+                                                    <Button size="sm" onClick={() => handleAddToJar(rec, "ACTIVITY", isPrivate)} className="text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20">
                                                         <Plus className="w-4 h-4 mr-1" /> Jar
                                                     </Button>
-                                                    <Button size="sm" onClick={() => handleGoTonight(rec)} className="text-xs bg-gradient-to-r from-yellow-400/20 to-orange-400/20 text-yellow-700 dark:text-yellow-200 border border-yellow-400/30 hover:bg-yellow-400/30">
+                                                    <Button size="sm" onClick={() => handleGoTonight(rec, "ACTIVITY", isPrivate)} className="text-xs bg-gradient-to-r from-indigo-400/20 to-blue-400/20 text-indigo-700 dark:text-indigo-200 border border-indigo-400/30">
                                                         <Zap className="w-4 h-4 mr-1" /> Go Tonight
                                                     </Button>
                                                 </div>

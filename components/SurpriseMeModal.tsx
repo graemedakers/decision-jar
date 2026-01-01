@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Loader2, DollarSign, MapPin, Activity } from "lucide-react";
+import { X, Sparkles, Loader2, DollarSign, MapPin, Activity, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getCategoriesForTopic } from "@/lib/categories";
 import { getCurrentLocation } from "@/lib/utils";
@@ -26,6 +26,7 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
         cost: "$",
         timeOfDay: "ANY",
         category: categories.length > 0 ? categories[0].id : "", // Default to first valid category or empty
+        isPrivate: true,
     });
 
     useEffect(() => {
@@ -33,7 +34,8 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
             setFormData(prev => ({
                 ...prev,
                 location: initialLocation || prev.location || "",
-                category: categories.find(c => c.id === prev.category) ? prev.category : categories[0].id
+                category: categories.find(c => c.id === prev.category) ? prev.category : categories[0].id,
+                isPrivate: true
             }));
         }
     }, [isOpen, initialLocation, jarTopic]);
@@ -46,7 +48,7 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
             const res = await fetch('/api/ideas/generate-surprise', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, topic: jarTopic }),
+                body: JSON.stringify({ ...formData, topic: jarTopic, isPrivate: formData.isPrivate }),
             });
 
             if (res.ok) {
@@ -201,6 +203,25 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                                             </button>
                                         ))}
                                     </div>
+                                </div>
+
+                                <div className="space-y-4 px-1">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Privacy Status</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, isPrivate: !formData.isPrivate })}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${formData.isPrivate ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-100 dark:bg-black/20 text-slate-500 border border-slate-200 dark:border-white/10'}`}
+                                        >
+                                            <Lock className="w-3.5 h-3.5" />
+                                            {formData.isPrivate ? "Secret Mode On" : "Public Mode"}
+                                        </button>
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 leading-tight">
+                                        {formData.isPrivate
+                                            ? "The generated idea will be hidden until it's spun."
+                                            : "The generated idea will be visible to everyone in the jar."}
+                                    </p>
                                 </div>
 
                                 <div className="pt-2 px-4">
