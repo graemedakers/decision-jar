@@ -155,11 +155,11 @@ export default function JarPage() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 key={idea.id}
-                                onClick={() => !idea.isMasked && setEditingIdea(idea)}
+                                onClick={() => idea.canEdit && !idea.isMasked && setEditingIdea(idea)}
                                 className={`glass-card p-5 relative group cursor-pointer hover:border-slate-300 dark:hover:border-white/20 transition-all ${idea.isMasked ? 'opacity-75 bg-slate-100 dark:bg-slate-900/50' : 'hover:-translate-y-1 bg-white dark:bg-slate-900/40'}`}
                             >
                                 <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {!idea.isMasked && (
+                                    {idea.canDelete && !idea.isMasked && (
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();

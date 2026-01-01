@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { awardXp } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
-import { isValidCategoryForTopic, getCategoriesForTopic } from '@/lib/categories';
+import { isValidCategoryForTopic, getCategoriesForTopic, getBestCategoryFit } from '@/lib/categories';
 
 export async function POST(request: Request) {
     const session = await getSession();
@@ -58,20 +58,15 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, selectedAt, notes, address, website, googleRating, openingHours, rating, photoUrls, selectedDate, isPrivate } = body;
+        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, selectedAt, notes, address, website, googleRating, openingHours, rating, photoUrls, selectedDate, isPrivate, weather, requiresTravel } = body;
 
         if (!description) {
             return NextResponse.json({ error: 'Description is required' }, { status: 400 });
         }
 
-        const finalCategory = category || (getCategoriesForTopic(jar.topic, (jar as any).customCategories as any[])[0]?.id || 'ACTIVITY');
+        const requestedCategory = category || 'ACTIVITY';
+        const finalCategory = getBestCategoryFit(requestedCategory, jar.topic, (jar as any).customCategories as any[]);
 
-        if (!isValidCategoryForTopic(finalCategory, jar.topic, (jar as any).customCategories as any[])) {
-            const allowed = getCategoriesForTopic(jar.topic, (jar as any).customCategories as any[]).map(c => c.label).join(', ');
-            return NextResponse.json({
-                error: `The category "${finalCategory}" is not allowed in this "${jar.topic || 'General'}" jar. Please choose one of: ${allowed}`
-            }, { status: 400 });
-        }
 
         const createData: Prisma.IdeaUncheckedCreateInput = {
             description,
@@ -81,7 +76,7 @@ export async function POST(request: Request) {
             activityLevel,
             cost,
             timeOfDay: timeOfDay || 'ANY',
-            category: category || 'ACTIVITY',
+            category: finalCategory,
             selectedAt: selectedAt ? new Date(selectedAt) : null,
             selectedDate: selectedDate ? new Date(selectedDate) : (selectedAt ? new Date(selectedAt) : null), // Use selectedDate if provided, else selectedAt
             jarId: currentJarId,
@@ -94,6 +89,8 @@ export async function POST(request: Request) {
             rating: rating ? parseInt(String(rating)) : null,
             photoUrls: photoUrls || [],
             isPrivate: Boolean(isPrivate),
+            weather: weather || 'ANY',
+            requiresTravel: Boolean(requiresTravel),
         };
 
         const idea = await prisma.idea.create({
@@ -158,6 +155,13 @@ export async function GET(request: Request) {
             ORDER BY i."createdAt" DESC
         `;
 
+        const membership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: { userId: session.user.id, jarId: currentJarId }
+            }
+        });
+        const isAdmin = membership?.role === 'ADMIN';
+
         const maskedIdeas = allIdeas.map(idea => {
             const isMyIdea = idea.createdById === session.user.id;
             const isSelected = !!idea.selectedAt;
@@ -166,41 +170,49 @@ export async function GET(request: Request) {
             const isGroupJar = (idea as any).jarType === 'SOCIAL';
             const isVotingJar = (idea as any).selectionMode === 'VOTING';
 
-            // If it has been selected, show everything.
-            if (isSelected) {
-                return idea;
+            let processedIdea = { ...idea };
+
+            // Apply Masking Logic
+            if (!isSelected && !isMyIdea) {
+                // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
+                if (isVotingJar && (isSurprise || isPrivate)) {
+                    processedIdea = {
+                        ...idea,
+                        description: isSurprise ? "Surprise Idea" : "??? (Secret Idea)",
+                        details: isSurprise ? "This idea will be revealed when you spin the jar!" : "shhh... it's a secret!",
+                        isMasked: true,
+                    };
+                }
+                // In Group Jars, everyone sees everything (unless specifically private or a surprise)
+                else if (isGroupJar && (isSurprise || isPrivate)) {
+                    processedIdea = {
+                        ...idea,
+                        description: isSurprise ? "Surprise Idea" : "??? (Secret Idea)",
+                        details: isSurprise ? "This idea will be revealed when you spin the jar!" : "shhh... it's a secret!",
+                        isMasked: true,
+                    };
+                }
+                // Romantic/Other jars: hide if private or surprise
+                else if (!isVotingJar && !isGroupJar && (isPrivate || isSurprise)) {
+                    processedIdea = {
+                        ...idea,
+                        description: isSurprise ? "Surprise Idea" : "??? (Secret Idea)",
+                        details: isSurprise ? "This idea will be revealed when you spin the jar!" : "shhh... it's a secret!",
+                        isMasked: true,
+                    };
+                }
             }
 
-            // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
-            if (isVotingJar && !isSurprise && !isPrivate) {
-                return idea;
-            }
-
-            // In Group Jars, everyone sees everything (unless specifically private or a surprise)
-            if (isGroupJar && !isSurprise && !isPrivate) {
-                return idea;
-            }
-
-            // If it's my idea, show it.
-            if (isMyIdea) {
-                return idea;
-            }
-
-            // If it is marked as private OR a Surprise Idea, hide from others until selected.
-            if (isPrivate || isSurprise) {
-                return {
-                    ...idea,
-                    description: isSurprise ? "Surprise Idea" : "??? (Secret Idea)",
-                    details: isSurprise ? "This idea will be revealed when you spin the jar!" : "shhh... it's a secret!",
-                    isMasked: true,
-                };
-            }
-
-            // Otherwise, if not private and not owned by me, show it (as requested: "If they chose not to keep it a secret, it should be visible")
-            return idea;
+            // Append permission flags
+            return {
+                ...processedIdea,
+                canEdit: isMyIdea || isAdmin,
+                canDelete: isMyIdea || isAdmin
+            };
         });
 
         return NextResponse.json(maskedIdeas);
+
     } catch (error) {
         console.error('Error fetching ideas:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

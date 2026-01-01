@@ -20,6 +20,7 @@ interface Idea {
     openingHours?: string; // For Movies: Runtime
     googleRating?: number;
     details?: string;
+    canEdit?: boolean;
 }
 
 interface Recommendation {
@@ -363,42 +364,46 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                             )}
 
                             <div className="flex flex-col gap-3 pt-2">
-                                {!showDatePicker ? (
-                                    <Button
-                                        onClick={() => setShowDatePicker(true)}
-                                        variant="outline"
-                                        className="w-full border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/10"
-                                    >
-                                        <Calendar className="w-4 h-4 mr-2" />
-                                        Set Date for Memory
-                                    </Button>
-                                ) : (
-                                    <div className="bg-slate-100 dark:bg-white/5 p-4 rounded-xl space-y-3 animate-in fade-in slide-in-from-bottom-2">
-                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block">When will you do this?</label>
-                                        <input
-                                            type="date"
-                                            value={selectedDateStr}
-                                            onChange={(e) => setSelectedDateStr(e.target.value)}
-                                            className="w-full bg-white dark:bg-black/40 border border-slate-300 dark:border-white/20 rounded-lg px-3 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-secondary transition-colors"
-                                        />
-                                        <div className="flex gap-2">
+                                {idea.canEdit && (
+                                    <>
+                                        {!showDatePicker ? (
                                             <Button
-                                                onClick={() => handleConfirmDate()}
-                                                className="flex-1 bg-green-500 hover:bg-green-600 text-white dark:bg-green-500/20 dark:text-green-200 dark:hover:bg-green-500/30"
-                                                disabled={isUpdatingDate}
+                                                onClick={() => setShowDatePicker(true)}
+                                                variant="outline"
+                                                className="w-full border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/10"
                                             >
-                                                {isUpdatingDate ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
-                                                Confirm Date
+                                                <Calendar className="w-4 h-4 mr-2" />
+                                                Set Date for Memory
                                             </Button>
-                                            <Button
-                                                onClick={() => setShowDatePicker(false)}
-                                                variant="ghost"
-                                                className="px-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </div>
-                                    </div>
+                                        ) : (
+                                            <div className="bg-slate-100 dark:bg-white/5 p-4 rounded-xl space-y-3 animate-in fade-in slide-in-from-bottom-2">
+                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block">When will you do this?</label>
+                                                <input
+                                                    type="date"
+                                                    value={selectedDateStr}
+                                                    onChange={(e) => setSelectedDateStr(e.target.value)}
+                                                    className="w-full bg-white dark:bg-black/40 border border-slate-300 dark:border-white/20 rounded-lg px-3 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-secondary transition-colors"
+                                                />
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        onClick={() => handleConfirmDate()}
+                                                        className="flex-1 bg-green-500 hover:bg-green-600 text-white dark:bg-green-500/20 dark:text-green-200 dark:hover:bg-green-500/30"
+                                                        disabled={isUpdatingDate}
+                                                    >
+                                                        {isUpdatingDate ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                                                        Confirm Date
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => setShowDatePicker(false)}
+                                                        variant="ghost"
+                                                        className="px-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
 
                                 <Button onClick={onClose} variant="secondary" className="w-full shadow-lg shadow-secondary/20">

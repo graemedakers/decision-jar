@@ -4,134 +4,122 @@ import { NextResponse } from 'next/server';
 import { sendDateNotificationEmail } from '@/lib/mailer';
 import { awardXp } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
-
-const COST_VALUES: Record<string, number> = { 'FREE': 0, '$': 1, '$$': 2, '$$$': 3 };
-const ACTIVITY_VALUES: Record<string, number> = { 'LOW': 0, 'MEDIUM': 1, 'HIGH': 2 };
+import { COST_VALUES, ACTIVITY_VALUES } from '@/lib/constants';
 
 export async function POST(request: Request) {
     try {
         const session = await getSession();
-        const { maxDuration, maxCost, maxActivityLevel, timeOfDay, category } = await request.json().catch(() => ({}));
-
-        let ideas = [];
-        let coupleId = null;
-        let userEmail = null;
-        let userName = null;
+        const { maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly } = await request.json().catch(() => ({}));
 
         if (!session?.user?.email) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Authenticated User - Fetch fresh state from DB
+        // 1. Fetch User and Active Jar
         const user = await prisma.user.findUnique({
-            where: { id: session.user.id }
+            where: { id: session.user.id },
+            include: { memberships: true }
         });
 
-        if (!user) {
-            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+        const currentJarId = user.activeJarId || user.memberships?.[0]?.jarId || user.coupleId;
+        if (!currentJarId) return NextResponse.json({ error: 'No active jar found' }, { status: 400 });
+
+        // 2. Build Prisma-level Filters (Performance Optimization)
+        const whereClause: any = {
+            jarId: currentJarId,
+            selectedAt: null,
+            category: { not: 'PLANNED_DATE' }
+        };
+
+        if (category && category !== 'ANY') whereClause.category = category;
+        if (timeOfDay && timeOfDay !== 'ANY') {
+            // Include ANY ideas or exact match
+            whereClause.timeOfDay = { in: ['ANY', timeOfDay] };
         }
 
-        coupleId = user.activeJarId || user.coupleId; // Using variable coupleId as generic "JarId"
-        const currentJarId = coupleId;
+        // Fetch ideas with base filters applied
+        const candidateIdeas = await prisma.idea.findMany({ where: whereClause });
 
-        if (!currentJarId) {
-            return NextResponse.json({ error: 'No active jar' }, { status: 400 });
-        }
-
-        userEmail = session.user.email;
-        userName = session.user.name;
-
-        // Fetch all unselected ideas for this couple (jar)
-        const allIdeas = await prisma.idea.findMany({
-            where: {
-                jarId: currentJarId,
-                selectedAt: null,
-            },
-        });
-
-        // Filter in memory (easier for string enums)
-        ideas = allIdeas.filter(idea => {
-            // Category filter (if specified and not ANY)
-            if (category !== undefined && category !== 'ANY') {
-                if (idea.category !== category) return false;
-            }
-
-            // EXCLUDE PLANNED DATES from random spins
-            if (idea.category === 'PLANNED_DATE') return false;
-
-            // Duration filter (if specified)
+        // 3. Apply Multi-dimensional Filters in Memory (Complex logic)
+        const filteredIdeas = candidateIdeas.filter(idea => {
+            // Duration
             if (maxDuration !== undefined && idea.duration > maxDuration) return false;
 
-            // Cost filter (if specified)
+            // Cost
             if (maxCost !== undefined) {
                 const ideaCostVal = COST_VALUES[idea.cost] ?? 0;
                 const maxCostVal = COST_VALUES[maxCost] ?? 3;
                 if (ideaCostVal > maxCostVal) return false;
             }
 
-            // Activity filter (if specified)
+            // Activity
             if (maxActivityLevel !== undefined) {
                 const ideaActivityVal = ACTIVITY_VALUES[idea.activityLevel] ?? 0;
                 const maxActivityVal = ACTIVITY_VALUES[maxActivityLevel] ?? 2;
                 if (ideaActivityVal > maxActivityVal) return false;
             }
 
-            // Time of Day filter (if specified and not ANY)
-            if (timeOfDay !== undefined && timeOfDay !== 'ANY') {
-                // If idea is ANY, it matches everything.
-                // If idea is specific (e.g. DAY), it must match the filter.
-                if (idea.timeOfDay !== 'ANY' && idea.timeOfDay !== timeOfDay) return false;
+            // Weather (Real-life Context)
+            if (weather && weather !== 'ANY') {
+                const ideaWeather = (idea as any).weather || 'ANY';
+                if (ideaWeather !== 'ANY' && ideaWeather !== weather) return false;
             }
+
+            // Travel (Real-life Context)
+            if (localOnly && (idea as any).requiresTravel) return false;
 
             return true;
         });
 
-        if (ideas.length === 0) {
+        if (filteredIdeas.length === 0) {
             return NextResponse.json({ error: 'No matching ideas found' }, { status: 404 });
         }
 
-        // Pick a random idea
-        const randomIndex = Math.floor(Math.random() * ideas.length);
-        const selectedIdea = ideas[randomIndex];
+        // 4. Random Selection
+        const selectedIdea = filteredIdeas[Math.floor(Math.random() * filteredIdeas.length)];
 
-        // Mark as selected (ONLY for authenticated users)
+        // 5. Update Selection State
         if (session && currentJarId) {
             await prisma.idea.update({
                 where: { id: selectedIdea.id },
                 data: {
                     selectedAt: new Date(),
-                    selectedDate: new Date(), // Assuming selected for 'today'
+                    selectedDate: new Date(),
                 },
             });
 
-            // Send Email Notification to ALL Jar Members
-            try {
-                const members = await prisma.jarMember.findMany({
-                    where: { jarId: currentJarId },
-                    include: { user: true }
-                });
+            // Parallel background tasks
+            (async () => {
+                try {
+                    const members = await prisma.jarMember.findMany({
+                        where: { jarId: currentJarId },
+                        include: { user: true }
+                    });
+                    const recipients = Array.from(new Set(members.map(m => m.user.email).filter(Boolean))) as string[];
+                    if (recipients.length > 0) await sendDateNotificationEmail(recipients, selectedIdea);
 
-                const recipients = members
-                    .map(m => m.user.email)
-                    .filter(email => email) as string[];
-
-                // Ensure unique and present
-                const uniqueRecipients = Array.from(new Set(recipients));
-
-                if (uniqueRecipients.length > 0) {
-                    await sendDateNotificationEmail(uniqueRecipients, selectedIdea);
+                    await awardXp(currentJarId, 5);
+                    await checkAndUnlockAchievements(currentJarId);
+                } catch (err) {
+                    console.error("Post-spin tasks failed:", err);
                 }
-            } catch (emailErr) {
-                console.error("Error sending notification emails:", emailErr);
-            }
-
-            // Gamification: Award 5 XP for spinning/selecting
-            // Note: We use try-catch inside the helper so it won't crash if it fails
-            await awardXp(currentJarId, 5);
-            await checkAndUnlockAchievements(currentJarId);
+            })();
         }
 
-        return NextResponse.json(selectedIdea);
+        // 6. Return with Permissions
+        const isMyIdea = selectedIdea.createdById === session.user.id;
+        const membership = await prisma.jarMember.findUnique({
+            where: { userId_jarId: { userId: session.user.id, jarId: currentJarId } }
+        });
+        const isAdmin = membership?.role === 'ADMIN';
+
+        return NextResponse.json({
+            ...selectedIdea,
+            canEdit: isMyIdea || isAdmin,
+            canDelete: isMyIdea || isAdmin
+        });
 
     } catch (error) {
         console.error('Pick date error:', error);

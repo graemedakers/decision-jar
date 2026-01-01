@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2 } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -23,7 +23,8 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
     const sections = [
         { id: "intro", title: "Introduction", icon: BookOpen },
         { id: "getting-started", title: "Getting Started", icon: MapPin },
-        { id: "community", title: "Communities", icon: Users },
+        { id: "admin-roles", title: "Admin & Roles", icon: Crown },
+        { id: "community", title: "Manage Jars", icon: Users },
         { id: "dashboard", title: "The Dashboard", icon: History },
         { id: "gamification", title: "Levels & XP", icon: Trophy },
         { id: "date-night-planner", title: "Night Out Planner", icon: Compass },
@@ -47,28 +48,63 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
 
     const renderContent = () => {
         switch (activeSection) {
-            // ...
+            case "intro":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Welcome to Decision Jar!</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Decision Jar is your ultimate tool for ending indecision. Whether you're planning a date night, a group hangout, or just trying to decide what's for dinner, we've got you covered.
+                        </p>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Fill your Jar with ideas, use our AI-powered Concierges to find new adventures, and "Spin the Jar" to let fate decide your next activity.
+                        </p>
+                    </div>
+                );
+            case "admin-roles":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Admin & Permissions</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Decision Jar uses a role-based system to ensure your shared lists stay organized and protected.
+                        </p>
+                        <div className="space-y-4">
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                    <Crown className="w-4 h-4 text-amber-500" /> Admin Privileges
+                                </h4>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                    <li><strong>Rename Jar:</strong> Update the Jar's name at any time.</li>
+                                    <li><strong>Manage Members:</strong> View the full member list and promote/demote others to Admin status.</li>
+                                    <li><strong>Delete Jar:</strong> Permanently remove the jar and all its contents.</li>
+                                    <li><strong>Curate Ideas:</strong> Edit or Delete any idea or memory, regardless of who created it.</li>
+                                </ul>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2">Member Permissions</h4>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                    <li><strong>Contribute:</strong> Add new ideas to the jar.</li>
+                                    <li><strong>Edit Own:</strong> Edit or delete ideas that *you* personally added.</li>
+                                    <li><strong>Spin & Enjoy:</strong> Everyone can spin the jar and access Concierge tools.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                );
             case "community":
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Communities</h3>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Managing Your Jars</h3>
                         <p className="text-slate-600 dark:text-slate-300">
-                            Join public jars to share ideas with people who share your interests, or create your own community!
+                            You can belong to multiple Jars at once! Click the Jar Name in the dashboard header to switch views or open the management tool.
                         </p>
                         <div className="space-y-4 mt-4">
-                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
-                                <h4 className="font-bold text-slate-800 dark:text-white mb-1">Joining a Community</h4>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-1">Jar Management Modal</h4>
                                 <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
-                                    <li><strong>Discover:</strong> Browse the Community Index to find jars by topic (e.g., Hiking, Food).</li>
-                                    <li><strong>Waitlists:</strong> If a jar is full, join the waitlist. You'll be automatically promoted and notified when a spot opens!</li>
-                                    <li><strong>Leave:</strong> You can leave a community at any time from its detail page.</li>
-                                </ul>
-                            </div>
-                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
-                                <h4 className="font-bold text-slate-800 dark:text-white mb-1">Creating & Managing</h4>
-                                <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
-                                    <li><strong>Create:</strong> Premium users can create public jars with custom member limits.</li>
-                                    <li><strong>Admin Dashboard:</strong> Creators have access to a dashboard to approve new members and manage the waitlist.</li>
+                                    <li><strong>Switching:</strong> Instantly jump between your Jars.</li>
+                                    <li><strong>Manage Members:</strong> (Admins only) Manage who has access and who can moderate.</li>
+                                    <li><strong>Renaming:</strong> (Admins only) Give your jar a fresh identity with the pencil icon.</li>
+                                    <li><strong>Leaving:</strong> Non-owners can leave a jar to declutter their dashboard.</li>
                                 </ul>
                             </div>
                         </div>
@@ -417,12 +453,12 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                         </button>
 
                         {/* Sidebar */}
-                        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-black/20 py-4 md:p-4 shrink-0 flex flex-col md:block">
-                            <div className="flex items-center gap-2 mb-4 md:mb-6 px-6 md:px-2 pr-14 md:pr-2">
+                        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-black/20 py-4 md:p-4 shrink-0 flex flex-col md:overflow-y-auto custom-scrollbar">
+                            <div className="flex items-center gap-2 mb-4 md:mb-6 px-6 md:px-2 pr-14 md:pr-2 shrink-0">
                                 <HelpCircle className="w-6 h-6 text-primary" />
                                 <h2 className="text-xl font-bold text-slate-800 dark:text-white whitespace-nowrap">Help Center</h2>
                             </div>
-                            <nav className="flex flex-row md:flex-col gap-2 md:gap-0 md:space-y-1 overflow-x-auto md:overflow-visible px-6 md:px-0 pb-2 md:pb-0 min-h-0 no-scrollbar snap-x">
+                            <nav className="flex flex-row md:flex-col gap-2 md:gap-0 md:space-y-1 overflow-x-auto md:overflow-y-visible px-6 md:px-0 pb-2 md:pb-0 min-h-0 no-scrollbar snap-x">
                                 {sections.map((section) => (
                                     <button
                                         key={section.id}

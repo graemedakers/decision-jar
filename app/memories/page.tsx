@@ -265,20 +265,24 @@ export default function MemoriesPage() {
                                 >
                                     <Copy className="w-5 h-5" />
                                 </button>
-                                <button
-                                    onClick={() => setEditingMemory(idea)}
-                                    className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"
-                                    title="Edit Entry"
-                                >
-                                    <Pencil className="w-5 h-5" />
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteClick(idea.id)}
-                                    className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                    title="Delete"
-                                >
-                                    <Trash2 className="w-5 h-5" />
-                                </button>
+                                {idea.canEdit && (
+                                    <button
+                                        onClick={() => setEditingMemory(idea)}
+                                        className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"
+                                        title="Edit Entry"
+                                    >
+                                        <Pencil className="w-5 h-5" />
+                                    </button>
+                                )}
+                                {idea.canDelete && (
+                                    <button
+                                        onClick={() => handleDeleteClick(idea.id)}
+                                        className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                        title="Delete"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}

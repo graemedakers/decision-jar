@@ -224,6 +224,10 @@ model Idea {
   isSurprise     Boolean  @default(false)
   isPrivate      Boolean  @default(false)
 
+  // Real-life Context
+  weather        String   @default("ANY") // ANY, SUNNY, RAINY, COLD
+  requiresTravel Boolean  @default(false) // If true, it's an "Outing"
+
   ratings        Rating[]
   wonSessions    VoteSession[] @relation("SessionWinner")
   votes          Vote[]

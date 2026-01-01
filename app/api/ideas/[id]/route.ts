@@ -96,7 +96,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const body = await request.json();
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, isPrivate } = body;
+        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, isPrivate, weather, requiresTravel } = body;
 
         // Verify ownership
         const idea = await prisma.idea.findUnique({
@@ -114,9 +114,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
         // Allow modification if:
         // 1. User is the author
-        // 2. It is a memory (selected) and the user is in the same jar
-        // 3. User is an admin in the jar
-        if (idea.createdById !== session.user.id && !idea.selectedAt) {
+        // 2. User is an admin in the jar
+        if (idea.createdById !== session.user.id) {
             const membership = await prisma.jarMember.findUnique({
                 where: {
                     userId_jarId: { userId: session.user.id, jarId: currentJarId }
@@ -124,7 +123,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             });
 
             if (membership?.role !== 'ADMIN') {
-                return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this idea' }, { status: 403 });
+                return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this idea. Only the creator or an admin can edit ideas.' }, { status: 403 });
             }
         }
 
@@ -147,7 +146,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
                 cost,
                 timeOfDay,
                 category,
-                isPrivate: typeof isPrivate === 'boolean' ? isPrivate : undefined
+                isPrivate: typeof isPrivate === 'boolean' ? isPrivate : undefined,
+                weather: weather || undefined,
+                requiresTravel: typeof requiresTravel === 'boolean' ? requiresTravel : undefined
             },
         });
 

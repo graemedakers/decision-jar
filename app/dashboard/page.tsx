@@ -452,6 +452,8 @@ export default function DashboardPage() {
                     onClose={() => setIsFilterModalOpen(false)}
                     onSpin={handleSpinJar}
                     jarTopic={jarTopic}
+                    ideas={ideas}
+                    customCategories={userData?.customCategories}
                 />
 
                 <SettingsModal

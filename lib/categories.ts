@@ -1,79 +1,86 @@
-import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap, Bed } from "lucide-react";
+import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map as MapIcon, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap, Bed } from "lucide-react";
 
 export interface CategoryDef {
     id: string;
     label: string;
     icon: any;
+    placeholder?: string;
 }
 
 export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
     "Activities": [
-        { id: "OUTDOOR", label: "Adventure", icon: Activity },
-        { id: "INDOOR", label: "Chill/Home", icon: Home },
-        { id: "SOCIAL", label: "Event", icon: PartyPopper },
-        { id: "CULTURAL", label: "Museum/Art", icon: Ticket },
+        { id: "OUTDOOR", label: "Adventure", icon: Activity, placeholder: "e.g. Hiking at Bear Mountain" },
+        { id: "INDOOR", label: "Chill/Home", icon: Home, placeholder: "e.g. Board game night" },
+        { id: "SOCIAL", label: "Event", icon: PartyPopper, placeholder: "e.g. Local food festival" },
+        { id: "CULTURAL", label: "Museum/Art", icon: Ticket, placeholder: "e.g. Visit the Modern Art gallery" },
+        { id: "DINING", label: "Dining", icon: Utensils, placeholder: "e.g. That new Ramen spot" },
+        { id: "BAR", label: "Drinks", icon: Martini, placeholder: "e.g. Cocktails at The Speakeasy" },
+        { id: "MOVIE", label: "Movie", icon: Popcorn, placeholder: "e.g. Watch 'Interstellar' again" },
+        { id: "WELLNESS", label: "Wellness", icon: Sparkles, placeholder: "e.g. Couple's Spa Day" },
+        { id: "FITNESS", label: "Fitness", icon: Dumbbell, placeholder: "e.g. Morning Yoga Session" },
+        { id: "GAME", label: "Gaming", icon: Gamepad2, placeholder: "e.g. Mario Kart Tournament" },
     ],
     "Romantic": [
-        { id: "ACTIVITY", label: "Activity", icon: Activity },
-        { id: "DINING", label: "Dining", icon: Utensils },
-        { id: "NIGHTLIFE", label: "Nightlife", icon: Martini },
-        { id: "STAYCATION", label: "Staycation", icon: Bed },
-        { id: "CULTURAL", label: "Art & Culture", icon: Ticket },
+        { id: "ACTIVITY", label: "Activity", icon: Activity, placeholder: "e.g. Sunset walk on the beach" },
+        { id: "DINING", label: "Dining", icon: Utensils, placeholder: "e.g. Candlelit dinner" },
+        { id: "NIGHTLIFE", label: "Nightlife", icon: Martini, placeholder: "e.g. Jazz bar date" },
+        { id: "STAYCATION", label: "Staycation", icon: Bed, placeholder: "e.g. Luxury hotel weekend" },
+        { id: "CULTURAL", label: "Art & Culture", icon: Ticket, placeholder: "e.g. See a Broadway show" },
     ],
     "Restaurants": [
-        { id: "FINE_DINING", label: "Fine Dining", icon: ChefHat },
-        { id: "CASUAL", label: "Casual", icon: Utensils },
-        { id: "BRUNCH", label: "Brunch", icon: Coffee },
-        { id: "FAST_FOOD", label: "Quick Bite", icon: Pizza },
-        { id: "INTERNATIONAL", label: "Exotic", icon: Map },
+        { id: "FINE_DINING", label: "Fine Dining", icon: ChefHat, placeholder: "e.g. Le Bernardin" },
+        { id: "CASUAL", label: "Casual", icon: Utensils, placeholder: "e.g. Joe's Pizza" },
+        { id: "BRUNCH", label: "Brunch", icon: Coffee, placeholder: "e.g. Morning Pancakes at the Diner" },
+        { id: "FAST_FOOD", label: "Quick Bite", icon: Pizza, placeholder: "e.g. Grab some tacos" },
+        { id: "INTERNATIONAL", label: "Exotic", icon: MapIcon, placeholder: "e.g. Thai street food" },
     ],
     "Bars": [
-        { id: "COCKTAIL", label: "Cocktail Bar", icon: Martini },
-        { id: "PUB", label: "Pub/Dive", icon: Beer },
-        { id: "WINE_BAR", label: "Wine Bar", icon: Wine },
-        { id: "ROOFTOP", label: "Rooftop", icon: Star },
-        { id: "SPEAKEASY", label: "Speakeasy", icon: Moon },
+        { id: "COCKTAIL", label: "Cocktail Bar", icon: Martini, placeholder: "e.g. The Attaboy" },
+        { id: "PUB", label: "Pub/Dive", icon: Beer, placeholder: "e.g. The Drunken Duck" },
+        { id: "WINE_BAR", label: "Wine Bar", icon: Wine, placeholder: "e.g. Terroir Wine" },
+        { id: "ROOFTOP", label: "Rooftop", icon: Star, placeholder: "e.g. 230 Fifth Rooftop Bar" },
+        { id: "SPEAKEASY", label: "Speakeasy", icon: Moon, placeholder: "e.g. Please Don't Tell" },
     ],
     "Nightclubs": [
-        { id: "DANCE_CLUB", label: "Dance Club", icon: Disc },
-        { id: "LOUNGE", label: "Lounge", icon: Utensils },
-        { id: "LIVE_MUSIC", label: "Live Venue", icon: Speaker },
-        { id: "RAVE", label: "Rave/Techno", icon: Zap },
+        { id: "DANCE_CLUB", label: "Dance Club", icon: Disc, placeholder: "e.g. Club Space" },
+        { id: "LOUNGE", label: "Lounge", icon: Utensils, placeholder: "e.g. Blue Note Lounge" },
+        { id: "LIVE_MUSIC", label: "Live Venue", icon: Speaker, placeholder: "e.g. Red Rocks Amphitheatre" },
+        { id: "RAVE", label: "Rave/Techno", icon: Zap, placeholder: "e.g. Berghain" },
     ],
     "Movies": [
-        { id: "CINEMA", label: "Cinema", icon: Popcorn },
-        { id: "STREAMING", label: "Streaming", icon: Clapperboard },
-        { id: "SERIES", label: "TV Series", icon: Activity },
+        { id: "CINEMA", label: "Cinema", icon: Popcorn, placeholder: "e.g. IMAX Experience" },
+        { id: "STREAMING", label: "Streaming", icon: Clapperboard, placeholder: "e.g. Netflix & Chill" },
+        { id: "SERIES", label: "TV Series", icon: Activity, placeholder: "e.g. Binge 'Succession'" },
     ],
     "Wellness": [
-        { id: "MEDITATION", label: "Meditation", icon: Moon },
-        { id: "SPA", label: "Spa/Bath", icon: Sparkles },
-        { id: "WALK", label: "Walk", icon: Footprints },
-        { id: "DETOX", label: "Digital Detox", icon: Leaf },
+        { id: "MEDITATION", label: "Meditation", icon: Moon, placeholder: "e.g. Guided group session" },
+        { id: "SPA", label: "Spa/Bath", icon: Sparkles, placeholder: "e.g. Turkish Baths" },
+        { id: "WALK", label: "Walk", icon: Footprints, placeholder: "e.g. Nature trail walk" },
+        { id: "DETOX", label: "Digital Detox", icon: Leaf, placeholder: "e.g. No-phone Sunday" },
     ],
     "Fitness": [
-        { id: "CARDIO", label: "Cardio", icon: Activity },
-        { id: "STRENGTH", label: "Strength", icon: Dumbbell },
-        { id: "YOGA", label: "Yoga", icon: Leaf },
-        { id: "OUTDOOR_SPORT", label: "Sport", icon: Trophy },
+        { id: "CARDIO", label: "Cardio", icon: Activity, placeholder: "e.g. Peloton Ride" },
+        { id: "STRENGTH", label: "Strength", icon: Dumbbell, placeholder: "e.g. Push Pull Legs day" },
+        { id: "YOGA", label: "Yoga", icon: Leaf, placeholder: "e.g. Hot Yoga Class" },
+        { id: "OUTDOOR_SPORT", label: "Sport", icon: Trophy, placeholder: "e.g. Afternoon Tennis" },
     ],
     "Travel": [
-        { id: "WEEKEND", label: "Weekend Trip", icon: Car },
-        { id: "ABROAD", label: "International", icon: Plane },
-        { id: "STAYCATION", label: "Staycation", icon: Home },
-        { id: "ROADTRIP", label: "Road Trip", icon: Map },
+        { id: "WEEKEND", label: "Weekend Trip", icon: Car, placeholder: "e.g. Visit the Catskills" },
+        { id: "ABROAD", label: "International", icon: Plane, placeholder: "e.g. Flight to Tokyo" },
+        { id: "STAYCATION", label: "Staycation", icon: Home, placeholder: "e.g. Local Airbnb" },
+        { id: "ROADTRIP", label: "Road Trip", icon: MapIcon, placeholder: "e.g. Pacific Coast Highway" },
     ],
     "Hotel Stays": [
-        { id: "BOUTIQUE", label: "Boutique", icon: Bed },
-        { id: "RESORT", label: "Resort", icon: Sparkles },
-        { id: "BUDGET", label: "Budget", icon: Home },
-        { id: "LUXURY", label: "Luxury", icon: Star },
-        { id: "BNB", label: "B&B", icon: Coffee },
+        { id: "BOUTIQUE", label: "Boutique", icon: Bed, placeholder: "e.g. The Standard Hotel" },
+        { id: "RESORT", label: "Resort", icon: Sparkles, placeholder: "e.g. Amanoi Resort" },
+        { id: "BUDGET", label: "Budget", icon: Home, placeholder: "e.g. Cozy Local Inn" },
+        { id: "LUXURY", label: "Luxury", icon: Star, placeholder: "e.g. The Four Seasons" },
+        { id: "BNB", label: "B&B", icon: Coffee, placeholder: "e.g. Charming country B&B" },
     ],
     "Custom": [
-        { id: "OPTION_A", label: "Option 1", icon: Activity },
-        { id: "OPTION_B", label: "Option 2", icon: Activity },
-        { id: "OPTION_C", label: "Option 3", icon: Activity },
+        { id: "OPTION_A", label: "Option 1", icon: Activity, placeholder: "e.g. Task one" },
+        { id: "OPTION_B", label: "Option 2", icon: Activity, placeholder: "e.g. Task two" },
+        { id: "OPTION_C", label: "Option 3", icon: Activity, placeholder: "e.g. Task three" },
     ]
 };
 
@@ -180,7 +187,7 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
 // Helper to map icon name to component
 const getIconComponent = (iconName: string) => {
     // Basic mapping for common icons, fallback to Sparkles
-    const map: any = { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza };
+    const map: any = { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map: MapIcon, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza };
     return map[iconName] || Sparkles;
 };
 
@@ -193,7 +200,7 @@ export const getCategoriesForTopic = (topic: string | null | undefined, customCa
         }));
     }
 
-    if (!topic) return TOPIC_CATEGORIES["Activities"];
+    if (!topic || topic.toLowerCase() === 'general') return TOPIC_CATEGORIES["Activities"];
 
     // Case-insensitive match 
     const foundKey = Object.keys(TOPIC_CATEGORIES).find(
@@ -203,13 +210,45 @@ export const getCategoriesForTopic = (topic: string | null | undefined, customCa
     return foundKey ? TOPIC_CATEGORIES[foundKey] : TOPIC_CATEGORIES["Activities"];
 };
 
+export const getAllCategories = (): CategoryDef[] => {
+    const all = new Map<string, CategoryDef>();
+    Object.values(TOPIC_CATEGORIES).forEach(list => {
+        list.forEach(cat => {
+            if (!all.has(cat.id)) all.set(cat.id, cat);
+        });
+    });
+    return Array.from(all.values());
+};
+
+export const getCategoryDef = (id: string, customCategories?: any[]): CategoryDef => {
+    // 1. Check custom categories first
+    if (customCategories) {
+        const custom = customCategories.find(c => c.id === id);
+        if (custom) return {
+            id: custom.id,
+            label: custom.label,
+            icon: getIconComponent(custom.icon)
+        };
+    }
+
+    // 2. Check built-ins
+    for (const topic of Object.keys(TOPIC_CATEGORIES)) {
+        const found = TOPIC_CATEGORIES[topic].find(c => c.id === id);
+        if (found) return found;
+    }
+
+    // 3. Last fallback
+    return { id, label: id, icon: Sparkles };
+};
+
+
 export const isValidCategoryForTopic = (category: string, topic: string | null | undefined, customCategories?: any[]): boolean => {
     const validCategories = getCategoriesForTopic(topic, customCategories);
     return validCategories.some(c => c.id === category);
 };
 
 export const getThemeForTopic = (topic: string | null | undefined): TopicTheme => {
-    if (!topic) return TOPIC_THEMES["Activities"];
+    if (!topic || topic.toLowerCase() === 'general') return TOPIC_THEMES["Activities"];
 
     const foundKey = Object.keys(TOPIC_THEMES).find(
         key => key.toLowerCase() === topic.toLowerCase()
@@ -217,3 +256,32 @@ export const getThemeForTopic = (topic: string | null | undefined): TopicTheme =
 
     return foundKey ? TOPIC_THEMES[foundKey] : TOPIC_THEMES["Activities"];
 };
+
+export const getBestCategoryFit = (requestedId: string, topic: string | null | undefined, customCategories?: any[]): string => {
+    const valid = getCategoriesForTopic(topic, customCategories);
+
+    // 1. Perfect match
+    if (valid.some(v => v.id === requestedId)) return requestedId;
+
+    // 2. Common mappings
+    const mappings: Record<string, string[]> = {
+        'BAR': ['NIGHTLIFE', 'SOCIAL', 'COCKTAIL', 'PUB', 'DRINKS', 'OUTING'],
+        'NIGHTCLUB': ['BAR', 'NIGHTLIFE', 'SOCIAL', 'PARTY'],
+        'DINING': ['MEAL', 'RESTAURANT', 'SOCIAL', 'FOOD'],
+        'MEAL': ['DINING', 'RESTAURANT', 'SOCIAL', 'FOOD'],
+        'MOVIE': ['CINEMA', 'ENTERTAINMENT', 'SOCIAL', 'WATCH'],
+        'WELLNESS': ['SPA', 'SELF_CARE', 'RELAX', 'HEALTH'],
+        'FITNESS': ['GYM', 'EXERCISE', 'OUTDOOR', 'HEALTH'],
+        'GAME': ['GAMING', 'ENTERTAINMENT', 'INDOOR'],
+        'ACTIVITY': ['OUTDOOR', 'INDOOR', 'SOCIAL', 'EVENT']
+    };
+
+    const potentials = mappings[requestedId] || [];
+    for (const p of potentials) {
+        if (valid.some(v => v.id === p)) return p;
+    }
+
+    // 3. Just return the first valid one if all else fails
+    return valid[0]?.id || 'ACTIVITY';
+};
+
