@@ -20,8 +20,69 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
 
     const { icon: Icon, color, title, description, steps, cta } = useCase;
 
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": `How to use a ${title} Decision Jar`,
+        "description": description,
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": steps.create.title,
+                "text": steps.create.description,
+                "position": 1
+            },
+            {
+                "@type": "HowToStep",
+                "name": steps.invite.title,
+                "text": steps.invite.description,
+                "position": 2
+            },
+            {
+                "@type": "HowToStep",
+                "name": steps.add.title,
+                "text": steps.add.description,
+                "position": 3
+            },
+            {
+                "@type": "HowToStep",
+                "name": steps.choose.title,
+                "text": steps.choose.description,
+                "position": 4
+            }
+        ]
+    };
+
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'
+        }, {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Use Cases",
+            "item": `${process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'}/use-cases`
+        }, {
+            "@type": "ListItem",
+            "position": 3,
+            "name": title
+        }]
+    };
+
     return (
         <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white pb-20">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+            />
             {/* Header */}
             <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10">
                 <div className="max-w-4xl mx-auto px-4 h-16 flex items-center">

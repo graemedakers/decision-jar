@@ -1,7 +1,16 @@
 import { MetadataRoute } from 'next';
+import { USE_CASES } from '@/lib/use-cases';
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com';
+
+    const useCasesSitemap = USE_CASES.map((uc) => ({
+        url: `${baseUrl}/use-cases/${uc.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+    }));
+
     return [
         {
             url: baseUrl,
@@ -51,5 +60,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 0.7,
         },
+        {
+            url: `${baseUrl}/use-cases`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        ...useCasesSitemap
     ];
 }
