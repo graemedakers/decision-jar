@@ -154,7 +154,8 @@ export async function GET(request: Request) {
                    i."isPrivate",
                    json_build_object('id', u.id, 'name', u.name) as "createdBy",
                    c.type as "jarType",
-                   c."selectionMode" as "selectionMode"
+                   c."selectionMode" as "selectionMode",
+                   c."isCommunityJar" as "isCommunityJar"
             FROM "Idea" i
             LEFT JOIN "User" u ON i."createdById" = u.id
             LEFT JOIN "Couple" c ON i."coupleId" = c.id
@@ -175,12 +176,13 @@ export async function GET(request: Request) {
             const isSurprise = (idea as any).isSurprise;
             const isPrivate = (idea as any).isPrivate;
             const isGroupJar = (idea as any).jarType === 'SOCIAL';
+            const isCommunityJar = (idea as any).isCommunityJar;
             const isVotingJar = (idea as any).selectionMode === 'VOTING';
 
             let processedIdea = { ...idea };
 
-            // Apply Masking Logic
-            if (!isSelected && !isMyIdea) {
+            // Apply Masking Logic (Skip for Community Jars)
+            if (!isSelected && !isMyIdea && !isCommunityJar) {
                 // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
                 if (isVotingJar && (isSurprise || isPrivate)) {
                     processedIdea = {

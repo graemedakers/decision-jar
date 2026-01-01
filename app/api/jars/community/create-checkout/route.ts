@@ -56,7 +56,17 @@ export async function POST(req: Request) {
             }
         });
 
-        // 2. Create Stripe Session
+        // 2. Check for Specific User Bypass
+        if (session.user.email === 'graemedakers@gmail.com') {
+            await prisma.jar.update({
+                where: { id: newJar.id },
+                data: { subscriptionStatus: 'ACTIVE' }
+            });
+
+            return NextResponse.json({ url: `${process.env.NEXT_PUBLIC_APP_URL}/community/success?jar_id=${newJar.id}`, jarId: newJar.id }, { headers: corsHeaders });
+        }
+
+        // 3. Create Stripe Session
         const targetPriceId = process.env.STRIPE_PRICE_COMMUNITY_YEARLY || 'price_placeholder'; // Needs to be set in .env
 
         let checkoutSession;
