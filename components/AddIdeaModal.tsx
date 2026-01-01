@@ -35,9 +35,10 @@ interface AddIdeaModalProps {
     jarTopic?: string | null;
     customCategories?: any[];
     currentUser?: any;
+    onSuccess?: () => void;
 }
 
-export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser }: AddIdeaModalProps) {
+export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser, onSuccess }: AddIdeaModalProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
@@ -157,6 +158,9 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
             });
 
             if (res.ok) {
+                if (method === "POST" || method === "PUT") {
+                    onSuccess?.();
+                }
                 onClose();
             } else {
                 alert("Failed to save idea");

@@ -34,7 +34,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
     const [isPrivate, setIsPrivate] = useState(true);
 
     // Dynamic Text based on Topic
-    const isDateContext = !jarTopic || jarTopic === 'Dates' || jarTopic === 'Romantic';
+    const isDateContext = jarTopic === 'Dates' || jarTopic === 'Romantic';
     const titleText = isDateContext ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
     const buttonText = isDateContext ? "Plan My Date Night" : "Plan My Activity";
     const resultTitle = isDateContext ? "Date Night" : "Itinerary";

@@ -16,6 +16,7 @@ interface JarSummary {
     ideaCount: number;
     createdAt: string;
     isCommunityJar: boolean;
+    topic?: string;
 }
 
 interface JarManagerModalProps {
@@ -216,6 +217,11 @@ export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
                                                             ) : (
                                                                 <>
                                                                     <h3 className="font-bold text-slate-900 dark:text-white text-base truncate">{jar.name}</h3>
+                                                                    {jar.topic && (
+                                                                        <span className="bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/5">
+                                                                            {jar.topic}
+                                                                        </span>
+                                                                    )}
                                                                     {jar.role === 'ADMIN' && (
                                                                         <>
                                                                             <button

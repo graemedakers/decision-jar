@@ -43,7 +43,8 @@ export async function GET(req: NextRequest) {
             memberCount: j._count.members,
             ideaCount: j._count.ideas,
             createdAt: j.createdAt.toISOString(),
-            isCommunityJar: j.isCommunityJar
+            isCommunityJar: j.isCommunityJar,
+            topic: j.topic
         }));
 
         return NextResponse.json(result);

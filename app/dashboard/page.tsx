@@ -168,6 +168,7 @@ export default function DashboardPage() {
     const jarSelectionMode = userData?.jarSelectionMode;
     const isVotingMode = jarSelectionMode === 'VOTING';
     const theme = getThemeForTopic(jarTopic);
+    const activityPlannerTitle = (jarTopic === 'Dates' || jarTopic === 'Romantic') ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
 
     const refreshUser = async () => {
         try {
@@ -432,7 +433,6 @@ export default function DashboardPage() {
                     onClose={() => {
                         setIsModalOpen(false);
                         setEditingIdea(null);
-                        handleContentUpdate(); // Refresh list after adding
                     }}
                     initialData={editingIdea}
                     isPremium={isPremium}
@@ -441,6 +441,7 @@ export default function DashboardPage() {
                         setIsPremiumModalOpen(true);
                     }}
                     currentUser={userData}
+                    onSuccess={handleContentUpdate}
                 />
 
                 <SurpriseMeModal
@@ -1071,7 +1072,7 @@ export default function DashboardPage() {
                                                 {!isPremium && <Lock className="w-5 h-5 text-slate-300 dark:text-slate-600" />}
                                             </div>
                                             <div>
-                                                <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Activity Planner</span>
+                                                <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">{activityPlannerTitle}</span>
                                                 <span className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed block">Step-by-step itineraries for any occasion.</span>
                                             </div>
                                         </div>
