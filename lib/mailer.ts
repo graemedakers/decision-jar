@@ -21,12 +21,12 @@ export async function sendVerificationEmail(email: string, token: string) {
 
   try {
     await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Decision Jar <hello@spinthejar.com>',
+      from: process.env.EMAIL_FROM || `Spin the Jar <hello@${new URL(baseUrl).hostname}>`,
       to: email,
-      subject: 'Verify your email for Decision Jar',
+      subject: `Verify your email for Spin the Jar`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1>Welcome to Decision Jar!</h1>
+          <h1>Welcome to Spin the Jar!</h1>
           <p>Please click the button below to verify your email address and activate your account.</p>
           <a href="${verificationUrl}" style="display: inline-block; background-color: #ec4899; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0;">Verify Email</a>
           <p>Or copy this link: <a href="${verificationUrl}">${verificationUrl}</a></p>
@@ -51,9 +51,9 @@ export async function sendDateNotificationEmail(recipients: string[], idea: any)
 
   try {
     await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Decision Jar <onboarding@resend.dev>',
+      from: process.env.EMAIL_FROM || `Spin the Jar <onboarding@${new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com').hostname}>`,
       to: recipients,
-      subject: `Decision Made: ${idea.description}!`,
+      subject: `Plan Decided: ${idea.description}!`,
       html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #ec4899;">It's Decided!</h1>
@@ -87,9 +87,9 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
   try {
     await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Decision Jar <onboarding@resend.dev>',
+      from: process.env.EMAIL_FROM || `Spin the Jar <onboarding@${new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com').hostname}>`,
       to: email,
-      subject: 'Reset your password for Decision Jar',
+      subject: `Reset your password for Spin the Jar`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1>Reset Your Password</h1>

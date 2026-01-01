@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Lock, Sparkles, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { isCapacitor } from "@/lib/utils";
-import { PRICING } from "@/lib/config";
+import { PRICING, BASE_DOMAIN } from "@/lib/config";
 
 import { useRouter } from "next/navigation";
 
@@ -113,7 +113,7 @@ export function PremiumModal({ isOpen, onClose, title, description }: PremiumMod
                                 <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10 mb-4 w-full">
                                     <p className="text-white font-medium mb-2">Upgrade Available on Web</p>
                                     <p className="text-sm text-slate-400">
-                                        To comply with App Store policies, please visit <strong>spinthejar.com</strong> on your computer or mobile browser to upgrade.
+                                        To comply with App Store policies, please visit <strong>{BASE_DOMAIN}</strong> on your computer or mobile browser to upgrade.
                                     </p>
                                     <p className="text-xs text-slate-500 mt-2">
                                         Once upgraded, premium features will instantly unlock here.

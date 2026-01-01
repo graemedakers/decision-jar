@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://spinthejar.com",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://spinthejar.com",
     title: "Spin the Jar | Make Decisions Together",
     description: "Stop asking 'What do you want to do?'. Let the Spin the Jar decide.",
     siteName: "Spin the Jar",

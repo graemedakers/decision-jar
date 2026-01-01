@@ -32,7 +32,7 @@ export default function PrivacyPolicyPage() {
         {
             icon: <Shield className="w-6 h-6 text-red-500" />,
             title: "Data Deletion",
-            content: "You have the right to request the deletion of your account and all associated data at any time. To do so, please contact us at support@decisionjar.com or use the 'Delete Account' option within your account settings."
+            content: "You have the right to request the deletion of your account and all associated data at any time. To do so, please contact us at support@spinthejar.com or use the 'Delete Account' option within your account settings."
         }
     ];
 
@@ -108,7 +108,7 @@ export default function PrivacyPolicyPage() {
                                 If you have any questions about this Privacy Policy or how we handle your data, feel free to reach out.
                             </p>
                         </div>
-                        <a href="mailto:support@decisionjar.com" className="inline-block">
+                        <a href="mailto:support@spinthejar.com" className="inline-block">
                             <Button className="bg-accent hover:bg-accent/90 text-white font-bold px-8 h-12 rounded-full shadow-lg shadow-accent/25">
                                 Contact Support
                             </Button>

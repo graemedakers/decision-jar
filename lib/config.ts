@@ -6,3 +6,4 @@ export const PRICING = {
 };
 
 export const APP_NAME = "Spin the Jar";
+export const BASE_DOMAIN = "spinthejar.com";

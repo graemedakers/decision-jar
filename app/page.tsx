@@ -141,8 +141,9 @@ export default function Home() {
     offers: {
       '@type': 'Offer',
       price: '0',
-      priceCurrency: 'USD',
+      priceCurrency: PRICING.CURRENCY,
     },
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com',
     description: 'A fun, interactive way for couples and friends to decide on their next date or hangout.',
     aggregateRating: {
       '@type': 'AggregateRating',
@@ -150,7 +151,7 @@ export default function Home() {
       ratingCount: ratingCount,
     },
     featureList: 'Decision Maker, Couple Sync, Weekend Planner, Dining Concierge',
-    screenshot: 'https://spinthejar.com/og-image.jpg',
+    screenshot: `${process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'}/og-image.jpg`,
     mainEntity: {
       '@type': 'FAQPage',
       mainEntity: [

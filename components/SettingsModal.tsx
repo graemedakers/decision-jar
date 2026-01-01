@@ -8,6 +8,7 @@ import { DeleteLogModal } from "@/components/DeleteLogModal";
 import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { BASE_DOMAIN } from "@/lib/config";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -485,7 +486,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                         {isNative ? (
                                             <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
                                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                    Manage Subscription: Please visit <strong>spinthejar.com</strong>
+                                                    Manage Subscription: Please visit <strong>{BASE_DOMAIN}</strong>
                                                 </p>
                                             </div>
                                         ) : (
