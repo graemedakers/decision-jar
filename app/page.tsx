@@ -274,11 +274,16 @@ export default function Home() {
               </Button>
               <Link href="/guide" className="w-full sm:w-auto">
                 <Button variant="outline" className="h-14 px-8 text-lg border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 w-full">
-                  Learn How it Works
+                  How it Works
                 </Button>
               </Link>
             </div>
-            <div className="pt-4 flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500">
+            <div className="pt-6 flex flex-wrap gap-4 justify-center md:justify-start">
+              <Link href="/use-cases" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                Did you know? Check out 10 ways to use Decision Jar &rarr;
+              </Link>
+            </div>
+            <div className="pt-2 flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-950 bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs text-slate-600 dark:text-white">
@@ -627,6 +632,7 @@ export default function Home() {
           </p>
           <div className="flex gap-6 text-sm text-slate-500 dark:text-slate-500">
             <Link href="/privacy" className="hover:text-slate-900 dark:hover:text-white transition-colors">Privacy</Link>
+            <Link href="/use-cases" className="hover:text-slate-900 dark:hover:text-white transition-colors">Ways to Use</Link>
             <Link href="/terms" className="hover:text-slate-900 dark:hover:text-white transition-colors">Terms</Link>
             <a href="mailto:hello@datejar.app" className="hover:text-slate-900 dark:hover:text-white transition-colors">Contact</a>
           </div>
