@@ -204,7 +204,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                             </h2>
                         </div>
 
-                        <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-6 pb-8 custom-scrollbar">
+                        <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-6 pb-24 md:pb-8 custom-scrollbar">
                             {itinerary ? (
                                 <ItineraryPreview itinerary={itinerary} />
                             ) : (

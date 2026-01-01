@@ -85,7 +85,7 @@ export function SpinFiltersModal({ isOpen, onClose, onSpin, jarTopic, ideas, cus
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 custom-scrollbar min-w-0">
+                        <div className="flex-1 overflow-y-auto px-6 py-6 pb-32 md:pb-6 space-y-6 custom-scrollbar min-w-0">
                             {/* Category Filter */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Category</label>

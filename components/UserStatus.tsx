@@ -27,7 +27,7 @@ export function UserStatus() {
     if (!user) return null;
 
     return (
-        <div className="hidden md:flex fixed bottom-4 right-4 z-50 items-center gap-2 px-4 py-2 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full shadow-lg text-xs text-slate-300 pointer-events-none">
+        <div className="hidden md:flex fixed bottom-4 right-20 z-50 items-center gap-2 px-4 py-2 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full shadow-lg text-xs text-slate-300 pointer-events-none">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
             <span className="font-medium">Logged in as <span className="text-white">{user.name}</span></span>
         </div>

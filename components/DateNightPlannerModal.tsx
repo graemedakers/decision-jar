@@ -213,7 +213,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto isolate">
+            <DialogContent className="sm:max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto isolate pb-32 md:pb-6">
                 <DialogHeader className="flex flex-row items-center justify-between space-y-0">
                     <DialogTitle className="flex items-center gap-2 text-2xl">
                         <Sparkles className="w-6 h-6 text-pink-600 dark:text-pink-400" />

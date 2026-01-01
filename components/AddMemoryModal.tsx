@@ -168,7 +168,7 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="glass-card w-full max-w-md relative max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10"
+                        className="glass-card w-full max-w-md relative max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 pb-32 md:pb-6"
                     >
                         <button
                             onClick={onClose}

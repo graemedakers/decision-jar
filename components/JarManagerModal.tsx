@@ -160,7 +160,7 @@ export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2 pb-32 md:pb-0">
                                 <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
                                     View and manage all the Jars you belong to. Leave communities you're no longer interested in, or delete inactive Jars you manage.
                                 </p>

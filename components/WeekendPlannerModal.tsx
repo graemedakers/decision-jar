@@ -167,7 +167,7 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white max-h-[80vh] overflow-y-auto isolate">
+            <DialogContent className="sm:max-w-md bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white max-h-[80vh] overflow-y-auto isolate pb-32 md:pb-6">
                 <Button
                     variant="ghost"
                     size="sm"
