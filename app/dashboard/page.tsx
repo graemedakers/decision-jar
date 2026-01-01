@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import { SoundEffects, triggerHaptic } from "@/lib/feedback";
 
 import { Button } from "@/components/ui/Button";
 import { getApiUrl } from "@/lib/utils";
@@ -312,13 +313,25 @@ export default function DashboardPage() {
             return;
         }
         setIsSpinning(true);
-        try {
-            await Haptics.impact({ style: ImpactStyle.Heavy });
-        } catch (e) {
-            // Ignore haptic errors on web
-        }
-        // Simulate animation
-        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Haptic/Audio Feedback Loop
+        const spinDuration = 2000;
+        const tickInterval = 150; // ms
+        let elapsed = 0;
+
+        const tickLoop = setInterval(() => {
+            SoundEffects.playTick();
+            triggerHaptic(10);
+            elapsed += tickInterval;
+            if (elapsed >= spinDuration) clearInterval(tickLoop);
+        }, tickInterval);
+
+        // Wait...
+        await new Promise(resolve => setTimeout(resolve, spinDuration));
+
+        clearInterval(tickLoop);
+        triggerHaptic([50, 50, 50]); // Success vibration
+        SoundEffects.playFanfare();
 
         try {
             const res = await fetch(getApiUrl('/api/pick-date'), {

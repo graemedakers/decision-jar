@@ -1,4 +1,4 @@
-import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map as MapIcon, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap, Bed } from "lucide-react";
+import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map as MapIcon, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap, Bed, Bug, Code, PenTool, Search, FileText } from "lucide-react";
 
 export interface CategoryDef {
     id: string;
@@ -6,6 +6,10 @@ export interface CategoryDef {
     icon: any;
     placeholder?: string;
 }
+
+
+
+
 
 export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
     "Activities": [
@@ -81,6 +85,13 @@ export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
         { id: "OPTION_A", label: "Option 1", icon: Activity, placeholder: "e.g. Task one" },
         { id: "OPTION_B", label: "Option 2", icon: Activity, placeholder: "e.g. Task two" },
         { id: "OPTION_C", label: "Option 3", icon: Activity, placeholder: "e.g. Task three" },
+    ],
+    "System Development": [
+        { id: "FEATURE", label: "Feature Request", icon: Code, placeholder: "e.g. Add Dark Mode" },
+        { id: "BUG", label: "Bug Report", icon: Bug, placeholder: "e.g. Login broken on Safari" },
+        { id: "REVIEW", label: "Code Review", icon: Search, placeholder: "e.g. Review PR #123" },
+        { id: "DOCS", label: "Documentation", icon: FileText, placeholder: "e.g. Update API docs" },
+        { id: "DESIGN", label: "Design", icon: PenTool, placeholder: "e.g. Redesign Settings Page" },
     ]
 };
 
@@ -181,6 +192,14 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
         gradientTo: "to-fuchsia-500",
         bgBlob1: "bg-violet-500/10",
         bgBlob2: "bg-fuchsia-500/10"
+    },
+    "System Development": {
+        primary: "slate-600",
+        secondary: "slate-800",
+        gradientFrom: "from-slate-500",
+        gradientTo: "to-slate-800",
+        bgBlob1: "bg-slate-500/10",
+        bgBlob2: "bg-slate-800/10"
     }
 };
 
