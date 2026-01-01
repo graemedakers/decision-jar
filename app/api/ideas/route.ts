@@ -68,11 +68,13 @@ export async function POST(request: Request) {
         const finalCategory = getBestCategoryFit(requestedCategory, jar.topic, (jar as any).customCategories as any[]);
 
 
+        const safeDuration = typeof duration === 'string' ? parseFloat(duration) : Number(duration);
+
         const createData: Prisma.IdeaUncheckedCreateInput = {
             description,
             details: details || null,
             indoor: Boolean(indoor),
-            duration: typeof duration === 'string' ? parseFloat(duration) : Number(duration),
+            duration: isNaN(safeDuration) ? 2.0 : safeDuration, // Default to 2.0 if invalid
             activityLevel,
             cost,
             timeOfDay: timeOfDay || 'ANY',
@@ -98,13 +100,18 @@ export async function POST(request: Request) {
         });
 
         // Gamification: Award XP for adding an idea
-        await awardXp(currentJarId, 15);
-        await checkAndUnlockAchievements(currentJarId);
+        try {
+            await awardXp(currentJarId, 15);
+            await checkAndUnlockAchievements(currentJarId);
+        } catch (xpError) {
+            console.error("Gamification error during idea creation:", xpError);
+            // Non-blocking
+        }
 
         return NextResponse.json(idea);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating idea:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: `Failed to create idea: ${error.message || 'Unknown error'}` }, { status: 500 });
     }
 }
 

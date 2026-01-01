@@ -179,7 +179,7 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-xl text-slate-900 dark:text-white">
                         <Sparkles className="w-5 h-5 text-secondary" />
-                        Weekend Planner
+                        Weekend Events
                     </DialogTitle>
                 </DialogHeader>
 
@@ -279,16 +279,16 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                                     </div>
                                     {suggestions.map((item, idx) => (
                                         <div key={idx} className="bg-white dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-sm dark:shadow-none relative">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="font-bold text-lg text-secondary pr-8">{item.title}</h3>
-                                                <button
-                                                    onClick={() => handleFavorite(item)}
-                                                    className={`absolute top-4 right-4 p-2 rounded-full transition-all ${item.isFavorite ? 'text-pink-500 bg-pink-500/10' : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}
-                                                >
-                                                    <Heart className={`w-5 h-5 ${item.isFavorite ? 'fill-current' : ''}`} />
-                                                </button>
-                                                <span className="text-xs font-mono bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 absolute top-4 right-16">{item.day}</span>
+                                            <div className="flex justify-between items-start mb-2 pr-14">
+                                                <h3 className="font-bold text-lg text-secondary leading-tight">{item.title}</h3>
+                                                <span className="text-xs font-mono bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 shrink-0 ml-2 mt-0.5">{item.day}</span>
                                             </div>
+                                            <button
+                                                onClick={() => handleFavorite(item)}
+                                                className={`absolute top-4 right-4 p-2 rounded-full transition-all ${item.isFavorite ? 'text-pink-500 bg-pink-500/10' : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}
+                                            >
+                                                <Heart className={`w-5 h-5 ${item.isFavorite ? 'fill-current' : ''}`} />
+                                            </button>
                                             <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 leading-relaxed mt-6">{item.description}</p>
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-3">
                                                 <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
