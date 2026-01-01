@@ -85,6 +85,8 @@ export async function POST(request: Request) {
         - timeOfDay (string: "DAY", "EVENING", "ANY")
         - category (string: strictly one of [${validCategoryIds}])
         - url (string)
+        - weather (string: "ANY", "SUNNY", "RAINY", "COLD")
+        - requiresTravel (boolean)
         `;
 
         const { reliableGeminiCall } = await import('@/lib/gemini');
@@ -106,6 +108,10 @@ export async function POST(request: Request) {
                 jarId: user.activeJarId!,
                 createdById: user.id,
                 isPrivate: isPrivate !== undefined ? isPrivate : true,
+
+                // New Tags
+                weather: ideaData.weather || "ANY",
+                requiresTravel: ideaData.requiresTravel || false,
             }
         });
 
