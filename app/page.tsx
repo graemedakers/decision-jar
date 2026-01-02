@@ -548,9 +548,6 @@ export default function Home() {
                 <div className="text-sm text-slate-600 dark:text-slate-400">
                   or <strong className="text-slate-900 dark:text-white">{PRICING.LIFETIME}</strong> Lifetime
                 </div>
-                <div className="text-xs text-green-400 font-medium px-2 py-1 bg-green-500/10 rounded-full inline-block mt-2">
-                  ✨ Includes {PRICING.TRIAL_DAYS}-Day Free Full-Access Trial
-                </div>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {[
