@@ -16,12 +16,19 @@ export async function POST(request: Request) {
         // Dynamically import cloudinary
         const { v2: cloudinary } = await import('cloudinary');
 
-        // Sanitize environment variables (remove surrounding quotes if present)
+        // FORCE FIX: The Cloudinary SDK reads process.env.CLOUDINARY_URL automatically.
+        // If it contains quotes (e.g. 'cloudinary://...'), it will crash even if we pass manual config.
+        // We must sanitize the actual environment variable in this process.
+        if (process.env.CLOUDINARY_URL) {
+            process.env.CLOUDINARY_URL = process.env.CLOUDINARY_URL.replace(/^['"]|['"]$/g, '');
+        }
+
+        // Sanitize other variables just in case we use them
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.replace(/^['"]|['"]$/g, '');
         const apiKey = process.env.CLOUDINARY_API_KEY?.replace(/^['"]|['"]$/g, '');
         const apiSecret = process.env.CLOUDINARY_API_SECRET?.replace(/^['"]|['"]$/g, '');
 
-        // Configure Cloudinary
+        // Configure Cloudinary with sanitized values
         cloudinary.config({
             cloud_name: cloudName,
             api_key: apiKey,
