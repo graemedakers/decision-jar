@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { getApiUrl } from "@/lib/utils";
 import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { motion } from "framer-motion";
-import { Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers, Users } from "lucide-react";
+import { Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers, Users, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Jar3D } from "@/components/Jar3D";
 import { useRouter } from "next/navigation";
@@ -175,6 +175,7 @@ export default function DashboardPage() {
     const isAllocationMode = jarSelectionMode === 'ALLOCATION';
     const theme = getThemeForTopic(jarTopic);
     const activityPlannerTitle = (jarTopic === 'Dates' || jarTopic === 'Romantic') ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
+    const isAdminPickMode = jarSelectionMode === 'ADMIN_PICK';
 
     const refreshUser = async () => {
         try {
@@ -798,7 +799,7 @@ export default function DashboardPage() {
 
                             {/* Mobile: Spin Button at Top - Compact Banner Style (Hide if Voting) */}
                             <div className="xl:hidden">
-                                {!isVotingMode && (
+                                {!isVotingMode && !isAdminPickMode && (
                                     <motion.button
                                         whileHover={availableIdeasCount > 0 ? { scale: 1.02 } : {}}
                                         whileTap={availableIdeasCount > 0 ? { scale: 0.95 } : {}}
@@ -830,6 +831,42 @@ export default function DashboardPage() {
                                             <Sparkles className="w-4 h-4 text-pink-500/50" />
                                         </div>
                                     </motion.button>
+                                )}
+
+                                {isAdminPickMode && (
+                                    userData?.isCreator ? (
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => router.push('/jar')}
+                                            className="w-full relative overflow-hidden rounded-xl p-4 flex items-center justify-between transition-all cursor-pointer border shadow-lg group bg-gradient-to-r from-amber-600/20 to-amber-900/40 border-amber-500/30 hover:border-amber-500/50"
+                                        >
+                                            <div className="flex items-center gap-3 relative z-10">
+                                                <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border bg-amber-500/20 text-amber-200 border-amber-500/30">
+                                                    <Crown className="w-4 h-4" />
+                                                </div>
+                                                <div className="text-left">
+                                                    <span className="block text-base font-bold text-amber-100">
+                                                        Pick a Winner
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <Crown className="w-4 h-4 text-amber-500/50" />
+                                        </motion.button>
+                                    ) : (
+                                        <div className="w-full relative overflow-hidden rounded-xl p-4 flex items-center justify-between border shadow-lg bg-slate-800/20 border-slate-700 opacity-70">
+                                            <div className="flex items-center gap-3 relative z-10">
+                                                <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border bg-slate-700 text-slate-400 border-slate-600">
+                                                    <Lock className="w-4 h-4" />
+                                                </div>
+                                                <div className="text-left">
+                                                    <span className="block text-base font-bold text-slate-400">
+                                                        Waiting for Admin
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
                                 )}
                             </div>
 
@@ -966,7 +1003,40 @@ export default function DashboardPage() {
                                             </Button>
                                         )}
 
-                                        {!isVotingMode && !isAllocationMode && (
+                                        {isAdminPickMode && (
+                                            userData?.isCreator ? (
+                                                <Button
+                                                    onClick={() => router.push('/jar')}
+                                                    className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 transition-all cursor-pointer border shadow-lg group bg-gradient-to-br from-amber-500/20 to-amber-700/40 border-amber-500/30 hover:border-amber-500/50 h-auto"
+                                                >
+                                                    <div className="w-12 h-12 shrink-0 rounded-full flex items-center justify-center bg-amber-500/20 text-amber-200 border border-amber-500/30">
+                                                        <Crown className="w-6 h-6" />
+                                                    </div>
+                                                    <div className="text-left">
+                                                        <span className="block text-lg font-bold text-amber-100">Pick a Winner</span>
+                                                        <span className="text-sm text-amber-200/60">
+                                                            {availableIdeasCount} ideas waiting for your decision
+                                                        </span>
+                                                    </div>
+                                                </Button>
+                                            ) : (
+                                                <div
+                                                    className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 border shadow-lg bg-slate-800/20 border-slate-700 opacity-70 cursor-not-allowed"
+                                                >
+                                                    <div className="w-12 h-12 shrink-0 rounded-full flex items-center justify-center bg-slate-700 text-slate-400 border border-slate-600">
+                                                        <Lock className="w-6 h-6" />
+                                                    </div>
+                                                    <div className="text-left">
+                                                        <span className="block text-lg font-bold text-slate-400">Waiting for Admin</span>
+                                                        <span className="text-sm text-slate-500">
+                                                            Admin will pick the winner
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )
+                                        )}
+
+                                        {!isVotingMode && !isAllocationMode && !isAdminPickMode && (
                                             <motion.button
                                                 whileHover={availableIdeasCount > 0 ? { scale: 1.02 } : {}}
                                                 whileTap={availableIdeasCount > 0 ? { scale: 0.95 } : {}}

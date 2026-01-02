@@ -34,6 +34,7 @@ export async function PUT(request: Request) {
                 name,
                 topic,
                 type,
+                selectionMode,
             }
         });
 

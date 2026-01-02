@@ -32,6 +32,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
     const [jarType, setJarType] = useState<"ROMANTIC" | "SOCIAL">("ROMANTIC");
     const [jarName, setJarName] = useState("");
     const [jarTopic, setJarTopic] = useState("");
+    const [jarSelectionMode, setJarSelectionMode] = useState<"RANDOM" | "VOTING" | "ALLOCATION" | "ADMIN_PICK">("RANDOM");
 
     // Premium Invite Logic
     const [currentUserEmail, setCurrentUserEmail] = useState("");
@@ -59,6 +60,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                         if (data.user.jarType) setJarType(data.user.jarType);
                         setJarName(data.user.jarName || "");
                         setJarTopic(data.user.jarTopic || "");
+                        if (data.user.jarSelectionMode) setJarSelectionMode(data.user.jarSelectionMode);
                         setCurrentUserEmail(data.user.email || "");
                         setPremiumInviteToken(data.user.premiumInviteToken || "");
                     }
@@ -90,6 +92,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                     body: JSON.stringify({
                         name: jarName,
                         topic: jarTopic,
+                        selectionMode: jarSelectionMode,
                     }),
                     credentials: 'include',
                 });
@@ -349,6 +352,29 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                             </div>
                                             <p className="text-[10px] text-slate-500 ml-1">
                                                 The topic determines which categories (Activity, Dining, etc) are available.
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Selection Mode</label>
+                                            <div className="relative">
+                                                <select
+                                                    value={jarSelectionMode}
+                                                    onChange={(e) => setJarSelectionMode(e.target.value as any)}
+                                                    className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white appearance-none focus:outline-none focus:border-primary/50"
+                                                >
+                                                    <option value="RANDOM">Random Spin (Standard)</option>
+                                                    <option value="ADMIN_PICK">Admin Pick (Curated)</option>
+                                                    <option value="VOTING">Group Voting</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                                            </div>
+                                            <p className="text-[10px] text-slate-500 ml-1">
+                                                {jarSelectionMode === 'ADMIN_PICK'
+                                                    ? "Members add ideas, but only Admin can pick the winner."
+                                                    : jarSelectionMode === 'VOTING'
+                                                        ? "Members vote on ideas to pick a winner."
+                                                        : "Spin the jar to randomly select an idea."}
                                             </p>
                                         </div>
                                     </div>

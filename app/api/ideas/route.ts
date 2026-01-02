@@ -174,8 +174,9 @@ export async function GET(request: Request) {
 
             let processedIdea = { ...idea };
 
-            // Apply Masking Logic (Skip for Community Jars)
-            if (!isSelected && !isMyIdea && !isCommunityJar) {
+            // Apply Masking Logic (Skip for Community Jars, or Admin in Admin Pick Mode)
+            const isAdminPick = (idea as any).selectionMode === 'ADMIN_PICK';
+            if (!isSelected && !isMyIdea && !isCommunityJar && !(isAdmin && isAdminPick)) {
                 // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
                 if (isVotingJar && (isSurprise || isPrivate)) {
                     processedIdea = {
@@ -217,13 +218,19 @@ export async function GET(request: Request) {
                 };
             }
 
+            // Admin Pick Mode:
+            // Members can only see the ideas they added. Admin sees all.
+            if (isAdminPick && !isAdmin && !isMyIdea && !isSelected) {
+                return null;
+            }
+
             // Append permission flags
             return {
                 ...processedIdea,
                 canEdit: isMyIdea || isAdmin,
                 canDelete: isMyIdea || isAdmin
             };
-        });
+        }).filter(Boolean);
 
         return NextResponse.json(maskedIdeas);
 

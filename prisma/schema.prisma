@@ -285,6 +285,7 @@ enum SelectionMode {
   RANDOM
   VOTING
   ALLOCATION
+  ADMIN_PICK
 }
 
 enum VoteStatus {

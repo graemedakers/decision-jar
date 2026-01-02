@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
@@ -112,6 +112,8 @@ export default function JarPage() {
     };
 
     const activeIdeas = ideas.filter(i => !i.selectedAt);
+    const isAdminPickMode = currentUser?.jarSelectionMode === 'ADMIN_PICK';
+    const isAdmin = !!currentUser?.isCreator; // Assuming creator is admin for now, or check role if available
 
     return (
         <main className="min-h-screen p-4 md:p-8 relative overflow-hidden w-full max-w-[1600px] mx-auto">
@@ -187,15 +189,17 @@ export default function JarPage() {
                                         {(!idea.category || idea.category === 'ACTIVITY') && <Activity className="w-4 h-4" />}
                                     </div>
                                     <div className="flex gap-2 items-center">
-                                        {idea.category === 'PLANNED_DATE' && !idea.isMasked && (
+                                        {(idea.category === 'PLANNED_DATE' && !idea.isMasked) || (isAdminPickMode && isAdmin && !idea.isMasked) ? (
                                             <Button
                                                 size="sm"
-                                                className="h-7 text-[10px] bg-pink-500 hover:bg-pink-600 border-0 text-white"
+                                                className={`h-7 text-[10px] border-0 text-white ${isAdminPickMode ? 'bg-amber-500 hover:bg-amber-600' : 'bg-pink-500 hover:bg-pink-600'}`}
                                                 onClick={(e) => handleGoTonight(e, idea)}
                                             >
-                                                Go Tonight
+                                                {isAdminPickMode ? (
+                                                    <span className="flex items-center gap-1"><Crown className="w-3 h-3" /> Pick Winner</span>
+                                                ) : "Go Tonight"}
                                             </Button>
-                                        )}
+                                        ) : null}
                                         <div className={`w-2 h-2 rounded-full ${idea.activityLevel === 'HIGH' ? 'bg-red-400' : idea.activityLevel === 'MEDIUM' ? 'bg-yellow-400' : 'bg-green-400'}`} title={`Activity: ${idea.activityLevel}`} />
                                     </div>
                                 </div>
