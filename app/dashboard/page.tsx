@@ -48,6 +48,7 @@ import { VotingManager } from "@/components/VotingManager";
 import { DashboardOnboarding } from "@/components/DashboardOnboarding";
 import { BarCrawlPlannerModal } from "@/components/BarCrawlPlannerModal";
 import { AdminControlsModal } from "@/components/AdminControlsModal";
+import { CateringPlannerModal } from "@/components/CateringPlannerModal";
 
 interface UserData {
     id: string;
@@ -117,6 +118,7 @@ export default function DashboardPage() {
     const [isGameModalOpen, setIsGameModalOpen] = useState(false);
     const [isBarCrawlOpen, setIsBarCrawlOpen] = useState(false);
     const [isDateNightOpen, setIsDateNightOpen] = useState(false);
+    const [isCateringPlannerOpen, setIsCateringPlannerOpen] = useState(false);
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isSurpriseModalOpen, setIsSurpriseModalOpen] = useState(false);
     const [isLoadingUser, setIsLoadingUser] = useState(true);
@@ -648,6 +650,12 @@ export default function DashboardPage() {
                     jarTopic={jarTopic}
                 />
 
+                <CateringPlannerModal
+                    isOpen={isCateringPlannerOpen}
+                    onClose={() => setIsCateringPlannerOpen(false)}
+                    onIdeaAdded={handleContentUpdate}
+                />
+
                 <RateDateModal
                     isOpen={!!ratingIdea}
                     onClose={() => {
@@ -1111,7 +1119,17 @@ export default function DashboardPage() {
                                         whileHover={{ scale: 1.02, y: -4 }}
                                         whileTap={{ scale: 0.98 }}
                                         className="group relative h-full"
-                                        onClick={() => isPremium ? setIsDateNightOpen(true) : setIsPremiumModalOpen(true)}
+                                        onClick={() => {
+                                            if (!isPremium) {
+                                                setIsPremiumModalOpen(true);
+                                                return;
+                                            }
+                                            if (jarTopic === 'Cooking & Recipes') {
+                                                setIsCateringPlannerOpen(true);
+                                            } else {
+                                                setIsDateNightOpen(true);
+                                            }
+                                        }}
                                     >
                                         <div className="absolute -inset-0.5 bg-gradient-to-b from-rose-500/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition duration-500" />
                                         <div className="relative h-full bg-white dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-3xl p-8 flex flex-col gap-6 cursor-pointer hover:shadow-2xl hover:shadow-rose-500/10 transition-all">

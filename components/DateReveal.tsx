@@ -1,5 +1,6 @@
-import { getItinerary, getApiUrl } from "@/lib/utils";
-import { ItineraryPreview } from "./ItineraryPreview"; // Keep this import
+import { getItinerary, getCateringPlan, getApiUrl } from "@/lib/utils";
+import { ItineraryPreview } from "./ItineraryPreview";
+import { CateringPreview } from "./CateringPreview";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar, Clock, Sparkles, Loader2, MapPin, ExternalLink, Star, Utensils, Check, Popcorn } from "lucide-react"; // Removed DollarSign, Activity
 import { Button } from "./ui/Button";
@@ -97,6 +98,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
     };
 
     const itinerary = idea ? getItinerary(idea.details) : null;
+    const cateringPlan = idea ? getCateringPlan(idea.details) : null;
 
     // Reset state when modal closes or idea changes
     if (!idea && (recommendations.length > 0 || showAI)) {
@@ -244,6 +246,8 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                 <>
                                     {itinerary ? (
                                         <ItineraryPreview itinerary={itinerary} />
+                                    ) : cateringPlan ? (
+                                        <CateringPreview plan={cateringPlan} />
                                     ) : (
                                         <>
                                             {/* Idea Details */}

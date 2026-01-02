@@ -1,4 +1,4 @@
-import { LucideIcon, Users, Brain, Sparkles, Zap, MessageSquare, Compass, Heart, GraduationCap } from "lucide-react";
+import { LucideIcon, Users, Brain, Sparkles, Zap, MessageSquare, Compass, Heart, GraduationCap, ChefHat, Utensils } from "lucide-react";
 
 export interface ResourceGuide {
     slug: string;
@@ -286,6 +286,74 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             {
                 title: "Scouting the Unknown",
                 content: "Finding 'new' often feels like work. Our AI Concierge scouts (Bar, Club, Movie, Theatre) are designed to handle the research. Your only job is to show up and experience the novelty together."
+            }
+        ]
+    },
+    {
+        slug: "mastering-the-unforgettable-dinner-party",
+        category: "Lifestyle",
+        title: "The Art of the Stress-Free Soirée: Hosting Like a Pro",
+        description: "How to use professional prep strategies and AI planning to host memorable gatherings without the kitchen chaos.",
+        icon: ChefHat,
+        readTime: "8 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Professional dinner party hosting and catering strategies",
+            "description": "Expert advice on planning, timing, and executing the perfect group meal using modern AI tools."
+        },
+        faqs: [
+            {
+                question: "What is the secret to a stress-free dinner party?",
+                answer: "Prep and timing. Knowing exactly what needs to be done 24 hours ahead, 6 hours ahead, and 1 hour before service is the difference between an exhausted host and a happy one."
+            },
+            {
+                question: "How can AI help with catering?",
+                answer: "The Catering Planner tool can scale ingredients perfectly for any group size and design a cohesive menu theme that flows from appetizer to dessert."
+            }
+        ],
+        sections: [
+            {
+                title: "The Host's Dilemma",
+                content: "We host because we want to connect, but we often spend the entire night trapped in the kitchen. Traditional hosting feels like a chore because the mental load of managing courses, dietary needs, and portions is overwhelming."
+            },
+            {
+                title: "The 'Mise en Place' Strategy",
+                content: "Professional chefs use 'Mise en Place'—everything in its place. Our Catering Planner provides a unified 'Prep & Timing Strategy' that breaks your tasks into manageable blocks. By front-loading the work according to the AI's timeline, you can be present at your own party."
+            }
+        ]
+    },
+    {
+        slug: "breaking-the-recipe-rut",
+        category: "Activities",
+        title: "Culinary Creativity: Using AI to Break Your Recipe Rut",
+        description: "How to rediscover the joy of cooking by exploring global themes and Michelin-star techniques at home.",
+        icon: Utensils,
+        readTime: "7 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Using AI for culinary inspiration and recipe exploration",
+            "description": "Learn how to use AI catering tools to expand your cooking skills and try new global cuisines."
+        },
+        faqs: [
+            {
+                question: "I'm stuck cooking the same 5 meals. How do I start?",
+                answer: "Switch your jar topic to 'Cooking & Recipes' and use the Catering Planner. Ask for a specific theme like 'Tokyo Street Food' or 'Greek Island Summer' to get instant inspiration."
+            },
+            {
+                question: "Can I use the Catering Planner for simple weeknight meals?",
+                answer: "Absolutely. Simply set the complexity to 'Simple' and the audience to 'Adults' or 'Children' to get efficient, high-quality meal ideas that fit your schedule."
+            }
+        ],
+        sections: [
+            {
+                title: "The Cycle of the Same",
+                content: "Most households default to a rotation of just 5-7 meals. Over time, cooking becomes a utility rather than an activity. To break the rut, you need a 'Creative Catalyst'—something to suggest a path you wouldn't normally take."
+            },
+            {
+                title: "Theme-Based Learning",
+                content: "Instead of just 'Chicken for dinner,' try a 'Mediterranean Sunset' theme. AI allows you to explore techniques and ingredient pairings that professional caterers use. It turns your kitchen into a classroom where every meal is an opportunity to learn a new culinary tradition."
             }
         ]
     }

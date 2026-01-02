@@ -1,8 +1,9 @@
 "use client";
-import { getItinerary, getApiUrl } from "@/lib/utils";
+import { getItinerary, getCateringPlan, getApiUrl } from "@/lib/utils";
 import { getCategoriesForTopic, TOPIC_CATEGORIES } from "@/lib/categories";
 
 import { ItineraryPreview } from "./ItineraryPreview";
+import { CateringPreview } from "./CateringPreview";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -114,6 +115,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     }, [jarTopic, isOpen, categories]);
 
     const itinerary = getItinerary(formData.details);
+    const cateringPlan = getCateringPlan(formData.details);
 
 
 
@@ -193,8 +195,9 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                         <div className="px-6 pt-6 pb-4">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                                 {itinerary ? "Itinerary Preview" :
-                                    initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea"}
-                                {(!initialData || !initialData.id) && !itinerary && (
+                                    cateringPlan ? "Catering Plan" :
+                                        initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea"}
+                                {(!initialData || !initialData.id) && !itinerary && !cateringPlan && (
                                     <button
                                         type="button"
                                         onClick={handleRandomize}
@@ -211,6 +214,8 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                         <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-6 pb-24 md:pb-8 custom-scrollbar">
                             {itinerary ? (
                                 <ItineraryPreview itinerary={itinerary} />
+                            ) : cateringPlan ? (
+                                <CateringPreview plan={cateringPlan} />
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <fieldset disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">
@@ -300,6 +305,11 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         {getItinerary(formData.details) && (
                                             <p className="text-[10px] text-slate-400 text-right">
                                                 This contains a structured itinerary (Night Out Plan). Switch to Preview to view nicely.
+                                            </p>
+                                        )}
+                                        {getCateringPlan(formData.details) && (
+                                            <p className="text-[10px] text-slate-400 text-right">
+                                                This contains a structured Catering Plan. Switch to Preview to view nicely.
                                             </p>
                                         )}
                                     </div>

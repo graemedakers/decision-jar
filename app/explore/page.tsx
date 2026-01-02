@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Users, Gamepad2, Footprints } from "lucide-react";
+import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Users, Gamepad2, Footprints, ChefHat } from "lucide-react";
 import { PremiumModal } from "@/components/PremiumModal";
 import { useRouter } from "next/navigation";
 import { WeekendPlannerModal } from "@/components/WeekendPlannerModal";
@@ -17,6 +17,7 @@ import { WellnessConciergeModal } from "@/components/WellnessConciergeModal";
 import { FitnessConciergeModal } from "@/components/FitnessConciergeModal";
 import { TheatreConciergeModal } from "@/components/TheatreConciergeModal";
 import { GameConciergeModal } from "@/components/GameConciergeModal";
+import { CateringPlannerModal } from "@/components/CateringPlannerModal";
 import { getApiUrl } from "@/lib/utils";
 
 export default function ExplorePage() {
@@ -39,6 +40,7 @@ export default function ExplorePage() {
     const [isFitnessModalOpen, setIsFitnessModalOpen] = useState(false);
     const [isTheatreModalOpen, setIsTheatreModalOpen] = useState(false);
     const [isGameModalOpen, setIsGameModalOpen] = useState(false);
+    const [isCateringModalOpen, setIsCateringModalOpen] = useState(false);
 
     useEffect(() => {
         // Optimistically load premium status and location from cache
@@ -106,6 +108,13 @@ export default function ExplorePage() {
             icon: Utensils,
             action: () => isPremium ? setIsDiningModalOpen(true) : setIsPremiumModalOpen(true),
             color: "orange"
+        },
+        {
+            title: "Catering Planner",
+            desc: "Chef-designed menus & prep for groups and parties.",
+            icon: ChefHat,
+            action: () => isPremium ? setIsCateringModalOpen(true) : setIsPremiumModalOpen(true),
+            color: "red"
         },
         {
             title: "Bar Scout",
@@ -280,6 +289,10 @@ export default function ExplorePage() {
             <GameConciergeModal
                 isOpen={isGameModalOpen}
                 onClose={() => setIsGameModalOpen(false)}
+            />
+            <CateringPlannerModal
+                isOpen={isCateringModalOpen}
+                onClose={() => setIsCateringModalOpen(false)}
             />
         </main>
     );

@@ -92,6 +92,15 @@ export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
         { id: "REVIEW", label: "Code Review", icon: Search, placeholder: "e.g. Review PR #123" },
         { id: "DOCS", label: "Documentation", icon: FileText, placeholder: "e.g. Update API docs" },
         { id: "DESIGN", label: "Design", icon: PenTool, placeholder: "e.g. Redesign Settings Page" },
+    ],
+    "Cooking & Recipes": [
+        { id: "BREAKFAST", label: "Breakfast", icon: Coffee, placeholder: "e.g. Fluffy Pancakes" },
+        { id: "LUNCH", label: "Lunch", icon: Pizza, placeholder: "e.g. Quinoa Salad" },
+        { id: "DINNER", label: "Dinner", icon: ChefHat, placeholder: "e.g. Beef Wellington" },
+        { id: "DESSERT", label: "Dessert", icon: Sparkles, placeholder: "e.g. Chocolate Soufflé" },
+        { id: "BAKING", label: "Baking", icon: ChefHat, placeholder: "e.g. Sourdough Bread" },
+        { id: "CATERING", label: "Dinner Party", icon: Users, placeholder: "e.g. 3-Course Mediterranean Plan" },
+        { id: "MEAL_PREP", label: "Meal Prep", icon: Calendar, placeholder: "e.g. Weekly Chicken Bowls" },
     ]
 };
 
@@ -200,6 +209,14 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
         gradientTo: "to-slate-800",
         bgBlob1: "bg-slate-500/10",
         bgBlob2: "bg-slate-800/10"
+    },
+    "Cooking & Recipes": {
+        primary: "amber-500",
+        secondary: "orange-600",
+        gradientFrom: "from-amber-400",
+        gradientTo: "to-orange-500",
+        bgBlob1: "bg-amber-500/10",
+        bgBlob2: "bg-orange-600/10"
     }
 };
 
@@ -292,7 +309,9 @@ export const getBestCategoryFit = (requestedId: string, topic: string | null | u
         'WELLNESS': ['SPA', 'SELF_CARE', 'RELAX', 'HEALTH'],
         'FITNESS': ['GYM', 'EXERCISE', 'OUTDOOR', 'HEALTH'],
         'GAME': ['GAMING', 'ENTERTAINMENT', 'INDOOR'],
-        'ACTIVITY': ['OUTDOOR', 'INDOOR', 'SOCIAL', 'EVENT']
+        'ACTIVITY': ['OUTDOOR', 'INDOOR', 'SOCIAL', 'EVENT'],
+        'CATERING': ['DINNER', 'MEAL', 'SOCIAL', 'FOOD', 'DINING'],
+        'MEAL_PREP': ['MEAL', 'DINNER', 'LUNCH', 'FOOD']
     };
 
     const potentials = mappings[requestedId] || [];

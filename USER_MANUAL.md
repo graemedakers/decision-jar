@@ -32,7 +32,7 @@ Decision Jar allows you to create shared collections of activity ideas with your
 3.  Enter your name and email.
 4.  **Location:** Enter your city (e.g., "New York, NY"). This helps our Concierge tools suggest relevant venues nearby.
 5.  **Create Jar:**
-    - Choose a **Name** and **Topic** (e.g., "Food", "Movies", "General").
+    - Choose a **Name** and **Topic** (e.g., "Food", "Movies", "Cooking & Recipes").
     - Select a **Type** (Romantic, Community, or Social).
     - Select a **Selection Mode** (Random spin, Voting Session, or Task Allocation).
 
@@ -167,6 +167,20 @@ Creates a cohesive timeline for an evening, typically including Drinks, Dinner, 
 
 ### Weekend Planner
 Generates a curated list of 5 activity ideas for the upcoming (or current) weekend, tailored to your location and the weather.
+
+### Catering Planner (Premium)
+Plan professional-grade dinner parties or group events with ease. 
+- Input people count, age groups, and desired themes.
+- Choose complexity levels from "Simple" to "Michelin Star".
+- Receive 3 complete menu options with scaled ingredient lists and cooking instructions.
+- Includes a full "Prep & Timing Strategy" to ensure a stress-free hosting experience.
+
+#### Common Use Cases:
+- **Kid's Birthday Party:** Choose the "Children" audience and a "Superhero" or "Space" theme. The AI will suggest finger foods and treats that are easy for small hands and picky eaters.
+- **Romantic Anniversary Dinner:** Set complexity to "Gourmet" and choose a "Hidden Garden" or "Classical French" theme for an intimate 5-course experience.
+- **Holiday Feast:** Plan Christmas or Thanksgiving for 20+ people. The tool handles the ingredient scaling and tells you exactly what to prep 24 hours in advance to avoid kitchen chaos.
+- **Game Day Snacks:** Choose "Mixed" audience and "Super Bowl" theme for hearty, easy-to-eat comfort food perfect for a group.
+- **Micro-Wedding / Engagement:** Professional-grade menus for small, meaningful gatherings where you want the food to be the star.
 
 ---
 

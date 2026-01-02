@@ -19,6 +19,19 @@ export function getItinerary(details?: string | null) {
     return null;
 }
 
+export function getCateringPlan(details?: string | null) {
+    if (!details) return null;
+    try {
+        let data = JSON.parse(details);
+        if (typeof data === 'string') {
+            try { data = JSON.parse(data); } catch (e) { }
+        }
+        // Check for options or courses
+        if (data && typeof data === 'object' && (Array.isArray((data as any).courses) || Array.isArray((data as any).options))) return data;
+    } catch (e) { return null; }
+    return null;
+}
+
 export function getApiUrl(path: string) {
     if (path.startsWith('http')) return path;
 
