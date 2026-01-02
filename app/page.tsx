@@ -540,13 +540,19 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Spin the Jar Pro</h3>
                 <p className="text-slate-600 dark:text-slate-400">For the ultimate social life</p>
               </div>
-              <div className="mb-8 space-y-2">
-                <div>
-                  <span className="text-4xl font-bold text-slate-800 dark:text-white">{PRICING.MONTHLY}</span>
-                  <span className="text-slate-500 dark:text-slate-400">/month</span>
+              <div className="mb-8 space-y-3">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-black text-slate-800 dark:text-white">{PRICING.MONTHLY}</span>
+                  <span className="text-lg text-slate-400 line-through decoration-primary/50">{PRICING.ORIGINAL_MONTHLY}</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-sm">/month</span>
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
-                  or <strong className="text-slate-900 dark:text-white">{PRICING.LIFETIME}</strong> Lifetime
+                <div className="flex flex-col gap-2">
+                  <div className="inline-flex items-center gap-2 px-2 py-1 rounded-md bg-primary text-white text-[10px] font-black uppercase tracking-wider w-fit animate-pulse">
+                    ⚡ Limited Time Launch Offer
+                  </div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                    or <strong className="text-slate-900 dark:text-white">{PRICING.LIFETIME}</strong> Lifetime
+                  </div>
                 </div>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
@@ -672,7 +678,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 dark:text-green-400" /> Free {PRICING.TRIAL_DAYS}-day trial of premium features</span>
-                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-yellow-500 dark:text-yellow-400" /> Then just {PRICING.MONTHLY} / month</span>
+                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-yellow-500 dark:text-yellow-400" /> Then just {PRICING.MONTHLY} / month (Launch Offer!)</span>
               </div>
             </div>
           </div>
