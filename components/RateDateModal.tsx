@@ -40,6 +40,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
             fetch(`/api/ideas/${idea.id}/rate`)
                 .then(res => res.json())
                 .then((data: any[]) => {
+                    console.log("Fetched ratings:", data);
                     const myRating = data.find(r => r.isMe);
                     if (myRating) {
                         setRating(myRating.value);
@@ -167,7 +168,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                                             className="focus:outline-none transition-transform hover:scale-110"
                                         >
                                             <Star
-                                                className={`w-8 h-8 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-slate-300 dark:text-slate-600"}`}
+                                                className={`w-8 h-8 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-slate-400 dark:text-slate-500"}`}
                                             />
                                         </button>
                                     ))}
