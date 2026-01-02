@@ -119,6 +119,12 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
 
 
+    const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('PREVIEW');
+
+    useEffect(() => {
+        if (isOpen) setViewMode('PREVIEW');
+    }, [isOpen]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -192,11 +198,10 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                             <X className="w-6 h-6" />
                         </button>
 
-                        <div className="px-6 pt-6 pb-4">
+                        <div className="px-6 pt-6 pb-4 flex flex-col gap-2">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                {itinerary ? "Itinerary Preview" :
-                                    cateringPlan ? "Catering Plan" :
-                                        initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea"}
+                                {viewMode === 'PREVIEW' && (itinerary || cateringPlan) ? (itinerary ? "Itinerary Preview" : "Catering Plan") :
+                                    (initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea")}
                                 {(!initialData || !initialData.id) && !itinerary && !cateringPlan && (
                                     <button
                                         type="button"
@@ -209,13 +214,32 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                     </button>
                                 )}
                             </h2>
+
+                            {(itinerary || cateringPlan) && (
+                                <div className="flex bg-slate-200 dark:bg-black/40 p-1 rounded-lg w-fit">
+                                    <button
+                                        onClick={() => setViewMode('PREVIEW')}
+                                        className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${viewMode === 'PREVIEW' ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        Formatted View
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('EDIT')}
+                                        className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${viewMode === 'EDIT' ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        Edit Details
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-6 pb-24 md:pb-8 custom-scrollbar">
-                            {itinerary ? (
-                                <ItineraryPreview itinerary={itinerary} />
-                            ) : cateringPlan ? (
-                                <CateringPreview plan={cateringPlan} />
+                            {(itinerary || cateringPlan) && viewMode === 'PREVIEW' ? (
+                                itinerary ? (
+                                    <ItineraryPreview itinerary={itinerary} />
+                                ) : (
+                                    <CateringPreview plan={cateringPlan} />
+                                )
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <fieldset disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">
