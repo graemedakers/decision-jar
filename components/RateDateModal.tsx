@@ -144,7 +144,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="glass-card w-full max-w-md relative max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10"
+                        className="glass-card w-full max-w-md relative h-[calc(100vh-2rem)] md:h-auto md:max-h-[85vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10"
                     >
                         <button
                             onClick={onClose}
@@ -156,7 +156,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Rate Experience</h2>
                         <p className="text-slate-600 dark:text-slate-300 mb-6 font-medium text-lg">"{idea?.description}"</p>
 
-                        <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+                        <form onSubmit={handleSubmit} className="space-y-6 pb-20 md:pb-6" autoComplete="off">
                             <div className="space-y-2 text-center">
                                 <label className="text-sm font-medium text-slate-600 dark:text-slate-400">How was it?</label>
                                 <div className="flex justify-center gap-2">

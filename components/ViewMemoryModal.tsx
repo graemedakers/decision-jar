@@ -55,7 +55,7 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white p-0 overflow-hidden">
+            <DialogContent className="max-w-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white p-0">
                 <div className="bg-gradient-to-r from-pink-600 to-purple-600 p-6 relative">
                     <button
                         onClick={onClose}
@@ -107,7 +107,7 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
                     </div>
                 ) : null}
 
-                <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto w-full">
+                <div className="p-6 space-y-6 w-full">
                     {/* Dining Details Section - Consistent with DateReveal */}
                     {(idea.website || idea.address || idea.openingHours) && (
                         <div className="bg-slate-100 dark:bg-white/5 rounded-xl p-4 space-y-3 text-left">
