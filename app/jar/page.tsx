@@ -256,6 +256,8 @@ export default function JarPage() {
                     setIsPremiumModalOpen(true);
                 }}
                 currentUser={currentUser}
+                jarTopic={currentUser?.jarTopic}
+                customCategories={currentUser?.customCategories}
             />
 
             <DeleteConfirmModal
