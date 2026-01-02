@@ -14,7 +14,7 @@ interface CateringPlannerModalProps {
 
 export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringPlannerModalProps) {
     const [isLoading, setIsLoading] = useState(false);
-    const [numPeople, setNumPeople] = useState(4);
+    const [numPeople, setNumPeople] = useState<number | string>(4);
     const [ageGroup, setAgeGroup] = useState("Adults");
     const [complexity, setComplexity] = useState("Moderate");
     const [theme, setTheme] = useState("");
@@ -118,7 +118,7 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                         min="1"
                                         max="100"
                                         value={numPeople}
-                                        onChange={(e) => setNumPeople(parseInt(e.target.value))}
+                                        onChange={(e) => setNumPeople(e.target.value === '' ? '' : parseInt(e.target.value))}
                                         className="glass-input w-full px-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-orange-500 transition-all font-bold"
                                     />
                                 </div>
