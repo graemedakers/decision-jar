@@ -226,6 +226,9 @@ export default function Home() {
             <Link href="/guide" className="hidden md:block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
               How it Works
             </Link>
+            <Link href="/learn" className="hidden lg:block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+              Learning Center
+            </Link>
             <div className="flex items-center gap-4">
               {user ? (
                 <Button onClick={() => router.push('/dashboard')} size="sm" className="bg-slate-200/50 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 border-none text-slate-800 dark:text-white">
@@ -596,6 +599,12 @@ export default function Home() {
               answer="Yes. Once you invite your partner or friends using your unique code, your jars are instantly linked. Any idea added or removed on one phone appears on everyone's device immediately."
             />
           </div>
+
+          <div className="mt-12 text-center">
+            <Link href="/learn" className="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
+              Have more questions? Visit our Learning Center <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -638,7 +647,8 @@ export default function Home() {
           <p className="text-slate-500 dark:text-slate-600 text-sm">
             © {new Date().getFullYear()} Spin the Jar. Built for fun.
           </p>
-          <div className="flex gap-6 text-sm text-slate-500 dark:text-slate-500">
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-slate-500 dark:text-slate-500">
+            <Link href="/learn" className="hover:text-slate-900 dark:hover:text-white transition-colors font-bold text-slate-700 dark:text-slate-300">Learning Center</Link>
             <Link href="/privacy" className="hover:text-slate-900 dark:hover:text-white transition-colors">Privacy</Link>
             <Link href="/use-cases" className="hover:text-slate-900 dark:hover:text-white transition-colors">Ways to Use</Link>
             <Link href="/terms" className="hover:text-slate-900 dark:hover:text-white transition-colors">Terms</Link>
