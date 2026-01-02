@@ -97,7 +97,7 @@ export default function GuideDetailPage({ params }: { params: Promise<{ slug: st
                 {/* Sidebar CTA */}
                 <aside className="lg:col-span-4">
                     <div className="sticky top-24 space-y-6">
-                        <div className="glass-card bg-primary text-white border-none p-8 overflow-hidden relative">
+                        <div className="rounded-2xl shadow-2xl bg-primary text-white border-none p-8 overflow-hidden relative">
                             <Zap className="absolute -bottom-4 -right-4 w-32 h-32 text-white/10 rotate-12" />
                             <h3 className="text-2xl font-black mb-4 relative z-10 text-white">Put this into practice</h3>
                             <p className="text-white/80 text-sm mb-6 relative z-10 leading-relaxed">
