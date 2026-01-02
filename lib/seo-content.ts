@@ -118,5 +118,175 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
                 content: "A healthy social life should be a mix of 'Comfort' (the local pub) and 'Challenge' (trying an escape room). Decision Jar helps you maintain this balance by allowing you to categorize ideas into Low, Medium, and High energy blocks."
             }
         ]
+    },
+    {
+        slug: "roommate-harmony-blueprint",
+        category: "Social",
+        title: "The Roommate Harmony Blueprint: Automating Chores",
+        description: "How to eliminate kitchen arguments and distribute household tasks fairly using Task Allocation.",
+        icon: Zap,
+        readTime: "7 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Managing roommate relationships with automated chore distribution",
+            "description": "Learn how to use task allocation to reduce conflict and increase fairness in shared living spaces."
+        },
+        faqs: [
+            {
+                question: "What is the best way to handle chores?",
+                answer: "Consistency and fairness are key. Using a randomizer or a systematic allocation tool removes the 'nagging' element, as the system makes the assignment, not a person."
+            },
+            {
+                question: "How can I invite my roommates to a jar?",
+                answer: "Share your unique jar code from the dashboard. Once they join, they can see their assigned tasks in real-time."
+            }
+        ],
+        sections: [
+            {
+                title: "The Friction of Shared Spaces",
+                content: "Most roommate conflicts stem from perceived unfairness in labor. 'I always do the dishes' is a common refrain because we tend to remember our own work more clearly than others'. Structured allocation solves this perception bias."
+            },
+            {
+                title: "Systematizing Fair Play",
+                content: "By moving chores from an unspoken agreement to a digital 'Task Jar,' you create a neutral third party. When the system assigns the bins to 'User A,' it's not a personal request—it's just the turn of the jar."
+            }
+        ]
+    },
+    {
+        slug: "digital-sabbath-offline-ritual",
+        category: "Social",
+        title: "Digital Sabbath: Why Your Relationship Needs an Offline Ritual",
+        description: "Reclaim your focus and foster deeper intimacy by creating tech-free connection windows.",
+        icon: Heart,
+        readTime: "9 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Benefits of offline rituals for couples and families",
+            "description": "Strategies for implementing technology-free time to improve communication and mental health."
+        },
+        faqs: [
+            {
+                question: "What is a digital sabbath?",
+                answer: "It's a designated period (could be an hour or a full day) where you step away from screens to focus on real-world interaction."
+            },
+            {
+                question: "How do I decide what to do without my phone?",
+                answer: "This is where pre-planned 'Offline' ideas in your jar come in handy. Spin the jar before you put the phones away so you have a clear plan for the tech-free time."
+            }
+        ],
+        sections: [
+            {
+                title: "The Phantom Vibration of Modern Love",
+                content: "We are more connected than ever, yet more distracted. 'Parallel Scrolling'—where two people sit together but focus on their phones—is a major contributor to relationship loneliness. A digital sabbath breaks this cycle."
+            },
+            {
+                title: "Designing the Ritual",
+                content: "Rituals thrive on structure. Use Your 'Date Jar' to store high-quality, phone-free activities like board games, night walks, or cooking a new recipe. The goal is to move from passive consumption to active creation together."
+            }
+        ]
+    },
+    {
+        slug: "decision-paralysis-unlocked",
+        category: "Productivity",
+        title: "Decision Paralysis: How to Stop Scrolling and Start Doing",
+        description: "The psychology behind 'The Paradox of Choice' and how to overcome it to live a more active life.",
+        icon: Compass,
+        readTime: "6 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Overcoming decision paralysis in daily life",
+            "description": "Scientific approaches to making faster, better choices to reduce stress and increase activity levels."
+        },
+        faqs: [
+            {
+                question: "Why can't I decide where to eat?",
+                answer: "You are likely suffering from Choice Overload. When presented with too many options, the brain shuts down. Limiting your pool to curated favorites in a jar solves this instantly."
+            },
+            {
+                question: "Is random selection actually better?",
+                answer: "In many cases, yes. It prevents the 'negotiation fatigue' that often leads to doing nothing at all. The speed of the decision is often more important than the specific choice."
+            }
+        ],
+        sections: [
+            {
+                title: "The Cost of Choice",
+                content: "Every choice we make consumes brain power. By the time we reach the end of a long workday, we have no energy left to pick a restaurant. This is why we default to 'whatever is easiest' rather than 'what is best.'"
+            },
+            {
+                title: "Curating Your Universe",
+                content: "The solution isn't to have more options; it's to have better ones. By curating a 'Yes' list in your jar when you are in a high-energy state, you protect your low-energy self from having to think later."
+            }
+        ]
+    },
+    {
+        slug: "gamifying-home-life",
+        category: "Lifestyle",
+        title: "Gamification for Good: How to Turn Daily Drudgery into Level-Ups",
+        description: "Using XP, Levels, and Trophies to make household management feel like a shared adventure.",
+        icon: GraduationCap,
+        readTime: "8 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Gamification techniques for lifestyle improvement",
+            "description": "How to apply game mechanics to household tasks and social goals to increase engagement."
+        },
+        faqs: [
+            {
+                question: "Does gamification actually change behavior?",
+                answer: "Yes. By providing immediate feedback (XP) and long-term milestones (Levels), tasks that were once boring become satisfying completions."
+            },
+            {
+                question: "How do I earn XP in Decision Jar?",
+                answer: "You earn XP for adding ideas, spinning the jar, and most importantly, completing and rating activities. It's a system designed to reward 'doing'."
+            }
+        ],
+        sections: [
+            {
+                title: "The Dopamine Loop of Achievement",
+                content: "Games are addictive because they provide a clear sense of progress. Traditional housework is the opposite—it's never finished. Gamification introduces a 'Score' to the chores, making the effort visible and rewarded."
+            },
+            {
+                title: "Building the Trophy Case",
+                content: "Don't just do the dishes; unlock the 'Kitchen Master' trophy. These small digital milestones create a layer of play over the routine of daily life, turning 'adulting' into a collaborative game."
+            }
+        ]
+    },
+    {
+        slug: "science-of-novelty",
+        category: "Activities",
+        title: "The Science of New: Why Novelty is the Ultimate Relationship Hack",
+        description: "Exploring the neurological link between new experiences and relationship satisfaction.",
+        icon: Sparkles,
+        readTime: "10 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Novelty and brain chemistry in long-term relationships",
+            "description": "Scientific research on how new activities impact dopamine and bonding in couples."
+        },
+        faqs: [
+            {
+                question: "How often should we try something new?",
+                answer: "Research suggests that 'Novelty Rituals' even once a week can significantly offset relationship decline and boredom."
+            },
+            {
+                question: "What if we don't like the new activity?",
+                answer: "The bonding doesn't come from the activity being 'perfect'—it comes from the shared vulnerability of trying something unfamiliar together."
+            }
+        ],
+        sections: [
+            {
+                title: "The Neurochemistry of Adventure",
+                content: "When you do something new, your brain releases dopamine and norepinephrine. In a relationship context, these chemicals are the same ones found in the honeymoon phase. You are literally 'tricking' your brain into feeling that early excitement again."
+            },
+            {
+                title: "Scouting the Unknown",
+                content: "Finding 'new' often feels like work. Our AI Concierge scouts (Bar, Club, Movie, Theatre) are designed to handle the research. Your only job is to show up and experience the novelty together."
+            }
+        ]
     }
 ];
