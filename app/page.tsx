@@ -165,34 +165,34 @@ export default function Home() {
         },
         {
           '@type': 'Question',
-          name: 'Is Spin the Jar free for couples?',
+          name: 'Is Spin the Jar free?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! You can create up to 3 active jars (e.g., one for your partner, one for roommates, and one for friends), add unlimited ideas, and sync with everyone for free. We also offer a premium tier for advanced features like the Smart Weekend Planner and Dining Concierge.'
+            text: 'Yes! You can create up to 3 jars, add unlimited ideas, and sync with your group for free. Premium features like AI planning require a subscription.'
           }
         },
         {
           '@type': 'Question',
-          name: 'Can I find restaurants for dinner?',
+          name: 'Does it work for roommates and friend groups?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Absolutely. Our Dining Concierge feature helps you find top-rated restaurants near you, complete with reviews, ratings, and price levels.'
+            text: 'Absolutely. Use Social mode for friends or Task Allocation mode for roommates to distribute chores fairly.'
           }
         },
         {
           '@type': 'Question',
-          name: 'Does it sync between two phones?',
+          name: 'Is my data secure and private?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes. Decision Jar is designed for couples and groups. Once you invite your partner or friends using your unique code, your jars are instantly linked. Any idea added or removed on one phone appears on the others immediately.'
+            text: 'Your jars are private by default. Only people with your unique invite code can join. We use industry-standard encryption to protect your data.'
           }
         },
         {
           '@type': 'Question',
-          name: 'What is Task Allocation mode?',
+          name: 'Can I use it on iPhone and Android?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Allocation mode allows administrators to randomly distribute a set number of tasks to each jar member. Once assigned, these tasks are private to the assigned user until they are completed or marked as done.'
+            text: 'Yes, Decision Jar is a Progressive Web App. You can add it to your home screen on any mobile device for a native-like experience.'
           }
         }
       ]
@@ -575,35 +575,77 @@ export default function Home() {
 
       {/* ... FAQ ... */}
       <section className="py-24 px-6 bg-slate-50/50 dark:bg-slate-950/50 relative z-10">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-            <p className="text-slate-600 dark:text-slate-400">Everything you need to know about your new favorite social app.</p>
-          </div>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className="lg:col-span-1">
+              <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 leading-tight">
+                Common <br />Questions.
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400 mb-8 text-lg">
+                Everything you need to know about the app, the community, and how we handle your decisions.
+              </p>
+              <div className="p-6 bg-primary/10 rounded-2xl border border-primary/20">
+                <h4 className="font-bold text-primary mb-2">Still have questions?</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Our Learning Center has deep-dive guides on social connection and more.</p>
+                <Link href="/learn">
+                  <Button variant="outline" className="w-full bg-white dark:bg-slate-900 border-primary/30 text-primary hover:bg-primary hover:text-white transition-all">
+                    Visit Learning Center
+                  </Button>
+                </Link>
+              </div>
+            </div>
 
-          <div className="glass-card p-6 md:p-8 space-y-2">
-            <FaqItem
-              question="How does the decision maker work?"
-              answer="Simply add your own ideas or use our pre-filled categories. When you're ready, filter by budget, time, or energy level, and 'Spin the Jar' to get a random suggestion that fits your mood perfectly."
-            />
-            <FaqItem
-              question="Is Spin the Jar free?"
-              answer="Yes! You can create up to 3 active jars (e.g., one for your partner, one for roommates, and one for work lunch!), add unlimited ideas, and sync with everyone for free. We also offer a premium tier for advanced features."
-            />
-            <FaqItem
-              question="Can I find restaurants and bars?"
-              answer="Absolutely. Our Concierge features help you find top-rated restaurants and bars near you, complete with reviews, ratings, and price levels."
-            />
-            <FaqItem
-              question="Does it sync between multiple phones?"
-              answer="Yes. Once you invite your partner or friends using your unique code, your jars are instantly linked. Any idea added or removed on one phone appears on everyone's device immediately."
-            />
-          </div>
+            <div className="lg:col-span-2 space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-4">The Basics</h3>
+                <div className="glass-card p-2 md:p-4 space-y-1">
+                  <FaqItem
+                    question="How does the decision maker work?"
+                    answer="Simply add your own ideas or use our pre-filled categories. When you're ready, filter by budget, time, or energy level, and 'Spin the Jar' to get a random suggestion that fits your mood perfectly."
+                  />
+                  <FaqItem
+                    question="Is Spin the Jar free?"
+                    answer="Yes! You can create up to 3 active jars, add unlimited ideas, and sync with your partner or friends for free. We offer a Pro tier for those who want AI tools and advanced conciliere features."
+                  />
+                  <FaqItem
+                    question="Does it work on iPhone and Android?"
+                    answer="Yes! It's a web-based app that works on any browser. For the best experience, open it on your phone and 'Add to Home Screen' to use it like a native app."
+                  />
+                </div>
+              </div>
 
-          <div className="mt-12 text-center">
-            <Link href="/learn" className="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
-              Have more questions? Visit our Learning Center <ArrowRight className="w-4 h-4" />
-            </Link>
+              <div className="space-y-2 pt-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-4">Features & Modes</h3>
+                <div className="glass-card p-2 md:p-4 space-y-1">
+                  <FaqItem
+                    question="What is Task Allocation mode?"
+                    answer="Allocation mode is built for shared responsibilities. You can create a list of tasks (like chores) and the app will randomly distribute them among members evenly."
+                  />
+                  <FaqItem
+                    question="How do Community Jars work?"
+                    answer="Community Jars are public collections you can discover and join. From 'Best Coffee Spots' to 'System Bug Reports', you can find a squad for any interest."
+                  />
+                  <FaqItem
+                    question="Can I save memories?"
+                    answer="Yes! Every time you complete an activity from the jar, you can add photos, ratings, and notes. These are stored in your 'Vault' as a digital scrapbook of your connection."
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-4">Privacy & Security</h3>
+                <div className="glass-card p-2 md:p-4 space-y-1">
+                  <FaqItem
+                    question="Is my data private?"
+                    answer="By default, all personal and social jars are 100% private. Only those with your unique invite code can see your ideas. We do not sell your data or use your private collections for training AI."
+                  />
+                  <FaqItem
+                    question="Can I delete my account?"
+                    answer="Yes. You have full control over your data. You can delete your jars or your entire account at any time from the settings menu."
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
