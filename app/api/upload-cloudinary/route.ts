@@ -16,11 +16,17 @@ export async function POST(request: Request) {
         // Dynamically import cloudinary
         const { v2: cloudinary } = await import('cloudinary');
 
+        // Sanitize environment variables (remove surrounding quotes if present)
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.replace(/^['"]|['"]$/g, '');
+        const apiKey = process.env.CLOUDINARY_API_KEY?.replace(/^['"]|['"]$/g, '');
+        const apiSecret = process.env.CLOUDINARY_API_SECRET?.replace(/^['"]|['"]$/g, '');
+
         // Configure Cloudinary
         cloudinary.config({
-            cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-            api_key: process.env.CLOUDINARY_API_KEY,
-            api_secret: process.env.CLOUDINARY_API_SECRET,
+            cloud_name: cloudName,
+            api_key: apiKey,
+            api_secret: apiSecret,
+            secure: true
         });
 
         let file: File | null = null;
