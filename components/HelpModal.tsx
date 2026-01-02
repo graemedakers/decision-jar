@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
