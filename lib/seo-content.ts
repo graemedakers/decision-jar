@@ -382,12 +382,20 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
         ],
         sections: [
             {
-                title: "The Compartmentalized Mind",
-                content: "Our brains struggle when we mix contexts. Trying to pick a movie while looking at a list of household chores kills the mood. By creating distinct Jars, you create distinct mental spaces for each area of your life."
+                title: "The Problem: Context Contamination",
+                content: "The biggest enemy of romance is logistics. The biggest enemy of productivity is distraction. When you keep all your 'To-Dos,' 'Date Ideas,' and 'Movies to Watch' in a single list, you create 'Context Contamination.' You open the app to find a fun date night, but you see 'Fix the Sink' staring back at you. Instantly, the mood is gone."
             },
             {
-                title: "A Jar for Every Role",
-                content: "You wear many hats: Partner, Friend, Parent, Employee. Creates jars that reflect these roles. A 'Solo Jar' ensures you prioritize your own well-being, whilst a 'Family Jar' turns weekend planning into a collaborative game."
+                title: "Solution: The 4 Essential Jars",
+                content: "To regain balance, we recommend creating four distinct Jars, each with a specific emotional purpose:\n\n1. **The Romantic Jar (Couples)**: This is sacred ground. It only contains fun, connecting activities. No chores, no 'taxes,' no obligations. When you open this jar, you know you are choosing joy.\n\n2. **The Admin Jar (Household)**: This is for the business of life. Use 'Allocation Mode' here to fairly distribute chores like 'Clean the Kitchen' or 'Pay Bills.' It keeps the necessary work visible but contained.\n\n3. **The Solo Jar (Self)**: Often neglected, this jar is for YOU. Fill it with books you want to read, hobbies you want to practice, or self-care rituals. It's a reminder that you are an individual outside of your relationships.\n\n4. **The Social Jar (Community)**: For your wider circle. Use this for 'Board Game Nights,' 'Bar Crawls,' or 'Group Hikes.' Share the invite link with your friends so they can add ideas too."
+            },
+            {
+                title: "Advanced Strategy: The Sunday Workflow",
+                content: "High-performing couples often use a 'Sunday Ritual.' They sit down for 15 minutes, spin the **Admin Jar** to assign chores for the week (getting the boring stuff out of the way), and then spin the **Romantic Jar** to lock in a date night. This separates the 'Business Partner' relationship from the 'Romantic Partner' relationship."
+            },
+            {
+                title: "The Golden Rule of Separation",
+                content: "Never put a 'Have To' item in a 'Want To' jar. The moment a chore sneaks into your Fun Jar, your brain will start to associate that jar with work, and you will stop using it. Keep the boundaries clean, and the excitement will last."
             }
         ]
     }
