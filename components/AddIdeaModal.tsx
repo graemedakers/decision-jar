@@ -214,7 +214,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                             <X className="w-6 h-6" />
                         </button>
 
-                        <div className="px-6 pt-6 pb-4 flex flex-col gap-2">
+                        <div className="px-4 md:px-6 pt-6 pb-4 flex flex-col gap-2">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                                 {viewMode === 'PREVIEW' && (itinerary || cateringPlan) ? (itinerary ? "Itinerary Preview" : "Catering Plan") :
                                     (initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea")}
@@ -260,7 +260,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                             )}
                         </div>
 
-                        <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-6 pb-24 md:pb-8 custom-scrollbar">
+                        <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-24 md:pb-8 custom-scrollbar">
                             {(itinerary || cateringPlan) && viewMode === 'PREVIEW' ? (
                                 <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl"> {/* Wrap for capture */}
                                     {itinerary ? (
@@ -472,19 +472,19 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
                                     <div className="space-y-4">
                                         <div className="p-4 bg-slate-100 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/10 space-y-4">
-                                            <div className="flex items-center justify-between group cursor-pointer"
+                                            <div className="flex items-start justify-between group cursor-pointer"
                                                 onClick={() => setFormData({ ...formData, requiresTravel: !formData.requiresTravel })}
                                             >
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${formData.requiresTravel ? 'bg-blue-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all ${formData.requiresTravel ? 'bg-blue-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
                                                         <Car className="w-5 h-5" />
                                                     </div>
-                                                    <div>
-                                                        <p className="font-bold text-slate-900 dark:text-white">Requires Traveling?</p>
+                                                    <div className="min-w-0">
+                                                        <p className="font-bold text-slate-900 dark:text-white truncate">Requires Traveling?</p>
                                                         <p className="text-xs text-slate-500 dark:text-slate-400">e.g. driving/trip (This is an "Outing")</p>
                                                     </div>
                                                 </div>
-                                                <div className={`w-12 h-6 rounded-full relative transition-colors ${formData.requiresTravel ? 'bg-blue-500' : 'bg-slate-300 dark:bg-white/10'}`}>
+                                                <div className={`w-12 h-6 shrink-0 ml-3 rounded-full relative transition-colors ${formData.requiresTravel ? 'bg-blue-500' : 'bg-slate-300 dark:bg-white/10'}`}>
                                                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.requiresTravel ? 'left-7' : 'left-1'}`} />
                                                 </div>
                                             </div>
@@ -513,19 +513,19 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/10 group cursor-pointer transition-all hover:bg-slate-200 dark:hover:bg-black/30"
+                                        <div className="flex items-start justify-between p-4 bg-slate-100 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/10 group cursor-pointer transition-all hover:bg-slate-200 dark:hover:bg-black/30"
                                             onClick={() => setFormData({ ...formData, isPrivate: !formData.isPrivate })}
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${formData.isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all ${formData.isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
                                                     <Lock className="w-5 h-5" />
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-900 dark:text-white">Keep it a secret?</p>
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-slate-900 dark:text-white truncate">Keep it a secret?</p>
                                                     <p className="text-xs text-slate-500 dark:text-slate-400">Other users won't see this until it's selected.</p>
                                                 </div>
                                             </div>
-                                            <div className={`w-12 h-6 rounded-full relative transition-colors ${formData.isPrivate ? 'bg-amber-500' : 'bg-slate-300 dark:bg-white/10'}`}>
+                                            <div className={`w-12 h-6 shrink-0 ml-3 rounded-full relative transition-colors ${formData.isPrivate ? 'bg-amber-500' : 'bg-slate-300 dark:bg-white/10'}`}>
                                                 <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.isPrivate ? 'left-7' : 'left-1'}`} />
                                             </div>
                                         </div>
