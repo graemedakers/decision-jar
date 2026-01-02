@@ -1,4 +1,4 @@
-import { LucideIcon, Users, Brain, Sparkles, Zap, MessageSquare, Compass, Heart, GraduationCap, ChefHat, Utensils } from "lucide-react";
+import { LucideIcon, Users, Brain, Sparkles, Zap, MessageSquare, Compass, Heart, GraduationCap, ChefHat, Utensils, Layers } from "lucide-react";
 
 export interface ResourceGuide {
     slug: string;
@@ -354,6 +354,40 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             {
                 title: "Theme-Based Learning",
                 content: "Instead of just 'Chicken for dinner,' try a 'Mediterranean Sunset' theme. AI allows you to explore techniques and ingredient pairings that professional caterers use. It turns your kitchen into a classroom where every meal is an opportunity to learn a new culinary tradition."
+            }
+        ]
+    },
+    {
+        slug: "organizing-your-life-with-jars",
+        category: "Lifestyle",
+        title: "Organizing Your Life with Jars: A Blueprint for Balance",
+        description: "How to use different jar types—Romantic, Social, Solo, Family, and Work—to manage every aspect of your life.",
+        icon: Layers,
+        readTime: "7 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "How to organize your life with decision jars",
+            "description": "A comprehensive guide on creating and managing multiple jars for romance, friends, self-care, family, and work."
+        },
+        faqs: [
+            {
+                question: "Can I use one jar for everything?",
+                answer: "You can, but separating them allows for context switching. You don't want a 'Discuss Budget' task popping up on your Date Night."
+            },
+            {
+                question: "How many jars should I have?",
+                answer: "We recommend starting with 2-3: one for romance/social, one for solo self-care, and one for chores/admin."
+            }
+        ],
+        sections: [
+            {
+                title: "The Compartmentalized Mind",
+                content: "Our brains struggle when we mix contexts. Trying to pick a movie while looking at a list of household chores kills the mood. By creating distinct Jars, you create distinct mental spaces for each area of your life."
+            },
+            {
+                title: "A Jar for Every Role",
+                content: "You wear many hats: Partner, Friend, Parent, Employee. Creates jars that reflect these roles. A 'Solo Jar' ensures you prioritize your own well-being, whilst a 'Family Jar' turns weekend planning into a collaborative game."
             }
         ]
     }
