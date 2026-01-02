@@ -554,12 +554,12 @@ export default function Home() {
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {[
+                  "Full Premium Suite Access",
                   "Unlimited Jars & Members",
-                  "Unlimited Ideas",
-                  "Smart Weekend Planner (AI)",
-                  "Dining Concierge & Bar Scout",
+                  "All AI Planners & Concierges",
                   "Custom Itinerary Builder",
-                  "Support Future Development"
+                  "Cloud Memory Storage",
+                  "Excl. Community Jar Hosting"
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
                     <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
@@ -628,7 +628,7 @@ export default function Home() {
                   />
                   <FaqItem
                     question="How do Community Jars work?"
-                    answer="Community Jars are public collections you can discover and join. From 'Best Coffee Spots' to 'System Bug Reports', you can find a squad for any interest."
+                    answer="Community Jars are public collections you can discover and join. While anyone can join for free, creating and hosting a public Community Jar requires a separate annual hosting fee for the organizer."
                   />
                   <FaqItem
                     question="Can I save memories?"
