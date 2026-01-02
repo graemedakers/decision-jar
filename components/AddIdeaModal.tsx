@@ -475,13 +475,13 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                             <div className="flex items-start justify-between group cursor-pointer"
                                                 onClick={() => setFormData({ ...formData, requiresTravel: !formData.requiresTravel })}
                                             >
-                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className="flex items-start gap-3 flex-1 min-w-0">
                                                     <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all ${formData.requiresTravel ? 'bg-blue-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
                                                         <Car className="w-5 h-5" />
                                                     </div>
-                                                    <div className="min-w-0">
-                                                        <p className="font-bold text-slate-900 dark:text-white truncate">Requires Traveling?</p>
-                                                        <p className="text-xs text-slate-500 dark:text-slate-400">e.g. driving/trip (This is an "Outing")</p>
+                                                    <div className="min-w-0 pt-0.5">
+                                                        <p className="font-bold text-slate-900 dark:text-white leading-tight">Requires Traveling?</p>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">e.g. driving/trip (This is an "Outing")</p>
                                                     </div>
                                                 </div>
                                                 <div className={`w-12 h-6 shrink-0 ml-3 rounded-full relative transition-colors ${formData.requiresTravel ? 'bg-blue-500' : 'bg-slate-300 dark:bg-white/10'}`}>
@@ -516,13 +516,13 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         <div className="flex items-start justify-between p-4 bg-slate-100 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/10 group cursor-pointer transition-all hover:bg-slate-200 dark:hover:bg-black/30"
                                             onClick={() => setFormData({ ...formData, isPrivate: !formData.isPrivate })}
                                         >
-                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <div className="flex items-start gap-3 flex-1 min-w-0">
                                                 <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all ${formData.isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
                                                     <Lock className="w-5 h-5" />
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <p className="font-bold text-slate-900 dark:text-white truncate">Keep it a secret?</p>
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400">Other users won't see this until it's selected.</p>
+                                                <div className="min-w-0 pt-0.5">
+                                                    <p className="font-bold text-slate-900 dark:text-white leading-tight">Keep it a secret?</p>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Other users won't see this until it's selected.</p>
                                                 </div>
                                             </div>
                                             <div className={`w-12 h-6 shrink-0 ml-3 rounded-full relative transition-colors ${formData.isPrivate ? 'bg-amber-500' : 'bg-slate-300 dark:bg-white/10'}`}>
