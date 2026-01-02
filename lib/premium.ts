@@ -61,10 +61,10 @@ export function isCouplePremium(jar: Jar | null | undefined): boolean {
 export function getLimits(user: User | null | undefined) {
     const isPro = isUserPro(user);
     return {
-        maxJars: isPro ? 50 : 1,
+        maxJars: isPro ? 50 : 3, // Increased from 1 to 3 to match marketing examples
         maxMembersPerJar: isPro ? 50 : 4,
         aiPlanning: isPro,
-        unlimitedIdeas: isPro,
+        unlimitedIdeas: true, // Ideas are now unlimited for everyone
         googlePhotos: isPro,
     };
 }

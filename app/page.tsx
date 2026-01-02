@@ -168,7 +168,7 @@ export default function Home() {
           name: 'Is Spin the Jar free for couples?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! You can create a jar, add unlimited ideas, and sync with your partner or group for free. We also offer a premium tier for advanced features like the Smart Weekend Planner and Dining Concierge.'
+            text: 'Yes! You can create up to 3 active jars (e.g., one for your partner, one for roommates, and one for friends), add unlimited ideas, and sync with everyone for free. We also offer a premium tier for advanced features like the Smart Weekend Planner and Dining Concierge.'
           }
         },
         {
@@ -506,9 +506,9 @@ export default function Home() {
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {[
-                  "1 Active Jar Included",
+                  "3 Active Jars Included",
                   "Up to 4 Members/Jar",
-                  "25 Idea Capacity",
+                  "Unlimited Idea Capacity",
                   "Basic 'Spin' Feature",
                   "Standard Categories"
                 ].map((feature, i) => (
@@ -588,7 +588,7 @@ export default function Home() {
             />
             <FaqItem
               question="Is Spin the Jar free?"
-              answer="Yes! You can create unlimited jars (e.g., one for your partner, one for roommates, one for work lunch!), add unlimited ideas, and sync with everyone for free. We also offer a premium tier for advanced features."
+              answer="Yes! You can create up to 3 active jars (e.g., one for your partner, one for roommates, and one for work lunch!), add unlimited ideas, and sync with everyone for free. We also offer a premium tier for advanced features."
             />
             <FaqItem
               question="Can I find restaurants and bars?"

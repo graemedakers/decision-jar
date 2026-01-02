@@ -47,14 +47,7 @@ export async function POST(request: Request) {
     const { getLimits } = await import('@/lib/premium');
     const limits = getLimits(user);
 
-    if (!limits.unlimitedIdeas) {
-        const count = await prisma.idea.count({ where: { jarId: currentJarId } });
-        if (count >= 25) {
-            return NextResponse.json({
-                error: "Limit reached: Free jars are limited to 25 ideas. Upgrade to Pro for unlimited ideas!"
-            }, { status: 403 });
-        }
-    }
+
 
     try {
         const body = await request.json();

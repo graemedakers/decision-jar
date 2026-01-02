@@ -36,7 +36,7 @@ Decision Jar allows you to create shared collections of activity ideas with your
     - Select a **Type** (Romantic, Community, or Social).
     - Select a **Selection Mode** (Random spin, Voting Session, or Task Allocation).
 
-**Note:** You can create and join multiple jars! Switch between them easily using the header menu.
+**Note:** You can create and join up to 3 jars for free! Switch between them easily using the header menu. Pro users can manage up to 50 jars.
 
 ---
 
