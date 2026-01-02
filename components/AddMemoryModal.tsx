@@ -75,6 +75,11 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
             return;
         }
 
+        if (file.size > 4.5 * 1024 * 1024) {
+            alert("File is too large. Please choose an image under 4.5MB.");
+            return;
+        }
+
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', file);
@@ -289,6 +294,10 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                                                         onChange={(e) => {
                                                             const file = e.target.files?.[0];
                                                             if (file) {
+                                                                if (file.size > 4.5 * 1024 * 1024) {
+                                                                    alert("File is too large. Please choose an image under 4.5MB.");
+                                                                    return;
+                                                                }
                                                                 setIsUploading(true);
                                                                 const formData = new FormData();
                                                                 formData.append('file', file);
