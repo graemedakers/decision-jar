@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Users, Gamepad2 } from "lucide-react";
+import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Users, Gamepad2, Footprints } from "lucide-react";
 import { PremiumModal } from "@/components/PremiumModal";
 import { useRouter } from "next/navigation";
 import { WeekendPlannerModal } from "@/components/WeekendPlannerModal";
 import { DiningConciergeModal } from "@/components/DiningConciergeModal";
 import { BarConciergeModal } from "@/components/BarConciergeModal";
+import { BarCrawlPlannerModal } from "@/components/BarCrawlPlannerModal";
 import { DateNightPlannerModal } from "@/components/DateNightPlannerModal";
 import { NightClubConciergeModal } from "@/components/NightClubConciergeModal";
 import { MovieConciergeModal } from "@/components/MovieConciergeModal";
@@ -29,6 +30,7 @@ export default function ExplorePage() {
     const [isDiningModalOpen, setIsDiningModalOpen] = useState(false);
     const router = useRouter();
     const [isBarModalOpen, setIsBarModalOpen] = useState(false);
+    const [isBarCrawlOpen, setIsBarCrawlOpen] = useState(false);
     const [isDateNightOpen, setIsDateNightOpen] = useState(false);
     const [isNightClubModalOpen, setIsNightClubModalOpen] = useState(false);
     const [isHotelModalOpen, setIsHotelModalOpen] = useState(false);
@@ -111,6 +113,13 @@ export default function ExplorePage() {
             icon: Wine,
             action: () => isPremium ? setIsBarModalOpen(true) : setIsPremiumModalOpen(true),
             color: "pink"
+        },
+        {
+            title: "Bar Crawl Planner",
+            desc: "Design a walking route of top-rated bars.",
+            icon: Footprints,
+            action: () => isPremium ? setIsBarCrawlOpen(true) : setIsPremiumModalOpen(true),
+            color: "orange"
         },
         {
             title: "Night Out Planner",
@@ -226,6 +235,11 @@ export default function ExplorePage() {
             <BarConciergeModal
                 isOpen={isBarModalOpen}
                 onClose={() => setIsBarModalOpen(false)}
+                userLocation={userLocation || undefined}
+            />
+            <BarCrawlPlannerModal
+                isOpen={isBarCrawlOpen}
+                onClose={() => setIsBarCrawlOpen(false)}
                 userLocation={userLocation || undefined}
             />
             <DateNightPlannerModal
