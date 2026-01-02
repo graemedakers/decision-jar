@@ -500,16 +500,21 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Free Starter</h3>
                 <p className="text-slate-600 dark:text-slate-400">Perfect for couples, roommates, or small groups</p>
               </div>
-              <div className="mb-8">
-                <span className="text-4xl font-bold text-slate-800 dark:text-white">Free</span>
-                <span className="text-slate-500 dark:text-slate-400">/forever</span>
+              <div className="mb-8 space-y-2">
+                <div>
+                  <span className="text-4xl font-bold text-slate-800 dark:text-white">Free</span>
+                  <span className="text-slate-500 dark:text-slate-400">/forever</span>
+                </div>
+                <div className="text-xs text-primary font-medium px-2 py-1 bg-primary/10 rounded-full inline-block mt-2">
+                  🎁 Auto-starts with 14 days of Pro
+                </div>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {[
                   "3 Active Jars Included",
                   "Up to 4 Members/Jar",
                   "Unlimited Idea Capacity",
-                  "Basic 'Spin' Feature",
+                  "Automatic 14-Day Pro Trial",
                   "Standard Categories"
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
