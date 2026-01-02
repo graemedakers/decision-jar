@@ -59,6 +59,11 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
             return;
         }
 
+        if (file.size > 4 * 1024 * 1024) {
+            alert("File is too large. Please choose an image under 4MB.");
+            return;
+        }
+
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', file);
@@ -69,15 +74,25 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                 method: 'POST',
                 body: formData
             });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText || `Upload failed with status ${res.status}`);
+            }
+
             const data = await res.json();
             if (data.success) {
                 setPhotoUrls(prev => [...prev, data.url]);
             } else {
-                alert("Upload failed");
+                throw new Error(data.error || "Upload failed");
             }
         } catch (error) {
             console.error('Upload failed', error);
-            alert("Failed to upload photo");
+            let errorMessage = "Failed to upload photo";
+            if (error instanceof Error) {
+                errorMessage += `: ${error.message}`;
+            }
+            alert(errorMessage);
         } finally {
             setIsUploading(false);
             e.target.value = "";
@@ -195,12 +210,22 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                                                         onChange={(e) => {
                                                             const file = e.target.files?.[0];
                                                             if (file) {
+                                                                if (file.size > 4 * 1024 * 1024) {
+                                                                    alert("File is too large. Please choose an image under 4MB.");
+                                                                    return;
+                                                                }
                                                                 // Handle replace logic inline or separate function
                                                                 setIsUploading(true);
                                                                 const formData = new FormData();
                                                                 formData.append('file', file);
                                                                 fetch('/api/upload-cloudinary', { method: 'POST', body: formData })
-                                                                    .then(res => res.json())
+                                                                    .then(async res => {
+                                                                        if (!res.ok) {
+                                                                            const errorText = await res.text();
+                                                                            throw new Error(errorText || `Upload failed with status ${res.status}`);
+                                                                        }
+                                                                        return res.json();
+                                                                    })
                                                                     .then(data => {
                                                                         if (data.success) {
                                                                             setPhotoUrls(prev => {
@@ -208,10 +233,20 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                                                                                 newUrls[index] = data.url;
                                                                                 return newUrls;
                                                                             });
+                                                                        } else {
+                                                                            throw new Error(data.error || "Upload failed");
                                                                         }
                                                                         setIsUploading(false);
                                                                     })
-                                                                    .catch(() => setIsUploading(false));
+                                                                    .catch((error) => {
+                                                                        console.error('Upload failed', error);
+                                                                        let errorMessage = "Failed to upload photo";
+                                                                        if (error instanceof Error) {
+                                                                            errorMessage += `: ${error.message}`;
+                                                                        }
+                                                                        alert(errorMessage);
+                                                                        setIsUploading(false);
+                                                                    });
                                                             }
                                                         }}
                                                     />
