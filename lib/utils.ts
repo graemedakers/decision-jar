@@ -5,30 +5,58 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+function safeParseJSON(input: string | any) {
+    if (typeof input !== 'string') return input;
+
+    // 1. Try direct parse
+    try {
+        return JSON.parse(input);
+    } catch (e) { }
+
+    // 2. Try parsing string as JSON (double stringified)
+    try {
+        const parsed = JSON.parse(input);
+        if (typeof parsed === 'object' && parsed !== null) return parsed;
+        if (typeof parsed === 'string') {
+            try { return JSON.parse(parsed); } catch (e) { }
+        }
+    } catch (e) { }
+
+    // 3. Try stripping Markdown code blocks
+    const markdownMatch = input.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (markdownMatch) {
+        try { return JSON.parse(markdownMatch[1]); } catch (e) { }
+    }
+
+    // 4. Try extracting simple object
+    const firstOpen = input.indexOf('{');
+    const lastClose = input.lastIndexOf('}');
+    if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+        try {
+            return JSON.parse(input.substring(firstOpen, lastClose + 1));
+        } catch (e) { }
+    }
+
+    return null;
+}
+
 export function getItinerary(details?: string | null) {
     if (!details) return null;
-    try {
-        let data = JSON.parse(details);
-        // Handle potential double-stringification
-        if (typeof data === 'string') {
-            try { data = JSON.parse(data); } catch (e) { }
-        }
-        // Check for schedule array
-        if (data && typeof data === 'object' && Array.isArray(data.schedule)) return data;
-    } catch (e) { return null; }
+    const data = safeParseJSON(details);
+
+    if (data && typeof data === 'object' && Array.isArray(data.schedule)) {
+        return data;
+    }
     return null;
 }
 
 export function getCateringPlan(details?: string | null) {
     if (!details) return null;
-    try {
-        let data = JSON.parse(details);
-        if (typeof data === 'string') {
-            try { data = JSON.parse(data); } catch (e) { }
-        }
-        // Check for options or courses
-        if (data && typeof data === 'object' && (Array.isArray((data as any).courses) || Array.isArray((data as any).options))) return data;
-    } catch (e) { return null; }
+    const data = safeParseJSON(details);
+
+    if (data && typeof data === 'object' && (Array.isArray((data as any).courses) || Array.isArray((data as any).options))) {
+        return data;
+    }
     return null;
 }
 

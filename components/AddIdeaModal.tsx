@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, Utensils, Calendar, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getRandomIdeaForTopic } from "@/lib/sample-ideas";
 import { COST_LEVELS, ACTIVITY_LEVELS, TIME_OF_DAY, WEATHER_TYPES } from "@/lib/constants";
+import { exportToPdf } from "@/lib/pdf-export";
 
 const DEFAULT_FORM_DATA = {
     description: "",
@@ -45,6 +46,21 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
 
     const [isMagicLoading, setIsMagicLoading] = useState(false);
+
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    const handleExportPdf = async () => {
+        if (!contentRef.current) return;
+        setIsLoading(true);
+        try {
+            await exportToPdf(contentRef.current, formData.description || 'plan');
+        } catch (error) {
+            console.error("PDF Export failed", error);
+            alert("Failed to export PDF");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleRandomize = async () => {
         setIsMagicLoading(true);
@@ -123,7 +139,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
     useEffect(() => {
         if (isOpen) setViewMode('PREVIEW');
-    }, [isOpen]);
+    }, [isOpen, initialData?.id]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -216,30 +232,43 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                             </h2>
 
                             {(itinerary || cateringPlan) && (
-                                <div className="flex bg-slate-200 dark:bg-black/40 p-1 rounded-lg w-fit">
-                                    <button
-                                        onClick={() => setViewMode('PREVIEW')}
-                                        className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${viewMode === 'PREVIEW' ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
-                                    >
-                                        Formatted View
-                                    </button>
-                                    <button
-                                        onClick={() => setViewMode('EDIT')}
-                                        className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${viewMode === 'EDIT' ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
-                                    >
-                                        Edit Details
-                                    </button>
+                                <div className="flex justify-between items-center w-full">
+                                    <div className="flex bg-slate-100 dark:bg-black/40 p-1 rounded-lg w-fit">
+                                        <button
+                                            onClick={() => setViewMode('PREVIEW')}
+                                            className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${viewMode === 'PREVIEW' ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            Formatted View
+                                        </button>
+                                        <button
+                                            onClick={() => setViewMode('EDIT')}
+                                            className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${viewMode === 'EDIT' ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            Edit Details
+                                        </button>
+                                    </div>
+
+                                    {cateringPlan && viewMode === 'PREVIEW' && (
+                                        <button
+                                            onClick={handleExportPdf}
+                                            className="text-xs font-bold text-slate-500 hover:text-orange-600 flex items-center gap-1 transition-colors"
+                                        >
+                                            <ExternalLink className="w-3 h-3" /> Export PDF
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>
 
                         <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-6 pb-24 md:pb-8 custom-scrollbar">
                             {(itinerary || cateringPlan) && viewMode === 'PREVIEW' ? (
-                                itinerary ? (
-                                    <ItineraryPreview itinerary={itinerary} />
-                                ) : (
-                                    <CateringPreview plan={cateringPlan} />
-                                )
+                                <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl"> {/* Wrap for capture */}
+                                    {itinerary ? (
+                                        <ItineraryPreview itinerary={itinerary} />
+                                    ) : (
+                                        <CateringPreview plan={cateringPlan} />
+                                    )}
+                                </div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <fieldset disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">

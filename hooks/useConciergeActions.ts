@@ -24,7 +24,7 @@ export function useConciergeActions({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     description: rec.name,
-                    details: `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
+                    details: rec.details || `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
                     indoor: true,
                     duration: "2.0",
                     activityLevel: "LOW",

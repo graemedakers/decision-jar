@@ -46,7 +46,7 @@ export function ItineraryPreview({ itinerary }: ItineraryPreviewProps) {
                             <div className="absolute -left-[41px] top-0 w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-pink-500 flex items-center justify-center z-10">
                                 <div className="w-2 h-2 rounded-full bg-pink-500" />
                             </div>
-                            <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-4 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                            <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-4 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors pdf-item">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
                                         <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-300 mb-1 border border-pink-200 dark:border-pink-500/20">

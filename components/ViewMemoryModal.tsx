@@ -1,6 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
-import { Calendar, MapPin, DollarSign, Clock, Activity, Star, Quote, X, Utensils, Ticket, Moon } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Clock, Activity, Star, Quote, X, Utensils, Ticket, Moon, Popcorn, ExternalLink, Loader2, Download } from "lucide-react";
+import { getItinerary, getCateringPlan } from "@/lib/utils";
+import { ItineraryPreview } from "./ItineraryPreview";
+import { CateringPreview } from "./CateringPreview";
+import { exportToPdf } from "@/lib/pdf-export";
+import { Button } from "./ui/Button";
 
 interface ViewMemoryModalProps {
     isOpen: boolean;
@@ -10,6 +15,23 @@ interface ViewMemoryModalProps {
 
 export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps) {
     const [ratings, setRatings] = useState<any[]>([]);
+
+    // PDF Export
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [isExporting, setIsExporting] = useState(false);
+
+    const handleExportPdf = async () => {
+        if (!contentRef.current || !idea) return;
+        setIsExporting(true);
+        try {
+            await exportToPdf(contentRef.current, idea.description || 'plan');
+        } catch (error) {
+            console.error("PDF Export failed", error);
+            alert("Failed to export PDF");
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     useEffect(() => {
         if (idea && isOpen) {
@@ -27,6 +49,9 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
     const formattedDate = idea.selectedAt
         ? new Date(idea.selectedAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
         : "Unknown Date";
+
+    const itinerary = getItinerary(idea.details);
+    const cateringPlan = getCateringPlan(idea.details);
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -83,6 +108,86 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
                 ) : null}
 
                 <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto w-full">
+                    {/* Dining Details Section - Consistent with DateReveal */}
+                    {(idea.website || idea.address || idea.openingHours) && (
+                        <div className="bg-slate-100 dark:bg-white/5 rounded-xl p-4 space-y-3 text-left">
+                            {idea.address && (
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-white dark:bg-white/10 rounded-full shrink-0 shadow-sm dark:shadow-none">
+                                        {idea.address === 'Streaming'
+                                            ? <Popcorn className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                                            : <MapPin className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                                        }
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">
+                                            {idea.address === 'Streaming' || idea.address === 'Cinema' ? 'Watch On' : 'Address'}
+                                        </p>
+                                        <p className="text-sm text-slate-800 dark:text-white">{idea.address}</p>
+                                        {idea.address !== 'Streaming' && (
+                                            <a
+                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(idea.description + " " + idea.address)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-secondary hover:underline mt-1 inline-block"
+                                            >
+                                                View on Google Maps
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {idea.openingHours && (
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-white dark:bg-white/10 rounded-full shrink-0 shadow-sm dark:shadow-none">
+                                        <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">
+                                            {idea.address === 'Streaming' || idea.address === 'Cinema' ? 'Runtime' : 'Opening Hours'}
+                                        </p>
+                                        <p className="text-sm text-slate-800 dark:text-white">{idea.openingHours}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {idea.googleRating && (
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-white dark:bg-white/10 rounded-full shrink-0 shadow-sm dark:shadow-none">
+                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">Google Rating</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-sm text-slate-800 dark:text-white font-bold">{idea.googleRating} / 5</p>
+                                            <a
+                                                href={`https://www.google.com/search?q=${encodeURIComponent(idea.description + " " + (idea.address || "") + " reviews")}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-blue-400 hover:underline"
+                                            >
+                                                Read Reviews
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {idea.website && (
+                                <Button
+                                    onClick={() => window.open(idea.website, '_blank')}
+                                    className="w-full mt-2 bg-white text-slate-900 hover:bg-slate-100 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white border border-slate-200 dark:border-transparent shadow-sm dark:shadow-none"
+                                >
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    {idea.address === 'Streaming' ? `Watch on ${idea.cost !== '$' && idea.cost !== 'Free' ? 'Streaming' : 'Service'}` :
+                                        idea.address === 'Cinema' ? 'Get Tickets' : 'Make Reservation / Visit Website'}
+                                </Button>
+                            )}
+                        </div>
+                    )}
+
+
                     {/* Ratings Section */}
                     {ratings.length > 0 ? (
                         <div className="space-y-3">
@@ -163,9 +268,47 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
                             {idea.details && (
                                 <div>
                                     <h4 className="text-sm text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider mb-2">Itinerary / Details</h4>
-                                    <p className="text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700 leading-relaxed whitespace-pre-wrap shadow-sm dark:shadow-none">
-                                        {idea.details}
-                                    </p>
+                                    {itinerary ? (
+                                        <div className="space-y-2">
+                                            <div className="flex justify-end">
+                                                <Button
+                                                    onClick={handleExportPdf}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-xs text-slate-500 hover:text-pink-600 h-8"
+                                                    disabled={isExporting}
+                                                >
+                                                    {isExporting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Download className="w-3 h-3 mr-1" />}
+                                                    Export Itinerary PDF
+                                                </Button>
+                                            </div>
+                                            <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+                                                <ItineraryPreview itinerary={itinerary} />
+                                            </div>
+                                        </div>
+                                    ) : cateringPlan ? (
+                                        <div className="space-y-2">
+                                            <div className="flex justify-end">
+                                                <Button
+                                                    onClick={handleExportPdf}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-xs text-slate-500 hover:text-orange-600 h-8"
+                                                    disabled={isExporting}
+                                                >
+                                                    {isExporting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Download className="w-3 h-3 mr-1" />}
+                                                    Export Menu PDF
+                                                </Button>
+                                            </div>
+                                            <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+                                                <CateringPreview plan={cateringPlan} />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700 leading-relaxed whitespace-pre-wrap shadow-sm dark:shadow-none">
+                                            {idea.details}
+                                        </p>
+                                    )}
                                 </div>
                             )}
                         </div>

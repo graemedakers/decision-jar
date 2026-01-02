@@ -2,10 +2,11 @@ import { getItinerary, getCateringPlan, getApiUrl } from "@/lib/utils";
 import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Clock, Sparkles, Loader2, MapPin, ExternalLink, Star, Utensils, Check, Popcorn } from "lucide-react"; // Removed DollarSign, Activity
+import { X, Calendar, Clock, Sparkles, Loader2, MapPin, ExternalLink, Star, Utensils, Check, Popcorn, Download } from "lucide-react";
 import { Button } from "./ui/Button";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Confetti } from "./Confetti";
+import { exportToPdf } from "@/lib/pdf-export";
 
 interface Idea {
     id: string;
@@ -41,6 +42,23 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
     const [showAI, setShowAI] = useState(false);
+
+    // PDF Export State
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [isExporting, setIsExporting] = useState(false);
+
+    const handleExportPdf = async () => {
+        if (!contentRef.current || !idea) return;
+        setIsExporting(true);
+        try {
+            await exportToPdf(contentRef.current, idea.description || 'plan');
+        } catch (error) {
+            console.error("PDF Export failed", error);
+            alert("Failed to export PDF");
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     const handleGetAI = async () => {
         if (!idea) return;
@@ -199,7 +217,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                             </div>
                                             <div>
                                                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">
-                                                    {idea.address === 'Streaming' || idea.address === 'Cinema' ? 'Runtime' : 'Opening Hours'}
+                                                    {idea.address === 'Streaming' || idea.address?.toLowerCase().includes('cinema') ? 'Runtime' : 'Opening Hours'}
                                                 </p>
                                                 <p className="text-sm text-slate-800 dark:text-white">{idea.openingHours}</p>
                                             </div>
@@ -245,9 +263,41 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                             {!(idea.website || idea.address || idea.openingHours) && (
                                 <>
                                     {itinerary ? (
-                                        <ItineraryPreview itinerary={itinerary} />
+                                        <div className="space-y-2">
+                                            <div className="flex justify-end">
+                                                <Button
+                                                    onClick={handleExportPdf}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-xs text-slate-500 hover:text-pink-600 h-8"
+                                                    disabled={isExporting}
+                                                >
+                                                    {isExporting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Download className="w-3 h-3 mr-1" />}
+                                                    Export Itinerary PDF
+                                                </Button>
+                                            </div>
+                                            <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl">
+                                                <ItineraryPreview itinerary={itinerary} />
+                                            </div>
+                                        </div>
                                     ) : cateringPlan ? (
-                                        <CateringPreview plan={cateringPlan} />
+                                        <div className="space-y-2">
+                                            <div className="flex justify-end">
+                                                <Button
+                                                    onClick={handleExportPdf}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-xs text-slate-500 hover:text-orange-600 h-8"
+                                                    disabled={isExporting}
+                                                >
+                                                    {isExporting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Download className="w-3 h-3 mr-1" />}
+                                                    Export Menu PDF
+                                                </Button>
+                                            </div>
+                                            <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl">
+                                                <CateringPreview plan={cateringPlan} />
+                                            </div>
+                                        </div>
                                     ) : (
                                         <>
                                             {/* Idea Details */}

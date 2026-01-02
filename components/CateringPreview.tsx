@@ -21,7 +21,7 @@ export function CateringPreview({ plan }: CateringPreviewProps) {
                     <ChefHat className="w-3 h-3" /> The Menu
                 </h5>
                 {courses.map((course: any, cIdx: number) => (
-                    <div key={cIdx} className="bg-white dark:bg-white/5 p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm">
+                    <div key={cIdx} className="bg-white dark:bg-white/5 p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm pdf-item">
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-[10px] font-black uppercase text-orange-600 bg-orange-100 dark:bg-orange-500/10 px-3 py-1 rounded-full">Course {cIdx + 1}</span>
                             <h6 className="font-black text-slate-900 dark:text-white text-lg">{course.name}</h6>
