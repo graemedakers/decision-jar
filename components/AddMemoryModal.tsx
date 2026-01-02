@@ -84,15 +84,25 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                 method: 'POST',
                 body: formData
             });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText || `Upload failed with status ${res.status}`);
+            }
+
             const data = await res.json();
             if (data.success) {
                 setPhotoUrls(prev => [...prev, data.url]);
             } else {
-                alert("Upload failed");
+                throw new Error(data.error || "Upload failed");
             }
         } catch (error) {
             console.error('Upload failed', error);
-            alert("Failed to upload photo");
+            let errorMessage = "Failed to upload photo";
+            if (error instanceof Error) {
+                errorMessage += `: ${error.message}`;
+            }
+            alert(errorMessage);
         } finally {
             setIsUploading(false);
             e.target.value = "";
