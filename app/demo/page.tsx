@@ -349,14 +349,15 @@ export default function DemoPage() {
                     )}
                 </div>
 
-                {/* Dev Helper - Hidden in Production normally, but useful for Demo */}
-                <div className="mt-8 text-center opacity-30 hover:opacity-100 transition-opacity">
+                {/* Dev Helper - Visible for Testing */}
+                <div className="mt-12 mb-8 text-center">
                     <button
                         onClick={resetConciergeTrial}
-                        className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline"
+                        className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors font-mono"
                     >
-                        (Dev) Reset Trial Status
+                        🔄 (Dev) Reset Trial Status
                     </button>
+                    <p className="text-xs text-slate-400 mt-2">Click to restore your 1 free concierge use</p>
                 </div>
             </main>
 
@@ -379,6 +380,12 @@ export default function DemoPage() {
                             reason="premium"
                             message="You've used your free premium trial! Upgrade to unlock unlimited access."
                         />
+                        <button
+                            onClick={resetConciergeTrial}
+                            className="w-full text-center mt-4 text-xs text-white/50 hover:text-white underline"
+                        >
+                            (Dev Testing) Reset Limit & Refresh
+                        </button>
                         <button
                             onClick={() => setUpgradeModalOpen(false)}
                             className="absolute top-[-40px] right-0 text-white/80 hover:text-white"
