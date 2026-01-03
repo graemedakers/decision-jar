@@ -8,6 +8,8 @@ import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { getCurrentLocation } from "@/lib/utils";
 import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
+import { useDemoConcierge } from "@/lib/use-demo-concierge";
+import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
 
 interface EscapeRoomConciergeModalProps {
     isOpen: boolean;
@@ -19,6 +21,9 @@ interface EscapeRoomConciergeModalProps {
 }
 
 export function EscapeRoomConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: EscapeRoomConciergeModalProps) {
+    const demoConcierge = useDemoConcierge();
+    const [showTrialUsedPrompt, setShowTrialUsedPrompt] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
     const [isStandardizing, setIsStandardizing] = useState(false);
 
@@ -67,6 +72,10 @@ export function EscapeRoomConciergeModal({ isOpen, onClose, userLocation, onIdea
     });
 
     const handleGetRecommendations = async () => {
+        if (demoConcierge && !demoConcierge.hasUsedTrial) {
+            demoConcierge.onUse();
+        }
+
         setIsLoading(true);
         try {
             const res = await fetch('/api/escape-room-concierge', {
@@ -83,6 +92,12 @@ export function EscapeRoomConciergeModal({ isOpen, onClose, userLocation, onIdea
             if (res.ok) {
                 const data = await res.json();
                 setRecommendations(data.recommendations);
+
+                if (demoConcierge && demoConcierge.triesRemaining === 0) {
+                    setTimeout(() => {
+                        setShowTrialUsedPrompt(true);
+                    }, 3000);
+                }
             } else {
                 const data = await res.json().catch(() => ({}));
                 alert(`Error ${res.status}: ${data.error || "Failed to get recommendations. Please try again."}`);
@@ -251,6 +266,15 @@ export function EscapeRoomConciergeModal({ isOpen, onClose, userLocation, onIdea
                                             />
                                         ))}
                                     </div>
+                                </div>
+                            )}
+
+                            {showTrialUsedPrompt && demoConcierge && demoConcierge.triesRemaining === 0 && (
+                                <div className="mt-6">
+                                    <DemoUpgradePrompt
+                                        reason="premium"
+                                        message="Loved the Escape Room Concierge? Sign up for unlimited access to ALL 11 premium concierge tools!"
+                                    />
                                 </div>
                             )}
                         </div>
