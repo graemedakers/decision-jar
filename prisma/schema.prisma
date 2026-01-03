@@ -353,3 +353,18 @@ model RateLimit {
   
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  type      String   // "VIEW", "ACTION", "WEB_VITALS", "ERROR"
+  name      String   // "page_view", "signup", "CLS", "conversion"
+  value     Float?   // Numeric value for metrics
+  metadata  Json?    // Flexible context
+  userId    String?  // Optional user ID
+  sessionId String?  // Anonymous session ID
+  path      String?  // Current URL path
+  createdAt DateTime @default(now())
+
+  @@index([type, name])
+  @@index([createdAt])
+}

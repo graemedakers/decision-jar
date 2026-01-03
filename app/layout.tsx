@@ -7,6 +7,7 @@ import { HelpButton } from "@/components/HelpButton";
 import { BottomNav } from "@/components/BottomNav";
 import { PWAInstaller } from "@/components/PWAInstaller";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -151,6 +152,7 @@ export default function RootLayout({
         <BottomNav />
         <UserStatus />
         <HelpButton />
+        <AnalyticsProvider />
       </body>
     </html>
   );

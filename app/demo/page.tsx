@@ -27,6 +27,7 @@ import { MovieConciergeModal } from '@/components/MovieConciergeModal';
 import { EscapeRoomConciergeModal } from '@/components/EscapeRoomConciergeModal';
 import { Utensils, Wine, Film, Key } from 'lucide-react';
 import { useDemoConcierge } from '@/lib/use-demo-concierge';
+import { trackEvent } from '@/lib/analytics';
 
 export default function DemoPage() {
     const router = useRouter();
@@ -79,6 +80,8 @@ export default function DemoPage() {
         setAiCount(getDemoAICount());
     };
 
+
+
     const handleSpin = () => {
         const availableIdeas = ideas.filter(i => !i.selectedAt);
 
@@ -87,6 +90,7 @@ export default function DemoPage() {
             return;
         }
 
+        trackEvent('spin_jar', 'ACTION', 1, { demo: true, ideaCount: availableIdeas.length });
         setSpinning(true);
 
         setTimeout(() => {
