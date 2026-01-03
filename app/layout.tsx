@@ -5,6 +5,8 @@ import "./globals.css";
 import { UserStatus } from "@/components/UserStatus";
 import { HelpButton } from "@/components/HelpButton";
 import { BottomNav } from "@/components/BottomNav";
+import { PWAInstaller } from "@/components/PWAInstaller";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -92,6 +94,25 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+// PWA Manifest and Icons
+export const manifest = {
+  themeColor: '#ec4899',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Spin the Jar',
+  },
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -99,6 +120,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Spin the Jar" />
+
+        {/* Android Chrome */}
+        <meta name="mobile-web-app-capable" content="yes" />
+
+        {/* Windows */}
+        <meta name="msapplication-TileColor" content="#ec4899" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
@@ -108,6 +146,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {children}
+        <PWAInstaller />
+        <InstallPrompt />
         <BottomNav />
         <UserStatus />
         <HelpButton />

@@ -1,0 +1,106 @@
+{
+    "name": "Spin the Jar - Decision Maker",
+    "short_name": "Spin the Jar",
+    "description": "Never ask 'what should we do?' again. Perfect for couples, groups, and solo decisions.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#ec4899",
+    "orientation": "portrait",
+    "scope": "/",
+    "categories": [
+        "lifestyle",
+        "entertainment",
+        "productivity"
+    ],
+    "icons": [
+        {
+            "src": "/icon-72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshot-mobile.png",
+            "sizes": "540x720",
+            "type": "image/png",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshot-desktop.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Spin the Jar",
+            "short_name": "Spin",
+            "description": "Quickly spin your jar for a random idea",
+            "url": "/dashboard",
+            "icons": [
+                {
+                    "src": "/icon-96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Add Idea",
+            "short_name": "Add",
+            "description": "Add a new idea to your jar",
+            "url": "/dashboard?action=add",
+            "icons": [
+                {
+                    "src": "/icon-96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ]
+}
