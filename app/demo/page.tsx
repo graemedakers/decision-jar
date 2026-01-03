@@ -17,7 +17,15 @@ import {
     getDemoAICount,
     isDemoAILimitReached,
     DEMO_LIMITS,
+    getDemoConciergeCount,
+    isConciergeLimitReached,
 } from '@/lib/demo-storage';
+import { DiningConciergeModal } from '@/components/DiningConciergeModal';
+import { BarConciergeModal } from '@/components/BarConciergeModal';
+import { MovieConciergeModal } from '@/components/MovieConciergeModal';
+import { EscapeRoomConciergeModal } from '@/components/EscapeRoomConciergeModal';
+import { Utensils, Wine, Film, Key } from 'lucide-react';
+import { useDemoConcierge } from '@/lib/use-demo-concierge';
 
 export default function DemoPage() {
     const router = useRouter();
@@ -30,6 +38,25 @@ export default function DemoPage() {
     const [aiCount, setAiCount] = useState(0);
     const [showAILimitPrompt, setShowAILimitPrompt] = useState(false);
     const [showSavePrompt, setShowSavePrompt] = useState(false);
+
+    // Concierge Modals
+    const [diningModalOpen, setDiningModalOpen] = useState(false);
+    const [barModalOpen, setBarModalOpen] = useState(false);
+    const [movieModalOpen, setMovieModalOpen] = useState(false);
+    const [escapeModalOpen, setEscapeModalOpen] = useState(false);
+
+    // Concierge Trial State
+    const demoConcierge = useDemoConcierge();
+    const [showConciergeUpgrade, setShowConciergeUpgrade] = useState(false);
+
+    const handleConciergeClick = (opener: () => void) => {
+        if (demoConcierge && demoConcierge.triesRemaining === 0) {
+            // Already used trial? Show upgrade prompt!
+            setShowConciergeUpgrade(true);
+        } else {
+            opener();
+        }
+    };
 
     useEffect(() => {
         initializeDemoData();
@@ -235,11 +262,82 @@ export default function DemoPage() {
                     </div>
                 </div>
 
+                {/* Premium Tools Section - NEW! */}
+                <div className="mt-12 mb-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-amber-500" />
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                                Premium Concierge Tools
+                            </h2>
+                        </div>
+                        <span className="text-xs font-semibold px-2 py-1 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 rounded-full border border-amber-500/30">
+                            1 FREE TRIAL LEFT
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {/* Dining */}
+                        <Button
+                            variant="outline"
+                            className="h-auto py-6 flex flex-col gap-2 border-slate-200 dark:border-slate-800 hover:border-amber-500/50 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-all"
+                            onClick={() => handleConciergeClick(() => setDiningModalOpen(true))}
+                        >
+                            <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                                <Utensils className="w-5 h-5" />
+                            </div>
+                            <span className="font-semibold text-slate-900 dark:text-white">Dining Concierge</span>
+                        </Button>
+
+                        {/* Bar */}
+                        <Button
+                            variant="outline"
+                            className="h-auto py-6 flex flex-col gap-2 border-slate-200 dark:border-slate-800 hover:border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-all"
+                            onClick={() => handleConciergeClick(() => setBarModalOpen(true))}
+                        >
+                            <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                <Wine className="w-5 h-5" />
+                            </div>
+                            <span className="font-semibold text-slate-900 dark:text-white">Bar Concierge</span>
+                        </Button>
+
+                        {/* Movie */}
+                        <Button
+                            variant="outline"
+                            className="h-auto py-6 flex flex-col gap-2 border-slate-200 dark:border-slate-800 hover:border-blue-500/50 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all"
+                            onClick={() => handleConciergeClick(() => setMovieModalOpen(true))}
+                        >
+                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                <Film className="w-5 h-5" />
+                            </div>
+                            <span className="font-semibold text-slate-900 dark:text-white">Movie Concierge</span>
+                        </Button>
+
+                        {/* Escape Room */}
+                        <Button
+                            variant="outline"
+                            className="h-auto py-6 flex flex-col gap-2 border-slate-200 dark:border-slate-800 hover:border-green-500/50 hover:bg-green-50 dark:hover:bg-green-900/10 transition-all"
+                            onClick={() => handleConciergeClick(() => setEscapeModalOpen(true))}
+                        >
+                            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                                <Key className="w-5 h-5" />
+                            </div>
+                            <span className="font-semibold text-slate-900 dark:text-white">Escape Room</span>
+                        </Button>
+                    </div>
+                </div>
+
                 {/* Upgrade Prompts */}
                 <div className="mt-8 space-y-4 max-w-2xl mx-auto">
+                    {showConciergeUpgrade && (
+                        <DemoUpgradePrompt
+                            reason="premium"
+                            message="You've used your free premium trial! Upgrade to unlock unlimited access."
+                        />
+                    )}
                     {showAILimitPrompt && <DemoUpgradePrompt reason="ai_limit" />}
                     {showSavePrompt && !showAILimitPrompt && <DemoUpgradePrompt reason="save" />}
-                    {!showAILimitPrompt && !showSavePrompt && ideas.length >= 3 && (
+                    {!showAILimitPrompt && !showSavePrompt && !showConciergeUpgrade && ideas.length >= 3 && (
                         <DemoUpgradePrompt reason="general" />
                     )}
                 </div>
@@ -254,6 +352,28 @@ export default function DemoPage() {
                     localStorage.setItem('import_demo_data', 'true');
                     router.push('/signup');
                 }}
+            />
+
+            {/* Concierge Modals */}
+            <DiningConciergeModal
+                isOpen={diningModalOpen}
+                onClose={() => setDiningModalOpen(false)}
+                onIdeaAdded={loadDemoData}
+            />
+            <BarConciergeModal
+                isOpen={barModalOpen}
+                onClose={() => setBarModalOpen(false)}
+                onIdeaAdded={loadDemoData}
+            />
+            <MovieConciergeModal
+                isOpen={movieModalOpen}
+                onClose={() => setMovieModalOpen(false)}
+                onIdeaAdded={loadDemoData}
+            />
+            <EscapeRoomConciergeModal
+                isOpen={escapeModalOpen}
+                onClose={() => setEscapeModalOpen(false)}
+                onIdeaAdded={loadDemoData}
             />
         </div>
     );
