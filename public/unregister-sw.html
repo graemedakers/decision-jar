@@ -1,0 +1,186 @@
+// Emergency: Unregister broken service worker
+// Visit /unregister-sw.html to clear service workers
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unregister Service Worker - Spin the Jar</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        button {
+            background: #ec4899;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background: #db2777;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 Service Worker Troubleshooting</h1>
+    <p>If you're experiencing issues accessing the site, this page will help clear any problematic service workers.</p>
+
+    <div id="status" class="status info">
+        Checking service workers...
+    </div>
+
+    <button onclick="unregisterAll()">Unregister All Service Workers</button>
+    <button onclick="clearCache()">Clear All Caches</button>
+    <button onclick="window.location.href='/'">Return to Site</button>
+
+    <div id="details" style="margin-top: 30px; text-align: left; font-size: 12px; font-family: monospace;"></div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const detailsEl = document.getElementById('details');
+
+        function log(message) {
+            console.log(message);
+            detailsEl.innerHTML += message + '<br>';
+        }
+
+        async function checkServiceWorkers() {
+            if (!('serviceWorker' in navigator)) {
+                statusEl.className = 'status info';
+                statusEl.textContent = 'No service worker support in this browser';
+                return;
+            }
+
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+
+                if (registrations.length === 0) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = '✓ No service workers registered';
+                    log('No service workers found');
+                } else {
+                    statusEl.className = 'status info';
+                    statusEl.textContent = `Found ${registrations.length} service worker(s)`;
+                    registrations.forEach((reg, i) => {
+                        log(`SW ${i + 1}: ${reg.scope}`);
+                        if (reg.active) log(`  - Active: ${reg.active.scriptURL}`);
+                        if (reg.waiting) log(`  - Waiting: ${reg.waiting.scriptURL}`);
+                        if (reg.installing) log(`  - Installing: ${reg.installing.scriptURL}`);
+                    });
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = 'Error checking service workers: ' + error.message;
+                log('Error: ' + error.message);
+            }
+        }
+
+        async function unregisterAll() {
+            if (!('serviceWorker' in navigator)) {
+                alert('Service workers not supported');
+                return;
+            }
+
+            statusEl.className = 'status info';
+            statusEl.textContent = 'Unregistering service workers...';
+            log('\n=== Unregistering All Service Workers ===');
+
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+
+                for (const registration of registrations) {
+                    log(`Unregistering: ${registration.scope}`);
+                    await registration.unregister();
+                    log('✓ Unregistered successfully');
+                }
+
+                statusEl.className = 'status success';
+                statusEl.textContent = `✓ Unregistered ${registrations.length} service worker(s)`;
+                log(`\nTotal unregistered: ${registrations.length}`);
+
+                setTimeout(() => {
+                    alert('Service workers unregistered! Page will reload.');
+                    window.location.reload();
+                }, 2000);
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = 'Error: ' + error.message;
+                log('Error: ' + error.message);
+            }
+        }
+
+        async function clearCache() {
+            if (!('caches' in window)) {
+                alert('Cache API not supported');
+                return;
+            }
+
+            statusEl.className = 'status info';
+            statusEl.textContent = 'Clearing caches...';
+            log('\n=== Clearing All Caches ===');
+
+            try {
+                const cacheNames = await caches.keys();
+
+                for (const name of cacheNames) {
+                    log(`Deleting cache: ${name}`);
+                    await caches.delete(name);
+                    log('✓ Deleted');
+                }
+
+                statusEl.className = 'status success';
+                statusEl.textContent = `✓ Cleared ${cacheNames.length} cache(s)`;
+                log(`\nTotal caches cleared: ${cacheNames.length}`);
+
+                setTimeout(() => {
+                    alert('Caches cleared! Page will reload.');
+                    window.location.reload();
+                }, 2000);
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = 'Error: ' + error.message;
+                log('Error: ' + error.message);
+            }
+        }
+
+        // Check on load
+        checkServiceWorkers();
+    </script>
+</body>
+
+</html>
