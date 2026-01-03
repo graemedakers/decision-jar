@@ -25,6 +25,7 @@ import { DiningConciergeModal } from '@/components/DiningConciergeModal';
 import { BarConciergeModal } from '@/components/BarConciergeModal';
 import { MovieConciergeModal } from '@/components/MovieConciergeModal';
 import { EscapeRoomConciergeModal } from '@/components/EscapeRoomConciergeModal';
+import { PremiumBlockerModal } from '@/components/PremiumBlockerModal';
 import { Utensils, Wine, Film, Key } from 'lucide-react';
 import { useDemoConcierge } from '@/lib/use-demo-concierge';
 import { trackEvent } from '@/lib/analytics';
@@ -373,28 +374,11 @@ export default function DemoPage() {
             />
 
             {/* Upgrade Modal Overlay */}
-            {upgradeModalOpen && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="w-full max-w-md relative">
-                        <DemoUpgradePrompt
-                            reason="premium"
-                            message="You've used your free premium trial! Upgrade to unlock unlimited access."
-                        />
-                        <button
-                            onClick={resetConciergeTrial}
-                            className="w-full text-center mt-4 text-xs text-white/50 hover:text-white underline"
-                        >
-                            (Dev Testing) Reset Limit & Refresh
-                        </button>
-                        <button
-                            onClick={() => setUpgradeModalOpen(false)}
-                            className="absolute top-[-40px] right-0 text-white/80 hover:text-white"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
+            {/* Upgrade Modal Overlay */}
+            <PremiumBlockerModal
+                isOpen={upgradeModalOpen}
+                onClose={() => setUpgradeModalOpen(false)}
+            />
 
             {/* Concierge Modals */}
             <DiningConciergeModal
