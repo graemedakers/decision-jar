@@ -239,11 +239,14 @@ export default function Home() {
                 </Button>
               ) : (
                 <>
-                  <Link href="/login" className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                  <Link href="/login" className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors hidden sm:block">
                     Sign In
                   </Link>
-                  <Button onClick={() => router.push('/signup')} size="sm" className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 border-none hidden sm:flex">
-                    Get Started
+                  <Button onClick={() => router.push('/demo')} size="sm" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none">
+                    Try Demo
+                  </Button>
+                  <Button onClick={() => router.push('/signup')} size="sm" variant="outline" className="hidden lg:flex">
+                    Sign Up Free
                   </Button>
                 </>
               )}
