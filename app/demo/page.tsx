@@ -47,12 +47,14 @@ export default function DemoPage() {
 
     // Concierge Trial State
     const demoConcierge = useDemoConcierge();
-    const [showConciergeUpgrade, setShowConciergeUpgrade] = useState(false);
+
+    const [showConciergeUpgrade, setShowConciergeUpgrade] = useState(false); // Keeps existing banner logic
+    const [upgradeModalOpen, setUpgradeModalOpen] = useState(false); // New modal logic
 
     const handleConciergeClick = (opener: () => void) => {
         if (demoConcierge && demoConcierge.triesRemaining === 0) {
             // Already used trial? Show upgrade prompt!
-            setShowConciergeUpgrade(true);
+            setUpgradeModalOpen(true);
         } else {
             opener();
         }
@@ -353,6 +355,24 @@ export default function DemoPage() {
                     router.push('/signup');
                 }}
             />
+
+            {/* Upgrade Modal Overlay */}
+            {upgradeModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="w-full max-w-md relative">
+                        <DemoUpgradePrompt
+                            reason="premium"
+                            message="You've used your free premium trial! Upgrade to unlock unlimited access."
+                        />
+                        <button
+                            onClick={() => setUpgradeModalOpen(false)}
+                            className="absolute top-[-40px] right-0 text-white/80 hover:text-white"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Concierge Modals */}
             <DiningConciergeModal
