@@ -8,6 +8,8 @@ import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { getCurrentLocation } from "@/lib/utils";
 import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
+import { useDemoConcierge } from "@/lib/use-demo-concierge";
+import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
 
 interface DiningConciergeModalProps {
     isOpen: boolean;
@@ -19,6 +21,10 @@ interface DiningConciergeModalProps {
 }
 
 export function DiningConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: DiningConciergeModalProps) {
+    // Demo mode concierge trial
+    const demoConcierge = useDemoConcierge();
+    const [showTrialUsedPrompt, setShowTrialUsedPrompt] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
     const [isStandardizing, setIsStandardizing] = useState(false);
     const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
@@ -73,6 +79,11 @@ export function DiningConciergeModal({ isOpen, onClose, userLocation, onIdeaAdde
 
 
     const handleGetRecommendations = async () => {
+        // Demo mode: Mark concierge trial as used
+        if (demoConcierge && !demoConcierge.hasUsedTrial) {
+            demoConcierge.onUse();
+        }
+
         setIsLoading(true);
         try {
             const res = await fetch('/api/dining-concierge', {
@@ -89,6 +100,13 @@ export function DiningConciergeModal({ isOpen, onClose, userLocation, onIdeaAdde
             if (res.ok) {
                 const data = await res.json();
                 setRecommendations(data.recommendations);
+
+                // Demo mode: Show upgrade prompt after getting results
+                if (demoConcierge && demoConcierge.triesRemaining === 0) {
+                    setTimeout(() => {
+                        setShowTrialUsedPrompt(true);
+                    }, 3000); // Show after 3 seconds so they can see results first
+                }
             } else {
                 const errorData = await res.json().catch(() => ({}));
                 const errorMessage = errorData.error || "Failed to get recommendations.";
@@ -267,6 +285,16 @@ export function DiningConciergeModal({ isOpen, onClose, userLocation, onIdeaAdde
                                             />
                                         ))}
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Demo Mode: Upgrade Prompt after trial used */}
+                            {showTrialUsedPrompt && demoConcierge && demoConcierge.triesRemaining === 0 && (
+                                <div className="mt-6">
+                                    <DemoUpgradePrompt
+                                        reason="premium"
+                                        message="Loved the Dining Concierge? Sign up for unlimited access to ALL 11 premium concierge tools!"
+                                    />
                                 </div>
                             )}
                         </div>
