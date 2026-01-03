@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
 import { Button } from './ui/Button';
+import { trackPWAEvent } from '@/lib/pwa-analytics';
 
 export function InstallPrompt() {
     const [showPrompt, setShowPrompt] = useState(false);
@@ -42,6 +43,9 @@ export function InstallPrompt() {
 
         if (outcome === 'accepted') {
             console.log('User accepted the install prompt');
+            trackPWAEvent('pwa_install_accepted');
+        } else {
+            trackPWAEvent('pwa_install_rejected');
         }
 
         setDeferredPrompt(null);
@@ -50,6 +54,7 @@ export function InstallPrompt() {
     };
 
     const handleDismiss = () => {
+        trackPWAEvent('pwa_install_dismissed');
         setShowPrompt(false);
         localStorage.setItem('pwa-install-prompted', 'true');
     };

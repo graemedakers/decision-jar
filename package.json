@@ -9,7 +9,10 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "db:deploy": "prisma migrate deploy",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "pwa:icons": "node scripts/generate-icons.js",
+    "pwa:screenshots": "node scripts/generate-screenshots.js",
+    "pwa:setup": "npm run pwa:icons && npm run pwa:screenshots"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -51,6 +54,8 @@
     "eslint": "^9",
     "eslint-config-next": "^16.0.7",
     "prisma": "^5.10.0",
+    "puppeteer": "^24.34.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"

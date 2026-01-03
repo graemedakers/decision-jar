@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePWAAnalytics } from '@/lib/pwa-analytics';
 
 export function PWAInstaller() {
+    // Initialize PWA analytics
+    usePWAAnalytics();
     useEffect(() => {
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
             // Register service worker
