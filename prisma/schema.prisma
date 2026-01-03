@@ -153,6 +153,7 @@ model User {
   votes                  Vote[]
   rateLimit              RateLimit?
   assignedTasks          Idea[]    @relation("AssignedTo")
+  analyticsEvents        AnalyticsEvent[]
 }
 
 model Account {
@@ -361,6 +362,7 @@ model AnalyticsEvent {
   value     Float?   // Numeric value for metrics
   metadata  Json?    // Flexible context
   userId    String?  // Optional user ID
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   sessionId String?  // Anonymous session ID
   path      String?  // Current URL path
   createdAt DateTime @default(now())
