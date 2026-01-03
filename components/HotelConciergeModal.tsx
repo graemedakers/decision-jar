@@ -6,6 +6,7 @@ import { X, Bed, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Heart
 import { Button } from "./ui/Button";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { getCurrentLocation } from "@/lib/utils";
+import { LocationInput } from "./LocationInput";
 
 interface HotelConciergeModalProps {
     isOpen: boolean;
@@ -18,6 +19,7 @@ interface HotelConciergeModalProps {
 
 export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: HotelConciergeModalProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isStandardizing, setIsStandardizing] = useState(false);
 
     // Filters
     const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
@@ -82,7 +84,7 @@ export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     facilities: selectedFacilities,
-                    location,
+                    location: location,
                     budget,
                     type: selectedType
                 }),
@@ -152,16 +154,13 @@ export function HotelConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
                                             Use GPS
                                         </button>
                                     </div>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                        <input
-                                            type="text"
-                                            value={location}
-                                            onChange={(e) => setLocation(e.target.value)}
-                                            placeholder="City, Region, or Neighborhood"
-                                            className="glass-input w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
-                                        />
-                                    </div>
+                                    <LocationInput
+                                        value={location}
+                                        onChange={setLocation}
+                                        placeholder="City, Region, or Neighborhood"
+                                        isStandardizing={isStandardizing}
+                                        updateProfileLocation={true}
+                                    />
                                 </div>
 
                                 <div className="space-y-4">

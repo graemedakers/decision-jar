@@ -7,6 +7,7 @@ import { X, Sparkles, Loader2, DollarSign, MapPin, Activity, Lock } from "lucide
 import { useState, useEffect } from "react";
 import { getCategoriesForTopic } from "@/lib/categories";
 import { getCurrentLocation } from "@/lib/utils";
+import { LocationInput } from "./LocationInput";
 
 interface SurpriseMeModalProps {
     isOpen: boolean;
@@ -119,17 +120,11 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                                             Use GPS
                                         </button>
                                     </div>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                        <input
-                                            type="text"
-                                            value={formData.location}
-                                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                            placeholder="e.g. New York, NY"
-                                            className="glass-input pl-10 w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400"
-                                            required
-                                        />
-                                    </div>
+                                    <LocationInput
+                                        value={formData.location}
+                                        onChange={(val) => setFormData({ ...formData, location: val })}
+                                        placeholder="e.g. New York, NY"
+                                    />
                                 </div>
 
                                 <div className="space-y-2">

@@ -6,6 +6,7 @@ import { X, MapPin, Loader2, Sparkles, ExternalLink, Plus, Footprints, Beer, Nav
 import { Button } from "./ui/Button";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { getCurrentLocation } from "@/lib/utils";
+import { LocationInput } from "./LocationInput";
 
 interface BarCrawlPlannerModalProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ interface BarCrawlPlannerModalProps {
 
 export function BarCrawlPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded, onFavoriteUpdated }: BarCrawlPlannerModalProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isStandardizing, setIsStandardizing] = useState(false);
     const [location, setLocation] = useState(userLocation || "");
     const [stopCount, setStopCount] = useState(3);
     const [barType, setBarType] = useState("Any");
@@ -58,7 +60,7 @@ export function BarCrawlPlannerModal({ isOpen, onClose, userLocation, onIdeaAdde
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    location,
+                    location: location,
                     count: stopCount,
                     type: barType
                 }),
@@ -199,12 +201,11 @@ export function BarCrawlPlannerModal({ isOpen, onClose, userLocation, onIdeaAdde
                                             Use GPS
                                         </button>
                                     </div>
-                                    <input
-                                        type="text"
+                                    <LocationInput
                                         value={location}
-                                        onChange={(e) => setLocation(e.target.value)}
+                                        onChange={setLocation}
                                         placeholder="e.g. Downtown, Soho, or specific address"
-                                        className="glass-input w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                                        isStandardizing={isStandardizing}
                                     />
                                 </div>
 

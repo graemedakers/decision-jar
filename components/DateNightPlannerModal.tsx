@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/Button";
 import { Sparkles, MapPin, Loader2, ExternalLink, Calendar, DollarSign, Wine, Utensils, Ticket, Clock, Check, Plus, RefreshCcw, Pencil, X, Save, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
+import { LocationInput } from "./LocationInput";
 
 interface ScheduleItem {
     time: string;
@@ -43,6 +44,7 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
     // State
     const [itinerary, setItinerary] = useState<Itinerary | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isStandardizing, setIsStandardizing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isAdding, setIsAdding] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
@@ -247,16 +249,12 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm text-slate-600 dark:text-slate-400 font-medium">Where?</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-3 w-4 h-4 text-slate-400 dark:text-slate-500" />
-                                    <input
-                                        type="text"
-                                        placeholder="City or Neighborhood"
-                                        className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500/50 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                                        value={targetLocation}
-                                        onChange={(e) => setTargetLocation(e.target.value)}
-                                    />
-                                </div>
+                                <LocationInput
+                                    value={targetLocation}
+                                    onChange={setTargetLocation}
+                                    placeholder="City or Neighborhood"
+                                    isStandardizing={isStandardizing}
+                                />
                             </div>
                             <div className="space-y-2 md:col-span-2">
                                 <label className="text-sm text-slate-600 dark:text-slate-400 font-medium">Budget</label>

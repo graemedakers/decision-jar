@@ -9,6 +9,7 @@ import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles,
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BASE_DOMAIN } from "@/lib/config";
+import { LocationInput } from "./LocationInput";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -51,6 +52,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                 .then(res => res.json())
                 .then(data => {
                     if (data?.user) {
+                        setLocation(data.user.homeTown || data.user.location || "");
                         setInterests(data.user.interests || "");
                         setIsCreator(!!data.user.isCreator);
                         setHasPartner(!!data.user.hasPartner);
@@ -287,28 +289,10 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                             Locate Me
                                         </button>
                                     </div>
-                                    <Input
+                                    <LocationInput
                                         value={location}
-                                        onChange={(e) => setLocation(e.target.value)}
-                                        onBlur={async () => {
-                                            if (!location || location.length < 3) return;
-                                            try {
-                                                const res = await fetch('/api/location/standardize', {
-                                                    method: 'POST',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify({ location })
-                                                });
-                                                const data = await res.json();
-                                                if (data.formatted) {
-                                                    setLocation(data.formatted);
-                                                }
-                                            } catch (e) {
-                                                console.error("Failed to standardize location", e);
-                                            }
-                                        }}
+                                        onChange={setLocation}
                                         placeholder="e.g. New York, NY"
-                                        required
-                                        className="text-slate-900 dark:text-white"
                                     />
                                     <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">
                                         Used as the default base for smart suggestions & places.

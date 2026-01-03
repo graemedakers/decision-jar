@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Wine, Beer, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Martini, Heart, Lock } from "lucide-react";
 import { Button } from "./ui/Button";
+import { LocationInput } from "./LocationInput";
 
 interface BarConciergeModalProps {
     isOpen: boolean;
@@ -19,6 +20,7 @@ import { getCurrentLocation } from "@/lib/utils";
 
 export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: BarConciergeModalProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isStandardizing, setIsStandardizing] = useState(false);
     const [selectedDrinks, setSelectedDrinks] = useState<string[]>([]);
     const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
     const [location, setLocation] = useState(userLocation || "");
@@ -77,7 +79,7 @@ export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, 
                 body: JSON.stringify({
                     drinks: selectedDrinks.join(", "),
                     vibe: selectedVibes.join(", "),
-                    location,
+                    location: location,
                     price
                 }),
             });
@@ -146,16 +148,13 @@ export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, 
                                             Use GPS
                                         </button>
                                     </div>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                        <input
-                                            type="text"
-                                            value={location}
-                                            onChange={(e) => setLocation(e.target.value)}
-                                            placeholder="Current location, Neighborhood, or City"
-                                            className="glass-input w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
-                                        />
-                                    </div>
+                                    <LocationInput
+                                        value={location}
+                                        onChange={setLocation}
+                                        placeholder="Current location, Neighborhood, or City"
+                                        isStandardizing={isStandardizing}
+                                        updateProfileLocation={true}
+                                    />
                                     <p className="text-xs text-slate-500">Edit this to search in a specific area.</p>
                                 </div>
 

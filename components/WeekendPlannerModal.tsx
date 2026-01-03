@@ -4,6 +4,7 @@ import { Sparkles, Calendar, MapPin, Loader2, ExternalLink, Plus, Check, ArrowRi
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 import { getCurrentLocation } from "@/lib/utils";
+import { LocationInput } from "./LocationInput";
 
 interface Suggestion {
     title: string;
@@ -25,6 +26,7 @@ interface WeekendPlannerModalProps {
 export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded, onFavoriteUpdated }: WeekendPlannerModalProps) {
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isStandardizing, setIsStandardizing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [debugInfo, setDebugInfo] = useState<string | null>(null);
     const [addedIdeas, setAddedIdeas] = useState<Set<number>>(new Set());
@@ -205,34 +207,12 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                                         Use GPS
                                     </button>
                                 </div>
-                                <div className="relative">
-                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                    <Input
-                                        type="text"
-                                        value={customLocation}
-                                        onChange={(e) => setCustomLocation(e.target.value)}
-                                        onBlur={async () => {
-                                            if (!customLocation || customLocation.length < 3) return;
-                                            try {
-                                                const res = await fetch('/api/location/standardize', {
-                                                    method: 'POST',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify({ location: customLocation })
-                                                });
-                                                const data = await res.json();
-                                                if (data.formatted) {
-                                                    setCustomLocation(data.formatted);
-                                                }
-                                            } catch (e) {
-                                                console.error("Failed to standardize location", e);
-                                            }
-                                        }}
-                                        placeholder="City, Neighborhood, or Zip"
-                                        className="pl-10"
-                                        onKeyDown={(e) => e.key === 'Enter' && generatePlan()}
-                                        autoFocus
-                                    />
-                                </div>
+                                <LocationInput
+                                    value={customLocation}
+                                    onChange={setCustomLocation}
+                                    placeholder="City, Neighborhood, or Zip"
+                                    isStandardizing={isStandardizing}
+                                />
                                 <p className="text-xs text-slate-500 ml-1">We'll look for events and activities near here.</p>
                             </div>
 

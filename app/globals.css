@@ -138,12 +138,19 @@ body {
 }
 
 .glass-input {
-  background: var(--glass-bg);
+  background: var(--glass-bg) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   color: var(--foreground);
+  position: relative !important;
+  z-index: 10 !important;
+  cursor: text !important;
+  pointer-events: auto !important;
+
+  /* Force hide Google Maps API error background icons */
+  background-image: none !important;
 
   @apply w-full rounded-xl px-4 py-3 outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20;
 
@@ -152,6 +159,23 @@ body {
     /* slate-400 */
   }
 }
+
+/* Aggressively hide Google Maps internal error overlays that block typing */
+.gm-err-container,
+.gm-err-content,
+.gm-err-icon,
+.gm-err-title,
+.gm-err-message,
+[style*="z-index: 1000001"],
+[style*="z-index: 1000002"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
 
 /* Utilities */
 .no-scrollbar::-webkit-scrollbar {
@@ -180,4 +204,63 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.4);
+}
+
+/* Google Places Autocomplete Fixes */
+.pac-container {
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--glass-shadow);
+  margin-top: 4px;
+  font-family: inherit;
+  z-index: 9999 !important;
+  border-top: none;
+}
+
+.pac-item {
+  padding: 8px 12px;
+  border-top: 1px solid var(--glass-border);
+  cursor: pointer;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+}
+
+.pac-item:first-child {
+  border-top: none;
+}
+
+.pac-item:hover {
+  background-color: var(--glass-highlight);
+}
+
+.pac-item-query {
+  color: var(--foreground);
+  font-size: 14px;
+}
+
+.pac-matched {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.pac-icon {
+  margin-right: 10px;
+}
+
+/* Hide Google error overlay if it tries to render inside the container */
+.pac-container:empty,
+.pac-container[style*="display: none"] {
+  display: none !important;
+}
+
+/* Fix for the "This page can't load Google Maps correctly" markers appearing in a row */
+.gm-style-cc,
+.gm-style-mtc,
+.gm-svpc,
+.gm-style>div:nth-child(2) {
+  display: none !important;
 }

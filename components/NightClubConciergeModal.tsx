@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Disc, Music, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Heart, Lock, Shirt } from "lucide-react";
 import { Button } from "./ui/Button";
+import { LocationInput } from "./LocationInput";
 
 interface NightClubConciergeModalProps {
     isOpen: boolean;
@@ -19,6 +20,7 @@ import { getCurrentLocation } from "@/lib/utils";
 
 export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: NightClubConciergeModalProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isStandardizing, setIsStandardizing] = useState(false);
     const [selectedMusic, setSelectedMusic] = useState<string[]>([]);
     const [selectedCrowd, setSelectedCrowd] = useState<string[]>([]);
     const [selectedAge, setSelectedAge] = useState<string>("any");
@@ -81,7 +83,7 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                     music: selectedMusic.join(", "),
                     crowd: selectedCrowd.join(", "),
                     age: selectedAge,
-                    location,
+                    location: location,
                     price
                 }),
             });
@@ -150,16 +152,12 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                                             Use GPS
                                         </button>
                                     </div>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                        <input
-                                            type="text"
-                                            value={location}
-                                            onChange={(e) => setLocation(e.target.value)}
-                                            placeholder="Current location, Neighborhood, or City"
-                                            className="glass-input w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
-                                        />
-                                    </div>
+                                    <LocationInput
+                                        value={location}
+                                        onChange={setLocation}
+                                        placeholder="Current location, Neighborhood, or City"
+                                        isStandardizing={isStandardizing}
+                                    />
                                 </div>
 
                                 <div className="space-y-4">
@@ -171,8 +169,8 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                                                     key={c}
                                                     onClick={() => toggleSelection(c, selectedMusic, setSelectedMusic)}
                                                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedMusic.includes(c)
-                                                            ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                                                            : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
+                                                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                                                        : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
                                                         }`}
                                                 >
                                                     {c}
@@ -188,8 +186,8 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                                                     key={v}
                                                     onClick={() => toggleSelection(v, selectedCrowd, setSelectedCrowd)}
                                                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCrowd.includes(v)
-                                                            ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
-                                                            : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
+                                                        ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
+                                                        : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
                                                         }`}
                                                 >
                                                     {v}
@@ -261,8 +259,8 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                                                 <button
                                                     onClick={() => handleFavorite(rec, "CLUB")}
                                                     className={`absolute top-3 right-3 p-2 rounded-full transition-all z-10 ${rec.isFavorite
-                                                            ? 'text-pink-500 bg-pink-500/10'
-                                                            : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/5'
+                                                        ? 'text-pink-500 bg-pink-500/10'
+                                                        : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/5'
                                                         }`}
                                                 >
                                                     <Heart className={`w-5 h-5 ${rec.isFavorite ? 'fill-current' : ''}`} />
