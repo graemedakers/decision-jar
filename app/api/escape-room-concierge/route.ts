@@ -9,43 +9,51 @@ import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
     try {
-        const session = await getSession();
-        if (!session?.user?.email) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const isDemoMode = request.headers.get('x-demo-mode') === 'true';
 
-        // Check premium status
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
-            include: {
-                memberships: { include: { jar: true } },
-                couple: true // Legacy fallback
-            },
-        });
+        let activeJar: any = null;
+        let user: any = null;
 
-        // Determine the Active Jar
-        const activeJar = (user?.activeJarId ? user.memberships.find(m => m.jarId === user.activeJarId)?.jar : null) ||
-            user?.memberships?.[0]?.jar ||
-            user?.couple;
+        if (!isDemoMode) {
+            const session = await getSession();
+            if (!session?.user?.email) {
+                return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            }
+
+            // Check premium status
+            user = await prisma.user.findUnique({
+                where: { email: session.user.email },
+                include: {
+                    memberships: { include: { jar: true } },
+                    couple: true
+                },
+            });
+
+            // Determine the Active Jar
+            // Priority: 1. activeJarId, 2. First membership, 3. Legacy couple
+            activeJar = (user?.activeJarId ? user.memberships.find((m: any) => m.jarId === user.activeJarId)?.jar : null) ||
+                user?.memberships?.[0]?.jar ||
+                user?.couple;
 
 
-        if (!user || !activeJar) {
-            return NextResponse.json({ error: 'No active jar' }, { status: 400 });
-        }
+            if (!user || !activeJar) {
+                return NextResponse.json({ error: 'No active jar' }, { status: 400 });
+            }
 
-        if (!isCouplePremium(activeJar) && !isUserPro(user)) {
-            return NextResponse.json({ error: 'Premium required' }, { status: 403 });
-        }
+            if (!isCouplePremium(activeJar) && !isUserPro(user)) {
+                return NextResponse.json({ error: 'Premium required' }, { status: 403 });
+            }
 
-        const rateLimit = await checkRateLimit(user);
-        if (!rateLimit.allowed) {
-            return NextResponse.json({ error: 'Rate limit exceeded', details: rateLimit.error }, { status: 429 });
+            const rateLimit = await checkRateLimit(user);
+            if (!rateLimit.allowed) {
+                return NextResponse.json({ error: 'Rate limit exceeded', details: rateLimit.error }, { status: 429 });
+            }
         }
 
         const { themes, difficulty, groupSize, location } = await request.json().catch(() => ({}));
 
-        const coupleLocation = activeJar.location;
-        const userInterests = (user as any).interests;
+        const coupleLocation = activeJar?.location;
+        const userInterests = user ? (user as any).interests : null;
 
         let targetLocation = location;
         if (!targetLocation || targetLocation.trim() === "") {
@@ -63,7 +71,7 @@ export async function POST(request: Request) {
             extraInstructions += `The user is interested in these general topics: ${userInterests}.\n`;
         }
 
-        const excludeNames = await getExcludedNames(activeJar.id);
+        const excludeNames = activeJar ? await getExcludedNames(activeJar.id) : [];
         if (excludeNames.length > 0) {
             extraInstructions += `\nEXCLUSION LIST: The user is already aware of the following places. Do NOT match or recommend these exact names again: ${excludeNames.join(', ')}. Find NEW alternatives.\n`;
         }

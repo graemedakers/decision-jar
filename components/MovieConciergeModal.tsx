@@ -92,9 +92,14 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
 
         setIsLoading(true);
         try {
+            const headers: any = { 'Content-Type': 'application/json' };
+            if (demoConcierge) {
+                headers['x-demo-mode'] = 'true';
+            }
+
             const res = await fetch('/api/movie-concierge', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     genre: selectedGenres.join(", "),
                     vibe: selectedVibes.join(", "),

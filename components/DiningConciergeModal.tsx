@@ -86,9 +86,14 @@ export function DiningConciergeModal({ isOpen, onClose, userLocation, onIdeaAdde
 
         setIsLoading(true);
         try {
+            const headers: any = { 'Content-Type': 'application/json' };
+            if (demoConcierge) {
+                headers['x-demo-mode'] = 'true';
+            }
+
             const res = await fetch('/api/dining-concierge', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     cuisine: selectedCuisines.join(", "),
                     vibe: selectedVibes.join(", "),

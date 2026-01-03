@@ -83,9 +83,14 @@ export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, 
 
         setIsLoading(true);
         try {
+            const headers: any = { 'Content-Type': 'application/json' };
+            if (demoConcierge) {
+                headers['x-demo-mode'] = 'true';
+            }
+
             const res = await fetch('/api/bar-concierge', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     drinks: selectedDrinks.join(", "),
                     vibe: selectedVibes.join(", "),

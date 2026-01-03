@@ -78,9 +78,14 @@ export function EscapeRoomConciergeModal({ isOpen, onClose, userLocation, onIdea
 
         setIsLoading(true);
         try {
+            const headers: any = { 'Content-Type': 'application/json' };
+            if (demoConcierge) {
+                headers['x-demo-mode'] = 'true';
+            }
+
             const res = await fetch('/api/escape-room-concierge', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     themes: selectedThemes,
                     location: location,
