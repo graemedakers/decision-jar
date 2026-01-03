@@ -1,4 +1,4 @@
-import { Heart, Users, Briefcase, User, Film, Dumbbell, Plane, Smile, Utensils, Megaphone, Shield } from "lucide-react";
+import { Heart, Users, Briefcase, User, Film, Dumbbell, Plane, Smile, Utensils, Megaphone, Shield, Key, Trophy } from "lucide-react";
 
 export interface UseCaseStep {
     title: string;
@@ -316,6 +316,60 @@ export const USE_CASES: UseCase[] = [
             choose: {
                 title: "Automated Distribution",
                 description: "Administrators click 'Distribute Tasks'. Choose how many chores per person, and the jar assigns them randomly. No more picking favorites!"
+            }
+        }
+    },
+    {
+        slug: "escape-the-room",
+        title: "The Puzzle Masters",
+        description: "Organize an escape room challenge for your friends or team.",
+        icon: Key,
+        color: "text-amber-500",
+        jarType: "SOCIAL",
+        cta: "Find an Escape Room",
+        steps: {
+            create: {
+                title: "Use Escape Scout",
+                description: "Open the Executive Decision Suite on the dashboard and select 'Escape Room Scout'."
+            },
+            invite: {
+                title: "Gather the Squad",
+                description: "Escape rooms are best with 4-6 people. Invite your smartest friends."
+            },
+            add: {
+                title: "Choose the Vibe",
+                description: "Filter by 'Horror' for scares or 'Heist' for action. Set your difficulty level."
+            },
+            choose: {
+                title: "Book It",
+                description: "Review top-rated rooms nearby and use the direct link to book your slot."
+            }
+        }
+    },
+    {
+        slug: "sports-buddies",
+        title: "The Weekend Athlete",
+        description: "Find a regular tennis court, golf course, or pickup basketball game.",
+        icon: Trophy,
+        color: "text-emerald-500",
+        jarType: "GENERIC",
+        cta: "Find Sports Clubs",
+        steps: {
+            create: {
+                title: "Use Sports Scout",
+                description: "Open the Dashboard and select 'Sports Scout'."
+            },
+            invite: {
+                title: "Find a Partner",
+                description: "Invite a friend to your jar to share these locations."
+            },
+            add: {
+                title: "Filter by Sport",
+                description: "Select 'Tennis', 'Golf', or 'Swimming'. You can even filter for 'Public Access' only."
+            },
+            choose: {
+                title: "Hit the Court",
+                description: "Find the best facility near you, check if they are open, and go play!"
             }
         }
     }

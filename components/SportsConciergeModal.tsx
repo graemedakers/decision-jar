@@ -168,6 +168,45 @@ export function SportsConciergeModal({ isOpen, onClose, userLocation, onIdeaAdde
                                                     {sport}
                                                 </button>
                                             ))}
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Other sport..."
+                                                    className="px-3 py-1.5 rounded-l-full text-xs font-medium bg-slate-50 dark:bg-white/5 border border-r-0 border-slate-200 dark:border-white/10 focus:outline-none w-24 h-[26px]"
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            const val = e.currentTarget.value.trim();
+                                                            if (val && !selectedSports.includes(val)) {
+                                                                setSelectedSports([...selectedSports, val]);
+                                                                e.currentTarget.value = '';
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                                <button
+                                                    className="pl-1 pr-2 py-1.5 rounded-r-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 border border-l-0 border-slate-200 dark:border-white/10 h-[26px] flex items-center"
+                                                    onClick={(e) => {
+                                                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                                                        const val = input.value.trim();
+                                                        if (val && !selectedSports.includes(val)) {
+                                                            setSelectedSports([...selectedSports, val]);
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                >
+                                                    <Plus className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                                                </button>
+                                            </div>
+                                            {/* Show custom added sports as active buttons so they can be deselected */}
+                                            {selectedSports.filter(s => !SPORT_OPTIONS.includes(s)).map(sport => (
+                                                <button
+                                                    key={sport}
+                                                    onClick={() => toggleSelection(sport, selectedSports, setSelectedSports)}
+                                                    className="px-3 py-1.5 rounded-full text-xs font-medium transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                                                >
+                                                    {sport}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
 

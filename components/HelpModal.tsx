@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers, Key } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -36,8 +36,11 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "nightclub-concierge", title: "Nightclub Scout", icon: Disc },
         { id: "theatre-concierge", title: "Theatre Scout", icon: Ticket },
         { id: "movie-concierge", title: "Movie Scout", icon: Clapperboard },
+        { id: "movie-concierge", title: "Movie Scout", icon: Clapperboard },
         { id: "hotel-concierge", title: "Hotel Finder", icon: Bed },
         { id: "game-concierge", title: "Game Scout", icon: Gamepad2 },
+        { id: "escape-room-concierge", title: "Escape Room Scout", icon: Key },
+        { id: "sports-concierge", title: "Sports Scout", icon: Trophy },
         { id: "wellness-concierge", title: "Wellness & Spa", icon: Leaf },
         { id: "fitness-concierge", title: "Fitness Finder", icon: Dumbbell },
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
@@ -322,6 +325,34 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <li><strong>Preferences:</strong> Filter by Genre (e.g., Strategy, Party), Player Count, Budget, and Duration.</li>
                             <li><strong>Recommendations:</strong> Get curated picks with descriptions, difficulty levels, and price estimates.</li>
                             <li><strong>Add to Jar:</strong> Save games to your jar to play later!</li>
+                        </ul>
+                    </div>
+                );
+            case "escape-room-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Escape Room Scout <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Ready for a challenge? Find the best escape rooms nearby tailored to your group.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Themes:</strong> Filter by Horror, Mystery, Sci-Fi, Heist, and more.</li>
+                            <li><strong>Difficulty:</strong> Find rooms suited for beginners or puzzle masters.</li>
+                            <li><strong>Group Size:</strong> Ensure the room fits your party.</li>
+                        </ul>
+                    </div>
+                );
+            case "sports-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Sports Scout <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Find courts, clubs, and facilities for your favorite sports.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Sports:</strong> Search for Tennis, Golf, Swimming, Basketball, and more.</li>
+                            <li><strong>Access:</strong> Filter by "Public Access" or "Private/Membership" clubs.</li>
+                            <li><strong>Details:</strong> Get membership info and contact details instantly.</li>
                         </ul>
                     </div>
                 );

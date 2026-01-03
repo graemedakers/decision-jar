@@ -153,6 +153,9 @@ Decision Jar Premium unlocks a suite of AI-powered scouts and planners:
 Our Premium Concierge tools help you find specific venues near you:
 *   **Dining Concierge:** Find top restaurants with Google ratings and "Go Tonight" integration.
 *   **Bar Scout:** Discover speakeasies, rooftops, and local favorites.
+*   **Nightclub Scout:** Find the hottest clubs and dance venues.
+*   **Escape Room Scout:** [NEW] Find highly-rated escape rooms based on themes like Horror or Mystery.
+*   **Sports Scout:** [NEW] Locate sports clubs, tennis courts, and fitness facilities near you.
 *   **Movie Scout:** See current cinema listings or get streaming picks.
 *   **Theatre Scout:** Find live plays, musicals, and comedy shows.
 *   **Hotel Finder:** Plan staycations with boutique and luxury options.
