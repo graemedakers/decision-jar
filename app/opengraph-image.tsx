@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'edge';
 
 // Image metadata
-export const alt = 'Date Jar - Pick Your Next Date';
+export const alt = 'Spin the Jar - The Ultimate Decision Maker';
 export const size = {
     width: 1200,
     height: 630,
@@ -43,7 +43,7 @@ export default async function Image() {
                     >
                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                     </svg>
-                    <span style={{ fontWeight: 800, background: 'linear-gradient(to right, #ffffff, #94a3b8)', backgroundClip: 'text', color: 'transparent' }}>Date Jar</span>
+                    <span style={{ fontWeight: 800, background: 'linear-gradient(to right, #ffffff, #94a3b8)', backgroundClip: 'text', color: 'transparent' }}>Spin the Jar</span>
                 </div>
                 <div style={{ fontSize: 40, marginTop: 40, color: '#fda4af' }}>
                     Never ask "What should we do?" again.

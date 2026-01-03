@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Disc, Music, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star, Heart, Lock, Shirt } from "lucide-react";
 import { Button } from "./ui/Button";
 import { LocationInput } from "./LocationInput";
+import { ConciergeResultCard } from "@/components/ConciergeResultCard";
 
 interface NightClubConciergeModalProps {
     isOpen: boolean;
@@ -255,61 +256,22 @@ export function NightClubConciergeModal({ isOpen, onClose, userLocation, onIdeaA
                                     </div>
                                     <div className="grid grid-cols-1 gap-4">
                                         {recommendations.map((rec, index) => (
-                                            <div key={index} className="glass p-4 rounded-xl flex flex-col sm:flex-row gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors relative bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
-                                                <button
-                                                    onClick={() => handleFavorite(rec, "CLUB")}
-                                                    className={`absolute top-3 right-3 p-2 rounded-full transition-all z-10 ${rec.isFavorite
-                                                        ? 'text-pink-500 bg-pink-500/10'
-                                                        : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/5'
-                                                        }`}
-                                                >
-                                                    <Heart className={`w-5 h-5 ${rec.isFavorite ? 'fill-current' : ''}`} />
-                                                </button>
-
-                                                <div className="flex-1 pr-8">
-                                                    <div className="flex justify-between items-start">
-                                                        <h4 className="font-bold text-slate-900 dark:text-white text-lg">{rec.name}</h4>
-                                                        <span className="text-xs font-bold px-2 py-1 bg-slate-100 dark:bg-white/10 rounded text-slate-600 dark:text-slate-300">{rec.price}</span>
-                                                    </div>
-                                                    <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{rec.description}</p>
-                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-slate-400">
-                                                        <span className="flex items-center gap-1"><Music className="w-3 h-3" /> {rec.speciality}</span>
-                                                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {rec.address}</span>
-                                                        {rec.dress_code && (
-                                                            <span className="flex items-center gap-1"><Shirt className="w-3 h-3" /> {rec.dress_code}</span>
-                                                        )}
-                                                        {rec.google_rating && (
-                                                            <span className="flex items-center gap-1 text-yellow-400">
-                                                                <Star className="w-3 h-3 fill-yellow-400" /> {rec.google_rating}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    {rec.google_rating && (
-                                                        <button
-                                                            onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(rec.name + " " + rec.address + " reviews")}`, '_blank')}
-                                                            className="text-xs text-blue-400 hover:text-blue-300 underline mt-1 text-left"
-                                                        >
-                                                            Read Google Reviews
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                <div className="flex flex-wrap sm:flex-col gap-2 justify-start sm:justify-end">
-                                                    <Button size="sm" variant="ghost" className="text-xs" onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(rec.name + " " + rec.address)}`, '_blank')}>
-                                                        <ExternalLink className="w-4 h-4 mr-1" /> Map
-                                                    </Button>
-                                                    {rec.website && (
-                                                        <Button size="sm" variant="ghost" className="text-xs" onClick={() => window.open(rec.website, '_blank')}>
-                                                            <ExternalLink className="w-4 h-4 mr-1" /> Web
-                                                        </Button>
-                                                    )}
-                                                    <Button size="sm" onClick={() => handleAddToJar(rec, "ACTIVITY", isPrivate)} className="text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20">
-                                                        <Plus className="w-4 h-4 mr-1" /> Jar
-                                                    </Button>
-                                                    <Button size="sm" onClick={() => handleGoTonight(rec, "ACTIVITY", isPrivate)} className="text-xs bg-gradient-to-r from-indigo-400/20 to-blue-400/20 text-indigo-700 dark:text-indigo-200 border border-indigo-400/30">
-                                                        <Zap className="w-4 h-4 mr-1" /> Go Tonight
-                                                    </Button>
-                                                </div>
-                                            </div>
+                                            <ConciergeResultCard
+                                                key={index}
+                                                rec={rec}
+                                                categoryType="CLUB"
+                                                mainIcon={Music}
+                                                subtext={rec.speciality}
+                                                secondIcon={Shirt}
+                                                secondSubtext={rec.dress_code}
+                                                isPrivate={isPrivate}
+                                                onFavorite={handleFavorite}
+                                                onAddToJar={handleAddToJar}
+                                                onGoAction={handleGoTonight}
+                                                goActionLabel="Go Tonight"
+                                                goActionClass="bg-gradient-to-r from-indigo-400/20 to-blue-400/20 text-indigo-700 dark:text-indigo-200 border border-indigo-400/30"
+                                                ratingClass="text-yellow-400"
+                                            />
                                         ))}
                                     </div>
                                 </div>

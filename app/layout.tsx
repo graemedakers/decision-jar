@@ -25,7 +25,9 @@ export const metadata: Metadata = {
   description: "Stop asking \"what should we do?\" Spin the jar for ideas, sync with friends, and decide together. Perfect for groups, families, and solo decisions.",
   keywords: [
     "decision maker", "random picker", "group activities", "what to do", "idea generator",
-    "social planner", "activity picker", "choice maker", "randomizer", "community jars", "social decision making", "public groups"
+    "social planner", "activity picker", "choice maker", "randomizer", "community jars",
+    "social decision making", "public groups", "date night generator", "how to decide what to do",
+    "couple activities app", "friends hangout ideas", "weekend itinerary planner"
   ],
   authors: [{ name: "Spin the Jar Team" }],
   creator: "Spin the Jar",

@@ -150,8 +150,11 @@ export default function Home() {
       ratingValue: ratingValue,
       ratingCount: ratingCount,
     },
-    featureList: 'Decision Maker, Couple Sync, Task Allocation, Weekend Planner, Dining Concierge',
+    featureList: 'AI Date Planner, Group Decision Making, Shared Jars, Random Activity Picker, Weekend Itinerary Builder, Restaurant Finder, Event Scout',
+    applicationSubCategory: 'Social Networking',
+    permissions: 'internet',
     screenshot: `${process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'}/og-image.jpg`,
+    availableOnDevice: ['iOS', 'Android', 'Desktop'],
     mainEntity: {
       '@type': 'FAQPage',
       mainEntity: [
@@ -218,7 +221,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative w-8 h-8 rounded-lg overflow-hidden">
-              <Image src="/icon.png" alt="Logo" fill className="object-cover" />
+              <Image src="/icon.png" alt="Spin the Jar App Logo" fill className="object-cover" />
             </div>
             <span className="font-bold text-lg text-slate-800 dark:text-white tracking-tight">Spin the Jar</span>
           </div>
@@ -696,7 +699,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="relative w-6 h-6 rounded-md overflow-hidden">
-              <Image src="/icon.png" alt="Logo" fill className="object-cover" />
+              <Image src="/icon.png" alt="Spin the Jar App Logo" fill className="object-cover" />
             </div>
             <span className="font-bold text-slate-600 dark:text-slate-400">Spin the Jar</span>
           </div>

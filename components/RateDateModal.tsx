@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Star, Save, Camera, Loader2, Trash2, Utensils, Calendar, Moon, Activity, Clock, DollarSign, MapPin } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { GooglePhotosPicker } from "./GooglePhotosPicker";
 import { useRouter } from "next/navigation";
 
@@ -12,15 +12,26 @@ interface RateDateModalProps {
     onClose: () => void;
     idea: any;
     isPro?: boolean;
+    initialMode?: 'rate' | 'photos';
 }
 
-export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalProps) {
+export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rate' }: RateDateModalProps) {
     const router = useRouter();
     const [rating, setRating] = useState(0);
     const [notes, setNotes] = useState("");
     const [photoUrls, setPhotoUrls] = useState<string[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const photosRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isOpen && initialMode === 'photos' && photosRef.current) {
+            // Small timeout to allow render
+            setTimeout(() => {
+                photosRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+    }, [isOpen, initialMode]);
 
     useEffect(() => {
         if (idea) {
@@ -231,7 +242,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
                                 />
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2" ref={photosRef}>
                                 <label className="text-sm font-medium text-slate-600 dark:text-slate-400">Capture the Moment ({photoUrls.length}/3)</label>
 
                                 <div className="grid grid-cols-3 gap-3">

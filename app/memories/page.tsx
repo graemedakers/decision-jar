@@ -15,6 +15,7 @@ export default function MemoriesPage() {
     const [ideas, setIdeas] = useState<any[]>([]);
     const [favorites, setFavorites] = useState<any[]>([]);
     const [ratingIdea, setRatingIdea] = useState<any>(null);
+    const [ratingMode, setRatingMode] = useState<'rate' | 'photos'>('rate');
     const [viewingIdea, setViewingIdea] = useState<any>(null);
     const [duplicatingIdea, setDuplicatingIdea] = useState<any>(null);
     const [ideaToDelete, setIdeaToDelete] = useState<string | null>(null);
@@ -220,14 +221,14 @@ export default function MemoriesPage() {
                                     {idea.rating ? (
                                         <div
                                             className="flex items-center gap-1 cursor-pointer hover:scale-110 transition-transform bg-slate-100 dark:bg-black/20 px-3 py-1 rounded-full border border-slate-200 dark:border-white/5"
-                                            onClick={() => setRatingIdea(idea)}
+                                            onClick={() => { setRatingMode('rate'); setRatingIdea(idea); }}
                                         >
                                             <span className="text-sm font-bold mr-1 text-yellow-600 dark:text-yellow-500">{idea.rating}</span>
                                             <Star className="w-4 h-4 fill-yellow-500 dark:fill-yellow-400 text-yellow-500 dark:text-yellow-400" />
                                         </div>
                                     ) : (
                                         <button
-                                            onClick={() => setRatingIdea(idea)}
+                                            onClick={() => { setRatingMode('rate'); setRatingIdea(idea); }}
                                             className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-yellow-600 dark:hover:text-yellow-400 transition-colors px-4 py-1.5 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5"
                                         >
                                             Rate Decision
@@ -252,7 +253,7 @@ export default function MemoriesPage() {
                                     <Heart className={`w-5 h-5 ${isFavorite(idea) ? "fill-pink-500" : ""}`} />
                                 </button>
                                 <button
-                                    onClick={() => setRatingIdea(idea)}
+                                    onClick={() => { setRatingMode('photos'); setRatingIdea(idea); }}
                                     className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-green-500 dark:hover:text-green-400 transition-colors"
                                     title="Add Photos"
                                 >
@@ -303,6 +304,7 @@ export default function MemoriesPage() {
                 }}
                 idea={ratingIdea}
                 isPro={isPremium}
+                initialMode={ratingMode}
             />
 
             <AddIdeaModal
