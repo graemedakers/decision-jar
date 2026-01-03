@@ -211,6 +211,22 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                                         type="text"
                                         value={customLocation}
                                         onChange={(e) => setCustomLocation(e.target.value)}
+                                        onBlur={async () => {
+                                            if (!customLocation || customLocation.length < 3) return;
+                                            try {
+                                                const res = await fetch('/api/location/standardize', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ location: customLocation })
+                                                });
+                                                const data = await res.json();
+                                                if (data.formatted) {
+                                                    setCustomLocation(data.formatted);
+                                                }
+                                            } catch (e) {
+                                                console.error("Failed to standardize location", e);
+                                            }
+                                        }}
                                         placeholder="City, Neighborhood, or Zip"
                                         className="pl-10"
                                         onKeyDown={(e) => e.key === 'Enter' && generatePlan()}

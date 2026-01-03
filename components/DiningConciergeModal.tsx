@@ -156,6 +156,22 @@ export function DiningConciergeModal({ isOpen, onClose, userLocation, onIdeaAdde
                                             type="text"
                                             value={location}
                                             onChange={(e) => setLocation(e.target.value)}
+                                            onBlur={async () => {
+                                                if (!location || location.length < 3) return;
+                                                try {
+                                                    const res = await fetch('/api/location/standardize', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ location })
+                                                    });
+                                                    const data = await res.json();
+                                                    if (data.formatted) {
+                                                        setLocation(data.formatted);
+                                                    }
+                                                } catch (e) {
+                                                    console.error("Failed to standardize location", e);
+                                                }
+                                            }}
                                             placeholder="Current location, Neighborhood, or City"
                                             className="glass-input w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
                                         />

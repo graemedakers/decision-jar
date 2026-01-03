@@ -290,6 +290,22 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                     <Input
                                         value={location}
                                         onChange={(e) => setLocation(e.target.value)}
+                                        onBlur={async () => {
+                                            if (!location || location.length < 3) return;
+                                            try {
+                                                const res = await fetch('/api/location/standardize', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ location })
+                                                });
+                                                const data = await res.json();
+                                                if (data.formatted) {
+                                                    setLocation(data.formatted);
+                                                }
+                                            } catch (e) {
+                                                console.error("Failed to standardize location", e);
+                                            }
+                                        }}
                                         placeholder="e.g. New York, NY"
                                         required
                                         className="text-slate-900 dark:text-white"
