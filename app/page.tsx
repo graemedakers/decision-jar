@@ -2,7 +2,7 @@
 
 import { Jar3D } from "@/components/Jar3D";
 import { Button } from "@/components/ui/Button";
-import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket } from "lucide-react";
+import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -273,8 +273,8 @@ export default function Home() {
               For Everyone.
             </h1>
             <p className="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto md:mx-0 leading-relaxed break-words">
-              Stop scrolling and start doing. Our <strong>shared app for friends and families</strong> helps you curate, manage, and discover <strong>fun things to do</strong>.
-              Let fate decide your next adventure or use our <strong>smart planner</strong> for the perfect weekend.
+              Stop scrolling and start doing. Whether you're planning a date, organizing chores, or finding a local escape room, our <strong>shared app for friends, families, and couples</strong> helps you curate, manage, and discover <strong>fun things to do</strong>.
+              Let fate decide your next adventure or use our <strong>smart concierge</strong> to plan the perfect outing.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
               <Button
@@ -324,13 +324,19 @@ export default function Home() {
       <section id="features" className="py-24 px-6 relative z-10 bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-800 dark:text-white">Everything You Need for <br /><span className="text-primary dark:text-accent">Better Decisions</span></h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-slate-800 dark:text-white">The Toolkit for <br /><span className="text-primary dark:text-accent">Getting Things Done</span></h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              We've packed Spin the Jar with features designed to take the stress out of planning and put the fun back into spending time together.
+              We've evolved beyond just dates. Spin the Jar is now a powerful decision engine for your entire life, packed with AI tools to help you plan, organize, and experience more.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FeatureCard
+              icon={Key}
+              title="Escape Room Scout"
+              description="[NEW] Unlock the fun. Find highly-rated escape rooms nearby based on themes like Horror, Mystery, or Heist."
+              delay={0.18}
+            />
             <FeatureCard
               icon={Shuffle}
               title="Spin the Jar"
@@ -340,7 +346,7 @@ export default function Home() {
             <FeatureCard
               icon={Users}
               title="Sync & Collaborate"
-              description="Perfect for couples and groups. Invite friends to a shared jar and sync ideas instantly across devices."
+              description="Perfect for couples, roommates, and groups. Invite friends to a shared jar and sync ideas instantly across devices."
               delay={0.15}
             />
             <FeatureCard
@@ -408,7 +414,7 @@ export default function Home() {
             />
             <FeatureCard
               icon={Star}
-              title="Rate & Remember"
+              title="The Vault"
               description="Keep a digital scrapbook. Rate your experiences, upload photos, and cherish every moment."
               delay={0.7}
             />
@@ -635,7 +641,7 @@ export default function Home() {
                   />
                   <FaqItem
                     question="Can I save memories?"
-                    answer="Yes! Every time you complete an activity from the jar, you can add photos, ratings, and notes. These are stored in your 'Vault' as a digital scrapbook of your connection."
+                    answer="Yes! Every time you complete an activity from the jar, it's moved to 'The Vault'. There you can rate the experience, add private notes, and upload up to 3 photos to preserve the memory."
                   />
                 </div>
               </div>

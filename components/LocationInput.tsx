@@ -38,6 +38,9 @@ export function LocationInput({
     // Track the last value that was finalized/standardized to avoid redundant work
     const lastStandardizedValue = useRef<string>("");
 
+    // Track if usage of the geocoder should be blocked (e.g. because we just selected a valid place)
+    const blockStandardization = useRef(false);
+
     const updateProfileLocation = async (location: string) => {
         if (!shouldUpdate) return;
         try {
@@ -57,6 +60,8 @@ export function LocationInput({
         onPlaceSelected: (place) => {
             const formatted = place.formatted_address || place.name;
             if (formatted) {
+                // We have a valid selection, so block the blur-based standardized
+                blockStandardization.current = true;
                 lastStandardizedValue.current = formatted;
                 onChange(formatted);
                 if (shouldUpdate) {
@@ -75,6 +80,13 @@ export function LocationInput({
     });
 
     const handleStandardize = async () => {
+        // If standardization is blocked (valid place selected), reset and exit
+        if (blockStandardization.current) {
+            blockStandardization.current = false;
+            if (onBlur) onBlur();
+            return;
+        }
+
         // If the value is empty or already standardized, just call the parent's onBlur
         if (!value.trim() || value === lastStandardizedValue.current) {
             if (onBlur) onBlur();
@@ -89,6 +101,9 @@ export function LocationInput({
                 const geocoder = new google.maps.Geocoder();
                 geocoder.geocode({ address: value }, (results: any, status: any) => {
                     setIsInternalStandardizing(false);
+                    // Check block flag again in case a selection happened during the network request
+                    if (blockStandardization.current) return;
+
                     if (status === 'OK' && results && results[0]) {
                         const formatted = results[0].formatted_address;
                         lastStandardizedValue.current = formatted;
@@ -116,13 +131,25 @@ export function LocationInput({
         }
     };
 
+    const onInputBlur = () => {
+        // Use a timeout to allow onPlaceSelected to fire first if it's a click event
+        setTimeout(() => {
+            handleStandardize();
+        }, 200);
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        blockStandardization.current = false;
+        onChange(e.target.value);
+    };
+
     return (
         <div className="relative group">
             <Input
                 ref={apiKey ? (materialRef as any) : undefined}
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onBlur={handleStandardize}
+                onChange={handleInputChange}
+                onBlur={onInputBlur}
                 placeholder={placeholder}
                 disabled={disabled}
                 className={cn(

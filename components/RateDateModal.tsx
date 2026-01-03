@@ -24,8 +24,8 @@ export function RateDateModal({ isOpen, onClose, idea, isPro }: RateDateModalPro
 
     useEffect(() => {
         if (idea) {
-            setRating(0);
-            setNotes("");
+            setRating(idea.rating || 0);
+            setNotes(idea.notes || "");
 
             // Handle Photos
             if (idea.photoUrls && Array.isArray(idea.photoUrls)) {
