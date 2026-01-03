@@ -11,6 +11,7 @@ const STORAGE_KEYS = {
     USER: 'demo_user',
     AI_COUNT: 'demo_ai_count',
     WEEKEND_COUNT: 'demo_weekend_count',
+    CONCIERGE_COUNT: 'demo_concierge_count',
     LAST_SPIN: 'demo_last_spin',
 };
 
@@ -38,6 +39,9 @@ export function initializeDemoData() {
     }
     if (!localStorage.getItem(STORAGE_KEYS.WEEKEND_COUNT)) {
         localStorage.setItem(STORAGE_KEYS.WEEKEND_COUNT, '0');
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.CONCIERGE_COUNT)) {
+        localStorage.setItem(STORAGE_KEYS.CONCIERGE_COUNT, '0');
     }
 }
 
@@ -182,6 +186,35 @@ export function incrementDemoWeekendCount(): number {
  */
 export function isDemoWeekendLimitReached(): boolean {
     return getDemoWeekendCount() >= DEMO_LIMITS.WEEKEND_PLANS;
+}
+
+/**
+ * Get concierge use count
+ */
+export function getDemoConciergeCount(): number {
+    if (typeof window === 'undefined') return 0;
+
+    const count = localStorage.getItem(STORAGE_KEYS.CONCIERGE_COUNT);
+    return count ? parseInt(count, 10) : 0;
+}
+
+/**
+ * Increment concierge use count
+ */
+export function incrementDemoConciergeCount(): number {
+    if (typeof window === 'undefined') return 0;
+
+    const current = getDemoConciergeCount();
+    const newCount = current + 1;
+    localStorage.setItem(STORAGE_KEYS.CONCIERGE_COUNT, newCount.toString());
+    return newCount;
+}
+
+/**
+ * Check if concierge limit reached
+ */
+export function isConciergeLimitReached(): boolean {
+    return getDemoConciergeCount() >= DEMO_LIMITS.CONCIERGE_USES;
 }
 
 /**

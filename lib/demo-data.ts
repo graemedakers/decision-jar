@@ -151,6 +151,8 @@ export const DEMO_USER = {
 export const DEMO_LIMITS = {
     AI_REQUESTS: 2,
     WEEKEND_PLANS: 1,
+    CONCIERGE_USES: 1, // Allow one premium concierge trial
     MAX_IDEAS: 50,
     MAX_JARS: 1,
 };
+
