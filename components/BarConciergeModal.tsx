@@ -6,6 +6,8 @@ import { X, Wine, Beer, MapPin, Loader2, Sparkles, ExternalLink, Plus, Zap, Star
 import { Button } from "./ui/Button";
 import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
+import { useDemoConcierge } from "@/lib/use-demo-concierge";
+import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
 
 interface BarConciergeModalProps {
     isOpen: boolean;
@@ -20,6 +22,9 @@ import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { getCurrentLocation } from "@/lib/utils";
 
 export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, onGoTonight, onFavoriteUpdated }: BarConciergeModalProps) {
+    const demoConcierge = useDemoConcierge();
+    const [showTrialUsedPrompt, setShowTrialUsedPrompt] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
     const [isStandardizing, setIsStandardizing] = useState(false);
     const [selectedDrinks, setSelectedDrinks] = useState<string[]>([]);
@@ -72,6 +77,10 @@ export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, 
     });
 
     const handleGetRecommendations = async () => {
+        if (demoConcierge && !demoConcierge.hasUsedTrial) {
+            demoConcierge.onUse();
+        }
+
         setIsLoading(true);
         try {
             const res = await fetch('/api/bar-concierge', {
@@ -88,6 +97,12 @@ export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, 
             if (res.ok) {
                 const data = await res.json();
                 setRecommendations(data.recommendations);
+
+                if (demoConcierge && demoConcierge.triesRemaining === 0) {
+                    setTimeout(() => {
+                        setShowTrialUsedPrompt(true);
+                    }, 3000);
+                }
             } else {
                 const data = await res.json().catch(() => ({}));
                 alert(`Error ${res.status}: ${data.error || "Failed to get recommendations. Please try again."}`);
@@ -263,6 +278,15 @@ export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, 
                                             />
                                         ))}
                                     </div>
+                                </div>
+                            )}
+
+                            {showTrialUsedPrompt && demoConcierge && demoConcierge.triesRemaining === 0 && (
+                                <div className="mt-6">
+                                    <DemoUpgradePrompt
+                                        reason="premium"
+                                        message="Loved the Bar Concierge? Sign up for unlimited access to ALL 11 premium concierge tools!"
+                                    />
                                 </div>
                             )}
                         </div>
