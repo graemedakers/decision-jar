@@ -259,6 +259,15 @@ export function clearDemoData() {
 }
 
 /**
+ * Reset only concierge count (For testing)
+ */
+export function resetConciergeTrial() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(STORAGE_KEYS.CONCIERGE_COUNT);
+    window.location.reload();
+}
+
+/**
  * Export demo data for migration to real account
  */
 export function exportDemoData() {

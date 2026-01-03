@@ -19,6 +19,7 @@ import {
     DEMO_LIMITS,
     getDemoConciergeCount,
     isConciergeLimitReached,
+    resetConciergeTrial,
 } from '@/lib/demo-storage';
 import { DiningConciergeModal } from '@/components/DiningConciergeModal';
 import { BarConciergeModal } from '@/components/BarConciergeModal';
@@ -342,6 +343,16 @@ export default function DemoPage() {
                     {!showAILimitPrompt && !showSavePrompt && !showConciergeUpgrade && ideas.length >= 3 && (
                         <DemoUpgradePrompt reason="general" />
                     )}
+                </div>
+
+                {/* Dev Helper - Hidden in Production normally, but useful for Demo */}
+                <div className="mt-8 text-center opacity-30 hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={resetConciergeTrial}
+                        className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline"
+                    >
+                        (Dev) Reset Trial Status
+                    </button>
                 </div>
             </main>
 
