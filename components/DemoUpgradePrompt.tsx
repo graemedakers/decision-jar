@@ -102,30 +102,28 @@ export function DemoUpgradePrompt({ reason = 'general', message, compact = false
                         <X className="w-4 h-4" />
                     </button>
 
-                    <div className="flex items-start gap-4">
-                        <div className="p-3 bg-white/20 rounded-xl">
-                            <Icon className="w-6 h-6" />
+                    <div className="flex flex-col items-center text-center gap-4 relative z-10">
+                        <div className="p-4 bg-white/20 rounded-2xl shadow-inner backdrop-blur-sm ring-1 ring-white/30">
+                            <Icon className="w-8 h-8 drop-shadow-sm" />
                         </div>
 
-                        <div className="flex-1">
-                            <h3 className="font-bold text-lg mb-1">{config.title}</h3>
-                            <p className="text-white/90 text-sm mb-4">
+                        <div className="space-y-2 max-w-lg">
+                            <h3 className="font-black text-2xl tracking-tight">{config.title}</h3>
+                            <p className="text-white/90 text-sm md:text-base font-medium leading-relaxed">
                                 {message || config.message}
                             </p>
 
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                                 <Button
                                     onClick={handleSignup}
-                                    className="bg-white text-gray-900 hover:bg-white/90 font-semibold"
-                                    size="sm"
+                                    className="bg-white text-slate-900 hover:bg-white/90 font-bold shadow-lg hover:scale-105 active:scale-95 transition-all text-sm md:text-base px-6 h-11"
                                 >
                                     {config.cta}
                                 </Button>
                                 <Button
                                     onClick={() => setDismissed(true)}
                                     variant="ghost"
-                                    className="text-white hover:bg-white/20"
-                                    size="sm"
+                                    className="text-white hover:bg-white/20 font-medium h-11"
                                 >
                                     Maybe Later
                                 </Button>
