@@ -114,6 +114,15 @@ export async function POST(request: Request) {
         `;
 
         const result = await reliableGeminiCall(prompt);
+
+        // Add IMDB search URLs for each recommendation (more reliable than AI-generated URLs)
+        if (result.recommendations && Array.isArray(result.recommendations)) {
+            result.recommendations = result.recommendations.map((rec: any) => ({
+                ...rec,
+                website: `https://www.imdb.com/find/?q=${encodeURIComponent(rec.name)}`
+            }));
+        }
+
         return NextResponse.json(result);
 
     } catch (error: any) {
