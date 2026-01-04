@@ -93,7 +93,7 @@ export default function DemoPage() {
             return;
         }
 
-        trackEvent('spin_jar', 'ACTION', 1, { demo: true, ideaCount: availableIdeas.length });
+        trackEvent('demo_jar_spun', { demo: true, ideaCount: availableIdeas.length });
         setSpinning(true);
 
         setTimeout(() => {
