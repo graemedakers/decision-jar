@@ -2,7 +2,7 @@
 
 import { Jar3D } from "@/components/Jar3D";
 import { Button } from "@/components/ui/Button";
-import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key } from "lucide-react";
+import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key, Book } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -338,9 +338,15 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FeatureCard
+              icon={Book}
+              title="Book Finder"
+              description="[NEW] Curated lists for your next read. Filter by genre, vibe, and era to discover books you'll actually finish."
+              delay={0.12}
+            />
+            <FeatureCard
               icon={Key}
               title="Escape Room Scout"
-              description="[NEW] Unlock the fun. Find highly-rated escape rooms nearby based on themes like Horror, Mystery, or Heist."
+              description="Unlock the fun. Find highly-rated escape rooms nearby based on themes like Horror, Mystery, or Heist."
               delay={0.18}
             />
             <FeatureCard
