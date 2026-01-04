@@ -29,6 +29,8 @@ import { PremiumBlockerModal } from '@/components/PremiumBlockerModal';
 import { Utensils, Wine, Film, Key } from 'lucide-react';
 import { useDemoConcierge } from '@/lib/use-demo-concierge';
 import { trackEvent } from '@/lib/analytics';
+import { BookConciergeModal } from '@/components/BookConciergeModal';
+import { Book } from 'lucide-react';
 
 export default function DemoPage() {
     const router = useRouter();
@@ -47,6 +49,7 @@ export default function DemoPage() {
     const [barModalOpen, setBarModalOpen] = useState(false);
     const [movieModalOpen, setMovieModalOpen] = useState(false);
     const [escapeModalOpen, setEscapeModalOpen] = useState(false);
+    const [bookModalOpen, setBookModalOpen] = useState(false);
 
     // Concierge Trial State
     const demoConcierge = useDemoConcierge();
@@ -332,6 +335,18 @@ export default function DemoPage() {
                             </div>
                             <span className="font-semibold text-slate-900 dark:text-white">Escape Room</span>
                         </Button>
+
+                        {/* Book Finder */}
+                        <Button
+                            variant="outline"
+                            className="h-auto py-6 flex flex-col gap-2 border-slate-200 dark:border-slate-800 hover:border-blue-500/50 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all"
+                            onClick={() => handleConciergeClick(() => setBookModalOpen(true))}
+                        >
+                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                <Book className="w-5 h-5" />
+                            </div>
+                            <span className="font-semibold text-slate-900 dark:text-white">Book Finder</span>
+                        </Button>
                     </div>
                 </div>
 
@@ -400,6 +415,12 @@ export default function DemoPage() {
                 isOpen={escapeModalOpen}
                 onClose={() => setEscapeModalOpen(false)}
                 onIdeaAdded={loadDemoData}
+            />
+            <BookConciergeModal
+                isOpen={bookModalOpen}
+                onClose={() => setBookModalOpen(false)}
+                onIdeaAdded={loadDemoData}
+                demoConcierge={demoConcierge ?? undefined}
             />
         </div>
     );
