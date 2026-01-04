@@ -22,15 +22,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'),
   title: {
-    default: "Spin the Jar | The Ultimate Decision Maker",
+    default: "Spin the Jar | AI Date Night Planner for Couples",
     template: "%s | Spin the Jar",
   },
-  description: "Stop asking \"what should we do?\" Spin the jar for ideas, sync with friends, and decide together. Perfect for groups, families, and solo decisions.",
+  description: "Never waste 30 minutes deciding where to eat. Your AI-powered decision maker for date nights, friend hangs, and family adventures. We find perfect places, you spin to decide. No more arguments.",
   keywords: [
-    "decision maker", "random picker", "group activities", "what to do", "idea generator",
-    "social planner", "activity picker", "choice maker", "randomizer", "community jars",
-    "social decision making", "public groups", "date night generator", "how to decide what to do",
-    "couple activities app", "friends hangout ideas", "weekend itinerary planner"
+    "date night planner", "couples app", "AI date ideas", "what to do on a date", "date night ideas",
+    "restaurant finder", "AI concierge", "decision maker for couples", "date night app", "romantic ideas",
+    "couples activities", "relationship app", "dinner date ideas", "weekend date planner",
+    "eliminate decision fatigue", "AI restaurant recommendations", "date planning assistant",
+    "spin the jar", "random date picker", "couples decision maker"
   ],
   authors: [{ name: "Spin the Jar Team" }],
   creator: "Spin the Jar",
@@ -56,23 +57,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: process.env.NEXT_PUBLIC_APP_URL || "https://spinthejar.com",
-    title: "Spin the Jar | Make Decisions Together",
-    description: "Stop asking 'What do you want to do?'. Let Spin the Jar decide.",
+    title: "Spin the Jar | Never Waste 30 Minutes Deciding Where to Eat",
+    description: "Your AI-powered decision maker for date nights and hangouts. We find perfect places to go, you spin to decide. No more arguments. No more analysis paralysis.",
     siteName: "Spin the Jar",
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Spin the Jar Preview',
+        alt: 'Spin the Jar - AI Date Night Planner',
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Spin the Jar | Make Decisions Together",
-    description: "A fun way for friends and families to decide what to do.",
+    title: "Spin the Jar | AI Date Night Planner",
+    description: "Never waste 30 minutes deciding where to eat. AI finds perfect spots, you spin to decide. No arguments!",
     images: ['/opengraph-image.png'],
+    creator: "@spinthejar",
   },
   category: "lifestyle",
 };
