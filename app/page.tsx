@@ -2,7 +2,7 @@
 
 import { Jar3D } from "@/components/Jar3D";
 import { Button } from "@/components/ui/Button";
-import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key, Book, Menu } from "lucide-react";
+import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key, Book, Menu, ChefHat, Gamepad2, Trophy } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -473,10 +473,28 @@ export default function Home() {
               delay={0.65}
             />
             <FeatureCard
+              icon={Gamepad2}
+              title="Game Finder"
+              description="Find board game cafes, arcades, and gaming venues. Level up your social plans."
+              delay={0.68}
+            />
+            <FeatureCard
+              icon={Trophy}
+              title="Sports Scout"
+              description="Find clubs, courts, and facilities for solo or joint activities. Get active together."
+              delay={0.72}
+            />
+            <FeatureCard
+              icon={ChefHat}
+              title="Catering Planner"
+              description="Plan menus for parties and gatherings. AI-powered meal planning for every occasion."
+              delay={0.75}
+            />
+            <FeatureCard
               icon={Star}
               title="The Vault"
               description="Keep a digital scrapbook. Rate your experiences, upload photos, and cherish every moment."
-              delay={0.7}
+              delay={0.78}
             />
           </div>
         </div>

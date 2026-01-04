@@ -286,6 +286,9 @@ export default function DemoPage() {
                             1 FREE TRIAL LEFT
                         </span>
                     </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                        Try one of our AI-powered concierge tools for free. Premium includes 15+ specialized tools for dining, entertainment, wellness, and more.
+                    </p>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {/* Dining */}
