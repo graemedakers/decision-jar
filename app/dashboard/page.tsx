@@ -54,6 +54,7 @@ import { AdminControlsModal } from "@/components/AdminControlsModal";
 import { CateringPlannerModal } from "@/components/CateringPlannerModal";
 import { resetConciergeTrial } from "@/lib/demo-storage";
 import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
+import { EmptyJarMessage } from "@/components/EmptyJarMessage";
 
 interface UserData {
     id: string;
@@ -1008,42 +1009,53 @@ export default function DashboardPage() {
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="relative w-full aspect-square max-w-[450px] flex items-center justify-center">
-                                                {/* Cinematic Podium / Stage */}
-                                                <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[70%] h-[15%] rounded-[100%] bg-gradient-to-t from-slate-200 dark:from-white/10 to-transparent blur-md opacity-50" />
-                                                <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[40%] h-[20px] rounded-[100%] bg-slate-400/20 dark:bg-white/5 blur-sm" />
+                                            {/* Show empty state message when no ideas */}
+                                            {!isLoadingIdeas && availableIdeasCount === 0 ? (
+                                                <EmptyJarMessage
+                                                    onOpenTemplates={() => setIsTemplateBrowserOpen(true)}
+                                                    onAddIdea={() => setIsModalOpen(true)}
+                                                />
+                                            ) : (
+                                                <>
+                                                    <div className="relative w-full aspect-square max-w-[450px] flex items-center justify-center">
+                                                        {/* Cinematic Podium / Stage */}
+                                                        <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[70%] h-[15%] rounded-[100%] bg-gradient-to-t from-slate-200 dark:from-white/10 to-transparent blur-md opacity-50" />
+                                                        <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[40%] h-[20px] rounded-[100%] bg-slate-400/20 dark:bg-white/5 blur-sm" />
 
-                                                {/* Decorative Rings */}
-                                                <div className="absolute inset-0 border-[1px] border-slate-200 dark:border-white/5 rounded-full scale-[0.85] opacity-50 animate-[spin_20s_linear_infinite]" />
-                                                <div className="absolute inset-0 border-[1px] border-slate-200 dark:border-white/5 rounded-full scale-[0.95] opacity-20 animate-[spin_30s_linear_infinite_reverse]" />
+                                                        {/* Decorative Rings */}
+                                                        <div className="absolute inset-0 border-[1px] border-slate-200 dark:border-white/5 rounded-full scale-[0.85] opacity-50 animate-[spin_20s_linear_infinite]" />
+                                                        <div className="absolute inset-0 border-[1px] border-slate-200 dark:border-white/5 rounded-full scale-[0.95] opacity-20 animate-[spin_30s_linear_infinite_reverse]" />
 
-                                                <div className="relative z-10 scale-110 transform transition-all hover:scale-125 duration-700 cursor-help">
-                                                    <Jar3D />
-                                                </div>
-                                            </div>
-                                            <div className="mt-4 relative z-10 text-center">
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    className="flex flex-col items-center"
-                                                >
-                                                    {isLoadingIdeas ? (
-                                                        <div className="h-12 flex items-center justify-center">
-                                                            <div className="flex gap-1">
-                                                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
-                                                            </div>
+                                                        <div className="relative z-10 scale-110 transform transition-all hover:scale-125 duration-700 cursor-help">
+                                                            <Jar3D />
                                                         </div>
-                                                    ) : (
-                                                        <p className="text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">{availableIdeasCount}</p>
-                                                    )}
-                                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mt-1">Ready for Selection</p>
-                                                </motion.div>
-                                            </div>
+                                                    </div>
+                                                    <div className="mt-4 relative z-10 text-center">
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: 10 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            className="flex flex-col items-center"
+                                                        >
+                                                            {isLoadingIdeas ? (
+                                                                <div className="h-12 flex items-center justify-center">
+                                                                    <div className="flex gap-1">
+                                                                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                                                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                                                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">{availableIdeasCount}</p>
+                                                            )}
+                                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mt-1">Ready for Selection</p>
+                                                        </motion.div>
+                                                    </div>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                 </div>
+
 
                                 {/* Right Column: Action & History */}
                                 <div className="space-y-6 order-3 xl:order-3">
