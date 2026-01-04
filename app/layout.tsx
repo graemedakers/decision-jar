@@ -79,14 +79,36 @@ export const metadata: Metadata = {
   category: "lifestyle",
 };
 
+
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": "WebApplication",
   "name": "Spin the Jar",
+  "description": "AI-powered decision maker for date nights and hangouts. Never waste 30 minutes deciding where to eat again.",
   "url": "https://spinthejar.com",
-  "logo": "https://spinthejar.com/icon.png",
-  "sameAs": [
-    "https://twitter.com/spinthejar"
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "1250"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "Spin the Jar Team",
+    "url": "https://spinthejar.com"
+  },
+  "features": [
+    "AI-powered restaurant recommendations",
+    "Decision maker for couples",
+    "Pre-filled date night templates",
+    "Social collaboration features",
+    "Random idea picker"
   ]
 };
 
