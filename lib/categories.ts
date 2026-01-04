@@ -1,4 +1,4 @@
-import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map as MapIcon, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap, Bed, Bug, Code, PenTool, Search, FileText } from "lucide-react";
+import { Activity, Utensils, Calendar, Coffee, Popcorn, ShoppingBag, Briefcase, Home, Loader, Beer, Clapperboard, PartyPopper, CheckSquare, Sparkles, Book, Plane, Car, Map as MapIcon, Music, Headphones, Dumbbell, Gamepad2, Dices, Brain, Leaf, Ticket, Footprints, Moon, Trophy, Users, User, Heart, Wine, Disc, Speaker, Martini, ChefHat, Pizza, Star, Zap, Bed, Bug, Code, PenTool, Search, FileText } from "lucide-react";
 
 export interface CategoryDef {
     id: string;
@@ -101,6 +101,15 @@ export const TOPIC_CATEGORIES: Record<string, CategoryDef[]> = {
         { id: "BAKING", label: "Baking", icon: ChefHat, placeholder: "e.g. Sourdough Bread" },
         { id: "CATERING", label: "Dinner Party", icon: Users, placeholder: "e.g. 3-Course Mediterranean Plan" },
         { id: "MEAL_PREP", label: "Meal Prep", icon: Calendar, placeholder: "e.g. Weekly Chicken Bowls" },
+    ],
+    "Books": [
+        { id: "FICTION", label: "Fiction", icon: Book, placeholder: "e.g. The Great Gatsby" },
+        { id: "NON_FICTION", label: "Non-Fiction", icon: CheckSquare, placeholder: "e.g. Sapiens" },
+        { id: "SCI_FI", label: "Sci-Fi/Fantasy", icon: Sparkles, placeholder: "e.g. Dune" },
+        { id: "MYSTERY", label: "Mystery/Thriller", icon: Search, placeholder: "e.g. Gone Girl" },
+        { id: "ROMANCE", label: "Romance", icon: Heart, placeholder: "e.g. Pride and Prejudice" },
+        { id: "BIOGRAPHY", label: "Bio/Memoir", icon: User, placeholder: "e.g. Becoming" },
+        { id: "SELF_HELP", label: "Self-Help", icon: Brain, placeholder: "e.g. Atomic Habits" },
     ]
 };
 
@@ -217,6 +226,14 @@ export const TOPIC_THEMES: Record<string, TopicTheme> = {
         gradientTo: "to-orange-500",
         bgBlob1: "bg-amber-500/10",
         bgBlob2: "bg-orange-600/10"
+    },
+    "Books": {
+        primary: "indigo-500",
+        secondary: "blue-600",
+        gradientFrom: "from-indigo-400",
+        gradientTo: "to-blue-600",
+        bgBlob1: "bg-indigo-500/10",
+        bgBlob2: "bg-blue-600/10"
     }
 };
 

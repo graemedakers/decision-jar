@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Plus, Users, User, Heart, Check, LogOut, Loader2, MoreVertical, Trash2, Utensils, Film, PartyPopper, CheckSquare, Sparkles, Layers } from "lucide-react";
+import { ChevronDown, Plus, Users, User, Heart, Check, LogOut, Loader2, MoreVertical, Trash2, Utensils, Film, PartyPopper, CheckSquare, Sparkles, Layers, Book } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CreateJarModal } from "./CreateJarModal";
@@ -30,6 +30,7 @@ const getJarIcon = (jar: Jar, className?: string) => {
         case "Movies": return <Film className={className} />;
         case "Activities": return <PartyPopper className={className} />;
         case "Chores": return <CheckSquare className={className} />;
+        case "Books": return <Book className={className} />;
         // Fallback or Generic
         default:
             if (jar.type === 'ROMANTIC') return <Heart className={className} />;
