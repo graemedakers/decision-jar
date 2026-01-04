@@ -3,15 +3,18 @@
 import { useState } from 'react';
 import { Share2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { trackShareClicked } from '@/lib/analytics';
 
 interface ShareButtonProps {
     title: string;
     description: string;
     url?: string;
     className?: string;
+    source?: string; // e.g., 'dining_concierge', 'bar_concierge'
+    contentType?: string; // e.g., 'restaurant', 'bar'
 }
 
-export function ShareButton({ title, description, url, className = '' }: ShareButtonProps) {
+export function ShareButton({ title, description, url, className = '', source = 'unknown', contentType = 'recommendation' }: ShareButtonProps) {
     const [copied, setCopied] = useState(false);
     const [sharing, setSharing] = useState(false);
 
@@ -24,6 +27,9 @@ export function ShareButton({ title, description, url, className = '' }: ShareBu
 
     const handleShare = async () => {
         setSharing(true);
+
+        // Track the share action
+        trackShareClicked(source, contentType);
 
         try {
             // Check if Web Share API is available

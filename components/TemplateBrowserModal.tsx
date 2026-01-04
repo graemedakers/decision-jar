@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { JAR_TEMPLATES, type JarTemplate } from '@/lib/jar-templates';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { trackTemplateBrowsed, trackTemplateUsed } from '@/lib/analytics';
 
 interface TemplateBrowserModalProps {
     isOpen: boolean;
@@ -29,6 +30,13 @@ export function TemplateBrowserModal({
     const [selectedTemplate, setSelectedTemplate] = useState<JarTemplate | null>(null);
     const [dialogChoice, setDialogChoice] = useState<'new' | 'current'>('new');
 
+    // Track when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            trackTemplateBrowsed();
+        }
+    }, [isOpen]);
+
     const handleTemplateClick = (template: JarTemplate) => {
         setSelectedTemplate(template);
 
@@ -48,8 +56,10 @@ export function TemplateBrowserModal({
         setShowChoiceDialog(false);
 
         if (dialogChoice === 'new') {
+            trackTemplateUsed(selectedTemplate.id, selectedTemplate.name, 'new_jar');
             handleCreateNewJar(selectedTemplate.id);
         } else {
+            trackTemplateUsed(selectedTemplate.id, selectedTemplate.name, 'add_to_current');
             handleAddToCurrentJar(selectedTemplate.id);
         }
     };
@@ -173,8 +183,8 @@ export function TemplateBrowserModal({
                                 {/* Option 1: Create New Jar */}
                                 <label
                                     className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${dialogChoice === 'new'
-                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                                         }`}
                                 >
                                     <input
@@ -187,8 +197,8 @@ export function TemplateBrowserModal({
                                     />
                                     <div className="flex items-start gap-3">
                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${dialogChoice === 'new'
-                                                ? 'border-purple-500 bg-purple-500'
-                                                : 'border-slate-300 dark:border-slate-600'
+                                            ? 'border-purple-500 bg-purple-500'
+                                            : 'border-slate-300 dark:border-slate-600'
                                             }`}>
                                             {dialogChoice === 'new' && (
                                                 <Check className="w-3 h-3 text-white" />
@@ -208,8 +218,8 @@ export function TemplateBrowserModal({
                                 {/* Option 2: Add to Current Jar */}
                                 <label
                                     className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${dialogChoice === 'current'
-                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                                         }`}
                                 >
                                     <input
@@ -222,8 +232,8 @@ export function TemplateBrowserModal({
                                     />
                                     <div className="flex items-start gap-3">
                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${dialogChoice === 'current'
-                                                ? 'border-purple-500 bg-purple-500'
-                                                : 'border-slate-300 dark:border-slate-600'
+                                            ? 'border-purple-500 bg-purple-500'
+                                            : 'border-slate-300 dark:border-slate-600'
                                             }`}>
                                             {dialogChoice === 'current' && (
                                                 <Check className="w-3 h-3 text-white" />

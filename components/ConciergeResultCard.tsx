@@ -131,6 +131,8 @@ export function ConciergeResultCard({
                 <ShareButton
                     title={`${getRecommendationEmoji(categoryType)} ${rec.name}`}
                     description={getShareDescription(rec, categoryType)}
+                    source={categoryType.toLowerCase() + '_concierge'}
+                    contentType={categoryType.toLowerCase()}
                     className="text-xs h-8"
                 />
 

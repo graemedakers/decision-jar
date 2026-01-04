@@ -8,6 +8,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PWAInstaller } from "@/components/PWAInstaller";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
+import { PostHogProvider } from "@/components/PostHogProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -170,13 +171,15 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {children}
-        <PWAInstaller />
-        <InstallPrompt />
-        <BottomNav />
-        <UserStatus />
-        <HelpButton />
-        <AnalyticsProvider />
+        <PostHogProvider>
+          {children}
+          <PWAInstaller />
+          <InstallPrompt />
+          <BottomNav />
+          <UserStatus />
+          <HelpButton />
+          <AnalyticsProvider />
+        </PostHogProvider>
       </body>
     </html>
   );
