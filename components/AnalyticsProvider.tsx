@@ -11,7 +11,7 @@ function AnalyticsLogic() {
 
     useEffect(() => {
         // Track page view
-        trackEvent('page_view', 'VIEW', 1, {
+        trackEvent('page_view', {
             path: pathname,
             query: searchParams?.toString()
         });
@@ -21,8 +21,9 @@ function AnalyticsLogic() {
         // Filter for the metrics we care about: CLS, FID, LCP (proxy for TTFMP)
         // Also INP, FCP, TTFB are available
         if (['CLS', 'FID', 'LCP', 'FCP', 'TTFB', 'INP'].includes(metric.name)) {
-            trackEvent(metric.name, 'WEB_VITALS', metric.value, {
+            trackEvent(`web_vitals_${metric.name.toLowerCase()}`, {
                 id: metric.id,
+                value: metric.value,
                 rating: metric.rating, // 'good' | 'needs-improvement' | 'poor'
                 delta: metric.delta,
                 navigationType: metric.navigationType
