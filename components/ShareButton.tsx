@@ -28,22 +28,12 @@ export function ShareButton({ title, description, url, className = '' }: ShareBu
         try {
             // Check if Web Share API is available
             if (navigator.share) {
-                // Detect if mobile for better WhatsApp compatibility
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-                if (isMobile) {
-                    // Mobile: Combine everything for better WhatsApp/messaging app compatibility
-                    await navigator.share({
-                        text: shareText,
-                    });
-                } else {
-                    // Desktop: Separate fields for better app compatibility
-                    await navigator.share({
-                        title: title,
-                        text: description + '\n\nFound via Spin the Jar ✨',
-                        url: trackingUrl,
-                    });
-                }
+                // Use combined format for best compatibility across all platforms
+                // This works well for WhatsApp (both mobile and web), Instagram, 
+                // Twitter, Messages, and most other sharing destinations
+                await navigator.share({
+                    text: shareText,
+                });
             } else {
                 // Fallback: Copy to clipboard
                 await navigator.clipboard.writeText(shareText);
