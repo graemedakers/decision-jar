@@ -26,13 +26,24 @@ export function ShareButton({ title, description, url, className = '' }: ShareBu
         setSharing(true);
 
         try {
-            // Check if Web Share API is available (mobile devices)
+            // Check if Web Share API is available
             if (navigator.share) {
-                // For better compatibility with WhatsApp and other apps,
-                // combine everything into the text field
-                await navigator.share({
-                    text: shareText, // This includes title, description, branding, and URL
-                });
+                // Detect if mobile for better WhatsApp compatibility
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+                if (isMobile) {
+                    // Mobile: Combine everything for better WhatsApp/messaging app compatibility
+                    await navigator.share({
+                        text: shareText,
+                    });
+                } else {
+                    // Desktop: Separate fields for better app compatibility
+                    await navigator.share({
+                        title: title,
+                        text: description + '\n\nFound via Spin the Jar ✨',
+                        url: trackingUrl,
+                    });
+                }
             } else {
                 // Fallback: Copy to clipboard
                 await navigator.clipboard.writeText(shareText);
