@@ -225,12 +225,13 @@ export default function Home() {
             </div>
             <span className="font-bold text-lg text-slate-800 dark:text-white tracking-tight">Spin the Jar</span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/guide" className="hidden md:block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+          <div className="flex items-center gap-4 md:gap-6">
+            <Link href="/guide" className="hidden sm:block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
               How it Works
             </Link>
-            <Link href="/learn" className="hidden lg:block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
-              Learning Center
+            <Link href="/learn" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+              <span className="hidden md:inline">Learning Center</span>
+              <span className="md:hidden">Learn</span>
             </Link>
             <div className="flex items-center gap-4">
               {user ? (
