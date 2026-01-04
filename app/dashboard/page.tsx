@@ -690,6 +690,9 @@ export default function DashboardPage() {
                 <TemplateBrowserModal
                     isOpen={isTemplateBrowserOpen}
                     onClose={() => setIsTemplateBrowserOpen(false)}
+                    currentJarId={userData?.activeJarId}
+                    currentJarName={userData?.jarName || null}
+                    hasJars={(userData?.memberships?.length || 0) > 0}
                 />
 
 

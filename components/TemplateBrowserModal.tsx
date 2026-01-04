@@ -10,14 +10,51 @@ import { useRouter } from 'next/navigation';
 interface TemplateBrowserModalProps {
     isOpen: boolean;
     onClose: () => void;
+    currentJarId?: string | null;
+    currentJarName?: string | null;
+    hasJars?: boolean;
 }
 
-export function TemplateBrowserModal({ isOpen, onClose }: TemplateBrowserModalProps) {
+export function TemplateBrowserModal({
+    isOpen,
+    onClose,
+    currentJarId = null,
+    currentJarName = null,
+    hasJars = false
+}: TemplateBrowserModalProps) {
     const router = useRouter();
     const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null);
     const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
+    const [showChoiceDialog, setShowChoiceDialog] = useState(false);
+    const [selectedTemplate, setSelectedTemplate] = useState<JarTemplate | null>(null);
+    const [dialogChoice, setDialogChoice] = useState<'new' | 'current'>('new');
 
-    const handleUseTemplate = async (templateId: string) => {
+    const handleTemplateClick = (template: JarTemplate) => {
+        setSelectedTemplate(template);
+
+        // If they have jars and a current jar, show choice dialog
+        if (hasJars && currentJarId) {
+            setDialogChoice('new'); // Default to new jar
+            setShowChoiceDialog(true);
+        } else {
+            // No jars yet or not on a jar - just create new
+            handleCreateNewJar(template.id);
+        }
+    };
+
+    const handleConfirmChoice = () => {
+        if (!selectedTemplate) return;
+
+        setShowChoiceDialog(false);
+
+        if (dialogChoice === 'new') {
+            handleCreateNewJar(selectedTemplate.id);
+        } else {
+            handleAddToCurrentJar(selectedTemplate.id);
+        }
+    };
+
+    const handleCreateNewJar = async (templateId: string) => {
         setCreatingTemplate(templateId);
 
         try {
@@ -42,6 +79,36 @@ export function TemplateBrowserModal({ isOpen, onClose }: TemplateBrowserModalPr
         } catch (error) {
             console.error('Error creating jar from template:', error);
             alert('Failed to create jar. Please try again.');
+        } finally {
+            setCreatingTemplate(null);
+        }
+    };
+
+    const handleAddToCurrentJar = async (templateId: string) => {
+        if (!currentJarId) return;
+
+        setCreatingTemplate(templateId);
+
+        try {
+            const response = await fetch('/api/jar/add-template-ideas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ templateId, jarId: currentJarId })
+            });
+
+            if (!response.ok) throw new Error('Failed to add ideas to jar');
+
+            const result = await response.json();
+
+            // Close modal and refresh to show new ideas
+            onClose();
+            router.refresh();
+
+            // Show success message
+            alert(`Successfully added ${result.count} ideas to your jar!`);
+        } catch (error) {
+            console.error('Error adding template ideas to jar:', error);
+            alert('Failed to add ideas to jar. Please try again.');
         } finally {
             setCreatingTemplate(null);
         }
@@ -77,7 +144,7 @@ export function TemplateBrowserModal({ isOpen, onClose }: TemplateBrowserModalPr
                             <TemplateCard
                                 key={template.id}
                                 template={template}
-                                onUse={() => handleUseTemplate(template.id)}
+                                onUse={() => handleTemplateClick(template)}
                                 isCreating={creatingTemplate === template.id}
                                 isExpanded={expandedTemplate === template.id}
                                 onToggleExpand={() => setExpandedTemplate(
@@ -87,6 +154,116 @@ export function TemplateBrowserModal({ isOpen, onClose }: TemplateBrowserModalPr
                         ))}
                     </div>
                 </div>
+
+                {/* Choice Dialog Overlay */}
+                {showChoiceDialog && selectedTemplate && (
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                                    How would you like to use this template?
+                                </h3>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                    {selectedTemplate.name.replace(/^[^\w\s]+\s*/, '')} •{' '}
+                                    {selectedTemplate.ideas.length} ideas
+                                </p>
+                            </div>
+
+                            <div className="space-y-3">
+                                {/* Option 1: Create New Jar */}
+                                <label
+                                    className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${dialogChoice === 'new'
+                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                        }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="template-choice"
+                                        value="new"
+                                        checked={dialogChoice === 'new'}
+                                        onChange={(e) => setDialogChoice(e.target.value as 'new' | 'current')}
+                                        className="sr-only"
+                                    />
+                                    <div className="flex items-start gap-3">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${dialogChoice === 'new'
+                                                ? 'border-purple-500 bg-purple-500'
+                                                : 'border-slate-300 dark:border-slate-600'
+                                            }`}>
+                                            {dialogChoice === 'new' && (
+                                                <Check className="w-3 h-3 text-white" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-slate-900 dark:text-white mb-1">
+                                                Create new jar from template
+                                            </div>
+                                            <div className="text-sm text-slate-600 dark:text-slate-400">
+                                                Recommended • Keeps your jars organized by topic
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                {/* Option 2: Add to Current Jar */}
+                                <label
+                                    className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${dialogChoice === 'current'
+                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                        }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="template-choice"
+                                        value="current"
+                                        checked={dialogChoice === 'current'}
+                                        onChange={(e) => setDialogChoice(e.target.value as 'new' | 'current')}
+                                        className="sr-only"
+                                    />
+                                    <div className="flex items-start gap-3">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${dialogChoice === 'current'
+                                                ? 'border-purple-500 bg-purple-500'
+                                                : 'border-slate-300 dark:border-slate-600'
+                                            }`}>
+                                            {dialogChoice === 'current' && (
+                                                <Check className="w-3 h-3 text-white" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-slate-900 dark:text-white mb-1">
+                                                Add ideas to current jar
+                                            </div>
+                                            <div className="text-sm text-slate-600 dark:text-slate-400">
+                                                "{currentJarName || 'Current Jar'}"
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex gap-3 pt-2">
+                                <Button
+                                    onClick={() => {
+                                        setShowChoiceDialog(false);
+                                        setSelectedTemplate(null);
+                                    }}
+                                    variant="outline"
+                                    className="flex-1"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={handleConfirmChoice}
+                                    className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none"
+                                >
+                                    Continue
+                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </DialogContent>
         </Dialog>
     );
