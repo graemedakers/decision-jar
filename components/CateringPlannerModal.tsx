@@ -106,7 +106,7 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                         </div>
 
                         {/* Form */}
-                        <div className="p-8 overflow-y-auto flex-1 space-y-8 custom-scrollbar">
+                        <div className="p-4 md:p-8 overflow-y-auto flex-1 space-y-8 custom-scrollbar">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Input Groups */}
                                 <div className="space-y-2">
@@ -228,7 +228,7 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
 
                                     <div className="grid grid-cols-1 gap-4 md:gap-6 pb-20 md:pb-0">
                                         {recommendations.map((option, idx) => (
-                                            <div key={idx} className="group glass-card border-none md:border border-slate-200 dark:border-white/10 overflow-hidden rounded-xl md:rounded-[2rem] hover:shadow-2xl transition-all duration-500 bg-slate-50 md:bg-white dark:bg-white/5 mx-[-1rem] md:mx-0">
+                                            <div key={idx} className="group glass-card border-y md:border md:border-slate-200 dark:border-white/10 overflow-hidden rounded-none md:rounded-[2rem] hover:shadow-2xl transition-all duration-500 bg-slate-50 md:bg-white dark:bg-white/5 mx-[-1rem] md:mx-0">
                                                 <div className="p-4 md:p-8">
                                                     <div className="flex justify-between items-start mb-4 gap-4">
                                                         <div className="flex-1 min-w-0">
@@ -294,15 +294,15 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                                                     </div>
 
                                                                     {/* Strategy */}
-                                                                    <div className="bg-blue-600/5 dark:bg-blue-500/5 p-8 rounded-[2rem] border border-blue-200 dark:border-blue-500/20">
+                                                                    <div className="bg-blue-600/5 dark:bg-blue-500/5 p-4 md:p-8 rounded-xl md:rounded-[2rem] border border-blue-200 dark:border-blue-500/20">
                                                                         <h5 className="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-6 flex items-center gap-2">
                                                                             <Clock className="w-4 h-4" /> Prep & Timing Strategy
                                                                         </h5>
                                                                         <div className="grid gap-6 mb-8">
                                                                             {option.strategy.prepSteps.map((step: any, sIdx: number) => (
-                                                                                <div key={sIdx} className="flex gap-4">
-                                                                                    <div className="font-black text-sm text-blue-600 dark:text-blue-400 w-24 shrink-0">{step.time}</div>
-                                                                                    <div className="text-sm text-slate-700 dark:text-slate-300 font-medium">{step.task}</div>
+                                                                                <div key={sIdx} className="flex gap-3 md:gap-4">
+                                                                                    <div className="font-black text-xs md:text-sm text-blue-600 dark:text-blue-400 w-16 md:w-24 shrink-0 pt-0.5 text-right">{step.time}</div>
+                                                                                    <div className="text-xs md:text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{step.task}</div>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
