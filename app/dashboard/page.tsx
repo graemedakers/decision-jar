@@ -1050,14 +1050,14 @@ export default function DashboardPage() {
                                             userData?.isCreator ? (
                                                 <Button
                                                     onClick={() => router.push('/jar')}
-                                                    className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 transition-all cursor-pointer border shadow-lg group bg-gradient-to-br from-amber-500/20 to-amber-700/40 border-amber-500/30 hover:border-amber-500/50 h-auto"
+                                                    className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 transition-all cursor-pointer border shadow-lg group bg-gradient-to-br from-amber-500/10 to-amber-600/20 dark:from-amber-500/20 dark:to-amber-700/40 border-amber-500/20 hover:border-amber-500/50 h-auto"
                                                 >
-                                                    <div className="w-12 h-12 shrink-0 rounded-full flex items-center justify-center bg-amber-500/20 text-amber-200 border border-amber-500/30">
+                                                    <div className="w-12 h-12 shrink-0 rounded-full flex items-center justify-center bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-200 border border-amber-500/20 dark:border-amber-500/30">
                                                         <Crown className="w-6 h-6" />
                                                     </div>
                                                     <div className="text-left">
-                                                        <span className="block text-lg font-bold text-amber-100">Pick a Winner</span>
-                                                        <span className="text-sm text-amber-200/60">
+                                                        <span className="block text-lg font-bold text-amber-900 dark:text-amber-100">Pick a Winner</span>
+                                                        <span className="text-sm text-amber-700/70 dark:text-amber-200/60">
                                                             {availableIdeasCount} ideas waiting for your decision
                                                         </span>
                                                     </div>
