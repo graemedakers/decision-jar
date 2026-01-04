@@ -92,3 +92,8 @@ export const identifyUser = (userId: string, properties?: Record<string, any>) =
 export const resetAnalytics = () => {
     posthog.reset()
 }
+
+// Generic event tracking (for backward compatibility)
+export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
+    posthog.capture(eventName, properties)
+}
