@@ -162,7 +162,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
 
                             <div>
                                 <h2 className="text-sm font-bold text-primary uppercase tracking-wider mb-2">It's Decided!</h2>
-                                <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-tight">
+                                <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-tight break-words">
                                     {idea.description}
                                 </h3>
                             </div>
@@ -172,7 +172,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                 <div className="bg-slate-100 dark:bg-white/5 rounded-xl p-4 space-y-3 text-left">
                                     {idea.details && (
                                         <div className="mb-4 pb-4 border-b border-slate-200 dark:border-white/10">
-                                            <p className="text-slate-600 dark:text-slate-200 leading-relaxed text-sm">
+                                            <p className="text-slate-600 dark:text-slate-200 leading-relaxed text-sm break-words">
                                                 {idea.details.split('\n').filter(line =>
                                                     !line.trim().startsWith('Address:') &&
                                                     !line.trim().startsWith('Website:') &&
@@ -195,7 +195,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">
                                                     {idea.address === 'Streaming' || idea.address === 'Cinema' ? 'Watch On' : 'Address'}
                                                 </p>
-                                                <p className="text-sm text-slate-800 dark:text-white">{idea.address}</p>
+                                                <p className="text-sm text-slate-800 dark:text-white break-words">{idea.address}</p>
                                                 {idea.address !== 'Streaming' && (
                                                     <a
                                                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(idea.description + " " + idea.address)}`}
@@ -306,11 +306,11 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                                     <Sparkles className="w-4 h-4 text-secondary" />
                                                     The Plan
                                                 </h4>
-                                                <p className="text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">
+                                                <p className="text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap break-words">
                                                     {idea.details ? (
                                                         idea.details.split(/(https?:\/\/[^\s]+)/g).map((part, i) => (
                                                             part.match(/https?:\/\/[^\s]+/) ? (
-                                                                <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline break-all">
+                                                                <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline break-all inline-block">
                                                                     {part}
                                                                 </a>
                                                             ) : part

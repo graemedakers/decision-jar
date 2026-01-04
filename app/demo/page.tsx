@@ -174,12 +174,12 @@ export default function DemoPage() {
 
                         {/* Revealed Idea */}
                         {revealedIdea && (
-                            <div className="glass-card p-6 bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border-pink-200 dark:border-pink-800">
-                                <h3 className="font-bold text-xl text-slate-900 dark:text-white mb-2">
+                            <div className="glass-card p-6 bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border-pink-200 dark:border-pink-800 overflow-hidden">
+                                <h3 className="font-bold text-xl text-slate-900 dark:text-white mb-2 break-words">
                                     🎉 {revealedIdea.description}
                                 </h3>
                                 {revealedIdea.details && (
-                                    <p className="text-slate-700 dark:text-slate-300 mb-4">
+                                    <p className="text-slate-700 dark:text-slate-300 mb-4 break-words overflow-wrap-anywhere">
                                         {revealedIdea.details}
                                     </p>
                                 )}
