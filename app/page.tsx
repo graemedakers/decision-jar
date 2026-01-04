@@ -239,7 +239,7 @@ export default function Home() {
                 </Button>
               ) : (
                 <>
-                  <Link href="/login" className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors hidden sm:block">
+                  <Link href="/login" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                     Sign In
                   </Link>
                   <Button onClick={() => router.push('/demo')} size="sm" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none">
