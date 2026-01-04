@@ -294,7 +294,8 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                                                     </div>
 
                                                                     {/* Strategy */}
-                                                                    <div className="bg-blue-600/5 dark:bg-blue-500/5 p-4 md:p-8 rounded-xl md:rounded-[2rem] border border-blue-200 dark:border-blue-500/20">
+                                                                    {/* Strategy */}
+                                                                    <div className="bg-blue-600/5 dark:bg-blue-500/5 p-4 md:p-8 rounded-none md:rounded-[2rem] border-y md:border border-blue-200 dark:border-blue-500/20 mx-[-1rem] md:mx-0">
                                                                         <h5 className="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-6 flex items-center gap-2">
                                                                             <Clock className="w-4 h-4" /> Prep & Timing Strategy
                                                                         </h5>
@@ -306,12 +307,15 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                                                                 </div>
                                                                             ))}
                                                                         </div>
-                                                                        <div className="flex gap-4 p-4 bg-white/50 dark:bg-black/20 rounded-2xl border border-blue-200 dark:border-blue-500/10">
-                                                                            <Info className="w-5 h-5 text-blue-500 shrink-0" />
-                                                                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                                                                                <strong className="text-slate-900 dark:text-white block mb-1">Catering Advice for {ageGroup}:</strong>
+                                                                        <div className="flex flex-col md:flex-row gap-2 md:gap-4 p-3 md:p-4 bg-white/50 dark:bg-black/20 rounded-xl md:rounded-2xl border border-blue-200 dark:border-blue-500/10">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <Info className="w-5 h-5 text-blue-500 shrink-0" />
+                                                                                <strong className="text-slate-900 dark:text-white text-xs md:text-sm md:hidden">Advice for {ageGroup}:</strong>
+                                                                            </div>
+                                                                            <div className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                                                                <strong className="text-slate-900 dark:text-white hidden md:block mb-1">Catering Advice for {ageGroup}:</strong>
                                                                                 {option.strategy.advice}
-                                                                            </p>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
 
