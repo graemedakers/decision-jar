@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { isDemoMode, addDemoIdea } from "@/lib/demo-storage";
 
 interface ConciergeActionProps {
     onIdeaAdded?: () => void;
@@ -18,6 +19,34 @@ export function useConciergeActions({
 }: ConciergeActionProps) {
 
     const handleAddToJar = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
+        // Check if we're in demo mode
+        if (isDemoMode()) {
+            try {
+                // Use demo storage
+                const demoIdea = {
+                    description: rec.name,
+                    details: rec.details || `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
+                    indoor: true,
+                    duration: "2.0",
+                    activityLevel: "LOW",
+                    cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
+                    timeOfDay: "EVENING",
+                    category: category,
+                    isPrivate: isPrivate
+                };
+
+                addDemoIdea(demoIdea);
+                if (onIdeaAdded) onIdeaAdded();
+                alert("✅ Added to your Jar!\n\n(Demo Mode: This idea will appear in your jar and can be spun!)");
+                return;
+            } catch (error) {
+                console.error(error);
+                alert("Failed to add to jar.");
+                return;
+            }
+        }
+
+        // Regular authenticated mode
         try {
             const res = await fetch('/api/ideas', {
                 method: 'POST',
