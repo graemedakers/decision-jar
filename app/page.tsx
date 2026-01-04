@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
+import { TemplateGallery } from "@/components/TemplateGallery";
 
 function FeatureCard({ icon: Icon, title, description, delay }: { icon: any, title: string, description: string, delay: number }) {
   return (
@@ -304,7 +305,7 @@ export default function Home() {
       </nav>
 
       {/* ... Hero ... */}
-      <section className="relative pt-32 pb-20 md:pt-32 md:pb-32 px-4 md:px-6">
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -314,49 +315,76 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }} // Increased delay slightly
+            transition={{ duration: 0.6, delay: 0.3 }}
             className="space-y-8 text-center md:text-left w-full"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-accent">
-              <Sparkles className="w-3 h-3" />
-              <span>Stop the indecision</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20 text-sm font-medium text-pink-600 dark:text-pink-400">
+              <Sparkles className="w-4 h-4" />
+              <span>Your Personal AI Date Night Concierge</span>
             </div>
-            <h1 className="text-3xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-white dark:to-slate-400 tracking-tight leading-[1.1] break-words">
-              The Ultimate <br />
-              <span className="text-primary dark:text-accent">Decision Maker</span> <br />
-              For Everyone.
+
+            <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1] break-words">
+              Never Waste<br />
+              30 Minutes<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600">
+                Deciding Where to Eat
+              </span>
             </h1>
-            <p className="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto md:mx-0 leading-relaxed break-words">
-              Stop scrolling and start doing. Whether you're planning a date, organizing chores, or finding a local escape room, our <strong>shared app for friends, families, and couples</strong> helps you curate, manage, and discover <strong>fun things to do</strong>.
-              Let fate decide your next adventure or use our <strong>smart concierge</strong> to plan the perfect outing.
+
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-xl mx-auto md:mx-0 leading-relaxed">
+              Your <strong className="text-slate-800 dark:text-white">AI-powered decision maker</strong> for date nights, friend hangs, and family adventures.
+              We find perfect places to go, you spin to decide. <strong className="text-slate-800 dark:text-white">No more arguments.</strong> No more analysis paralysis.
             </p>
+
+            {/* Value Props */}
+            <div className="flex flex-col gap-3 text-left max-w-xl mx-auto md:mx-0">
+              <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                  <Brain className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <span><strong>AI finds hidden gems</strong> based on your mood & preferences</span>
+              </div>
+              <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                  <Shuffle className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span><strong>Spin the jar</strong> when you can't choose—let fate decide</span>
+              </div>
+              <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span><strong>Share jars</strong> with your partner, friends, or family</span>
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
               <Button
-                onClick={() => router.push(user ? '/dashboard' : '/signup')}
-                className="h-14 px-8 text-lg bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity shadow-lg shadow-primary/25 w-full sm:w-auto"
+                onClick={() => router.push(user ? '/dashboard' : '/demo')}
+                className="h-14 px-8 text-lg bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white border-none shadow-xl shadow-pink-500/25 w-full sm:w-auto"
               >
-                {user ? "Go to Dashboard" : "Create Your First Jar"} <ArrowRight className="w-5 h-5 ml-2" />
+                {user ? "Go to Dashboard" : "Try Free Demo"} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Link href="/guide" className="w-full sm:w-auto">
-                <Button variant="outline" className="h-14 px-8 text-lg border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 w-full">
-                  How it Works
-                </Button>
-              </Link>
+              <Button
+                onClick={() => router.push(user ? '/dashboard' : '/signup')}
+                variant="outline"
+                className="h-14 px-8 text-lg border-2 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 w-full sm:w-auto"
+              >
+                {user ? "Dashboard" : "Sign Up Free"}
+              </Button>
             </div>
-            <div className="pt-6 flex flex-wrap gap-4 justify-center md:justify-start">
-              <Link href="/use-cases" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
-                Did you know? Check out 10 ways to use Decision Jar &rarr;
-              </Link>
-            </div>
+
             <div className="pt-2 flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-950 bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs text-slate-600 dark:text-white">
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-950 bg-gradient-to-br from-pink-400 to-purple-400 flex items-center justify-center text-xs text-white shadow-md">
                     <User className="w-4 h-4" />
                   </div>
                 ))}
               </div>
-              <p>Loved by {reviews.length > 50 ? reviews.length + "+" : "500+"} couples & friend groups</p>
+              <p className="text-slate-600 dark:text-slate-400">
+                Join <strong className="text-slate-800 dark:text-white">{reviews.length > 50 ? reviews.length + "+" : "500+"} couples</strong> making decisions effortlessly
+              </p>
             </div>
           </motion.div>
 
@@ -366,13 +394,16 @@ export default function Home() {
             transition={{ duration: 0.8, type: "spring" }}
             className="relative h-[400px] md:h-[600px] flex items-center justify-center"
           >
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-accent/20 rounded-full blur-[100px] animate-pulse-glow" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-pink-500/20 via-purple-500/20 to-blue-500/20 rounded-full blur-[120px] animate-pulse-glow" />
             <div className="scale-90 md:scale-150 relative z-10">
               <Jar3D />
             </div>
           </motion.div>
         </motion.div>
       </section>
+
+      {/* Template Gallery */}
+      <TemplateGallery isAuthenticated={!!user} />
 
       {/* ... Features ... */}
       <section id="features" className="py-24 px-6 relative z-10 bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-sm">
