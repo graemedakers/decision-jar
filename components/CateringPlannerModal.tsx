@@ -221,25 +221,25 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                             {/* Results */}
                             {recommendations.length > 0 && (
                                 <div ref={resultsRef} className="space-y-6 pt-6 border-t border-slate-200 dark:border-white/10">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Your Custom Menus</h3>
-                                        <div className="text-[10px] uppercase tracking-widest font-black text-orange-600 bg-orange-100 dark:bg-orange-500/20 px-3 py-1 rounded-full">3 Options Generated</div>
+                                        <div className="text-[10px] uppercase tracking-widest font-black text-orange-600 bg-orange-100 dark:bg-orange-500/20 px-3 py-1 rounded-full w-fit">3 Options Generated</div>
                                     </div>
 
                                     <div className="grid grid-cols-1 gap-6">
                                         {recommendations.map((option, idx) => (
                                             <div key={idx} className="group glass-card border-slate-200 dark:border-white/10 overflow-hidden rounded-[2rem] hover:shadow-2xl transition-all duration-500 bg-white dark:bg-white/5">
-                                                <div className="p-8">
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <div className="flex-1">
-                                                            <h4 className="text-2xl font-black text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors">{option.title}</h4>
-                                                            <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium italic leading-relaxed">{option.description}</p>
+                                                <div className="p-4 md:p-8">
+                                                    <div className="flex justify-between items-start mb-4 gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors leading-tight">{option.title}</h4>
+                                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium italic leading-relaxed line-clamp-2 md:line-clamp-none">{option.description}</p>
                                                         </div>
                                                         <button
                                                             onClick={() => setExpandedOption(expandedOption === idx ? null : idx)}
-                                                            className="p-3 bg-slate-100 dark:bg-white/10 rounded-2xl hover:bg-orange-100 dark:hover:bg-orange-500/20 text-slate-500 dark:text-slate-400 transition-all"
+                                                            className="p-2 md:p-3 bg-slate-100 dark:bg-white/10 rounded-2xl hover:bg-orange-100 dark:hover:bg-orange-500/20 text-slate-500 dark:text-slate-400 transition-all shrink-0"
                                                         >
-                                                            {expandedOption === idx ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
+                                                            {expandedOption === idx ? <ChevronUp className="w-5 h-5 md:w-6 md:h-6" /> : <ChevronDown className="w-5 h-5 md:w-6 md:h-6" />}
                                                         </button>
                                                     </div>
 
@@ -251,28 +251,28 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                                                 exit={{ height: 0, opacity: 0 }}
                                                                 className="overflow-hidden"
                                                             >
-                                                                <div className="space-y-8 mt-8 pb-4">
+                                                                <div className="space-y-6 md:space-y-8 mt-6 md:mt-8 pb-4">
                                                                     {/* Courses */}
-                                                                    <div className="space-y-6">
+                                                                    <div className="space-y-4 md:space-y-6">
                                                                         <h5 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                                                             <ChefHat className="w-4 h-4" /> The Menu
                                                                         </h5>
                                                                         {option.courses.map((course: any, cIdx: number) => (
-                                                                            <div key={cIdx} className="bg-slate-50 dark:bg-white/5 p-6 rounded-3xl border border-slate-200 dark:border-white/10">
-                                                                                <div className="flex justify-between items-center mb-4">
+                                                                            <div key={cIdx} className="bg-slate-50 dark:bg-white/5 p-4 md:p-6 rounded-3xl border border-slate-200 dark:border-white/10">
+                                                                                <div className="flex flex-col items-start gap-2 mb-3 md:mb-4">
                                                                                     <span className="text-[10px] font-black uppercase text-orange-600 bg-orange-100 dark:bg-orange-500/10 px-3 py-1 rounded-full">Course {cIdx + 1}</span>
-                                                                                    <h6 className="font-black text-slate-900 dark:text-white text-lg">{course.name}</h6>
+                                                                                    <h6 className="font-black text-slate-900 dark:text-white text-lg leading-tight">{course.name}</h6>
                                                                                 </div>
-                                                                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 font-medium">{course.description}</p>
+                                                                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-5 font-medium leading-relaxed">{course.description}</p>
 
-                                                                                <div className="grid md:grid-cols-2 gap-8">
+                                                                                <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                                                                                     <div>
                                                                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><Plus className="w-3 h-3" /> Ingredients ({numPeople} people)</p>
                                                                                         <ul className="space-y-2">
                                                                                             {course.ingredients.map((ing: string, iIdx: number) => (
                                                                                                 <li key={iIdx} className="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2">
                                                                                                     <span className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5 shrink-0" />
-                                                                                                    {ing}
+                                                                                                    <span className="leading-relaxed">{ing}</span>
                                                                                                 </li>
                                                                                             ))}
                                                                                         </ul>
@@ -282,8 +282,8 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                                                                         <ul className="space-y-3">
                                                                                             {course.instructions.map((ins: string, iIdx: number) => (
                                                                                                 <li key={iIdx} className="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-3">
-                                                                                                    <span className="font-black text-orange-500 shrink-0">{iIdx + 1}.</span>
-                                                                                                    {ins}
+                                                                                                    <span className="font-black text-orange-500 shrink-0 mt-0.5">{iIdx + 1}.</span>
+                                                                                                    <span className="leading-relaxed">{ins}</span>
                                                                                                 </li>
                                                                                             ))}
                                                                                         </ul>
