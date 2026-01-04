@@ -53,6 +53,54 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
     const itinerary = getItinerary(idea.details);
     const cateringPlan = getCateringPlan(idea.details);
 
+    const formatTextWithLinks = (text: string) => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const parts = text.split(urlRegex);
+
+        const getFriendlyLinkText = (url: string): string => {
+            try {
+                const urlObj = new URL(url);
+                const hostname = urlObj.hostname.replace('www.', '');
+
+                // Common site patterns
+                if (hostname.includes('amazon')) return '🛒 View on Amazon';
+                if (hostname.includes('google.com/search')) return '🔍 Search on Google';
+                if (hostname.includes('google.com/maps')) return '📍 View on Maps';
+                if (hostname.includes('imdb')) return '🎬 View on IMDB';
+                if (hostname.includes('youtube')) return '▶️ Watch on YouTube';
+                if (hostname.includes('spotify')) return '🎵 Listen on Spotify';
+                if (hostname.includes('goodreads')) return '📚 View on Goodreads';
+                if (hostname.includes('booking.com')) return '🏨 View on Booking.com';
+                if (hostname.includes('tripadvisor')) return '✈️ View on TripAdvisor';
+                if (hostname.includes('yelp')) return '⭐ View on Yelp';
+
+                // Generic domain-based label
+                const domain = hostname.split('.')[0];
+                return `🔗 ${domain.charAt(0).toUpperCase() + domain.slice(1)}`;
+            } catch {
+                return '🔗 View Link';
+            }
+        };
+
+        return parts.map((part, i) => {
+            if (part.match(urlRegex)) {
+                return (
+                    <a
+                        key={i}
+                        href={part}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {getFriendlyLinkText(part)}
+                    </a>
+                );
+            }
+            return part;
+        });
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white p-0">
@@ -306,7 +354,7 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
                                         </div>
                                     ) : (
                                         <p className="text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700 leading-relaxed whitespace-pre-wrap shadow-sm dark:shadow-none">
-                                            {idea.details}
+                                            {formatTextWithLinks(idea.details)}
                                         </p>
                                     )}
                                 </div>
