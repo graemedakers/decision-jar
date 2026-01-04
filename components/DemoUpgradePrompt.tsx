@@ -90,7 +90,10 @@ export function DemoUpgradePrompt({ reason = 'general', message, compact = false
                 exit={{ opacity: 0, y: 20 }}
                 className="relative"
             >
-                <div className={`glass-card p-6 rounded-2xl bg-gradient-to-br ${config.gradient} text-white border-none shadow-xl`}>
+                <div className={`relative overflow-hidden p-8 rounded-3xl bg-gradient-to-br ${config.gradient} text-white shadow-2xl ring-1 ring-white/20`}>
+                    {/* Decorative background pulse */}
+                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/10 blur-3xl animate-pulse" />
+                    <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-black/10 blur-3xl" />
                     <button
                         onClick={() => setDismissed(true)}
                         className="absolute top-3 right-3 p-1 rounded-full hover:bg-white/20 transition-colors"
