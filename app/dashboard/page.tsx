@@ -52,6 +52,7 @@ import { DashboardOnboarding } from "@/components/DashboardOnboarding";
 import { BarCrawlPlannerModal } from "@/components/BarCrawlPlannerModal";
 import { AdminControlsModal } from "@/components/AdminControlsModal";
 import { CateringPlannerModal } from "@/components/CateringPlannerModal";
+import { resetConciergeTrial } from "@/lib/demo-storage";
 
 interface UserData {
     id: string;
@@ -1472,7 +1473,7 @@ export default function DashboardPage() {
                             {/* Setup / Personalize Prompts (Bottom area if needed) */}
 
                             {/* Footer Review CTA */}
-                            <div className="text-center pb-8 border-t border-slate-200 dark:border-white/5 pt-8 mt-12">
+                            <div className="text-center pb-8 border-t border-slate-200 dark:border-white/5 pt-8 mt-12 space-y-4">
                                 <button
                                     onClick={() => setIsReviewModalOpen(true)}
                                     className="inline-flex items-center gap-2 text-slate-500 hover:text-primary transition-colors text-sm font-medium group"
@@ -1480,6 +1481,18 @@ export default function DashboardPage() {
                                     <Heart className="w-4 h-4 group-hover:fill-primary transition-colors" />
                                     Love Decision Jar? Rate the app!
                                 </button>
+
+                                {userData?.email === 'graemedakers@gmail.com' && (
+                                    <button
+                                        onClick={() => {
+                                            resetConciergeTrial();
+                                            alert('Demo usage reset for this browser!');
+                                        }}
+                                        className="block mx-auto text-xs font-mono text-slate-400 hover:text-red-500 transition-colors"
+                                    >
+                                        [Admin] Reset Demo Concierge Trial
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </>

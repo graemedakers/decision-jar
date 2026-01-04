@@ -19,7 +19,6 @@ import {
     DEMO_LIMITS,
     getDemoConciergeCount,
     isConciergeLimitReached,
-    resetConciergeTrial,
 } from '@/lib/demo-storage';
 import { DiningConciergeModal } from '@/components/DiningConciergeModal';
 import { BarConciergeModal } from '@/components/BarConciergeModal';
@@ -358,7 +357,7 @@ export default function DemoPage() {
                     )}
 
                     <p className="text-slate-400 text-sm">
-                        Decision Jar &copy; {new Date().getFullYear()} • <button onClick={resetConciergeTrial} className="hover:underline">Reference ID: DEMO-{new Date().getTime().toString().slice(-4)}</button>
+                        Decision Jar &copy; {new Date().getFullYear()} • <span className="text-slate-500">Reference ID: DEMO-{new Date().getTime().toString().slice(-4)}</span>
                     </p>
                 </div>
             </main>
