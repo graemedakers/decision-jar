@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/Button";
 import { Sparkles, MapPin, Loader2, ExternalLink, Calendar, DollarSign, Wine, Utensils, Ticket, Clock, Check, Plus, RefreshCcw, Pencil, X, Save, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { LocationInput } from "./LocationInput";
+import { TOPIC_CATEGORIES } from "@/lib/categories";
+import { Book } from "lucide-react";
 
 interface ScheduleItem {
     time: string;
@@ -34,12 +36,21 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
     const [targetCost, setTargetCost] = useState("Medium");
     const [isPrivate, setIsPrivate] = useState(true);
 
+    // Book Specific
+    const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+
     // Dynamic Text based on Topic
     const isDateContext = jarTopic === 'Dates' || jarTopic === 'Romantic';
-    const titleText = isDateContext ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
-    const buttonText = isDateContext ? "Plan My Date Night" : "Plan My Activity";
-    const resultTitle = isDateContext ? "Date Night" : "Itinerary";
-    const loadingText = isDateContext ? "Curating the perfect evening..." : `Curating the perfect ${jarTopic && jarTopic !== 'General' ? jarTopic.toLowerCase() : "activity"} plan...`;
+    const isBookContext = jarTopic === 'Books';
+
+    let titleText = isDateContext ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
+    if (isBookContext) titleText = "Reading List Planner";
+
+    let buttonText = isDateContext ? "Plan My Date Night" : "Plan My Activity";
+    if (isBookContext) buttonText = "Curate Reading List";
+
+    const resultTitle = isDateContext ? "Date Night" : (isBookContext ? "Reading List" : "Itinerary");
+    const loadingText = isDateContext ? "Curating the perfect evening..." : (isBookContext ? "Finding your next favorite books..." : `Curating the perfect ${jarTopic && jarTopic !== 'General' ? jarTopic.toLowerCase() : "activity"} plan...`);
 
     // State
     const [itinerary, setItinerary] = useState<Itinerary | null>(null);
@@ -81,24 +92,63 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
         setEditForm(null);
 
         try {
-            const res = await fetch('/api/date-night-planner', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    location: targetLocation,
-                    date: targetDate, // e.g. "This Friday"
-                    cost: targetCost,
-                    topic: jarTopic // Pass topic to API if it supports it (it currently ignores it but good for future)
-                }),
-            });
+            if (isBookContext) {
+                // Book Concierge Call adapted to Itinerary
+                const res = await fetch('/api/book-concierge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        genre: selectedGenres.length > 0 ? selectedGenres[0] : "", // Taking first for simplicity or join
+                        vibe: selectedGenres.length > 1 ? selectedGenres[1] : "", // Use second as vibe if present
+                        length: "",
+                        era: ""
+                    }),
+                });
 
-            if (!res.ok) {
+                if (!res.ok) throw new Error("Failed to find books");
                 const data = await res.json();
-                throw new Error(data.error || "Failed to generate plan");
-            }
 
-            const data = await res.json();
-            setItinerary(data);
+                // Adapt to ScheduleItem
+                if (data.recommendations && Array.isArray(data.recommendations)) {
+                    const adaptedSchedule: ScheduleItem[] = data.recommendations.slice(0, 3).map((book: any, i: number) => ({
+                        time: `Book ${i + 1}`,
+                        activity_type: 'READING',
+                        venue_name: book.title, // Title as Venue
+                        description: book.description,
+                        address: book.author || "Unknown Author", // Author as Address
+                        booking_link: `https://www.google.com/search?q=${encodeURIComponent(book.title + " book")}`,
+                        cost_estimate: book.price || "$$"
+                    }));
+
+                    setItinerary({
+                        neighborhood: "Your Bookshelf",
+                        schedule: adaptedSchedule
+                    });
+                } else {
+                    throw new Error("No recommendations found");
+                }
+
+            } else {
+                // Standard Date/Activity Planner
+                const res = await fetch('/api/date-night-planner', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: targetLocation,
+                        date: targetDate, // e.g. "This Friday"
+                        cost: targetCost,
+                        topic: jarTopic
+                    }),
+                });
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error || "Failed to generate plan");
+                }
+
+                const data = await res.json();
+                setItinerary(data);
+            }
         } catch (err: any) {
             console.error(err);
             setError(err.message || "Something went wrong.");
@@ -211,7 +261,19 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
         }
     };
 
-    const isReady = targetLocation.length > 0;
+
+
+    const isReady = isBookContext ? selectedGenres.length > 0 : targetLocation.length > 0;
+
+    const toggleGenre = (genreId: string) => {
+        if (selectedGenres.includes(genreId)) {
+            setSelectedGenres(selectedGenres.filter(g => g !== genreId));
+        } else {
+            if (selectedGenres.length < 2) {
+                setSelectedGenres([...selectedGenres, genreId]);
+            }
+        }
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -234,45 +296,71 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                     {/* Inputs */}
                     {!itinerary && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm text-slate-600 dark:text-slate-400 font-medium">When?</label>
-                                <div className="relative">
-                                    <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400 dark:text-slate-500" />
-                                    <input
-                                        type="date"
-                                        className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500/50 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 [color-scheme:light] dark:[color-scheme:dark]"
-                                        value={targetDate}
-                                        onChange={(e) => setTargetDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]}
-                                    />
+                            {isBookContext ? (
+                                <div className="col-span-1 md:col-span-2 space-y-4">
+                                    <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
+                                        <h3 className="text-sm font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2 mb-2">
+                                            <Book className="w-4 h-4" /> Select Interests (Pick up to 2)
+                                        </h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {(TOPIC_CATEGORIES['Books'] || []).map((cat) => (
+                                                <button
+                                                    key={cat.id}
+                                                    onClick={() => toggleGenre(cat.label)}
+                                                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${selectedGenres.includes(cat.label)
+                                                        ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
+                                                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500'}`}
+                                                >
+                                                    {cat.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-slate-500 text-center">We'll curate a balanced reading list based on your selections.</p>
                                 </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm text-slate-600 dark:text-slate-400 font-medium">Where?</label>
-                                <LocationInput
-                                    value={targetLocation}
-                                    onChange={setTargetLocation}
-                                    placeholder="City or Neighborhood"
-                                    isStandardizing={isStandardizing}
-                                />
-                            </div>
-                            <div className="space-y-2 md:col-span-2">
-                                <label className="text-sm text-slate-600 dark:text-slate-400 font-medium">Budget</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {["Low", "Medium", "High"].map((c) => (
-                                        <button
-                                            key={c}
-                                            onClick={() => setTargetCost(c)}
-                                            className={`py-2 rounded-lg border text-sm font-medium transition-all ${targetCost === c
-                                                ? "bg-pink-100 dark:bg-pink-500/20 border-pink-500/50 text-pink-700 dark:text-white"
-                                                : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-                                                }`}
-                                        >
-                                            {c}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                            ) : (
+                                <>
+                                    <div className="space-y-2">
+                                        <label className="text-sm text-slate-600 dark:text-slate-400 font-medium">When?</label>
+                                        <div className="relative">
+                                            <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                            <input
+                                                type="date"
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500/50 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 [color-scheme:light] dark:[color-scheme:dark]"
+                                                value={targetDate}
+                                                onChange={(e) => setTargetDate(e.target.value)}
+                                                min={new Date().toISOString().split('T')[0]}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm text-slate-600 dark:text-slate-400 font-medium">Where?</label>
+                                        <LocationInput
+                                            value={targetLocation}
+                                            onChange={setTargetLocation}
+                                            placeholder="City or Neighborhood"
+                                            isStandardizing={isStandardizing}
+                                        />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-sm text-slate-600 dark:text-slate-400 font-medium">Budget</label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {["Low", "Medium", "High"].map((c) => (
+                                                <button
+                                                    key={c}
+                                                    onClick={() => setTargetCost(c)}
+                                                    className={`py-2 rounded-lg border text-sm font-medium transition-all ${targetCost === c
+                                                        ? "bg-pink-100 dark:bg-pink-500/20 border-pink-500/50 text-pink-700 dark:text-white"
+                                                        : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                                                        }`}
+                                                >
+                                                    {c}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
@@ -319,14 +407,16 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                             </div>
 
                             {/* Full Route Map Button */}
-                            <a
-                                href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(itinerary.schedule[0].venue_name + " " + itinerary.schedule[0].address)}&destination=${encodeURIComponent(itinerary.schedule[2].venue_name + " " + itinerary.schedule[2].address)}&waypoints=${encodeURIComponent(itinerary.schedule[1].venue_name + " " + itinerary.schedule[1].address)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block w-full py-3 bg-blue-100 dark:bg-blue-500/10 hover:bg-blue-200 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-500/20 rounded-xl text-center font-medium transition-colors flex items-center justify-center gap-2 mb-6"
-                            >
-                                <MapPin className="w-4 h-4" /> View Full Route on Map
-                            </a>
+                            {!isBookContext && (
+                                <a
+                                    href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(itinerary.schedule[0].venue_name + " " + itinerary.schedule[0].address)}&destination=${encodeURIComponent(itinerary.schedule[2].venue_name + " " + itinerary.schedule[2].address)}&waypoints=${encodeURIComponent(itinerary.schedule[1].venue_name + " " + itinerary.schedule[1].address)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-full py-3 bg-blue-100 dark:bg-blue-500/10 hover:bg-blue-200 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-500/20 rounded-xl text-center font-medium transition-colors flex items-center justify-center gap-2 mb-6"
+                                >
+                                    <MapPin className="w-4 h-4" /> View Full Route on Map
+                                </a>
+                            )}
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
