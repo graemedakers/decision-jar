@@ -106,7 +106,7 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                         </div>
 
                         {/* Form */}
-                        <div className="p-4 md:p-8 overflow-y-auto flex-1 space-y-8 custom-scrollbar">
+                        <div className="p-4 md:p-8 overflow-y-auto flex-1 space-y-8 custom-scrollbar pb-32 md:pb-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Input Groups */}
                                 <div className="space-y-2">
@@ -319,14 +319,14 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="fixed md:static bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 md:bg-transparent md:border-none md:p-0 z-50">
+                                                                    <div className="pt-6 mt-6 border-t border-slate-200 dark:border-white/10 md:border-none md:pt-0 md:mt-0">
                                                                         <Button
                                                                             onClick={() => handleAddToJar({
                                                                                 name: option.title,
                                                                                 description: option.description,
                                                                                 details: JSON.stringify(option)
                                                                             }, "CATERING")}
-                                                                            className="w-full h-12 md:h-14 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl md:rounded-2xl font-black text-sm shadow-xl"
+                                                                            className="w-full h-14 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl md:rounded-2xl font-black text-sm shadow-xl hover:scale-[1.02] transition-transform"
                                                                         >
                                                                             Add This Menu to My Jar
                                                                         </Button>
