@@ -305,18 +305,18 @@ export default function Home() {
       </nav>
 
       {/* ... Hero ... */}
-      <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 px-4 md:px-6">
+      <section className="relative pt-20 pb-12 md:pt-40 md:pb-32 px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center"
+          className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center"
         >
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="space-y-8 text-center md:text-left w-full"
+            className="space-y-6 md:space-y-8 text-center md:text-left w-full"
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20 text-sm font-medium text-pink-600 dark:text-pink-400">
               <Sparkles className="w-4 h-4" />
@@ -378,7 +378,7 @@ export default function Home() {
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-950 bg-gradient-to-br from-pink-400 to-purple-400 flex items-center justify-center text-xs text-white shadow-md">
-                    <User className="w-4 h-4" />
+                    <Heart className="w-4 h-4 fill-current" />
                   </div>
                 ))}
               </div>
@@ -392,10 +392,10 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, type: "spring" }}
-            className="relative h-[400px] md:h-[600px] flex items-center justify-center"
+            className="relative h-[300px] md:h-[600px] flex items-center justify-center"
           >
             <div className="absolute inset-0 bg-gradient-to-tr from-pink-500/20 via-purple-500/20 to-blue-500/20 rounded-full blur-[120px] animate-pulse-glow" />
-            <div className="scale-90 md:scale-150 relative z-10">
+            <div className="scale-[0.7] md:scale-150 relative z-10">
               <Jar3D />
             </div>
           </motion.div>
