@@ -113,7 +113,7 @@ export async function POST(request: Request) {
         }
         `;
 
-        const result = await reliableGeminiCall(prompt);
+        const result = await reliableGeminiCall(prompt) as any;
 
         // Add IMDB search URLs for each recommendation (more reliable than AI-generated URLs)
         if (result.recommendations && Array.isArray(result.recommendations)) {
