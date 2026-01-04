@@ -28,10 +28,10 @@ export function ShareButton({ title, description, url, className = '' }: ShareBu
         try {
             // Check if Web Share API is available (mobile devices)
             if (navigator.share) {
+                // For better compatibility with WhatsApp and other apps,
+                // combine everything into the text field
                 await navigator.share({
-                    title: title,
-                    text: description + '\n\nFound via Spin the Jar ✨',
-                    url: trackingUrl,
+                    text: shareText, // This includes title, description, branding, and URL
                 });
             } else {
                 // Fallback: Copy to clipboard
