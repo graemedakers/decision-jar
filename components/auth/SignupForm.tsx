@@ -8,8 +8,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
-
 import { signIn } from "next-auth/react";
+import { trackSignup } from "@/lib/analytics";
 
 export function SignupForm() {
     const router = useRouter();
@@ -48,6 +48,13 @@ export function SignupForm() {
 
     const handleSocialLogin = async (provider: string) => {
         setIsSocialLoading(provider);
+
+        // Track social signup attempt
+        const utmSource = searchParams.get('utm_source') || 'direct';
+        const utmMedium = searchParams.get('utm_medium') || undefined;
+        const utmCampaign = searchParams.get('utm_campaign') || undefined;
+        trackSignup(provider, utmSource, utmMedium, utmCampaign);
+
         try {
             await signIn(provider, { callbackUrl: "/dashboard" });
         } catch (error) {
@@ -96,6 +103,12 @@ export function SignupForm() {
             const data = await res.json();
 
             if (res.ok) {
+                // Track successful signup
+                const utmSource = searchParams.get('utm_source') || 'direct';
+                const utmMedium = searchParams.get('utm_medium') || undefined;
+                const utmCampaign = searchParams.get('utm_campaign') || undefined;
+                trackSignup('email', utmSource, utmMedium, utmCampaign);
+
                 if (data.premiumGifted) {
                     alert("Welcome! You have been upgraded to Premium via the invite link.");
                 } else if (data.premiumTokenInvalid) {
