@@ -2,13 +2,19 @@
 
 import { Jar3D } from "@/components/Jar3D";
 import { Button } from "@/components/ui/Button";
-import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key, Book } from "lucide-react";
+import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key, Book, Menu } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { PRICING } from "@/lib/config";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/DropdownMenu";
 
 function FeatureCard({ icon: Icon, title, description, delay }: { icon: any, title: string, description: string, delay: number }) {
   return (
@@ -220,18 +226,19 @@ export default function Home() {
       <nav className="fixed top-0 left-0 w-full z-50 border-b border-slate-200 dark:border-white/5 bg-white/70 dark:bg-slate-950/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0">
               <Image src="/icon.png" alt="Spin the Jar App Logo" fill className="object-cover" />
             </div>
-            <span className="font-bold text-lg text-slate-800 dark:text-white tracking-tight">Spin the Jar</span>
+            <span className="font-bold text-lg text-slate-800 dark:text-white tracking-tight whitespace-nowrap">Spin the Jar</span>
           </div>
-          <div className="flex items-center gap-4 md:gap-6">
-            <Link href="/guide" className="hidden sm:block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/guide" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
               How it Works
             </Link>
             <Link href="/learn" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
-              <span className="hidden md:inline">Learning Center</span>
-              <span className="md:hidden">Learn</span>
+              Learning Center
             </Link>
             <div className="flex items-center gap-4">
               {user ? (
@@ -243,7 +250,7 @@ export default function Home() {
                   <Link href="/login" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                     Sign In
                   </Link>
-                  <Button onClick={() => router.push('/demo')} size="sm" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none">
+                  <Button onClick={() => router.push('/demo')} size="sm" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none whitespace-nowrap">
                     Try Demo
                   </Button>
                   <Button onClick={() => router.push('/signup')} size="sm" variant="outline" className="hidden lg:flex">
@@ -252,6 +259,46 @@ export default function Home() {
                 </>
               )}
             </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="flex md:hidden items-center gap-3">
+            {!user && (
+              <Button onClick={() => router.push('/demo')} size="sm" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none text-xs h-8 px-3 whitespace-nowrap">
+                Try Demo
+              </Button>
+            )}
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9 -mr-2 text-slate-700 dark:text-slate-200">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 glass border-slate-200/50 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
+                {user ? (
+                  <DropdownMenuItem onClick={() => router.push('/dashboard')} className="cursor-pointer font-medium">
+                    Go to Dashboard
+                  </DropdownMenuItem>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => router.push('/login')} className="cursor-pointer">
+                      Sign In
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/signup')} className="cursor-pointer font-medium text-primary">
+                      Sign Up Free
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <div className="h-px bg-slate-100 dark:bg-white/5 my-2" />
+                <DropdownMenuItem onClick={() => router.push('/guide')} className="cursor-pointer">
+                  How it Works
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/learn')} className="cursor-pointer">
+                  Learning Center
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </nav>
