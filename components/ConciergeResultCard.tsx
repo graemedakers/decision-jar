@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/Button";
-import { ExternalLink, Heart, Info, MapPin, Plus, Star, Zap } from "lucide-react";
+import { ExternalLink, Heart, Info, MapPin, Plus, Star, Zap, Share2 } from "lucide-react";
 import React from "react";
+import { ShareButton } from "@/components/ShareButton";
 
 interface ConciergeRecommendation {
     name: string;
@@ -127,6 +128,12 @@ export function ConciergeResultCard({
                     </Button>
                 )}
 
+                <ShareButton
+                    title={`${getRecommendationEmoji(categoryType)} ${rec.name}`}
+                    description={getShareDescription(rec, categoryType)}
+                    className="text-xs h-8"
+                />
+
                 <Button
                     size="sm"
                     onClick={() => onAddToJar(rec, categoryType, isPrivate)}
@@ -145,4 +152,22 @@ export function ConciergeResultCard({
             </div>
         </div>
     );
+}
+
+// Helper functions for sharing
+function getRecommendationEmoji(categoryType: string): string {
+    switch (categoryType) {
+        case 'MEAL': return '🍽️';
+        case 'DRINK': return '🍸';
+        case 'EVENT': return '🎬';
+        case 'ACTIVITY': return '✨';
+        case 'BOOK': return '📚';
+        default: return '✨';
+    }
+}
+
+function getShareDescription(rec: any, categoryType: string): string {
+    const details = [rec.cuisine, rec.price, rec.address].filter(Boolean).join(' • ');
+    const typeLabel = categoryType === 'MEAL' ? 'Restaurant' : categoryType === 'DRINK' ? 'Bar' : 'Activity';
+    return `${typeLabel} Recommendation: ${rec.name}${details ? `\n${details}` : ''}${rec.description ? `\n\n${rec.description.slice(0, 150)}...` : ''}`;
 }
