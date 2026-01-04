@@ -32,19 +32,19 @@ export function EmptyJarMessage({ onOpenTemplates, onAddIdea }: EmptyJarMessageP
             <div className="flex flex-col sm:flex-row gap-4">
                 <Button
                     onClick={onOpenTemplates}
-                    className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none shadow-lg text-lg px-8 h-12"
+                    className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none shadow-lg px-6 py-6 h-auto whitespace-nowrap"
                 >
-                    <Layers className="w-5 h-5 mr-2" />
-                    Browse Templates
+                    <Layers className="w-5 h-5 mr-2 flex-shrink-0" />
+                    <span className="font-semibold">Browse Templates</span>
                 </Button>
 
                 <Button
                     onClick={onAddIdea}
                     variant="outline"
-                    className="border-2 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 text-lg px-8 h-12"
+                    className="border-2 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 px-6 py-6 h-auto whitespace-nowrap"
                 >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Add Custom Idea
+                    <Sparkles className="w-5 h-5 mr-2 flex-shrink-0" />
+                    <span className="font-semibold">Add Custom Idea</span>
                 </Button>
             </div>
 
