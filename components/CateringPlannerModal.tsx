@@ -79,12 +79,12 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm shadow-2xl">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm shadow-2xl">
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="glass-card w-full max-w-2xl relative max-h-[90vh] flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl rounded-[2rem]"
+                        className="glass-card w-full md:max-w-2xl h-full md:h-auto md:max-h-[90vh] flex flex-col bg-white dark:bg-slate-900 border-x-0 md:border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl rounded-none md:rounded-[2rem]"
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-gradient-to-r from-orange-50/50 to-red-50/50 dark:from-orange-500/5 dark:to-red-500/5">
@@ -226,13 +226,13 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                         <div className="text-[10px] uppercase tracking-widest font-black text-orange-600 bg-orange-100 dark:bg-orange-500/20 px-3 py-1 rounded-full w-fit">3 Options Generated</div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-6">
+                                    <div className="grid grid-cols-1 gap-4 md:gap-6 pb-20 md:pb-0">
                                         {recommendations.map((option, idx) => (
-                                            <div key={idx} className="group glass-card border-slate-200 dark:border-white/10 overflow-hidden rounded-[2rem] hover:shadow-2xl transition-all duration-500 bg-white dark:bg-white/5">
+                                            <div key={idx} className="group glass-card border-none md:border border-slate-200 dark:border-white/10 overflow-hidden rounded-xl md:rounded-[2rem] hover:shadow-2xl transition-all duration-500 bg-slate-50 md:bg-white dark:bg-white/5 mx-[-1rem] md:mx-0">
                                                 <div className="p-4 md:p-8">
                                                     <div className="flex justify-between items-start mb-4 gap-4">
                                                         <div className="flex-1 min-w-0">
-                                                            <h4 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors leading-tight">{option.title}</h4>
+                                                            <h4 className="text-lg md:text-2xl font-black text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors leading-tight line-clamp-3 md:line-clamp-none">{option.title}</h4>
                                                             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium italic leading-relaxed line-clamp-2 md:line-clamp-none">{option.description}</p>
                                                         </div>
                                                         <button
@@ -253,17 +253,17 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                                             >
                                                                 <div className="space-y-6 md:space-y-8 mt-6 md:mt-8 pb-4">
                                                                     {/* Courses */}
-                                                                    <div className="space-y-4 md:space-y-6">
+                                                                    <div className="space-y-3 md:space-y-6">
                                                                         <h5 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                                                             <ChefHat className="w-4 h-4" /> The Menu
                                                                         </h5>
                                                                         {option.courses.map((course: any, cIdx: number) => (
-                                                                            <div key={cIdx} className="bg-slate-50 dark:bg-white/5 p-4 md:p-6 rounded-3xl border border-slate-200 dark:border-white/10">
-                                                                                <div className="flex flex-col items-start gap-2 mb-3 md:mb-4">
-                                                                                    <span className="text-[10px] font-black uppercase text-orange-600 bg-orange-100 dark:bg-orange-500/10 px-3 py-1 rounded-full">Course {cIdx + 1}</span>
-                                                                                    <h6 className="font-black text-slate-900 dark:text-white text-lg leading-tight">{course.name}</h6>
+                                                                            <div key={cIdx} className="bg-white md:bg-slate-50 dark:bg-white/5 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm md:shadow-none">
+                                                                                <div className="flex flex-col items-start gap-1 mb-2 md:mb-4">
+                                                                                    <span className="text-[10px] font-black uppercase text-orange-600 bg-orange-100 dark:bg-orange-500/10 px-2 py-0.5 md:px-3 md:py-1 rounded-full">Course {cIdx + 1}</span>
+                                                                                    <h6 className="font-bold md:font-black text-slate-900 dark:text-white text-base md:text-lg leading-tight">{course.name}</h6>
                                                                                 </div>
-                                                                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-5 font-medium leading-relaxed">{course.description}</p>
+                                                                                <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 mb-4 md:mb-6 font-medium leading-relaxed">{course.description}</p>
 
                                                                                 <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                                                                                     <div>
@@ -315,16 +315,18 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                                                         </div>
                                                                     </div>
 
-                                                                    <Button
-                                                                        onClick={() => handleAddToJar({
-                                                                            name: option.title,
-                                                                            description: option.description,
-                                                                            details: JSON.stringify(option)
-                                                                        }, "CATERING")}
-                                                                        className="w-full h-14 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-sm shadow-xl"
-                                                                    >
-                                                                        Add This Menu to My Jar
-                                                                    </Button>
+                                                                    <div className="fixed md:static bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 md:bg-transparent md:border-none md:p-0 z-50">
+                                                                        <Button
+                                                                            onClick={() => handleAddToJar({
+                                                                                name: option.title,
+                                                                                description: option.description,
+                                                                                details: JSON.stringify(option)
+                                                                            }, "CATERING")}
+                                                                            className="w-full h-12 md:h-14 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl md:rounded-2xl font-black text-sm shadow-xl"
+                                                                        >
+                                                                            Add This Menu to My Jar
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
                                                             </motion.div>
                                                         )}
