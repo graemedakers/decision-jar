@@ -111,12 +111,12 @@ export function DateNightPlannerModal({ isOpen, onClose, userLocation, onIdeaAdd
                 // Adapt to ScheduleItem
                 if (data.recommendations && Array.isArray(data.recommendations)) {
                     const adaptedSchedule: ScheduleItem[] = data.recommendations.slice(0, 3).map((book: any, i: number) => ({
-                        time: `Book ${i + 1}`,
+                        time: book.cuisine || `Book ${i + 1}`,
                         activity_type: 'READING',
-                        venue_name: book.title, // Title as Venue
+                        venue_name: book.name,
                         description: book.description,
-                        address: book.author || "Unknown Author", // Author as Address
-                        booking_link: `https://www.google.com/search?q=${encodeURIComponent(book.title + " book")}`,
+                        address: book.address || book.author || "Unknown",
+                        booking_link: book.website || `https://www.google.com/search?q=${encodeURIComponent(book.name + " book")}`,
                         cost_estimate: book.price || "$$"
                     }));
 
