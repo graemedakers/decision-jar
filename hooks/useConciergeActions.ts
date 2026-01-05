@@ -108,7 +108,9 @@ export function useConciergeActions({
                             });
 
                             if (!createRes.ok) {
-                                throw new Error('Failed to create jar');
+                                const errorData = await createRes.json();
+                                console.error('Jar creation failed:', errorData);
+                                throw new Error(errorData.error || 'Failed to create jar');
                             }
 
                             const newJar = await createRes.json();
@@ -136,11 +138,13 @@ export function useConciergeActions({
                                 // Refresh page to show new jar
                                 window.location.href = '/dashboard';
                             } else {
-                                alert('Jar created, but failed to add idea. Please try again.');
+                                const addError = await addRes.json();
+                                console.error('Failed to add idea:', addError);
+                                alert(`Jar created, but failed to add idea:\n${addError.error || 'Unknown error'}`);
                             }
-                        } catch (error) {
+                        } catch (error: any) {
                             console.error('Failed to auto-create jar:', error);
-                            alert('Failed to create jar automatically. Please create one manually.');
+                            alert(`Failed to create jar automatically:\n${error.message || error}\n\nPlease check console for details.`);
                             window.location.href = '/dashboard';
                         }
                     }
