@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers, Users, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Jar3D } from "@/components/Jar3D";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DateReveal } from "@/components/DateReveal";
 import { SpinFiltersModal } from "@/components/SpinFiltersModal";
 import { SettingsModal } from "@/components/SettingsModal";
@@ -55,6 +55,7 @@ import { CateringPlannerModal } from "@/components/CateringPlannerModal";
 import { resetConciergeTrial } from "@/lib/demo-storage";
 import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
 import { EmptyJarMessage } from "@/components/EmptyJarMessage";
+import { trackEvent } from "@/lib/analytics";
 
 interface UserData {
     id: string;
@@ -138,6 +139,55 @@ export default function DashboardPage() {
     const [isAdminControlsOpen, setIsAdminControlsOpen] = useState(false);
     const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // Handle PWA shortcuts with premium gating
+    useEffect(() => {
+        const tool = searchParams?.get('tool');
+        if (!tool) return;
+
+        // Track shortcut usage
+        trackEvent('pwa_shortcut_used', { tool, from_home_screen: true });
+
+        // Wait for premium status to be loaded
+        const checkAndOpenTool = () => {
+            if (isLoadingUser) {
+                // Wait for user data to load
+                setTimeout(checkAndOpenTool, 100);
+                return;
+            }
+
+            if (!isPremium) {
+                // Free user trying to use premium shortcut
+                trackEvent('pwa_shortcut_blocked', { tool, reason: 'requires_premium' });
+                setIsPremiumModalOpen(true);
+                return;
+            }
+
+            // Premium user - open the requested tool
+            trackEvent('pwa_shortcut_opened', { tool, user_type: 'premium' });
+
+            switch (tool) {
+                case 'dining':
+                    setIsDiningModalOpen(true);
+                    break;
+                case 'bar':
+                    setIsBarModalOpen(true);
+                    break;
+                case 'weekend':
+                    setIsPlannerOpen(true);
+                    break;
+                case 'movie':
+                    setIsMovieModalOpen(true);
+                    break;
+                default:
+                    console.warn(`Unknown PWA shortcut tool: ${tool}`);
+            }
+        };
+
+        checkAndOpenTool();
+    }, [searchParams, isPremium, isLoadingUser]);
+
 
     const [diningSearchLocation, setDiningSearchLocation] = useState<string | null>(null);
 

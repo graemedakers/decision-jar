@@ -65,10 +65,10 @@
     ],
     "shortcuts": [
         {
-            "name": "Spin the Jar",
-            "short_name": "Spin",
-            "description": "Quickly spin your jar for a random idea",
-            "url": "/dashboard",
+            "name": "Find Restaurant",
+            "short_name": "Dining",
+            "description": "AI dining concierge - instant restaurant recommendations",
+            "url": "/dashboard?tool=dining",
             "icons": [
                 {
                     "src": "/icon-96.png",
@@ -77,10 +77,34 @@
             ]
         },
         {
-            "name": "Add Idea",
-            "short_name": "Add",
-            "description": "Add a new idea to your jar",
-            "url": "/dashboard?action=add",
+            "name": "Find Bar",
+            "short_name": "Bar Scout",
+            "description": "AI bar finder - perfect spot for drinks",
+            "url": "/dashboard?tool=bar",
+            "icons": [
+                {
+                    "src": "/icon-96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Weekend Planner",
+            "short_name": "Weekend",
+            "description": "Plan your perfect weekend with AI",
+            "url": "/dashboard?tool=weekend",
+            "icons": [
+                {
+                    "src": "/icon-96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Movie Scout",
+            "short_name": "Movies",
+            "description": "Find the perfect movie to watch",
+            "url": "/dashboard?tool=movie",
             "icons": [
                 {
                     "src": "/icon-96.png",
