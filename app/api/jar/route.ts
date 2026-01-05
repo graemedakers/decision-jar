@@ -91,13 +91,13 @@ export async function POST(request: Request) {
             await tx.jarMember.create({
                 data: {
                     jarId: jar.id,
-                    userId: session.user.id,
+                    userId: user.id,
                     role: 'ADMIN'
                 }
             });
 
             await tx.user.update({
-                where: { id: session.user.id },
+                where: { id: user.id },
                 data: { activeJarId: jar.id }
             });
 
