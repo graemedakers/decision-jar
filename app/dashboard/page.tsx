@@ -52,6 +52,7 @@ import { DashboardOnboarding } from "@/components/DashboardOnboarding";
 import { BarCrawlPlannerModal } from "@/components/BarCrawlPlannerModal";
 import { AdminControlsModal } from "@/components/AdminControlsModal";
 import { CateringPlannerModal } from "@/components/CateringPlannerModal";
+import { MenuPlannerModal } from "@/components/MenuPlannerModal";
 import { resetConciergeTrial } from "@/lib/demo-storage";
 import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
 import { EmptyJarMessage } from "@/components/EmptyJarMessage";
@@ -138,6 +139,7 @@ function DashboardContent() {
     const [isBarCrawlOpen, setIsBarCrawlOpen] = useState(false);
     const [isDateNightOpen, setIsDateNightOpen] = useState(false);
     const [isCateringPlannerOpen, setIsCateringPlannerOpen] = useState(false);
+    const [isMenuPlannerOpen, setIsMenuPlannerOpen] = useState(false);
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isSurpriseModalOpen, setIsSurpriseModalOpen] = useState(false);
     const [isLoadingUser, setIsLoadingUser] = useState(true);
@@ -800,6 +802,12 @@ function DashboardContent() {
                 <CateringPlannerModal
                     isOpen={isCateringPlannerOpen}
                     onClose={() => setIsCateringPlannerOpen(false)}
+                    onIdeaAdded={handleContentUpdate}
+                />
+
+                <MenuPlannerModal
+                    isOpen={isMenuPlannerOpen}
+                    onClose={() => setIsMenuPlannerOpen(false)}
                     onIdeaAdded={handleContentUpdate}
                 />
 
@@ -1518,6 +1526,27 @@ function DashboardContent() {
                                             <div>
                                                 <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Game Finder</span>
                                                 <span className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed block">Find online digital games to play solo or with friends.</span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+
+                                    <motion.div
+                                        whileHover={{ scale: 1.02, y: -4 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="group relative h-full"
+                                        onClick={() => isPremium ? setIsMenuPlannerOpen(true) : setIsPremiumModalOpen(true)}
+                                    >
+                                        <div className="absolute -inset-0.5 bg-gradient-to-b from-green-500/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition duration-500" />
+                                        <div className="relative h-full bg-white dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-3xl p-8 flex flex-col gap-6 cursor-pointer hover:shadow-2xl hover:shadow-green-500/10 transition-all">
+                                            <div className="flex items-center justify-between">
+                                                <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 ring-1 ring-green-500/20 group-hover:bg-green-500 group-hover:text-white transition-all duration-500 shadow-inner">
+                                                    <Calendar className="w-7 h-7" />
+                                                </div>
+                                                {!isPremium && <Lock className="w-5 h-5 text-slate-300 dark:text-slate-600" />}
+                                            </div>
+                                            <div>
+                                                <span className="block text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Menu Planner</span>
+                                                <span className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed block">Plan your weekly meals with personalized recipes.</span>
                                             </div>
                                         </div>
                                     </motion.div>

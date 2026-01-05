@@ -106,7 +106,7 @@ export function ConciergeResultCard({
             </div>
 
             <div className="flex flex-wrap sm:flex-col gap-2 justify-start sm:justify-end">
-                {rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && (
+                {rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME' && (
                     <Button
                         size="sm"
                         variant="ghost"

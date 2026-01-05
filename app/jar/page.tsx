@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { PremiumModal } from "@/components/PremiumModal";
 import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
+import { MoveIdeaModal } from "@/components/MoveIdeaModal";
 
 export default function JarPage() {
     const router = useRouter();
@@ -21,6 +22,9 @@ export default function JarPage() {
     const [hasPartner, setHasPartner] = useState(true);
     const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
     const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
+    const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+    const [ideaToMove, setIdeaToMove] = useState<any>(null);
+    const [availableJars, setAvailableJars] = useState<any[]>([]);
 
     const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -58,7 +62,20 @@ export default function JarPage() {
     useEffect(() => {
         fetchIdeas();
         fetchUser();
+        fetchAvailableJars();
     }, []);
+
+    const fetchAvailableJars = async () => {
+        try {
+            const res = await fetch('/api/jar/list');
+            if (res.ok) {
+                const data = await res.json();
+                setAvailableJars(data.jars || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch jars', error);
+        }
+    };
 
     const handleDeleteClick = (id: string) => {
         setIdeaToDelete(id);
@@ -186,7 +203,21 @@ export default function JarPage() {
                                 onClick={() => idea.canEdit && !idea.isMasked && setEditingIdea(idea)}
                                 className={`glass-card p-5 relative group cursor-pointer hover:border-slate-300 dark:hover:border-white/20 transition-all ${idea.isMasked ? 'opacity-75 bg-slate-100 dark:bg-slate-900/50' : 'hover:-translate-y-1 bg-white dark:bg-slate-900/40'}`}
                             >
-                                <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                                <div className="absolute top-4 right-4 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {idea.canEdit && !idea.isMasked && availableJars.length > 1 && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIdeaToMove(idea);
+                                                setIsMoveModalOpen(true);
+                                            }}
+                                            className="p-1.5 rounded-full bg-slate-200 dark:bg-black/40 text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-black/60 transition-colors"
+                                            title="Move to another jar"
+                                        >
+                                            <Move className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
                                     {idea.canDelete && !idea.isMasked && (
                                         <button
                                             onClick={(e) => {
@@ -267,7 +298,8 @@ export default function JarPage() {
                             </motion.div>
                         ))}
                     </div>
-                )}
+                )
+            }
 
             <AddIdeaModal
                 isOpen={isModalOpen || !!editingIdea}
@@ -307,6 +339,20 @@ export default function JarPage() {
                 currentJarId={currentUser?.currentJarId}
                 currentJarName={currentUser?.currentJarName}
                 hasJars={!!currentUser?.currentJarId}
+            />
+
+            <MoveIdeaModal
+                isOpen={isMoveModalOpen}
+                onClose={() => {
+                    setIsMoveModalOpen(false);
+                    setIdeaToMove(null);
+                }}
+                idea={ideaToMove}
+                availableJars={availableJars}
+                onMoveComplete={() => {
+                    fetchIdeas();
+                    fetchAvailableJars();
+                }}
             />
         </main >
     );

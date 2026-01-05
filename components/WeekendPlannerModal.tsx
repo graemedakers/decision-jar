@@ -1,11 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { Sparkles, Calendar, MapPin, Loader2, ExternalLink, Plus, Check, ArrowRight, X, Heart, Lock } from "lucide-react";
+import { Sparkles, Calendar, MapPin, Loader2, ExternalLink, Plus, Check, ArrowRight, X, Heart, Lock, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 import { getCurrentLocation } from "@/lib/utils";
 import { LocationInput } from "./LocationInput";
-import { trackAIToolUsed } from "@/lib/analytics";
+import { trackAIToolUsed, trackEvent } from "@/lib/analytics";
 
 interface Suggestion {
     title: string;
@@ -171,6 +171,51 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
             }
         } catch (e) {
             console.error("Error updating favorite:", e);
+        }
+    };
+
+    const handleSharePlan = async () => {
+        if (suggestions.length === 0) return;
+
+        // Build shareable text
+        const header = `🎉 My Weekend Plan near ${customLocation || "my area"}!\\n\\n`;
+        const items = suggestions.map((item, idx) =>
+            `${idx + 1}. ${item.title} (${item.day})\\n   ${item.description}\\n   💰 ${item.cost}${item.url ? `\\n   🔗 ${item.url}` : ''}`
+        ).join('\\n\\n');
+
+        const footer = `\\n\\n✨ Planned with Spin the Jar\\n${window.location.origin}`;
+        const shareText = header + items + footer;
+
+        // Check if native share is available
+        const hasNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+        // Track sharing event
+        trackEvent('weekend_plan_shared', {
+            location: customLocation,
+            plan_count: suggestions.length,
+            share_method: hasNativeShare ? 'native' : 'clipboard'
+        });
+
+        // Try native sharing first (mobile)
+        if (hasNativeShare) {
+            try {
+                await navigator.share({
+                    title: 'My Weekend Plan',
+                    text: shareText,
+                });
+            } catch (err) {
+                // User cancelled or error occurred
+                console.log('Share cancelled or failed:', err);
+            }
+        } else {
+            // Fallback: Copy to clipboard
+            try {
+                await navigator.clipboard.writeText(shareText);
+                alert('✅ Weekend plan copied to clipboard! Paste it anywhere to share.');
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                alert('Could not copy to clipboard. Please try again.');
+            }
         }
     };
 
@@ -340,10 +385,20 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                 <div className="flex justify-end gap-2">
                     <Button variant="ghost" onClick={onClose}>Close</Button>
                     {!isLoading && !error && hasGenerated && (
-                        <Button onClick={generatePlan} variant="secondary">
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Regenerate
-                        </Button>
+                        <>
+                            <Button
+                                onClick={handleSharePlan}
+                                variant="outline"
+                                className="border-primary/30 text-primary hover:bg-primary/10"
+                            >
+                                <Share2 className="w-4 h-4 mr-2" />
+                                Share Plan
+                            </Button>
+                            <Button onClick={generatePlan} variant="secondary">
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Regenerate
+                            </Button>
+                        </>
                     )}
                 </div>
             </DialogContent>
