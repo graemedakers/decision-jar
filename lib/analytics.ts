@@ -52,13 +52,15 @@ export const trackIdeaAdded = (method: 'manual' | 'ai' | 'template', source?: st
 }
 
 // User Events
-export const trackSignup = (method: string, utmSource?: string, utmMedium?: string, utmCampaign?: string) => {
+export const trackSignup = async (method: string, utmSource?: string, utmMedium?: string, utmCampaign?: string) => {
     posthog.capture('signup_completed', {
         method: method,
         utm_source: utmSource,
         utm_medium: utmMedium,
         utm_campaign: utmCampaign,
     })
+    // Wait a bit to ensure event is sent before redirect
+    await new Promise(resolve => setTimeout(resolve, 300))
 }
 
 export const trackLogin = (method: string) => {

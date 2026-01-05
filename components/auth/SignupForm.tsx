@@ -53,7 +53,7 @@ export function SignupForm() {
         const utmSource = searchParams.get('utm_source') || 'direct';
         const utmMedium = searchParams.get('utm_medium') || undefined;
         const utmCampaign = searchParams.get('utm_campaign') || undefined;
-        trackSignup(provider, utmSource, utmMedium, utmCampaign);
+        await trackSignup(provider, utmSource, utmMedium, utmCampaign);
 
         try {
             await signIn(provider, { callbackUrl: "/dashboard" });
@@ -107,7 +107,7 @@ export function SignupForm() {
                 const utmSource = searchParams.get('utm_source') || 'direct';
                 const utmMedium = searchParams.get('utm_medium') || undefined;
                 const utmCampaign = searchParams.get('utm_campaign') || undefined;
-                trackSignup('email', utmSource, utmMedium, utmCampaign);
+                await trackSignup('email', utmSource, utmMedium, utmCampaign);
 
                 if (data.premiumGifted) {
                     alert("Welcome! You have been upgraded to Premium via the invite link.");
