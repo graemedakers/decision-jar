@@ -74,13 +74,74 @@ export function useConciergeActions({
                 if (err.error && (err.error.includes('No active jar') || err.error.includes('No active jar found'))) {
                     const userWantsToCreateJar = window.confirm(
                         "You don't have a jar yet!\n\n" +
-                        "Create your first jar to save this idea and spin for it later?\n\n" +
-                        "Click OK to create a jar, or Cancel to continue browsing."
+                        "Create a jar to save this idea?\n\n" +
+                        "We'll create one for you automatically!"
                     );
 
                     if (userWantsToCreateJar) {
-                        // Redirect to dashboard where they can create a jar
-                        window.location.href = '/dashboard';
+                        try {
+                            // Determine jar topic based on category
+                            let jarTopic = "Activities";
+                            let jarName = "My Ideas";
+
+                            if (category === "MEAL") {
+                                jarTopic = "Dining";
+                                jarName = "Dining Ideas";
+                            } else if (category === "DRINK") {
+                                jarTopic = "Nightlife";
+                                jarName = "Bar & Drinks";
+                            } else if (category === "ACTIVITY" || category === "EVENT") {
+                                jarTopic = "Activities";
+                                jarName = "Activity Ideas";
+                            }
+
+                            // Create jar automatically
+                            const createRes = await fetch('/api/jar/create', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    name: jarName,
+                                    topic: jarTopic,
+                                    selectionMode: 'RANDOM'
+                                })
+                            });
+
+                            if (!createRes.ok) {
+                                throw new Error('Failed to create jar');
+                            }
+
+                            const newJar = await createRes.json();
+
+                            // Now add the idea to the new jar
+                            const addRes = await fetch('/api/ideas', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    description: rec.name,
+                                    details: rec.details || `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
+                                    indoor: true,
+                                    duration: "2.0",
+                                    activityLevel: "LOW",
+                                    cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
+                                    timeOfDay: "EVENING",
+                                    category: category,
+                                    isPrivate: isPrivate
+                                }),
+                            });
+
+                            if (addRes.ok) {
+                                alert(`✅ Created "${jarName}" jar and added your idea!\n\nReturning to dashboard...`);
+                                if (onIdeaAdded) onIdeaAdded();
+                                // Refresh page to show new jar
+                                window.location.href = '/dashboard';
+                            } else {
+                                alert('Jar created, but failed to add idea. Please try again.');
+                            }
+                        } catch (error) {
+                            console.error('Failed to auto-create jar:', error);
+                            alert('Failed to create jar automatically. Please create one manually.');
+                            window.location.href = '/dashboard';
+                        }
                     }
                     return;
                 }
