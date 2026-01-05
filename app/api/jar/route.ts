@@ -106,8 +106,17 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, jar: result });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Create Jar Error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        console.error("Error details:", {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        return NextResponse.json({
+            error: "Internal Server Error",
+            details: error.message,
+            type: error.name
+        }, { status: 500 });
     }
 }

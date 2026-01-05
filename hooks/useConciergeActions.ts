@@ -110,7 +110,10 @@ export function useConciergeActions({
                             if (!createRes.ok) {
                                 const errorData = await createRes.json();
                                 console.error('Jar creation failed:', errorData);
-                                throw new Error(errorData.error || 'Failed to create jar');
+                                const errorMsg = errorData.details
+                                    ? `${errorData.error}: ${errorData.details}${errorData.type ? ` (${errorData.type})` : ''}`
+                                    : errorData.error || 'Failed to create jar';
+                                throw new Error(errorMsg);
                             }
 
                             const newJar = await createRes.json();
