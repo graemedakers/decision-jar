@@ -113,6 +113,7 @@ export default function PremiumPage() {
                                     "Smart Activity Planner (AI)",
                                     "Dining Concierge & Bar Scout",
                                     "Custom Itinerary Builder",
+                                    "One-Tap Shortcuts (PWA)",
                                     "Priority Feature Access",
                                     "Cancel anytime during trial"
                                 ].map((feature, i) => (
