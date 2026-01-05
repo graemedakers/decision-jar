@@ -149,6 +149,18 @@ function DashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
+    // User data state (must be before PWA shortcuts useEffect)
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const [favoritesCount, setFavoritesCount] = useState(0);
+    const [diningSearchLocation, setDiningSearchLocation] = useState<string | null>(null);
+    const [hasPaid, setHasPaid] = useState(false);
+    const [coupleCreatedAt, setCoupleCreatedAt] = useState<string>("");
+    const [isTrialEligible, setIsTrialEligible] = useState(true);
+    const [xp, setXp] = useState<number | undefined>(undefined);
+    const [level, setLevel] = useState(1);
+    const [achievements, setAchievements] = useState<string[]>([]);
+    const [showLevelUp, setShowLevelUp] = useState(false);
+
     // Handle PWA shortcuts with premium gating
     useEffect(() => {
         const tool = searchParams?.get('tool');
@@ -217,20 +229,6 @@ function DashboardContent() {
         checkAndOpenTool();
     }, [searchParams, isPremium, isLoadingUser, userData]);
 
-
-    const [diningSearchLocation, setDiningSearchLocation] = useState<string | null>(null);
-
-    const [favoritesCount, setFavoritesCount] = useState(0);
-    const [userData, setUserData] = useState<UserData | null>(null);
-
-    // New state for Premium Banner
-    const [hasPaid, setHasPaid] = useState(false);
-    const [coupleCreatedAt, setCoupleCreatedAt] = useState<string>("");
-    const [isTrialEligible, setIsTrialEligible] = useState(true);
-    const [xp, setXp] = useState<number | undefined>(undefined);
-    const [level, setLevel] = useState(1);
-    const [achievements, setAchievements] = useState<string[]>([]);
-    const [showLevelUp, setShowLevelUp] = useState(false);
 
     const fetchIdeas = async () => {
         try {
