@@ -7,6 +7,7 @@ import { useState } from "react";
 import { CreateJarModal } from "./CreateJarModal";
 import { JoinJarModal } from "./JoinJarModal";
 import { useRouter } from "next/navigation";
+import { TemplateBrowserModal } from "./TemplateBrowserModal";
 
 interface DashboardOnboardingProps {
     onJarCreated: () => void;
@@ -16,6 +17,7 @@ interface DashboardOnboardingProps {
 export function DashboardOnboarding({ onJarCreated, isPro }: DashboardOnboardingProps) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isJoinOpen, setIsJoinOpen] = useState(false);
+    const [isTemplateOpen, setIsTemplateOpen] = useState(false);
     const router = useRouter();
 
     return (
@@ -30,6 +32,14 @@ export function DashboardOnboarding({ onJarCreated, isPro }: DashboardOnboarding
             <JoinJarModal
                 isOpen={isJoinOpen}
                 onClose={() => setIsJoinOpen(false)}
+            />
+            <TemplateBrowserModal
+                isOpen={isTemplateOpen}
+                onClose={() => {
+                    setIsTemplateOpen(false);
+                    onJarCreated(); // Refresh to show the new jar
+                }}
+                hasJars={false}
             />
 
             <motion.div
@@ -52,7 +62,7 @@ export function DashboardOnboarding({ onJarCreated, isPro }: DashboardOnboarding
                 </div>
 
                 {/* Actions */}
-                <div className="grid md:grid-cols-2 gap-6 pt-4">
+                <div className="grid md:grid-cols-3 gap-6 pt-4">
                     <motion.div
                         whileHover={{ y: -5 }}
                         className="glass-card p-6 flex flex-col items-center text-center gap-4 hover:border-primary/50 transition-colors group cursor-pointer"
@@ -65,7 +75,25 @@ export function DashboardOnboarding({ onJarCreated, isPro }: DashboardOnboarding
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create a Jar</h3>
                             <p className="text-sm text-slate-500 mt-1">Start fresh with your own custom categories and ideas.</p>
                         </div>
-                        <Button className="w-full mt-auto">Create Now</Button>
+                        <Button variant="outline" className="w-full mt-auto">Create Now</Button>
+                    </motion.div>
+
+                    <motion.div
+                        whileHover={{ y: -8, scale: 1.02 }}
+                        className="glass-card p-6 flex flex-col items-center text-center gap-4 bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/30 hover:border-primary/60 transition-all group cursor-pointer relative overflow-hidden"
+                        onClick={() => setIsTemplateOpen(true)}
+                    >
+                        <div className="absolute top-2 right-2 px-2 py-1 bg-primary text-white text-[10px] font-bold rounded-full">
+                            POPULAR
+                        </div>
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/25">
+                            <Layers className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Browse Templates</h3>
+                            <p className="text-sm text-slate-500 mt-1">Start with 10-20 pre-made ideas. Instant setup!</p>
+                        </div>
+                        <Button className="w-full mt-auto bg-gradient-to-r from-primary to-accent border-none">Browse Now</Button>
                     </motion.div>
 
                     <motion.div
