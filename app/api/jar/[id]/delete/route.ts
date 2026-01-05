@@ -50,6 +50,12 @@ export async function DELETE(req: NextRequest, props: Context) {
                 data: { coupleId: null }
             });
 
+            // 2. Clear activeJarId for users who had this jar active
+            await tx.user.updateMany({
+                where: { activeJarId: jarId },
+                data: { activeJarId: null }
+            });
+
             // 2. Delete Votes (Must be before VoteSession and Idea)
             // Votes linked to Sessions in this Jar AND Votes linked to Ideas in this Jar
             await tx.vote.deleteMany({
