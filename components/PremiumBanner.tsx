@@ -68,11 +68,24 @@ export function PremiumBanner({ hasPaid, coupleCreatedAt, isTrialEligible = true
                                         {daysRemaining > 0
                                             ? `${daysRemaining} Days of Pro Remaining`
                                             : "Your Free Trial has Concluded"}
-                                        <span className="text-[10px] bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full uppercase tracking-widest font-black">TRIAL ACTIVE</span>
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-widest font-black ${daysRemaining > 0 ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-500'
+                                            }`}>
+                                            {daysRemaining > 0 ? 'TRIAL ACTIVE' : 'EXPIRED'}
+                                        </span>
                                     </h3>
                                     <p className="text-slate-400 text-sm max-w-xl leading-relaxed">
-                                        You currently have full access to our AI Suite. Subscribe to maintain your status and unlock unlimited jar growth.
+                                        {daysRemaining > 0
+                                            ? "You currently have full access to our AI Suite. Subscribe to maintain your status and unlock unlimited jar growth."
+                                            : "Upgrade to Pro to restore your unlimited AI Suite access and continue growing your jars."}
                                     </p>
+                                    {daysRemaining <= 3 && daysRemaining > 0 && (
+                                        <div className="mt-2 px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded-lg inline-block">
+                                            <p className="text-orange-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
+                                                <span className="animate-pulse">⏰</span>
+                                                Hurry! Only {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} left!
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

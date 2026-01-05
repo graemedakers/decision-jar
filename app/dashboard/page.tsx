@@ -58,6 +58,8 @@ import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
 import { EmptyJarMessage } from "@/components/EmptyJarMessage";
 import { trackEvent } from "@/lib/analytics";
 import { PremiumWelcomeTip } from "@/components/PremiumWelcomeTip";
+import { TrialExpiredModal } from "@/components/TrialExpiredModal";
+
 
 interface UserData {
     id: string;
@@ -926,6 +928,10 @@ function DashboardContent() {
                         {!isLoadingUser && (
                             <div className="mb-4">
                                 <PremiumBanner hasPaid={hasPaid} coupleCreatedAt={coupleCreatedAt} isTrialEligible={isTrialEligible} />
+                                <TrialExpiredModal
+                                    hasPaid={hasPaid}
+                                    isTrialExpired={coupleCreatedAt ? (Math.ceil(Math.abs(new Date().getTime() - new Date(coupleCreatedAt).getTime()) / (1000 * 60 * 60 * 24)) > 14) : false}
+                                />
                             </div>
                         )}
 

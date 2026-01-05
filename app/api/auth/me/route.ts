@@ -1,7 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { isCouplePremium, isUserPro } from '@/lib/premium';
+import { isCouplePremium, isUserPro, hasActuallyPaid, hasJarActuallyPaid } from '@/lib/premium';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,13 +75,14 @@ export async function GET() {
         if (!user || !activeJar) {
             // If user exists but has no jar, return user only (onboarding state)  
             if (user) {
+                const userActuallyPaid = hasActuallyPaid(user);
                 return NextResponse.json({
                     user: {
                         ...user,
                         isCreator: false,
                         hasPartner: false,
                         isPremium: userIsPro, // User can have premium even without a jar
-                        hasPaid: userIsPro,
+                        hasPaid: userActuallyPaid,
                         location: user.homeTown, // Use user's personal location
                         coupleReferenceCode: null,
                         isTrialEligible: true,
@@ -105,6 +106,11 @@ export async function GET() {
         const jarIsPremium = isCouplePremium(activeJar);
         const effectivePremium = jarIsPremium || userIsPro;
 
+        // Check actual payment status
+        const userActuallyPaid = hasActuallyPaid(user);
+        const jarActuallyPaid = hasJarActuallyPaid(activeJar);
+        const effectiveHasPaid = userActuallyPaid || jarActuallyPaid;
+
         // Return user with mapped jar data
         return NextResponse.json({
             user: {
@@ -113,9 +119,9 @@ export async function GET() {
                 coupleReferenceCode: activeJar.referenceCode,
                 location: user.homeTown, // Use user's personal location, not jar location
                 isPremium: effectivePremium,
-                hasPaid: effectivePremium,
+                hasPaid: effectiveHasPaid,
                 isTrialEligible: activeJar.isTrialEligible,
-                coupleCreatedAt: activeJar.createdAt,
+                coupleCreatedAt: (user.createdAt > activeJar.createdAt) ? user.createdAt : activeJar.createdAt,
                 xp: activeJar.xp || 0,
                 level: activeJar.level || 1,
                 unlockedAchievements: activeJar.achievements?.map((a: any) => a.achievementId) || [],

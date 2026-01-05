@@ -7,6 +7,7 @@ import { Jar, User } from "@prisma/client";
  * 1. User has isLifetimePro = true (user-level premium)
  * 2. User has active subscription (subscriptionStatus = 'active', 'trialing', or 'past_due')
  * 3. Jar has isPremium = true (jar-level premium, for manual overrides)
+ * 4. User is within 14-day grace period
  * 
  * The effective premium status is: userIsPro OR jarIsPremium
  */
@@ -55,6 +56,34 @@ export function isCouplePremium(jar: Jar | null | undefined): boolean {
         }
     }
 
+    return false;
+}
+
+/**
+ * Checks if the user has ACTUALLY paid (excluding grace period/automated trials)
+ * Used to determine if upsell banners should be shown.
+ */
+export function hasActuallyPaid(user: User | null | undefined): boolean {
+    if (!user) return false;
+
+    // 1. Lifetime Pro
+    if (user.isLifetimePro) return true;
+
+    // 2. Active Subscription or Stripe Trial
+    const activeStatuses = ['active', 'trialing', 'past_due'];
+    if (user.subscriptionStatus && activeStatuses.includes(user.subscriptionStatus)) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Checks if the jar has ACTUALLY paid (excluding trial period)
+ */
+export function hasJarActuallyPaid(jar: Jar | null | undefined): boolean {
+    if (!jar) return false;
+    if (jar.isPremium === true) return true;
     return false;
 }
 
