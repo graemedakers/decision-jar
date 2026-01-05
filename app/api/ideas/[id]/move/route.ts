@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
     try {
         const session = await getSession();
         if (!session?.user?.email) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        const { id: ideaId } = await params;
         const { targetJarId } = await request.json();
-        const ideaId = params.id;
 
         if (!targetJarId) {
             return NextResponse.json({ error: "Target jar ID is required" }, { status: 400 });
