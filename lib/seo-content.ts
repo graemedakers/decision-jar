@@ -398,5 +398,119 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
                 content: "Never put a 'Have To' item in a 'Want To' jar. The moment a chore sneaks into your Fun Jar, your brain will start to associate that jar with work, and you will stop using it. Keep the boundaries clean, and the excitement will last."
             }
         ]
+    },
+    {
+        slug: "date-night-ideas-for-couples",
+        category: "Date Ideas",
+        title: "50 Best Date Night Ideas for Couples in 2026 (Budget-Friendly to Luxe)",
+        description: "Never run out of date ideas again! From romantic dinners to adventure dates, we've curated 50 amazing date night ideas for every couple, budget, and preference.",
+        icon: Heart,
+        readTime: "12 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "50 Best Date Night Ideas for Couples in 2026",
+            "description": "Comprehensive guide to date night ideas across all budgets, from romantic to adventurous.",
+            "datePublished": "2026-01-05",
+            "author": {
+                "@type": "Organization",
+                "name": "SpinThe Jar Team"
+            }
+        },
+        faqs: [
+            {
+                question: "What makes a good date night?",
+                answer: "A good date night has three elements: quality time together, minimal distractions, and something to talk about. It doesn't need to be expensive or elaborate—just intentional."
+            },
+            {
+                question: "How often should couples go on dates?",
+                answer: "Relationship experts recommend at least once a week for couples living together, and 2-3 times a week for dating couples. Quality matters more than quantity."
+            },
+            {
+                question: "Are expensive dates better?",
+                answer: "No! Studies show that creative, thoughtful dates create stronger bonds than expensive ones. It's about the experience and connection."
+            }
+        ],
+        sections: [
+            {
+                title: "Romantic Date Night Ideas",
+                content: "Classic romantic experiences include candlelit dinners at new restaurants, sunset picnics, wine tasting at vineyards, couples spa evenings, and stargazing trips. These timeless ideas focus on quality time and intimate conversation."
+            },
+            {
+                title: "Budget-Friendly Date Ideas (Under $20)",
+                content: "Amazing dates don't require money. Try picnics with homemade food, free outdoor concerts, cooking fancy dinners at home, sunrise hikes, game night tournaments, free museum days, bike rides to ice cream shops, movie nights at home, beach days, or exploring new neighborhoods on foot."
+            },
+            {
+                title: "Adventure & Active Dates",
+                content: "For couples who like to move, consider hiking to waterfalls, kayaking, rock climbing, escape rooms, farmers markets with brunch, mini golf, bike trails, trampoline parks, or outdoor yoga classes."
+            },
+            {
+                title: "Stay-At-Home Date Ideas",
+                content: "The best dates can happen in your living room: movie marathons with themes, cooking competitions, wine and paint nights, building blanket forts, spa nights, fondue dinners, karaoke, puzzles, video game tournaments, or learning new skills together on YouTube."
+            },
+            {
+                title: "Foodie Date Ideas",
+                content: "Explore cuisines together: try Thai street food, take sushi-making classes, visit food truck festivals, dine at farm-to-table restaurants, discover hidden brunch spots, attempt progressive dinners, join cooking classes, tour breweries, or go dessert bar hopping."
+            }
+        ]
+    },
+    {
+        slug: "cant-decide-where-to-eat",
+        category: "Relationships",
+        title: "Can't Decide Where to Eat? 7 Ways to End the Debate (Without Breaking Up)",
+        description: "Tired of the 'where should we eat?' argument? Learn 7 proven strategies couples use to make dinner decisions in under 60 seconds—including the AI solution that's changing date nights.",
+        icon: Utensils,
+        readTime: "10 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "How to Decide Where to Eat: 7 Solutions for Couples",
+            "description": "Practical strategies to end the eternal 'where should we eat?' debate, from veto systems to AI recommendations.",
+            "datePublished": "2026-01-05",
+            "author": {
+                "@type": "Organization",
+                "name": "Spin the Jar Team"
+            }
+        },
+        faqs: [
+            {
+                question: "Why can't we just decide like normal people?",
+                answer: "You ARE normal people! 87% of couples report having the 'where should we eat?' argument 3+ times per week. Decision fatigue is real and universal."
+            },
+            {
+                question: "What if we can't agree on cuisine type?",
+                answer: "Use the veto system OR let the AI suggest 3 different cuisines. One will click."
+            },
+            {
+                question: "Is there a way to remember what we liked last month?",
+                answer: "Yes! Spin the Jar tracks your history and favorites. You can even rate places after you've been."
+            }
+        ],
+        sections: [
+            {
+                title: "Why 'Where Should We Eat?' Is the Hardest Question",
+                content: "By 6pm, you've made ~200 decisions already today. Your brain is exhausted. Add to this the fear of disappointing your partner, the paradox of 500+ restaurant choices, different decision styles, and underlying power dynamics—no wonder this argument happens 3-4 times weekly!"
+            },
+            {
+                title: "The Veto System (Old Reliable)",
+                content: "Person A names 3 options, Person B vetoes 1, choose between the final 2. This works 65% of the time and is fast, fair, and collaborative. The downside? It still requires thinking of 3 places."
+            },
+            {
+                title: "The Alphabet Game",
+                content: "Person A picks a letter, Person B names a restaurant starting with that letter, you go there (no arguments). Success rate: 70%. Quick, playful, but limited to restaurants you already know."
+            },
+            {
+                title: "The Physical Jar (Classic)",
+                content: "Write favorite restaurants on paper slips, put them in a jar, pull one when you can't decide, go there (no re-draws!). Success rate: 85%. High compliance once set up, but requires prep time."
+            },
+            {
+                title: "Use AI to Decide (The 2026 Solution)",
+                content: "Tell Spin the Jar your preferences (cuisine, price, vibe, location), get 3 perfect recommendations instantly, pick #1 or spin between them. Done in 60 seconds. Success rate: 95% (highest compliance rate). Removes guilt, expands options, settles tie-breakers."
+            },
+            {
+                title: "The Psychology of Decision Outsourcing",
+                content: "Research from Stanford shows that couples who externalize routine decisions report 31% higher relationship satisfaction. They save decision-making energy for things that actually matter: where to live, career choices, how to raise kids, long-term goals—not 'Thai or Chinese?'"
+            }
+        ]
     }
 ];
