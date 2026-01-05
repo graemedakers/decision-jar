@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { PremiumModal } from "@/components/PremiumModal";
+import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
 
 export default function JarPage() {
     const router = useRouter();
@@ -19,6 +20,7 @@ export default function JarPage() {
     const [isPremium, setIsPremium] = useState(false);
     const [hasPartner, setHasPartner] = useState(true);
     const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+    const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
 
     const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -144,13 +146,34 @@ export default function JarPage() {
                         <p className="text-slate-400">Opening your jar...</p>
                     </div>
                 ) : activeIdeas.length === 0 ? (
-                    <div className="glass-card p-12 text-center border-dashed border-slate-300 dark:border-white/20 flex flex-col items-center justify-center min-h-[400px]">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 mx-auto flex items-center justify-center mb-4">
-                            <Plus className="w-8 h-8 text-slate-500" />
+                    <div className="max-w-2xl mx-auto">
+                        <div className="glass-card p-8 md:p-12 text-center border-2 border-dashed border-slate-300 dark:border-white/20 flex flex-col items-center justify-center">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 mx-auto flex items-center justify-center mb-6 shadow-lg">
+                                <Plus className="w-10 h-10 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Your Journey Starts Here!</h3>
+                            <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
+                                Fill your jar with ideas that excite you. Start with a pre-made template or create your own custom ideas from scratch.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                                <Button
+                                    onClick={() => setIsTemplateBrowserOpen(true)}
+                                    className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white border-none shadow-lg shadow-pink-500/25 h-12 px-6"
+                                >
+                                    <Layers className="w-5 h-5 mr-2" />
+                                    Browse Templates
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="h-12 px-6 border-2"
+                                >
+                                    <Plus className="w-5 h-5 mr-2" />
+                                    Add Custom Idea
+                                </Button>
+                            </div>
                         </div>
-                        <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Jar is Empty</h3>
-                        <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-xs mx-auto">Start adding your favorite ideas to fill up your jar.</p>
-                        <Button onClick={() => setIsModalOpen(true)}>Add First Idea</Button>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -273,6 +296,17 @@ export default function JarPage() {
             <PremiumModal
                 isOpen={isPremiumModalOpen}
                 onClose={() => setIsPremiumModalOpen(false)}
+            />
+
+            <TemplateBrowserModal
+                isOpen={isTemplateBrowserOpen}
+                onClose={() => {
+                    setIsTemplateBrowserOpen(false);
+                    fetchIdeas(); // Refresh ideas after template is applied
+                }}
+                currentJarId={currentUser?.currentJarId}
+                currentJarName={currentUser?.currentJarName}
+                hasJars={!!currentUser?.currentJarId}
             />
         </main >
     );
