@@ -8,6 +8,7 @@ import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
 import { useDemoConcierge } from "@/lib/use-demo-concierge";
 import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
+import { trackAIToolUsed } from "@/lib/analytics";
 
 interface BarConciergeModalProps {
     isOpen: boolean;
@@ -82,6 +83,15 @@ export function BarConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded, 
         }
 
         setIsLoading(true);
+
+        // Track AI tool usage
+        trackAIToolUsed('bar_concierge', {
+            drinks: selectedDrinks.join(", "),
+            vibe: selectedVibes.join(", "),
+            location: location,
+            price: price
+        });
+
         try {
             const headers: any = { 'Content-Type': 'application/json' };
             if (demoConcierge) {

@@ -10,6 +10,7 @@ import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
 import { useDemoConcierge } from "@/lib/use-demo-concierge";
 import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
+import { trackAIToolUsed } from "@/lib/analytics";
 
 interface MovieConciergeModalProps {
     isOpen: boolean;
@@ -91,6 +92,16 @@ export function MovieConciergeModal({ isOpen, onClose, userLocation, onIdeaAdded
         }
 
         setIsLoading(true);
+
+        // Track AI tool usage
+        trackAIToolUsed('movie_concierge', {
+            genre: selectedGenres.join(", "),
+            vibe: selectedVibes.join(", "),
+            platforms: selectedPlatforms.join(", "),
+            decades: selectedDecades.join(", "),
+            location: location
+        });
+
         try {
             const headers: any = { 'Content-Type': 'application/json' };
             if (demoConcierge) {

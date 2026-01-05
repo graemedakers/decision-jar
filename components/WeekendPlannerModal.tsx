@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 import { getCurrentLocation } from "@/lib/utils";
 import { LocationInput } from "./LocationInput";
+import { trackAIToolUsed } from "@/lib/analytics";
 
 interface Suggestion {
     title: string;
@@ -56,6 +57,12 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
         setError(null);
         setDebugInfo(null);
         setAddedIdeas(new Set()); // Reset added ideas on new generation
+
+        // Track AI tool usage
+        trackAIToolUsed('weekend_planner', {
+            location: customLocation
+        });
+
         try {
             const res = await fetch('/api/ai/weekend-planner', {
                 method: 'POST',
