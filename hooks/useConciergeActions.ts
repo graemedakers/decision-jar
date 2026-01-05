@@ -69,6 +69,23 @@ export function useConciergeActions({
                 alert("Added to jar!");
             } else {
                 const err = await res.json();
+
+                // Special handling for "No active jar" error
+                if (err.error && (err.error.includes('No active jar') || err.error.includes('No active jar found'))) {
+                    const userWantsToCreateJar = window.confirm(
+                        "You don't have a jar yet!\n\n" +
+                        "Create your first jar to save this idea and spin for it later?\n\n" +
+                        "Click OK to create a jar, or Cancel to continue browsing."
+                    );
+
+                    if (userWantsToCreateJar) {
+                        // Redirect to dashboard where they can create a jar
+                        window.location.href = '/dashboard';
+                    }
+                    return;
+                }
+
+                // Other errors
                 alert(`Failed to add: ${err.error || 'Server error'}`);
             }
         } catch (error) {
