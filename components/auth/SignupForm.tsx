@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
 import { signIn } from "next-auth/react";
-import { trackSignup } from "@/lib/analytics";
+import { trackSignup, identifyUser } from "@/lib/analytics";
 
 export function SignupForm() {
     const router = useRouter();
@@ -108,6 +108,16 @@ export function SignupForm() {
                 const utmMedium = searchParams.get('utm_medium') || undefined;
                 const utmCampaign = searchParams.get('utm_campaign') || undefined;
                 await trackSignup('email', utmSource, utmMedium, utmCampaign);
+
+                // Identify user in PostHog
+                if (data.user?.id) {
+                    identifyUser(data.user.id, {
+                        email: email,
+                        name: name,
+                        signup_method: 'email',
+                        utm_source: utmSource,
+                    });
+                }
 
                 if (data.premiumGifted) {
                     alert("Welcome! You have been upgraded to Premium via the invite link.");

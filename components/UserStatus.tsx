@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { identifyUser } from "@/lib/analytics";
 
 export function UserStatus() {
-    const [user, setUser] = useState<{ name: string } | null>(null);
+    const [user, setUser] = useState<{ id?: string; name: string; email?: string } | null>(null);
     const pathname = usePathname();
 
     useEffect(() => {
@@ -17,6 +18,14 @@ export function UserStatus() {
             .then(data => {
                 if (data?.user) {
                     setUser(data.user);
+
+                    // Identify user in PostHog
+                    if (data.user.id) {
+                        identifyUser(data.user.id, {
+                            email: data.user.email,
+                            name: data.user.name,
+                        });
+                    }
                 } else {
                     setUser(null);
                 }
