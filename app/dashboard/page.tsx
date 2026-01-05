@@ -56,6 +56,7 @@ import { resetConciergeTrial } from "@/lib/demo-storage";
 import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
 import { EmptyJarMessage } from "@/components/EmptyJarMessage";
 import { trackEvent } from "@/lib/analytics";
+import { PremiumWelcomeTip } from "@/components/PremiumWelcomeTip";
 
 interface UserData {
     id: string;
@@ -160,6 +161,20 @@ function DashboardContent() {
     const [level, setLevel] = useState(1);
     const [achievements, setAchievements] = useState<string[]>([]);
     const [showLevelUp, setShowLevelUp] = useState(false);
+    const [showPremiumTip, setShowPremiumTip] = useState(false);
+
+    // Check if we should show the premium welcome tip
+    useEffect(() => {
+        const success = searchParams?.get('success');
+        const hasSeenTip = localStorage.getItem('premium_shortcuts_tip_seen');
+
+        if (success === 'true' && !hasSeenTip && isPremium && !isLoadingUser) {
+            // Just upgraded! Show the tip
+            setShowPremiumTip(true);
+            trackEvent('premium_shortcuts_tip_shown', { trigger: 'post_upgrade' });
+        }
+    }, [searchParams, isPremium, isLoadingUser]);
+
 
     // Handle PWA shortcuts with premium gating
     useEffect(() => {
@@ -1600,6 +1615,12 @@ function DashboardContent() {
                     </>
                 )}
             </div>
+
+            {/* Premium Welcome Tip */}
+            <PremiumWelcomeTip
+                show={showPremiumTip}
+                onClose={() => setShowPremiumTip(false)}
+            />
         </main>
     );
 }
