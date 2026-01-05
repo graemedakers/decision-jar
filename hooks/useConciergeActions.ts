@@ -101,7 +101,7 @@ export function useConciergeActions({
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     name: jarName,
-                                    type: 'PERSONAL', // Personal jar type
+                                    type: 'GENERIC', // Valid JarType enum
                                     topic: jarTopic,
                                     selectionMode: 'RANDOM'
                                 })
