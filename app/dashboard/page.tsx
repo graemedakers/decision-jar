@@ -157,9 +157,9 @@ function DashboardContent() {
         // Track shortcut usage
         trackEvent('pwa_shortcut_used', { tool, from_home_screen: true });
 
-        // Wait for premium status to be loaded
-        const checkAndOpenTool = () => {
-            if (isLoadingUser) {
+        // Wait for premium status and user data to be loaded
+        const checkAndOpenTool = async () => {
+            if (isLoadingUser || !userData) {
                 // Wait for user data to load
                 setTimeout(checkAndOpenTool, 100);
                 return;
@@ -172,7 +172,28 @@ function DashboardContent() {
                 return;
             }
 
-            // Premium user - open the requested tool
+            // Premium user - check if they have an active jar
+            if (!userData.activeJarId && userData.memberships && userData.memberships.length > 0) {
+                // No active jar but has jars - auto-select the first one
+                const firstJar = userData.memberships[0];
+                try {
+                    await fetch('/api/jar/set-active', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ jarId: firstJar.jarId }),
+                        credentials: 'include'
+                    });
+
+                    trackEvent('pwa_shortcut_jar_auto_selected', {
+                        tool,
+                        jarId: firstJar.jarId
+                    });
+                } catch (error) {
+                    console.error('Failed to auto-select jar:', error);
+                }
+            }
+
+            // Open the requested tool
             trackEvent('pwa_shortcut_opened', { tool, user_type: 'premium' });
 
             switch (tool) {
@@ -194,7 +215,7 @@ function DashboardContent() {
         };
 
         checkAndOpenTool();
-    }, [searchParams, isPremium, isLoadingUser]);
+    }, [searchParams, isPremium, isLoadingUser, userData]);
 
 
     const [diningSearchLocation, setDiningSearchLocation] = useState<string | null>(null);
