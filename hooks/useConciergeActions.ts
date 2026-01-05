@@ -70,8 +70,8 @@ export function useConciergeActions({
             } else {
                 const err = await res.json();
 
-                // Special handling for "No active jar" error
-                if (err.error && (err.error.includes('No active jar') || err.error.includes('No active jar found'))) {
+                // Special handling for "No active jar" or "Jar not found" errors
+                if (err.error && (err.error.includes('No active jar') || err.error.includes('No active jar found') || err.error.includes('Jar not found'))) {
                     const userWantsToCreateJar = window.confirm(
                         "You don't have a jar yet!\n\n" +
                         "Create a jar to save this idea?\n\n" +
