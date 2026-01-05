@@ -113,11 +113,10 @@ export function useConciergeActions({
                                     // Set first jar as active and retry
                                     const firstJar = jars[0];
 
-                                    // Set as active (assumes /api/jar/set-active exists or we just update user)
-                                    await fetch('/api/user/update', {
-                                        method: 'PATCH',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ activeJarId: firstJar.id })
+                                    // Set as active using switch endpoint
+                                    await fetch(`/api/jar/${firstJar.id}/switch`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' }
                                     });
 
                                     // Retry adding idea
