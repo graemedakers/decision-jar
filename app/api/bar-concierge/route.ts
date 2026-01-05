@@ -36,12 +36,16 @@ export async function POST(request: Request) {
                 user?.couple;
 
 
-            if (!user || !activeJar) {
-                return NextResponse.json({ error: 'No active jar' }, { status: 400 });
+            if (!user) {
+                return NextResponse.json({ error: 'User not found' }, { status: 400 });
             }
 
-            if (!isCouplePremium(activeJar) && !isUserPro(user)) {
-                return NextResponse.json({ error: 'Premium required' }, { status: 403 });
+            // Check premium status - tool works without jar, but user needs premium
+            if (!activeJar || (!isCouplePremium(activeJar) && !isUserPro(user))) {
+                // If no jar, just check user premium status
+                if (!isUserPro(user)) {
+                    return NextResponse.json({ error: 'Premium required' }, { status: 403 });
+                }
             }
 
             const rateLimit = await checkRateLimit(user);
@@ -75,7 +79,7 @@ export async function POST(request: Request) {
             extraInstructions += `The user is interested in: ${userInterests}. Consider this when selecting the vibe or drinks if applicable.\n`;
         }
 
-        const excludeNames = await getExcludedNames(activeJar.id);
+        const excludeNames = activeJar ? await getExcludedNames(activeJar.id) : [];
         if (excludeNames.length > 0) {
             extraInstructions += `\nEXCLUSION LIST: The user is already aware of the following places. Do NOT match or recommend these exact names again: ${excludeNames.join(', ')}. Find NEW alternatives.\n`;
         }
