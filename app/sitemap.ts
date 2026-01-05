@@ -66,6 +66,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'weekly',
             priority: 0.9,
         },
+        {
+            url: `${baseUrl}/learn/date-night-ideas-for-couples`,
+            lastModified: new Date('2026-01-05'),
+            changeFrequency: 'monthly',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/learn/cant-decide-where-to-eat`,
+            lastModified: new Date('2026-01-05'),
+            changeFrequency: 'monthly',
+            priority: 0.9,
+        },
         ...useCasesSitemap
     ];
 }

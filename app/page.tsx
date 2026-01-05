@@ -814,6 +814,8 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-slate-500 dark:text-slate-500">
             <Link href="/learn" className="hover:text-slate-900 dark:hover:text-white transition-colors font-bold text-slate-700 dark:text-slate-300">Learning Center</Link>
+            <Link href="/learn/date-night-ideas-for-couples" className="hover:text-slate-900 dark:hover:text-white transition-colors">Date Night Ideas</Link>
+            <Link href="/learn/cant-decide-where-to-eat" className="hover:text-slate-900 dark:hover:text-white transition-colors">Where to Eat</Link>
             <Link href="/privacy" className="hover:text-slate-900 dark:hover:text-white transition-colors">Privacy</Link>
             <Link href="/use-cases" className="hover:text-slate-900 dark:hover:text-white transition-colors">Ways to Use</Link>
             <Link href="/terms" className="hover:text-slate-900 dark:hover:text-white transition-colors">Terms</Link>
