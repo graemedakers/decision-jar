@@ -80,6 +80,13 @@ export function useConciergeActions({
 
                     if (userWantsToCreateJar) {
                         try {
+                            // Show loading indicator
+                            const loadingMsg = document.createElement('div');
+                            loadingMsg.id = 'jar-creation-loading';
+                            loadingMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);color:white;padding:20px 30px;border-radius:12px;z-index:10000;font-size:16px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
+                            loadingMsg.innerHTML = '⏳ Creating jar...<br><span style="font-size:14px;opacity:0.8;margin-top:8px;display:block;">Please wait</span>';
+                            document.body.appendChild(loadingMsg);
+
                             // Determine jar topic based on category
                             let jarTopic = "Activities";
                             let jarName = "My Ideas";
@@ -136,16 +143,22 @@ export function useConciergeActions({
                             });
 
                             if (addRes.ok) {
+                                // Remove loading indicator
+                                document.getElementById('jar-creation-loading')?.remove();
                                 alert(`✅ Created "${jarName}" jar and added your idea!\n\nReturning to dashboard...`);
                                 if (onIdeaAdded) onIdeaAdded();
                                 // Refresh page to show new jar
                                 window.location.href = '/dashboard';
                             } else {
+                                // Remove loading indicator
+                                document.getElementById('jar-creation-loading')?.remove();
                                 const addError = await addRes.json();
                                 console.error('Failed to add idea:', addError);
                                 alert(`Jar created, but failed to add idea:\n${addError.error || 'Unknown error'}`);
                             }
                         } catch (error: any) {
+                            // Remove loading indicator
+                            document.getElementById('jar-creation-loading')?.remove();
                             console.error('Failed to auto-create jar:', error);
                             alert(`Failed to create jar automatically:\n${error.message || error}\n\nPlease check console for details.`);
                             window.location.href = '/dashboard';
