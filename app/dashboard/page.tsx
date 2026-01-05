@@ -8,7 +8,7 @@ import { getApiUrl } from "@/lib/utils";
 import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { motion } from "framer-motion";
 import { Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers, Users, Crown } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Jar3D } from "@/components/Jar3D";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DateReveal } from "@/components/DateReveal";
@@ -100,6 +100,14 @@ function InviteCodeDisplay({ mobile, code }: { mobile?: boolean; code: string | 
 }
 
 export default function DashboardPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-slate-400">Loading...</div></div>}>
+            <DashboardContent />
+        </Suspense>
+    );
+}
+
+function DashboardContent() {
     const [ideas, setIdeas] = useState<any[]>([]);
     const [isSpinning, setIsSpinning] = useState(false);
     const [selectedIdea, setSelectedIdea] = useState<any>(null);
