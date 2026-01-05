@@ -96,11 +96,12 @@ export function useConciergeActions({
                             }
 
                             // Create jar automatically
-                            const createRes = await fetch('/api/jar/create', {
+                            const createRes = await fetch('/api/jar', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     name: jarName,
+                                    type: 'PERSONAL', // Personal jar type
                                     topic: jarTopic,
                                     selectionMode: 'RANDOM'
                                 })
