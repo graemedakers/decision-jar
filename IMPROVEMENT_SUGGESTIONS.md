@@ -54,7 +54,7 @@ Based on the architectural review and user journey mapping, the following sugges
 - **Suggestion**: Migrate core mutations (Add Idea, Spin, Vote) to **Server Actions**.
     - *Benefit*: Reduces client-side JS bundle, improves type safety (direct import of backend logic), and simplifies form handling (progressive enhancement).
 
-### B. Image Optimization
+### B. Image Optimization [Completed]
 - **Context**: User uploads (Cloudinary) are barely processed.
 - **Suggestion**: Implement aggressive client-side compression *before* upload to save bandwidth and storage costs.
 

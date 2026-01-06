@@ -160,9 +160,15 @@ export function GooglePhotosPicker({ onPhotoSelected, onLoading, isPro }: Google
 
         if (data.action === window.google.picker.Action.PICKED) {
             const doc = data.docs[0];
-            const photoUrl = doc[window.google.picker.Document.URL] || doc.url;
+            let photoUrl = doc[window.google.picker.Document.URL] || doc.url;
 
             if (photoUrl) {
+                // Optimization: Enforce max dimensions (e.g., 2048px) to reduce payload
+                // Google Photos URLs typically support dynamic resizing via params
+                if (photoUrl.includes('googleusercontent.com') && !photoUrl.includes('=')) {
+                    photoUrl += '=w2048-h2048';
+                }
+
                 await uploadToCloudinary(photoUrl);
             } else {
                 alert("Could not get photo URL");
