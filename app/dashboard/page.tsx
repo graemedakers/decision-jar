@@ -28,6 +28,8 @@ import { UserData } from "@/lib/types";
 import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
 import { useFavorites } from "@/hooks/useFavorites";
+import { spinJar } from "@/app/actions/spin";
+import { deleteIdea } from "@/app/actions/ideas";
 
 function InviteCodeDisplay({ mobile, code }: { mobile?: boolean; code: string | null }) {
     const [copied, setCopied] = useState(false);
@@ -233,20 +235,13 @@ function DashboardContent() {
         SoundEffects.playFanfare();
 
         try {
-            const res = await fetch(getApiUrl('/api/pick-date'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(filters),
-                credentials: 'include',
-            });
+            const res = await spinJar(filters);
 
-            if (res.ok) {
-                const data = await res.json();
-                openModal('DATE_REVEAL', { idea: data });
+            if (res.success && res.idea) {
+                openModal('DATE_REVEAL', { idea: res.idea });
                 handleContentUpdate();
             } else {
-                const errorData = await res.json();
-                alert(errorData.error || "Failed to pick a date. Try adding more ideas!");
+                alert(res.error || "Failed to pick a date. Try adding more ideas!");
             }
         } catch (error) {
             console.error(error);
@@ -260,17 +255,13 @@ function DashboardContent() {
         openModal('DELETE_CONFIRM', {
             onConfirm: async () => {
                 try {
-                    const res = await fetch(getApiUrl(`/api/ideas/${id}`), {
-                        method: 'DELETE',
-                        credentials: 'include',
-                    });
+                    const res = await deleteIdea(id);
 
-                    if (res.ok) {
+                    if (res.success) {
                         fetchIdeas();
                     } else {
-                        const data = await res.json();
-                        alert(`Failed to delete idea: ${data.error || "Unknown error"}`);
-                        console.error("Delete failed:", data);
+                        alert(`Failed to delete idea: ${res.error || "Unknown error"}`);
+                        console.error("Delete failed:", res);
                     }
                 } catch (error: any) {
                     console.error("Error deleting idea:", error);

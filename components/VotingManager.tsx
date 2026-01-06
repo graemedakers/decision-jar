@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 
+import { startVote, castVote, cancelVote, extendVote, resolveVote } from "@/app/actions/vote";
+
 import { Idea } from "@/lib/types";
 
 interface VotingManagerProps {
@@ -74,20 +76,16 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
     const handleStartVote = async () => {
         setSubmitting(true);
         try {
-            const res = await fetch(`/api/jar/${jarId}/vote`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'START',
-                    timeLimitMinutes: parseInt(timeLimit),
-                    tieBreakerMode: tieBreaker
-                })
+            const res = await startVote(jarId, {
+                tieBreakerMode: tieBreaker,
+                timeLimitMinutes: parseInt(timeLimit)
             });
-            if (res.ok) {
+
+            if (res.success) {
                 setIsStartModalOpen(false);
                 fetchStatus();
             } else {
-                alert("Failed to start vote");
+                alert(res.error || "Failed to start vote");
             }
         } catch (e) {
             console.error(e);
@@ -100,19 +98,12 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
         if (!selectedIdeaId) return;
         setSubmitting(true);
         try {
-            const res = await fetch(`/api/jar/${jarId}/vote`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'CAST',
-                    ideaId: selectedIdeaId
-                })
-            });
-            if (res.ok) {
+            const res = await castVote(jarId, selectedIdeaId);
+
+            if (res.success) {
                 fetchStatus();
             } else {
-                const data = await res.json();
-                alert(data.error || "Failed to cast vote");
+                alert(res.error || "Failed to cast vote");
             }
         } catch (e) {
             console.error(e);
@@ -124,23 +115,17 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
     const handleResolve = async () => {
         setSubmitting(true);
         try {
-            const res = await fetch(`/api/jar/${jarId}/vote`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'RESOLVE' })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                if (data.success && data.winnerId) {
-                    onVoteComplete(data.winnerId);
-                    window.location.reload(); // Refresh to see selected idea
-                } else if (data.nextRound) {
-                    alert("Tie! Round 2 started.");
-                    fetchStatus();
-                } else {
-                    alert(data.message || "Resolved.");
-                    fetchStatus();
-                }
+            const data = await resolveVote(jarId);
+
+            if (data.success && data.winnerId) {
+                onVoteComplete(data.winnerId);
+                window.location.reload();
+            } else if (data.nextRound) {
+                alert("Tie! Round 2 started.");
+                fetchStatus();
+            } else {
+                alert(data.message || (data.error || "Resolved."));
+                fetchStatus();
             }
         } finally {
             setSubmitting(false);
@@ -319,19 +304,11 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                     <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Admin Controls</p>
                     <div className="flex gap-2 justify-center flex-wrap">
                         <Button variant="destructive" size="sm" onClick={async () => {
-                            await fetch(`/api/jar/${jarId}/vote`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'CANCEL' })
-                            });
+                            await cancelVote(jarId);
                             fetchStatus();
                         }}>Cancel</Button>
                         <Button variant="outline" size="sm" onClick={async () => {
-                            await fetch(`/api/jar/${jarId}/vote`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'EXTEND' })
-                            });
+                            await extendVote(jarId);
                             fetchStatus();
                         }}>
                             <Clock className="w-4 h-4 mr-2" />

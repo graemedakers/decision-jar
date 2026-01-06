@@ -49,7 +49,7 @@ Based on the architectural review and user journey mapping, the following sugges
 
 ## 3. Technical & Clean Code (Future Refactor)
 
-### A. Server Actions (Next.js 14)
+### A. Server Actions (Next.js 14) [Completed]
 - **Context**: Currently using API Routes (`/api/*`) and client-side `fetch`.
 - **Suggestion**: Migrate core mutations (Add Idea, Spin, Vote) to **Server Actions**.
     - *Benefit*: Reduces client-side JS bundle, improves type safety (direct import of backend logic), and simplifies form handling (progressive enhancement).

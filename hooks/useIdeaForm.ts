@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { getApiUrl } from "@/lib/utils";
 import { getCategoriesForTopic } from "@/lib/categories";
+import { createIdea, updateIdea } from "@/app/actions/ideas";
 
 export const DEFAULT_FORM_DATA = {
     description: "",
@@ -72,17 +72,14 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
 
         try {
             const isEditing = initialData && initialData.id;
-            const url = isEditing ? getApiUrl(`/api/ideas/${initialData.id}`) : getApiUrl("/api/ideas");
-            const method = isEditing ? "PUT" : "POST";
 
-            const payload = { ...formData };
-            if (formData.suggestedBy) {
-                payload.description = `${formData.description} (via ${formData.suggestedBy})`;
-            }
+            // Apply suggestedBy to description if present
+            const finalDescription = formData.suggestedBy
+                ? `${formData.description} (via ${formData.suggestedBy})`
+                : formData.description;
 
-            // Reconstruct payload to match API expectation
             const apiBody = {
-                description: payload.description,
+                description: finalDescription,
                 details: formData.details,
                 indoor: formData.indoor,
                 duration: formData.duration,
@@ -95,15 +92,15 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 requiresTravel: formData.requiresTravel
             };
 
-            const res = await fetch(url, {
-                method: method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(apiBody),
-                credentials: 'include',
-            });
+            let res;
+            if (isEditing) {
+                res = await updateIdea(initialData.id, apiBody);
+            } else {
+                res = await createIdea(apiBody);
+            }
 
-            if (res.ok) {
-                if (method === "POST" || method === "PUT") {
+            if (res.success || res.idea) { // Handle both standard success and direct object return if changed later
+                if (!isEditing || isEditing) { // Logic simplified: on success always notify/close
                     if (isCommunitySubmission) {
                         alert("🚀 Suggestion sent! The jar admin will review your idea soon.");
                     }
@@ -111,7 +108,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 }
                 onClose();
             } else {
-                alert("Failed to save idea");
+                alert(res.error || "Failed to save idea");
             }
         } catch (error) {
             console.error(error);
