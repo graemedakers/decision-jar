@@ -6,13 +6,13 @@ Based on the architectural review and user journey mapping, the following sugges
 
 ## 1. Workflow & UX Enhancements
 
-### A. "Add to Calendar" Integration
+### A. "Add to Calendar" Integration [Completed]
 - **Context**: Currently, when a user selects an activity ("Go Tonight"), it moves to the Vault.
 - **Gap**: There is no link to the user's actual schedule.
 - **Suggestion**: Add a "Add to Calendar" button on the `DateReveal` and `ViewMemoryModal`.
     - *Implementation*: Generate a `.ics` file or use `cal.com`/Google Calendar links with pre-filled Title/Location.
 
-### B. "Surprise Me" Visibility
+### B. "Surprise Me" Visibility [Completed]
 - **Context**: The AI generation ("Magic Fill") is buried inside the `Add Idea` modal.
 - **Gap**: New users struggling with "Blank Canvas Syndrome" might miss it.
 - **Suggestion**: Elevate "Surprise Me" to the Dashboard next to the "Add Idea" button (or as a secondary heavy-weight action).

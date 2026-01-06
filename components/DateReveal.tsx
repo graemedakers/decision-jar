@@ -1,4 +1,4 @@
-import { getItinerary, getCateringPlan, getApiUrl } from "@/lib/utils";
+import { getItinerary, getCateringPlan, getApiUrl, generateCalendarLinks } from "@/lib/utils";
 import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
 import { motion, AnimatePresence } from "framer-motion";
@@ -75,6 +75,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedDateStr, setSelectedDateStr] = useState(new Date().toISOString().split('T')[0]);
     const [isUpdatingDate, setIsUpdatingDate] = useState(false);
+    const [showCalendarOptions, setShowCalendarOptions] = useState(false);
 
     const handleConfirmDate = async () => {
         if (!idea) return;
@@ -444,6 +445,39 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                         )}
                                     </>
                                 )}
+
+                                {/* Add to Calendar */}
+                                <div className="relative">
+                                    <Button
+                                        onClick={() => setShowCalendarOptions(!showCalendarOptions)}
+                                        variant="outline"
+                                        className="w-full border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/10"
+                                    >
+                                        <Calendar className="w-4 h-4 mr-2" />
+                                        Add to Calendar
+                                    </Button>
+                                    {showCalendarOptions && (
+                                        <div className="absolute bottom-full left-0 w-full mb-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-2 flex flex-col gap-1 z-20 animate-in fade-in slide-in-from-bottom-2">
+                                            {(() => {
+                                                const links = generateCalendarLinks({
+                                                    title: idea.description,
+                                                    description: idea.details || "",
+                                                    location: idea.address || userLocation || "",
+                                                    startTime: idea.selectedAt ? new Date(idea.selectedAt) : new Date(),
+                                                    endTime: idea.selectedAt ? new Date(new Date(idea.selectedAt).getTime() + (Number(idea.duration || 1) * 60 * 60 * 1000)) : undefined
+                                                });
+                                                return (
+                                                    <>
+                                                        <a href={links.google} target="_blank" rel="noopener noreferrer" className="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">Google Calendar</a>
+                                                        <a href={links.outlook} target="_blank" rel="noopener noreferrer" className="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">Outlook</a>
+                                                        <a href={links.apple} download="event.ics" className="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">Apple / iCal</a>
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    )}
+                                </div>
+
 
                                 <Button onClick={onClose} variant="secondary" className="w-full shadow-lg shadow-secondary/20">
                                     Close & Enjoy!

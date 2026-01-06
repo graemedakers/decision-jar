@@ -127,3 +127,28 @@ export async function getCurrentLocation(): Promise<string> {
         );
     });
 }
+
+export interface CalendarEvent {
+    title: string;
+    description?: string;
+    location?: string;
+    startTime?: Date;
+    endTime?: Date;
+}
+
+export function generateCalendarLinks(event: CalendarEvent) {
+    const { title, description = '', location = '', startTime = new Date(), endTime } = event;
+    const start = startTime.toISOString().replace(/-|:|\.\d\d\d/g, "");
+    // Default 1 hour if no end time
+    const end = (endTime || new Date(startTime.getTime() + 60 * 60 * 1000)).toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+    const details = encodeURIComponent(description);
+    const text = encodeURIComponent(title);
+    const loc = encodeURIComponent(location);
+
+    const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=${details}&location=${loc}`;
+    const outlook = `https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&startdt=${startTime.toISOString()}&enddt=${(endTime || new Date(startTime.getTime() + 60 * 60 * 1000)).toISOString()}&subject=${text}&body=${details}&location=${loc}`;
+    const apple = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0AURL:${typeof document !== 'undefined' ? document.location.href : ''}%0ADTSTART:${start}%0ADTEND:${end}%0ASUMMARY:${text}%0ADESCRIPTION:${details}%0ALOCATION:${loc}%0AEND:VEVENT%0AEND:VCALENDAR`;
+
+    return { google, outlook, apple };
+}

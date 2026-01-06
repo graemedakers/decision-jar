@@ -24,9 +24,10 @@ interface AddIdeaModalProps {
     customCategories?: any[];
     currentUser?: UserData | null;
     onSuccess?: () => void;
+    initialMode?: 'default' | 'magic';
 }
 
-export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser, onSuccess }: AddIdeaModalProps) {
+export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser, onSuccess, initialMode = 'default' }: AddIdeaModalProps) {
     const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('PREVIEW');
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
@@ -72,7 +73,13 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     };
 
     useEffect(() => {
-        if (isOpen) setViewMode('PREVIEW');
+        if (isOpen) {
+            setViewMode('PREVIEW');
+            if (initialMode === 'magic' && !initialData?.id) {
+                // Small delay to ensure hook is ready
+                setTimeout(() => randomize(), 100);
+            }
+        }
     }, [isOpen, initialData?.id]);
 
     const itinerary = getItinerary(formData.details);

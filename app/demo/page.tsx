@@ -10,25 +10,17 @@ import {
     initializeDemoData,
     getDemoIdeas,
     getDemoJar,
-    addDemoIdea,
-    updateDemoIdea,
-    deleteDemoIdea,
     selectDemoIdea,
     getDemoAICount,
     isDemoAILimitReached,
     DEMO_LIMITS,
-    getDemoConciergeCount,
-    isConciergeLimitReached,
 } from '@/lib/demo-storage';
-import { DiningConciergeModal } from '@/components/DiningConciergeModal';
-import { BarConciergeModal } from '@/components/BarConciergeModal';
-import { MovieConciergeModal } from '@/components/MovieConciergeModal';
-import { EscapeRoomConciergeModal } from '@/components/EscapeRoomConciergeModal';
+import { GenericConciergeModal } from '@/components/GenericConciergeModal';
+import { CONCIERGE_CONFIGS } from '@/lib/concierge-configs';
 import { PremiumBlockerModal } from '@/components/PremiumBlockerModal';
 import { Utensils, Wine, Film, Key } from 'lucide-react';
 import { useDemoConcierge } from '@/lib/use-demo-concierge';
 import { trackEvent } from '@/lib/analytics';
-import { BookConciergeModal } from '@/components/BookConciergeModal';
 import { Book } from 'lucide-react';
 
 export default function DemoPage() {
@@ -82,8 +74,6 @@ export default function DemoPage() {
         setJar(getDemoJar());
         setAiCount(getDemoAICount());
     };
-
-
 
     const handleSpin = () => {
         const availableIdeas = ideas.filter(i => !i.selectedAt);
@@ -380,31 +370,35 @@ export default function DemoPage() {
             />
 
             {/* Concierge Modals */}
-            <DiningConciergeModal
+            <GenericConciergeModal
                 isOpen={diningModalOpen}
                 onClose={() => setDiningModalOpen(false)}
+                config={CONCIERGE_CONFIGS.DINING}
                 onIdeaAdded={loadDemoData}
             />
-            <BarConciergeModal
+            <GenericConciergeModal
                 isOpen={barModalOpen}
                 onClose={() => setBarModalOpen(false)}
+                config={CONCIERGE_CONFIGS.BAR}
                 onIdeaAdded={loadDemoData}
             />
-            <MovieConciergeModal
+            <GenericConciergeModal
                 isOpen={movieModalOpen}
                 onClose={() => setMovieModalOpen(false)}
+                config={CONCIERGE_CONFIGS.MOVIE}
                 onIdeaAdded={loadDemoData}
             />
-            <EscapeRoomConciergeModal
+            <GenericConciergeModal
                 isOpen={escapeModalOpen}
                 onClose={() => setEscapeModalOpen(false)}
+                config={CONCIERGE_CONFIGS.ESCAPE_ROOM}
                 onIdeaAdded={loadDemoData}
             />
-            <BookConciergeModal
+            <GenericConciergeModal
                 isOpen={bookModalOpen}
                 onClose={() => setBookModalOpen(false)}
+                config={CONCIERGE_CONFIGS.BOOK}
                 onIdeaAdded={loadDemoData}
-                demoConcierge={demoConcierge ?? undefined}
             />
         </div>
     );

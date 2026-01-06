@@ -121,6 +121,7 @@ export function DashboardModals({
                 }}
                 currentUser={userData}
                 onSuccess={handleContentUpdate}
+                initialMode={modalProps?.initialMode}
             />
 
             {!isCommunityJar && (

@@ -91,6 +91,9 @@ There are 11 AI-powered "Concierge" tools (Dining, Bar, Movie, etc.).
 
 
 ## 5. Next Steps
+- **Calendar Integration**: [Completed] Added 'Add to Calendar' to DateReveal and ViewMemoryModal.
+- **Surprise Me Flow**: [Completed] Enhanced Dashboard integration with direct AI magic mode.
+- **Demo Page Fix**: [Completed] Resolved Vercel build errors by centralizing Concierge Modal usage.
 - **Refactor `AddIdeaModal`**: [Completed] Logic extracted to `useIdeaForm` and `useMagicIdea` hooks.
 - **Global Modal System**: [Completed] `DashboardPage` and `ExplorePage` now use `ModalProvider` and `useModalSystem`.
 - **Explore Page Refactor**: [Completed] Updated to use `useModalSystem` hook.
