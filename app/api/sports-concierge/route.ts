@@ -42,7 +42,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Rate limit exceeded', details: rateLimit.error }, { status: 429 });
         }
 
-        const { sports, membership, location } = await request.json().catch(() => ({}));
+        const { sport, type, location, membership } = await request.json().catch(() => ({}));
 
         const coupleLocation = activeJar.location;
         const userInterests = (user as any).interests;
@@ -53,17 +53,27 @@ export async function POST(request: Request) {
         }
 
         let extraInstructions = "";
+        const activityType = type || "Play / Active"; // Default to play if undefined
 
-        // Add specific instructions for the location
-        extraInstructions += `The user is looking for sports clubs or facilities in or near "${targetLocation}". 
-        - Find places where they can participate in: ${sports && sports.length > 0 ? sports.join(", ") : "Various Sports"}.\n`;
+        // Add specific instructions for the location and activity type
+        extraInstructions += `The user is looking for a place in or near "${targetLocation}".\n`;
+        extraInstructions += `User's goal: ${activityType}.\n`;
 
-        if (membership && membership !== "any") {
-            extraInstructions += `The user prefers facilities with this access type: ${membership}.\n`;
+        if (activityType.includes("Watch") || activityType.includes("Sports Bar")) {
+            extraInstructions += `Find sports bars, pubs, or stadiums where they can WATCH: ${sport || "popular sports"}.\n`;
+            extraInstructions += `Focus on venues with screens, atmosphere, or live games.\n`;
+        } else {
+            // Play / Active
+            extraInstructions += `Find sports clubs, courts, gyms, or facilities where they can PARTICIPATE in: ${sport || "Various Sports"}.\n`;
+            extraInstructions += `Focus on places that offer lessons, court hire, or open play sessions.\n`;
+
+            if (membership) {
+                extraInstructions += `The user prefers facilities with this access type: ${membership}.\n`;
+            }
         }
 
         if (userInterests) {
-            extraInstructions += `The user is interested in: ${userInterests}.\n`;
+            extraInstructions += `The user is also generally interested in: ${userInterests}.\n`;
         }
 
         const excludeNames = await getExcludedNames(activeJar.id);
@@ -105,19 +115,21 @@ export async function POST(request: Request) {
 
         const prompt = `
         Act as a sports and recreation concierge for ${targetLocation}.
-        Recommend 5 distinct sports clubs, centers, or facilities based on the following preferences:
-        - Desired Sports/Activities: ${sports && sports.length > 0 ? sports.join(", ") : "Any (Tennis, Golf, Swimming, etc)"}
-        - Membership Access: ${membership || "Any"}
+        Recommend 5 distinct venues based on these specific requirements:
+        
+        - Desired Sport/Activity: ${sport || "Any"}
+        - Intent: ${activityType}
         
         ${extraInstructions}
         
         IMPORTANT: Perform a check to ensure the place is currently OPEN for business.
-        Focus on places where the user can *participate* in the sport, not just watch.
+        If the user wants to PLAY, prioritize active participation venues (clubs, centers).
+        If the user wants to WATCH, prioritize viewing venues (bars, stadiums).
         
         For each venue, provide:
         - Name
-        - A brief description (1 sentence)
-        - Sport/Activity Type (e.g. Tennis, Golf, Multi-sport)
+        - A brief description (1 sentence, mentioning specifically why it matches the selected sport)
+        - Sport/Activity Type (e.g. Tennis, Fencing, Golf)
         - Membership Policy (e.g. "Public Access", "Membership Required", "Guest Pass Available")
         - Price Category ($ = Cheap/Free, $$ = Moderate, $$$ = Expensive/Private)
         - Approximate address or neighborhood
@@ -130,8 +142,8 @@ export async function POST(request: Request) {
             "recommendations": [
                 {
                     "name": "Club Name",
-                    "description": "Premiere golf course with driving range.",
-                    "sport_type": "Golf",
+                    "description": "Premiere fencing club offering beginner classes.",
+                    "sport_type": "Fencing",
                     "membership_required": "Public Welcome",
                     "price": "$$$",
                     "address": "123 Green Way",

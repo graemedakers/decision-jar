@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Star, Copy, Trash2, Eye, Camera, Plus, Heart, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -9,11 +9,18 @@ import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { ViewMemoryModal } from "@/components/ViewMemoryModal";
+import { useUser } from "@/hooks/useUser";
+import { useIdeas } from "@/hooks/useIdeas";
+import { useFavorites } from "@/hooks/useFavorites";
 
 export default function MemoriesPage() {
     const router = useRouter();
-    const [ideas, setIdeas] = useState<any[]>([]);
-    const [favorites, setFavorites] = useState<any[]>([]);
+
+    // Hooks
+    const { isPremium, isLoading: isUserLoading } = useUser();
+    const { ideas, isLoading: isIdeasLoading, fetchIdeas } = useIdeas();
+    const { favorites, fetchFavorites } = useFavorites();
+
     const [ratingIdea, setRatingIdea] = useState<any>(null);
     const [ratingMode, setRatingMode] = useState<'rate' | 'photos'>('rate');
     const [viewingIdea, setViewingIdea] = useState<any>(null);
@@ -21,54 +28,8 @@ export default function MemoriesPage() {
     const [ideaToDelete, setIdeaToDelete] = useState<string | null>(null);
     const [addingMemory, setAddingMemory] = useState(false);
     const [editingMemory, setEditingMemory] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isPremium, setIsPremium] = useState(false);
 
-    const fetchIdeas = async () => {
-        try {
-            const res = await fetch('/api/ideas', { credentials: 'include' });
-            if (res.ok) {
-                const data = await res.json();
-                setIdeas(data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch ideas', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const fetchFavorites = async () => {
-        try {
-            const res = await fetch('/api/favorites', { credentials: 'include' });
-            if (res.ok) {
-                const data = await res.json();
-                setFavorites(data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch favorites', error);
-        }
-    };
-
-    const fetchUser = async () => {
-        try {
-            const res = await fetch('/api/auth/me');
-            if (res.ok) {
-                const data = await res.json();
-                if (data.user) {
-                    setIsPremium(!!data.user.isPremium);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch user', error);
-        }
-    };
-
-    useEffect(() => {
-        fetchIdeas();
-        fetchFavorites();
-        fetchUser();
-    }, []);
+    const isLoading = isIdeasLoading || isUserLoading;
 
     const isFavorite = (idea: any) => {
         return favorites.some(f => f.name === idea.description);
@@ -83,7 +44,7 @@ export default function MemoriesPage() {
                     credentials: 'include'
                 });
                 if (res.ok) {
-                    setFavorites(prev => prev.filter(f => f.name !== idea.description));
+                    fetchFavorites();
                 }
             } catch (err) {
                 console.error("Failed to remove favorite", err);
@@ -96,14 +57,14 @@ export default function MemoriesPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: idea.description,
-                        address: idea.address || idea.location || idea.details || "", // Fallback
-                        description: `Memory from ${new Date(idea.selectedDate || idea.selectedAt).toLocaleDateString()}`,
+                        address: idea.address || idea.location || idea.details || "",
+                        description: `Memory from ${new Date(idea.selectedDate || idea.selectedAt || Date.now()).toLocaleDateString()}`,
                         type: idea.category === 'MEAL' ? 'RESTAURANT' : 'VENUE'
                     }),
                     credentials: 'include'
                 });
                 if (res.ok) {
-                    fetchFavorites(); // Refresh full list
+                    fetchFavorites();
                 }
             } catch (err) {
                 console.error("Failed to add favorite", err);
@@ -131,14 +92,13 @@ export default function MemoriesPage() {
     };
 
     const handleDuplicate = (idea: any) => {
-        // Create a copy of the idea without the ID
         const { id, selectedAt, selectedDate, createdBy, createdAt, updatedAt, ...ideaData } = idea;
         setDuplicatingIdea(ideaData);
     };
 
     const memories = ideas
         .filter(i => i.selectedAt)
-        .sort((a, b) => new Date(a.selectedDate || a.selectedAt).getTime() - new Date(b.selectedDate || b.selectedAt).getTime()); // Ascending order
+        .sort((a, b) => new Date(a.selectedDate || a.selectedAt || 0).getTime() - new Date(b.selectedDate || b.selectedAt || 0).getTime());
 
     return (
         <main className="min-h-screen p-4 md:p-8 pb-32 relative overflow-hidden w-full max-w-[1600px] mx-auto">
@@ -201,13 +161,13 @@ export default function MemoriesPage() {
                         <div key={idea.id} className="glass-card p-6 flex flex-col sm:flex-row items-center gap-6 group hover:bg-slate-50 dark:hover:bg-white/5 bg-white dark:bg-slate-900/40 transition-colors">
                             <div className="flex flex-col items-center sm:items-start shrink-0 min-w-[120px] text-center sm:text-left">
                                 <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                                    {new Date(idea.selectedDate || idea.selectedAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                                    {new Date(idea.selectedDate || idea.selectedAt || Date.now()).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
                                 </span>
                                 <span className="text-3xl font-bold text-slate-900 dark:text-white">
-                                    {new Date(idea.selectedDate || idea.selectedAt).getDate()}
+                                    {new Date(idea.selectedDate || idea.selectedAt || Date.now()).getDate()}
                                 </span>
                                 <span className="text-xs text-slate-500">
-                                    {new Date(idea.selectedDate || idea.selectedAt).toLocaleDateString(undefined, { weekday: 'long' })}
+                                    {new Date(idea.selectedDate || idea.selectedAt || Date.now()).toLocaleDateString(undefined, { weekday: 'long' })}
                                 </span>
                             </div>
 

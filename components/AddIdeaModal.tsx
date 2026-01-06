@@ -1,206 +1,82 @@
 "use client";
-import { getItinerary, getCateringPlan, getApiUrl } from "@/lib/utils";
-import { getCategoriesForTopic, TOPIC_CATEGORIES } from "@/lib/categories";
-
+import { getItinerary, getCateringPlan } from "@/lib/utils";
 import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, Utensils, Calendar, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles } from "lucide-react";
+import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { getRandomIdeaForTopic } from "@/lib/sample-ideas";
 import { COST_LEVELS, ACTIVITY_LEVELS, TIME_OF_DAY, WEATHER_TYPES } from "@/lib/constants";
 import { exportToPdf } from "@/lib/pdf-export";
-
-const DEFAULT_FORM_DATA = {
-    description: "",
-    details: "",
-    indoor: true,
-    duration: "0.5",
-    activityLevel: "MEDIUM",
-    cost: "$",
-    timeOfDay: "ANY",
-    category: "ACTIVITY",
-    suggestedBy: "",
-    isPrivate: false,
-    weather: "ANY",
-    requiresTravel: false,
-};
+import { useIdeaForm } from "@/hooks/useIdeaForm";
+import { useMagicIdea } from "@/hooks/useMagicIdea";
+import { TOPIC_CATEGORIES } from "@/lib/categories";
+import { Idea, UserData } from "@/lib/types";
 
 interface AddIdeaModalProps {
     isOpen: boolean;
     onClose: () => void;
-    initialData?: any; // If provided, we are in "Edit" mode
+    initialData?: Idea | Partial<Idea> | null; // If provided, we are in "Edit" mode
     isPremium?: boolean;
     onUpgrade?: () => void;
     jarTopic?: string | null;
     customCategories?: any[];
-    currentUser?: any;
+    currentUser?: UserData | null;
     onSuccess?: () => void;
 }
 
 export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser, onSuccess }: AddIdeaModalProps) {
-    const [isLoading, setIsLoading] = useState(false);
-
-    const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
-
-    const [isMagicLoading, setIsMagicLoading] = useState(false);
-
+    const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('PREVIEW');
     const contentRef = useRef<HTMLDivElement>(null);
+    const [isExporting, setIsExporting] = useState(false);
+
+    const { formData, setFormData, isLoading, handleSubmit, categories, isCommunitySubmission } = useIdeaForm({
+        initialData,
+        currentUser,
+        jarTopic,
+        customCategories,
+        onSuccess,
+        onClose
+    });
+
+    const { randomize, isLoading: isMagicLoading } = useMagicIdea({
+        jarTopic,
+        currentUser,
+        onIdeaGenerated: (randomIdea) => {
+            setFormData(prev => ({
+                ...prev,
+                description: randomIdea.description,
+                category: randomIdea.category,
+                indoor: randomIdea.indoor,
+                duration: String(randomIdea.duration),
+                activityLevel: randomIdea.activityLevel,
+                cost: randomIdea.cost,
+                timeOfDay: randomIdea.timeOfDay,
+                details: (randomIdea.details || "") + (randomIdea.website ? `\n\n${randomIdea.website}` : "")
+            }));
+        }
+    });
 
     const handleExportPdf = async () => {
         if (!contentRef.current) return;
-        setIsLoading(true);
+        setIsExporting(true);
         try {
             await exportToPdf(contentRef.current, formData.description || 'plan');
         } catch (error) {
             console.error("PDF Export failed", error);
             alert("Failed to export PDF");
         } finally {
-            setIsLoading(false);
+            setIsExporting(false);
         }
     };
-
-    const handleRandomize = async () => {
-        setIsMagicLoading(true);
-        try {
-            const res = await fetch(getApiUrl('/api/magic-idea'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    topic: jarTopic,
-                    location: currentUser?.location
-                })
-            });
-            if (res.ok) {
-                const randomIdea = await res.json();
-                if (randomIdea) {
-                    setFormData(prev => ({
-                        ...prev,
-                        description: randomIdea.description,
-                        category: randomIdea.category,
-                        indoor: randomIdea.indoor,
-                        duration: String(randomIdea.duration),
-                        activityLevel: randomIdea.activityLevel,
-                        cost: randomIdea.cost,
-                        timeOfDay: randomIdea.timeOfDay,
-                        details: (randomIdea.details || "") + (randomIdea.website ? `\n\n${randomIdea.website}` : "")
-                    }));
-                }
-            }
-        } catch (e) {
-            console.error("Magic fill failed", e);
-        } finally {
-            setIsMagicLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (initialData) {
-            setFormData({
-                description: initialData.description,
-                details: initialData.details || "",
-                indoor: initialData.indoor,
-                duration: Number.isInteger(initialData.duration) ? `${initialData.duration}.0` : String(initialData.duration),
-                activityLevel: initialData.activityLevel,
-                cost: initialData.cost,
-                timeOfDay: initialData.timeOfDay || "ANY",
-                category: initialData.category || "ACTIVITY",
-                suggestedBy: "",
-                isPrivate: initialData.isPrivate || false,
-                weather: initialData.weather || "ANY",
-                requiresTravel: initialData.requiresTravel || false,
-            });
-        } else {
-            setFormData(DEFAULT_FORM_DATA);
-        }
-
-    }, [isOpen, initialData]);
-
-    const categories = getCategoriesForTopic(jarTopic, customCategories);
-
-    // Ensure category is valid for topic
-    useEffect(() => {
-        if (isOpen && categories.length > 0) {
-            const isValid = categories.some(c => c.id === formData.category);
-            if (!isValid) {
-                setFormData(prev => ({ ...prev, category: categories[0].id }));
-            }
-        }
-    }, [jarTopic, isOpen, categories]);
-
-    const itinerary = getItinerary(formData.details);
-    const cateringPlan = getCateringPlan(formData.details);
-
-
-
-    const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('PREVIEW');
 
     useEffect(() => {
         if (isOpen) setViewMode('PREVIEW');
     }, [isOpen, initialData?.id]);
 
-    const isCommunitySubmission = currentUser?.isCommunityJar && !currentUser?.isCreator && !initialData?.id;
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-
-        try {
-            // If initialData has an ID, we are editing. Otherwise we are creating (duplicating).
-            const isEditing = initialData && initialData.id;
-            const url = isEditing ? getApiUrl(`/api/ideas/${initialData.id}`) : getApiUrl("/api/ideas");
-            const method = isEditing ? "PUT" : "POST";
-
-            const payload = { ...formData };
-            if (formData.suggestedBy) {
-                payload.description = `${formData.description} (via ${formData.suggestedBy})`;
-                // Remove the extra field before sending to API which expects strict schema usually, 
-                // but since we spread formData, we should be careful. 
-                // Actually the API probably ignores extra fields.
-            }
-
-            // Reconstruct payload to match API expectation
-            const apiBody = {
-                description: payload.description,
-                details: formData.details,
-                indoor: formData.indoor,
-                duration: formData.duration,
-                activityLevel: formData.activityLevel,
-                cost: formData.cost,
-                timeOfDay: formData.timeOfDay,
-                category: formData.category,
-                isPrivate: formData.isPrivate,
-                weather: formData.weather,
-                requiresTravel: formData.requiresTravel
-            };
-
-            const res = await fetch(url, {
-                method: method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(apiBody),
-                credentials: 'include',
-            });
-
-            if (res.ok) {
-                if (method === "POST" || method === "PUT") {
-                    if (isCommunitySubmission) {
-                        alert("🚀 Suggestion sent! The jar admin will review your idea soon.");
-                    }
-                    onSuccess?.();
-                }
-                onClose();
-            } else {
-                alert("Failed to save idea");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("Error saving idea");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const itinerary = getItinerary(formData.details);
+    const cateringPlan = getCateringPlan(formData.details);
 
     return (
         <AnimatePresence>
@@ -226,7 +102,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                 {(!initialData || !initialData.id) && !itinerary && !cateringPlan && (
                                     <button
                                         type="button"
-                                        onClick={handleRandomize}
+                                        onClick={randomize}
                                         disabled={isMagicLoading}
                                         className="p-1.5 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-colors disabled:opacity-50"
                                         title="Auto-fill with random idea"
@@ -256,9 +132,10 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                     {cateringPlan && viewMode === 'PREVIEW' && (
                                         <button
                                             onClick={handleExportPdf}
-                                            className="text-xs font-bold text-slate-500 hover:text-orange-600 flex items-center gap-1 transition-colors"
+                                            disabled={isExporting}
+                                            className="text-xs font-bold text-slate-500 hover:text-orange-600 flex items-center gap-1 transition-colors disabled:opacity-50"
                                         >
-                                            <ExternalLink className="w-3 h-3" /> Export PDF
+                                            {isExporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <ExternalLink className="w-3 h-3" />} Export PDF
                                         </button>
                                     )}
                                 </div>
@@ -276,7 +153,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                 </div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
-                                    <fieldset disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">
+                                    <fieldset disabled={!!initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">
                                         <div className="space-y-2 min-w-0">
                                             <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Category</label>
                                             <div className="bg-slate-100 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10 overflow-hidden w-full">
@@ -343,7 +220,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                             )}
                                         </div>
                                         <textarea
-                                            disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)}
+                                            disabled={!!initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)}
                                             value={formData.details}
                                             onChange={(e) => setFormData({ ...formData, details: e.target.value })}
                                             placeholder={
@@ -362,7 +239,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         />
                                         {getItinerary(formData.details) && (
                                             <p className="text-[10px] text-slate-400 text-right">
-                                                This contains a structured itinerary (Night Out Plan). Switch to Preview to view nicely.
+                                                This contains a structured structured itinerary (Night Out Plan). Switch to Preview to view nicely.
                                             </p>
                                         )}
                                         {getCateringPlan(formData.details) && (
@@ -372,7 +249,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         )}
                                     </div>
 
-                                    <fieldset disabled={initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">
+                                    <fieldset disabled={!!initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-2 min-w-0">
@@ -540,7 +417,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         <button
                                             type="submit"
                                             className="w-full inline-flex items-center justify-center transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none glass-button px-4 py-3 text-sm font-medium"
-                                            disabled={isLoading || (initialData?.id && !(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)))}
+                                            disabled={isLoading || (!!initialData?.id && !(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)))}
                                         >
                                             {isLoading ? (
                                                 <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

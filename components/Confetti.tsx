@@ -15,7 +15,11 @@ interface Particle {
 
 const colors = ["#FFC700", "#FF0000", "#2E3191", "#41BBC7"];
 
-export function Confetti() {
+interface ConfettiProps {
+    onComplete?: () => void;
+}
+
+export function Confetti({ onComplete }: ConfettiProps) {
     const [particles, setParticles] = useState<Particle[]>([]);
 
     useEffect(() => {
@@ -38,7 +42,12 @@ export function Confetti() {
         }
 
         setParticles(newParticles);
-    }, []);
+
+        if (onComplete) {
+            const timer = setTimeout(onComplete, 1600); // slightly longer than duration
+            return () => clearTimeout(timer);
+        }
+    }, [onComplete]);
 
     return (
         <div className="fixed inset-0 pointer-events-none z-[60] overflow-hidden">

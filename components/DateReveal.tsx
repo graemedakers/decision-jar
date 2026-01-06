@@ -8,22 +8,7 @@ import { useState, useRef } from "react";
 import { Confetti } from "./Confetti";
 import { exportToPdf } from "@/lib/pdf-export";
 
-interface Idea {
-    id: string;
-    description: string;
-    indoor: boolean;
-    duration: number;
-    activityLevel: string;
-    cost: string;
-    timeOfDay: string;
-    // Optional fields for Concierge Items (Dining, Movies, Wellness)
-    website?: string;
-    address?: string; // For Movies: "Streaming" or "Cinema Name"
-    openingHours?: string; // For Movies: Runtime
-    googleRating?: number;
-    details?: string;
-    canEdit?: boolean;
-}
+import { Idea } from "@/lib/types";
 
 interface Recommendation {
     title: string;
@@ -319,7 +304,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                                                 </p>
                                                 <div className="mt-4 flex flex-wrap gap-2">
                                                     <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
-                                                        {idea.duration * 60} mins
+                                                        {Number(idea.duration || 0) * 60} mins
                                                     </span>
                                                     <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
                                                         {idea.cost}
@@ -467,7 +452,8 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                         </div>
                     </motion.div>
                 </motion.div>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     );
 }

@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/Button';
 interface EmptyJarMessageProps {
     onOpenTemplates?: () => void;
     onAddIdea: () => void;
+    isCommunityJar?: boolean;
 }
 
-export function EmptyJarMessage({ onOpenTemplates, onAddIdea }: EmptyJarMessageProps) {
+export function EmptyJarMessage({ onOpenTemplates, onAddIdea, isCommunityJar }: EmptyJarMessageProps) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -26,7 +27,7 @@ export function EmptyJarMessage({ onOpenTemplates, onAddIdea }: EmptyJarMessageP
             </h2>
 
             <p className="text-lg text-slate-600 dark:text-slate-300 mb-6 max-w-md">
-                {onOpenTemplates ? (
+                {onOpenTemplates && !isCommunityJar ? (
                     <>Get started in <span className="font-bold text-pink-600 dark:text-pink-400">10 seconds</span> with a pre-filled template</>
                 ) : (
                     <>Start adding ideas to your community jar</>
@@ -34,7 +35,7 @@ export function EmptyJarMessage({ onOpenTemplates, onAddIdea }: EmptyJarMessageP
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-                {onOpenTemplates && (
+                {onOpenTemplates && !isCommunityJar && (
                     <Button
                         onClick={onOpenTemplates}
                         className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none shadow-lg px-6 py-6 h-auto whitespace-nowrap"
@@ -54,7 +55,7 @@ export function EmptyJarMessage({ onOpenTemplates, onAddIdea }: EmptyJarMessageP
                 </Button>
             </div>
 
-            {onOpenTemplates && (
+            {onOpenTemplates && !isCommunityJar && (
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-6">
                     6 ready-made templates • 10+ ideas each • Instant setup
                 </p>

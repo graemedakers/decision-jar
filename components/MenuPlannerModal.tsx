@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Loader2, Sparkles, ChefHat, Plus, Lock, Check, Share2 } from "lucide-react";
+import { X, Calendar, Loader2, Sparkles, ChefHat, Plus, Lock, Check, Share2, Users } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { trackAIToolUsed, trackEvent } from "@/lib/analytics";
@@ -24,8 +24,13 @@ interface MealPlan {
 export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerModalProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [numDays, setNumDays] = useState(7);
+    const [numPeople, setNumPeople] = useState(2);
+    const [portionSize, setPortionSize] = useState("Standard");
+    const [audience, setAudience] = useState("Adults");
     const [dietaryPreference, setDietaryPreference] = useState("None");
     const [cookingSkill, setCookingSkill] = useState("Intermediate");
+    const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+    const [foodStyle, setFoodStyle] = useState("Any");
     const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
     const [addedMeals, setAddedMeals] = useState<Set<number>>(new Set());
     const [isPrivate, setIsPrivate] = useState(false);
@@ -42,6 +47,7 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
         if (isOpen) {
             setMealPlans([]);
             setAddedMeals(new Set());
+            // Don't reset preferences to allow easy regeneration
         }
     }, [isOpen]);
 
@@ -52,6 +58,8 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
 
         trackAIToolUsed('menu_planner', {
             numDays,
+            numPeople,
+            audience,
             dietaryPreference,
             cookingSkill
         });
@@ -62,8 +70,13 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     numDays,
+                    numPeople,
+                    portionSize,
+                    audience,
                     dietaryPreference,
-                    cookingSkill
+                    cookingSkill,
+                    cuisines: selectedCuisines,
+                    style: foodStyle
                 }),
             });
 
@@ -173,15 +186,57 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                         {/* Form */}
                         <div className="p-6 overflow-y-auto flex-1 space-y-6">
                             <div className="space-y-4">
-                                {/* Number of Days */}
+                                {/* Number of Days & People */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                            <Calendar className="w-4 h-4 text-green-500" /> Days
+                                        </label>
+                                        <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-2 rounded-xl">
+                                            <button onClick={() => setNumDays(Math.max(1, numDays - 1))} className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg text-slate-600 font-bold">-</button>
+                                            <span className="flex-1 text-center font-black text-slate-900 dark:text-white text-xl">{numDays}</span>
+                                            <button onClick={() => setNumDays(Math.min(14, numDays + 1))} className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg text-slate-600 font-bold">+</button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                            <Users className="w-4 h-4 text-green-500" /> People
+                                        </label>
+                                        <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-2 rounded-xl">
+                                            <button onClick={() => setNumPeople(Math.max(1, numPeople - 1))} className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg text-slate-600 font-bold">-</button>
+                                            <span className="flex-1 text-center font-black text-slate-900 dark:text-white text-xl">{numPeople}</span>
+                                            <button onClick={() => setNumPeople(Math.min(20, numPeople + 1))} className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg text-slate-600 font-bold">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Portion & Audience */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                                        <Calendar className="w-4 h-4 text-green-500" /> Number of Days
-                                    </label>
-                                    <div className="flex items-center gap-4 bg-slate-100 dark:bg-white/5 p-2 rounded-xl">
-                                        <button onClick={() => setNumDays(Math.max(1, numDays - 1))} className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg text-slate-600 font-bold">-</button>
-                                        <span className="flex-1 text-center font-black text-slate-900 dark:text-white text-xl">{numDays}</span>
-                                        <button onClick={() => setNumDays(Math.min(14, numDays + 1))} className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg text-slate-600 font-bold">+</button>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Portion Size</label>
+                                            <select
+                                                value={portionSize}
+                                                onChange={(e) => setPortionSize(e.target.value)}
+                                                className="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2.5 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            >
+                                                <option value="Light">Light / Small</option>
+                                                <option value="Standard">Standard</option>
+                                                <option value="Generous">Generous / Leftovers</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Audience</label>
+                                            <select
+                                                value={audience}
+                                                onChange={(e) => setAudience(e.target.value)}
+                                                className="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2.5 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            >
+                                                <option value="Adults">Adults Only</option>
+                                                <option value="Kids">Kid Friendly</option>
+                                                <option value="Mixed">Mixed / Family</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -199,6 +254,49 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                                                     }`}
                                             >
                                                 {pref}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Cuisines */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Preferred Cuisines</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian', 'French'].map((cuisine) => {
+                                            const isSelected = selectedCuisines.includes(cuisine);
+                                            return (
+                                                <button
+                                                    key={cuisine}
+                                                    onClick={() => setSelectedCuisines(prev =>
+                                                        isSelected ? prev.filter(c => c !== cuisine) : [...prev, cuisine]
+                                                    )}
+                                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isSelected
+                                                        ? 'bg-green-500 text-white shadow-md'
+                                                        : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                                                        }`}
+                                                >
+                                                    {cuisine}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Food Style */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Food Style / Goal</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {['Any', 'Healthy', 'Quick (<30m)', 'Comfort', 'Budget', 'Gourmet'].map((style) => (
+                                            <button
+                                                key={style}
+                                                onClick={() => setFoodStyle(style)}
+                                                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all ${foodStyle === style
+                                                    ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300 ring-2 ring-green-500 ring-inset'
+                                                    : 'bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'
+                                                    }`}
+                                            >
+                                                {style}
                                             </button>
                                         ))}
                                     </div>

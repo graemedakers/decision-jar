@@ -2,23 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Utensils, Wine, Moon, Lock, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Users, Gamepad2, Footprints, ChefHat } from "lucide-react";
+import { Lock } from "lucide-react";
 import { PremiumModal } from "@/components/PremiumModal";
 import { useRouter } from "next/navigation";
 import { WeekendPlannerModal } from "@/components/WeekendPlannerModal";
-import { DiningConciergeModal } from "@/components/DiningConciergeModal";
-import { BarConciergeModal } from "@/components/BarConciergeModal";
+
 import { BarCrawlPlannerModal } from "@/components/BarCrawlPlannerModal";
 import { DateNightPlannerModal } from "@/components/DateNightPlannerModal";
-import { NightClubConciergeModal } from "@/components/NightClubConciergeModal";
-import { MovieConciergeModal } from "@/components/MovieConciergeModal";
-import { HotelConciergeModal } from "@/components/HotelConciergeModal";
-import { WellnessConciergeModal } from "@/components/WellnessConciergeModal";
-import { FitnessConciergeModal } from "@/components/FitnessConciergeModal";
-import { TheatreConciergeModal } from "@/components/TheatreConciergeModal";
-import { GameConciergeModal } from "@/components/GameConciergeModal";
 import { CateringPlannerModal } from "@/components/CateringPlannerModal";
 import { getApiUrl } from "@/lib/utils";
+import { GenericConciergeModal } from "@/components/GenericConciergeModal";
+import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
+import { DASHBOARD_TOOLS, DashboardTool } from "@/lib/constants/tools";
+// import { useModal } from "@/hooks/useModal";
+import { DashboardModals } from "@/components/DashboardModals";
+import { useModalSystem } from "@/components/ModalProvider";
 
 export default function ExplorePage() {
     const [isPremium, setIsPremium] = useState(false);
@@ -26,21 +24,34 @@ export default function ExplorePage() {
     const [userLocation, setUserLocation] = useState<string | null>(null);
 
     // Modals
-    const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-    const [isPlannerOpen, setIsPlannerOpen] = useState(false);
-    const [isDiningModalOpen, setIsDiningModalOpen] = useState(false);
+    const { openModal } = useModalSystem();
     const router = useRouter();
-    const [isBarModalOpen, setIsBarModalOpen] = useState(false);
-    const [isBarCrawlOpen, setIsBarCrawlOpen] = useState(false);
-    const [isDateNightOpen, setIsDateNightOpen] = useState(false);
-    const [isNightClubModalOpen, setIsNightClubModalOpen] = useState(false);
-    const [isHotelModalOpen, setIsHotelModalOpen] = useState(false);
-    const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
-    const [isWellnessModalOpen, setIsWellnessModalOpen] = useState(false);
-    const [isFitnessModalOpen, setIsFitnessModalOpen] = useState(false);
-    const [isTheatreModalOpen, setIsTheatreModalOpen] = useState(false);
-    const [isGameModalOpen, setIsGameModalOpen] = useState(false);
-    const [isCateringModalOpen, setIsCateringModalOpen] = useState(false);
+
+    // Generic Concierge State
+    // const [activeConciergeTool, setActiveConciergeTool] = useState<string | null>(null); // Removed in favor of modal system
+
+
+    const fetchUser = async () => {
+        try {
+            const res = await fetch(getApiUrl('/api/auth/me'));
+            if (res.ok) {
+                const data = await res.json();
+                if (data?.user) {
+                    const userIsPremium = !!data.user.isPremium;
+                    setIsPremium(userIsPremium);
+                    localStorage.setItem('datejar_is_premium', userIsPremium.toString());
+                    if (data.user.location) {
+                        setUserLocation(data.user.location);
+                        localStorage.setItem('datejar_user_location', data.user.location);
+                    }
+                    if (data.user.jarType) setJarType(data.user.jarType);
+                    setUserData(data.user);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching user:", error);
+        }
+    };
 
     useEffect(() => {
         // Optimistically load premium status and location from cache
@@ -57,129 +68,44 @@ export default function ExplorePage() {
             // Ignore cache errors
         }
 
-        const fetchUser = async () => {
-            try {
-                const res = await fetch(getApiUrl('/api/auth/me'));
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data?.user) {
-                        const userIsPremium = !!data.user.isPremium;
-                        setIsPremium(userIsPremium);
-                        localStorage.setItem('datejar_is_premium', userIsPremium.toString());
-                        if (data.user.location) {
-                            setUserLocation(data.user.location);
-                            localStorage.setItem('datejar_user_location', data.user.location);
-                        }
-                        if (data.user.jarType) setJarType(data.user.jarType);
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching user:", error);
-            }
-        };
         fetchUser();
     }, []);
 
-    const tools = [
-        {
-            title: "Community Finder",
-            desc: "Join public jars and find your squad.",
-            icon: Users,
-            action: () => router.push('/community'),
-            color: "blue"
-        },
-        {
-            title: "Weekend Planner",
-            desc: "Discover great ideas of what to do in your area this weekend",
-            icon: Calendar,
-            action: () => isPremium ? setIsPlannerOpen(true) : setIsPremiumModalOpen(true),
-            color: "purple"
-        },
-        {
-            title: "Game Finder",
-            desc: "Find online digital games to play solo or with friends.",
-            icon: Gamepad2,
-            action: () => isPremium ? setIsGameModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "indigo"
-        },
-        {
-            title: "Dining Concierge",
-            desc: "Find the perfect dining spot for breakfast, lunch or dinner",
-            icon: Utensils,
-            action: () => isPremium ? setIsDiningModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "orange"
-        },
-        {
-            title: "Catering Planner",
-            desc: "Chef-designed menus & prep for groups and parties.",
-            icon: ChefHat,
-            action: () => isPremium ? setIsCateringModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "red"
-        },
-        {
-            title: "Bar Scout",
-            desc: "Discover top-rated bars and lounges nearby.",
-            icon: Wine,
-            action: () => isPremium ? setIsBarModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "pink"
-        },
-        {
-            title: "Bar Crawl Planner",
-            desc: "Design a walking route of top-rated bars.",
-            icon: Footprints,
-            action: () => isPremium ? setIsBarCrawlOpen(true) : setIsPremiumModalOpen(true),
-            color: "orange"
-        },
-        {
-            title: "Night Out Planner",
-            desc: "Plan a complete evening: Drinks, Dinner & Event.",
-            icon: Moon,
-            action: () => isPremium ? setIsDateNightOpen(true) : setIsPremiumModalOpen(true),
-            color: "rose"
-        },
-        {
-            title: "Nightclub Scout",
-            desc: "Discover the hottest clubs and dance venues.",
-            icon: Disc,
-            action: () => isPremium ? setIsNightClubModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "indigo"
-        },
-        {
-            title: "Theatre Scout",
-            desc: "Find plays, musicals, and live performances.",
-            icon: Ticket,
-            action: () => isPremium ? setIsTheatreModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "violet"
-        },
-        {
-            title: "Movie Scout",
-            desc: "Find best movies and cinemas playing near you.",
-            icon: Clapperboard,
-            action: () => isPremium ? setIsMovieModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "red"
-        },
-        {
-            title: "Hotel Finder",
-            desc: "Find the perfect stay for your getaway.",
-            icon: Bed,
-            action: () => isPremium ? setIsHotelModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "cyan"
-        },
-        {
-            title: "Wellness & Spa",
-            desc: "Find spas, yoga, and relaxation spots.",
-            icon: Leaf,
-            action: () => isPremium ? setIsWellnessModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "emerald"
-        },
-        {
-            title: "Fitness Finder",
-            desc: "Gyms, trails, and classes to get you moving.",
-            icon: Dumbbell,
-            action: () => isPremium ? setIsFitnessModalOpen(true) : setIsPremiumModalOpen(true),
-            color: "amber"
-        },
-    ].filter(t => jarType !== 'SOCIAL' || t.title !== 'Date Night Planner');
+    const [userData, setUserData] = useState<any>(null);
+
+    const handleToolClick = (tool: DashboardTool) => {
+        if (tool.requiresPremium && !isPremium) {
+            openModal('PREMIUM');
+            return;
+        }
+
+        if (tool.actionType === 'link' && tool.linkHref) {
+            router.push(tool.linkHref);
+            return;
+        }
+
+        if (tool.actionType === 'concierge' && tool.conciergeId) {
+            openModal('CONCIERGE', { toolId: tool.conciergeId });
+            return;
+        }
+
+        if (tool.actionType === 'modal') {
+            switch (tool.modalId) {
+                case 'weekend_planner':
+                    openModal('WEEKEND_PLANNER');
+                    break;
+                case 'catering':
+                    openModal('CATERING_PLANNER');
+                    break;
+                case 'bar_crawl':
+                    openModal('BAR_CRAWL_PLANNER');
+                    break;
+                case 'date_night':
+                    openModal('DATE_NIGHT_PLANNER');
+                    break;
+            }
+        }
+    };
 
     const getColorClasses = (color: string) => {
         const map: Record<string, any> = {
@@ -194,9 +120,21 @@ export default function ExplorePage() {
             cyan: { border: "border-cyan-200 dark:border-cyan-500/20", bgIcons: "bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300", hover: "hover:bg-cyan-50 dark:hover:bg-cyan-900/20" },
             emerald: { border: "border-emerald-200 dark:border-emerald-500/20", bgIcons: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300", hover: "hover:bg-emerald-50 dark:hover:bg-emerald-900/20" },
             amber: { border: "border-amber-200 dark:border-amber-500/20", bgIcons: "bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300", hover: "hover:bg-amber-50 dark:hover:bg-amber-900/20" },
+            teal: { border: "border-teal-200 dark:border-teal-500/20", bgIcons: "bg-teal-100 dark:bg-teal-500/20 text-teal-600 dark:text-teal-300", hover: "hover:bg-teal-50 dark:hover:bg-teal-900/20" },
+            green: { border: "border-green-200 dark:border-green-500/20", bgIcons: "bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-300", hover: "hover:bg-green-50 dark:hover:bg-green-900/20" },
         };
         return map[color] || map.purple;
     };
+
+    const visibleTools = DASHBOARD_TOOLS.filter(t => {
+        if (!t.showInExplore) return false;
+        if (userData?.isCommunityJar && !t.communityJarCompatible) return false;
+        // In original: return jarType !== 'SOCIAL' || t.title !== 'Date Night Planner';
+        // Now using id:
+        if (jarType === 'SOCIAL' && t.id === 'date_night_planner') return false;
+
+        return true;
+    });
 
     return (
         <main className="min-h-screen p-4 pb-24 relative w-full max-w-2xl mx-auto bg-slate-50 dark:bg-slate-950">
@@ -204,96 +142,54 @@ export default function ExplorePage() {
             <p className="text-slate-500 dark:text-slate-400 mb-8">Discover ideas to fill your jar or do right now.</p>
 
             <div className="grid grid-cols-1 gap-4">
-                {tools.map((tool) => {
+                {visibleTools.map((tool) => {
                     const styles = getColorClasses(tool.color);
+                    const Icon = tool.icon;
                     return (
                         <motion.button
-                            key={tool.title}
+                            key={tool.id}
                             whileTap={{ scale: 0.98 }}
-                            onClick={tool.action}
+                            onClick={() => handleToolClick(tool)}
                             className={`w-full text-left bg-white dark:bg-slate-900 border rounded-2xl p-5 flex items-start gap-4 transition-all shadow-sm hover:shadow-md ${styles.border} ${styles.hover}`}
                         >
                             <div className={`w-12 h-12 shrink-0 rounded-xl flex items-center justify-center ${styles.bgIcons}`}>
-                                <tool.icon className="w-6 h-6" />
+                                <Icon className="w-6 h-6" />
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center justify-between mb-1">
                                     <span className="font-bold text-slate-900 dark:text-white text-lg">{tool.title}</span>
-                                    {!isPremium && <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
+                                    {!isPremium && tool.requiresPremium && <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
                                 </div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">{tool.desc}</p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">{tool.description}</p>
                             </div>
                         </motion.button>
                     )
                 })}
             </div>
 
-            {/* Modals */}
-            <PremiumModal isOpen={isPremiumModalOpen} onClose={() => setIsPremiumModalOpen(false)} />
-
-            <WeekendPlannerModal
-                isOpen={isPlannerOpen}
-                onClose={() => setIsPlannerOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <DiningConciergeModal
-                isOpen={isDiningModalOpen}
-                onClose={() => setIsDiningModalOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <BarConciergeModal
-                isOpen={isBarModalOpen}
-                onClose={() => setIsBarModalOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <BarCrawlPlannerModal
-                isOpen={isBarCrawlOpen}
-                onClose={() => setIsBarCrawlOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <DateNightPlannerModal
-                isOpen={isDateNightOpen}
-                onClose={() => setIsDateNightOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <NightClubConciergeModal
-                isOpen={isNightClubModalOpen}
-                onClose={() => setIsNightClubModalOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <TheatreConciergeModal
-                isOpen={isTheatreModalOpen}
-                onClose={() => setIsTheatreModalOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <MovieConciergeModal
-                isOpen={isMovieModalOpen}
-                onClose={() => setIsMovieModalOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <HotelConciergeModal
-                isOpen={isHotelModalOpen}
-                onClose={() => setIsHotelModalOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <WellnessConciergeModal
-                isOpen={isWellnessModalOpen}
-                onClose={() => setIsWellnessModalOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <FitnessConciergeModal
-                isOpen={isFitnessModalOpen}
-                onClose={() => setIsFitnessModalOpen(false)}
-                userLocation={userLocation || undefined}
-            />
-            <GameConciergeModal
-                isOpen={isGameModalOpen}
-                onClose={() => setIsGameModalOpen(false)}
-            />
-            <CateringPlannerModal
-                isOpen={isCateringModalOpen}
-                onClose={() => setIsCateringModalOpen(false)}
+            {/* Modals via DashboardModals */}
+            <DashboardModals
+                isPremium={isPremium}
+                userData={userData}
+                ideas={[]}
+                userLocation={userLocation}
+                setUserLocation={setUserLocation}
+                combinedLocation={userLocation || ""}
+                jarTopic={jarType || "General"}
+                level={userData?.level || 1}
+                favoritesCount={0}
+                hasPaid={userData?.hasPaid || false}
+                coupleCreatedAt={userData?.coupleCreatedAt || ""}
+                isTrialEligible={userData?.isTrialEligible !== false}
+                handleContentUpdate={fetchUser}
+                fetchFavorites={() => { }}
+                fetchIdeas={() => { }}
+                refreshUser={fetchUser}
+                handleSpinJar={() => { }}
+                showConfetti={false}
+                setShowConfetti={() => { }}
             />
         </main>
     );
 }
+

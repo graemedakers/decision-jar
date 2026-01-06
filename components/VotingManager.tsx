@@ -8,12 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 
-interface Idea {
-    id: string;
-    description: string;
-    category: string;
-    createdAt: string;
-}
+import { Idea } from "@/lib/types";
 
 interface VotingManagerProps {
     jarId: string;

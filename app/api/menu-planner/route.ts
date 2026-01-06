@@ -28,7 +28,16 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json().catch(() => ({}));
-        const { numDays = 7, dietaryPreference = 'None', cookingSkill = 'Intermediate' } = body;
+        const {
+            numDays = 7,
+            dietaryPreference = 'None',
+            cookingSkill = 'Intermediate',
+            cuisines = [],
+            style = 'Any',
+            numPeople = 2,
+            portionSize = 'Standard',
+            audience = 'Adults'
+        } = body;
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
         if (!apiKey) {
@@ -39,7 +48,7 @@ export async function POST(request: Request) {
         }
 
         // Cache key based on parameters
-        const cacheKey = `menu-planner-${numDays}-${dietaryPreference.toLowerCase()}-${cookingSkill.toLowerCase()}`;
+        const cacheKey = `menu-planner-${numDays}-${dietaryPreference.toLowerCase()}-${cookingSkill.toLowerCase()}-${JSON.stringify(cuisines)}-${style.toLowerCase()}-${numPeople}-${audience.toLowerCase()}-${portionSize.toLowerCase()}`;
 
         try {
             const cached: any[] = await prisma.$queryRaw`
@@ -59,6 +68,19 @@ export async function POST(request: Request) {
         }
 
         const dietaryNote = dietaryPreference !== 'None' ? `All meals MUST be ${dietaryPreference}.` : '';
+        const cuisineNote = cuisines && cuisines.length > 0
+            ? `Prioritize these cuisines: ${cuisines.join(', ')}.`
+            : 'Include a variety of global cuisines.';
+
+        const styleNote = style && style !== 'Any'
+            ? `Meals should fit this style/goal: ${style}.`
+            : '';
+
+        const audienceNote = `Cooking for ${numPeople} people (${audience}). Portions should be ${portionSize}.`;
+        const familyNote = audience === 'Kids' || audience === 'Mixed'
+            ? 'Ensure meals are family-friendly and likely to be enjoyed by children.'
+            : 'Meals can be more adventurous or complex if suitable for adults.';
+
         const skillNote = cookingSkill === 'Beginner'
             ? 'Keep recipes simple with common ingredients and basic techniques.'
             : cookingSkill === 'Advanced'
@@ -66,7 +88,13 @@ export async function POST(request: Request) {
                 : 'Balance of accessible and interesting recipes.';
 
         const prompt = `
-        Generate a ${numDays}-day meal plan. ${dietaryNote} ${skillNote}
+        Generate a ${numDays}-day meal plan. 
+        ${dietaryNote} 
+        ${cuisineNote}
+        ${styleNote}
+        ${audienceNote}
+        ${familyNote}
+        ${skillNote}
         
         IMPORTANT REQUIREMENTS:
         - Provide exactly ${numDays} meals (one per day - dinner only)

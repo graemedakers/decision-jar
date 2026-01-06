@@ -43,14 +43,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Rate limit exceeded', details: rateLimit.error }, { status: 429 });
         }
 
-        const { facilities, budget, location, type } = await request.json().catch(() => ({}));
+        const { facilities, budget, location, style } = await request.json().catch(() => ({}));
 
         const coupleLocation = activeJar.location;
         const userInterests = (user as any).interests;
 
         // If user manually provided a location in the request, use that.
         // Otherwise, use couple location.
-        // Use the location provided in the request, or fallback to couple's location if empty
         let targetLocation = location;
         if (!targetLocation || targetLocation.trim() === "") {
             targetLocation = coupleLocation || "your local area";
@@ -59,8 +58,8 @@ export async function POST(request: Request) {
         let extraInstructions = "";
 
         // Add specific instructions for the location
-        extraInstructions += `The user is looking for a hotel stay in or near "${targetLocation}". 
-        - Find suggested hotels, resorts, or b&bs located in or very near "${targetLocation}".\n`;
+        extraInstructions += `The user is looking for a hotel stay strictly IN "${targetLocation}".\n`;
+        extraInstructions += `Do NOT suggest places in neighboring towns or regions unless they are commonly considered part of "${targetLocation}". (e.g. If searching for Melbourne, do not suggest Torquay or Mornington Peninsula).\n`;
 
 
         if (userInterests) {
@@ -105,13 +104,15 @@ export async function POST(request: Request) {
         const prompt = `
         Act as a luxury travel agent and hotel concierge for ${targetLocation}.
         Recommend 5 distinct hotels, resorts, or B&Bs based on the following preferences:
-        - Accommodation Type: ${type || "Any"}
+        - Accommodation Style: ${style || "Any"}
         - Budget/Price Range: ${budget || "Any"}
         - Desired Facilities: ${facilities && facilities.length > 0 ? facilities.join(", ") : "Any"}
         
         ${extraInstructions}
         
-        IMPORTANT: Perform a check to ensure the place is currently OPEN for business.
+        IMPORTANT: 
+        1. Perform a check to ensure the place is currently OPEN for business.
+        2. STRICT LOCATION CHECK: Ensure the hotel is actually located IN ${targetLocation}. Do not "drift" to further away areas.
         
         For each venue, provide:
         - Name

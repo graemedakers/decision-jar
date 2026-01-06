@@ -1,0 +1,554 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, MapPin, Loader2, Sparkles, Lock, LucideIcon, Search } from "lucide-react";
+import { Button } from "./ui/Button";
+import { LocationInput } from "./LocationInput";
+import { ConciergeResultCard } from "@/components/ConciergeResultCard";
+import { RichDetailsModal } from "./RichDetailsModal";
+import { useDemoConcierge } from "@/lib/use-demo-concierge";
+import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
+import { trackAIToolUsed } from "@/lib/analytics";
+import { useConciergeActions } from "@/hooks/useConciergeActions";
+import { getCurrentLocation } from "@/lib/utils";
+
+// --- Configuration Interfaces ---
+
+export interface ConciergeSection {
+    id: string;
+    label: string;
+    icon?: LucideIcon;
+    type: 'multi-select' | 'single-select' | 'text';
+    options?: string[];
+    allowCustom?: boolean; // New: Allow user to type a custom value
+    condition?: {
+        sectionId: string;
+        values: string[]; // Show if ONE of these is selected in the target section
+    };
+}
+
+export interface ConciergeToolConfig {
+    id: string; // e.g. 'dining_concierge'
+    title: string;
+    subtitle: string;
+    icon: LucideIcon;
+    colorTheme: 'blue' | 'purple' | 'orange' | 'green' | 'rose' | 'amber' | 'emerald' | 'indigo' | 'pink' | 'red';
+    endpoint: string;
+
+    // Features
+    hasLocation: boolean; // formatting as always-on if true
+    locationCondition?: { // New: Optional condition to show location
+        sectionId: string;
+        values: string[];
+    };
+    hasPrice: boolean;
+
+    // Input Configuration
+    sections: ConciergeSection[];
+
+    // Result Card Configuration
+    categoryType: string; // For adding to jar
+    resultCard: {
+        mainIcon: LucideIcon;
+        subtextKey?: string; // e.g. 'cuisine' or 'speciality'
+        secondIcon?: LucideIcon;
+        secondSubtextKey?: string;
+        goActionLabel?: string;
+        ratingClass?: string; // Tailwind class for star color
+    }
+}
+
+interface GenericConciergeModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    config: ConciergeToolConfig;
+    userLocation?: string;
+    onIdeaAdded?: () => void;
+    onGoTonight?: (idea: any) => void;
+    onFavoriteUpdated?: () => void;
+}
+
+// --- Theme Helper ---
+const getThemeClasses = (theme: string) => {
+    const maps: Record<string, any> = {
+        orange: {
+            bg: 'bg-orange-100 dark:bg-orange-500/20',
+            text: 'text-orange-600 dark:text-orange-400',
+            button: 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700',
+            shadow: 'shadow-orange-500/20',
+            selected: 'bg-orange-500 text-white shadow-lg shadow-orange-500/20',
+            border: 'border-orange-500',
+            ring: 'focus:ring-orange-500',
+            lightBg: 'bg-orange-500/10'
+        },
+        purple: {
+            bg: 'bg-purple-100 dark:bg-purple-500/20',
+            text: 'text-purple-600 dark:text-purple-400',
+            button: 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700',
+            shadow: 'shadow-purple-500/20',
+            selected: 'bg-purple-500 text-white shadow-lg shadow-purple-500/20',
+            border: 'border-purple-500',
+            ring: 'focus:ring-purple-500',
+            lightBg: 'bg-purple-500/10'
+        },
+        blue: {
+            bg: 'bg-blue-100 dark:bg-blue-500/20',
+            text: 'text-blue-600 dark:text-blue-400',
+            button: 'bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700',
+            shadow: 'shadow-blue-500/20',
+            selected: 'bg-blue-500 text-white shadow-lg shadow-blue-500/20',
+            border: 'border-blue-500',
+            ring: 'focus:ring-blue-500',
+            lightBg: 'bg-blue-500/10'
+        },
+        green: {
+            bg: 'bg-green-100 dark:bg-green-500/20',
+            text: 'text-green-600 dark:text-green-400',
+            button: 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700',
+            shadow: 'shadow-green-500/20',
+            selected: 'bg-green-500 text-white shadow-lg shadow-green-500/20',
+            border: 'border-green-500',
+            ring: 'focus:ring-green-500',
+            lightBg: 'bg-green-500/10'
+        },
+        rose: {
+            bg: 'bg-rose-100 dark:bg-rose-500/20',
+            text: 'text-rose-600 dark:text-rose-400',
+            button: 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700',
+            shadow: 'shadow-rose-500/20',
+            selected: 'bg-rose-500 text-white shadow-lg shadow-rose-500/20',
+            border: 'border-rose-500',
+            ring: 'focus:ring-rose-500',
+            lightBg: 'bg-rose-500/10'
+        },
+        amber: {
+            bg: 'bg-amber-100 dark:bg-amber-500/20',
+            text: 'text-amber-600 dark:text-amber-400',
+            button: 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700',
+            shadow: 'shadow-amber-500/20',
+            selected: 'bg-amber-500 text-white shadow-lg shadow-amber-500/20',
+            border: 'border-amber-500',
+            ring: 'focus:ring-amber-500',
+            lightBg: 'bg-amber-500/10'
+        },
+        emerald: {
+            bg: 'bg-emerald-100 dark:bg-emerald-500/20',
+            text: 'text-emerald-600 dark:text-emerald-400',
+            button: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700',
+            shadow: 'shadow-emerald-500/20',
+            selected: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
+            border: 'border-emerald-500',
+            ring: 'focus:ring-emerald-500',
+            lightBg: 'bg-emerald-500/10'
+        },
+        indigo: {
+            bg: 'bg-indigo-100 dark:bg-indigo-500/20',
+            text: 'text-indigo-600 dark:text-indigo-400',
+            button: 'bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700',
+            shadow: 'shadow-indigo-500/20',
+            selected: 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20',
+            border: 'border-indigo-500',
+            ring: 'focus:ring-indigo-500',
+            lightBg: 'bg-indigo-500/10'
+        },
+        pink: {
+            bg: 'bg-pink-100 dark:bg-pink-500/20',
+            text: 'text-pink-600 dark:text-pink-400',
+            button: 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700',
+            shadow: 'shadow-pink-500/20',
+            selected: 'bg-pink-500 text-white shadow-lg shadow-pink-500/20',
+            border: 'border-pink-500',
+            ring: 'focus:ring-pink-500',
+            lightBg: 'bg-pink-500/10'
+        },
+        red: {
+            bg: 'bg-red-100 dark:bg-red-500/20',
+            text: 'text-red-600 dark:text-red-400',
+            button: 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700',
+            shadow: 'shadow-red-500/20',
+            selected: 'bg-red-500 text-white shadow-lg shadow-red-500/20',
+            border: 'border-red-500',
+            ring: 'focus:ring-red-500',
+            lightBg: 'bg-red-500/10'
+        }
+    };
+    return maps[theme] || maps.blue;
+};
+
+export function GenericConciergeModal({
+    isOpen,
+    onClose,
+    config,
+    userLocation,
+    onIdeaAdded,
+    onGoTonight,
+    onFavoriteUpdated
+}: GenericConciergeModalProps) {
+    const demoConcierge = useDemoConcierge();
+    const [showTrialUsedPrompt, setShowTrialUsedPrompt] = useState(false);
+
+    const [isLoading, setIsLoading] = useState(false);
+
+    // State Store for all dynamic inputs
+    const [selections, setSelections] = useState<Record<string, string[]>>({});
+    const [customInputs, setCustomInputs] = useState<Record<string, string>>({}); // New: Store custom text inputs
+
+    const [location, setLocation] = useState(userLocation || "");
+    const [price, setPrice] = useState("any");
+    const [isPrivate, setIsPrivate] = useState(true);
+    const [recommendations, setRecommendations] = useState<any[]>([]);
+    const [prevOpen, setPrevOpen] = useState(false);
+    const resultsRef = useRef<HTMLDivElement>(null);
+    const [viewingItem, setViewingItem] = useState<any | null>(null);
+
+    const theme = getThemeClasses(config.colorTheme);
+
+    // Reset on Open
+    if (isOpen && !prevOpen) {
+        setLocation(userLocation || "");
+        setSelections({});
+        setCustomInputs({});
+        setRecommendations([]);
+        setPrice("any");
+        setPrevOpen(true);
+    } else if (!isOpen && prevOpen) {
+        setPrevOpen(false);
+    }
+
+    // Scroll to results
+    useEffect(() => {
+        if (recommendations.length > 0 && resultsRef.current) {
+            setTimeout(() => {
+                resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }, [recommendations]);
+
+    const { handleAddToJar, handleGoTonight: handleGoTonightFromHook, handleFavorite, toggleSelection: toggleSelectionFromHook } = useConciergeActions({
+        onIdeaAdded,
+        onGoTonight, // Pass the prop directly to the hook
+        onFavoriteUpdated,
+        onClose,
+        setRecommendations
+    });
+
+    const onGoAction = (rec: any) => {
+        if (config.id === 'chef_concierge') {
+            setViewingItem(rec);
+        } else {
+            handleGoTonight(rec, config.categoryType, isPrivate);
+        }
+    };
+
+    // Reset state when config changes or modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setLocation('');
+            setSelections({});
+            setRecommendations([]);
+        } else {
+            setPrevOpen(false);
+        }
+    }, [isOpen, userLocation]); // Depend on isOpen and userLocation
+
+    const toggleSelection = (option: string, sectionId: string, type: 'multi-select' | 'single-select') => {
+        setSelections(prev => {
+            const current = prev[sectionId] || [];
+            if (type === 'single-select') {
+                return { ...prev, [sectionId]: current.includes(option) ? [] : [option] };
+            } else {
+                return {
+                    ...prev,
+                    [sectionId]: current.includes(option)
+                        ? current.filter(i => i !== option)
+                        : [...current, option]
+                };
+            }
+        });
+    };
+
+    const handleGetRecommendations = async () => {
+        if (demoConcierge && !demoConcierge.hasUsedTrial) {
+            demoConcierge.onUse();
+        }
+
+        setIsLoading(true);
+
+        // Flatten selections for Analytics & API
+        // Flatten selections for Analytics & API
+        const selectionMap: Record<string, string> = {};
+
+        config.sections.forEach(section => {
+            const key = section.id;
+            const selectedValues = [...(selections[key] || [])];
+
+            // Append custom input if exists for this section
+            if (customInputs[key] && customInputs[key].trim()) {
+                selectedValues.push(customInputs[key].trim());
+            }
+
+            if (selectedValues.length > 0) {
+                selectionMap[key] = selectedValues.join(", ");
+            }
+        });
+
+        trackAIToolUsed(config.id, {
+            ...selectionMap,
+            location: config.hasLocation ? location : undefined,
+            price: config.hasPrice ? price : undefined
+        });
+
+        try {
+            const headers: any = { 'Content-Type': 'application/json' };
+            if (demoConcierge) {
+                headers['x-demo-mode'] = 'true';
+            }
+
+            const body = {
+                ...selectionMap,
+                location: config.hasLocation ? location : undefined,
+                price: config.hasPrice ? price : undefined
+            };
+
+            const res = await fetch(config.endpoint, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(body),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setRecommendations(data.recommendations || []);
+
+                if (demoConcierge && demoConcierge.triesRemaining === 0) {
+                    setTimeout(() => {
+                        setShowTrialUsedPrompt(true);
+                    }, 3000);
+                }
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                alert(`Error: ${errorData.error || "Failed to fetch recommendations."}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("An error occurred.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <AnimatePresence mode="wait">
+            {isOpen && (
+                <div key="concierge-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <motion.div
+                        key="concierge-modal-content"
+                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                        className="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[90vh] rounded-3xl shadow-xl flex flex-col overflow-hidden relative ring-1 ring-white/10"
+                    >
+                        {/* HEADER */}
+                        <div className="p-6 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-gradient-to-r from-transparent via-transparent to-white/5">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.bg}`}>
+                                    <config.icon className={`w-5 h-5 ${theme.text}`} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">{config.title}</h2>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">{config.subtitle}</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={onClose}
+                                className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 space-y-6 px-7 custom-scrollbar">
+                            <div className="space-y-6">
+                                {/* LOCATION */}
+                                {/* LOCATION */}
+                                {(config.hasLocation || (config.locationCondition && (selections[config.locationCondition.sectionId] || []).some(v => config.locationCondition?.values.includes(v)))) && (
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Location to Search</label>
+                                            <button
+                                                type="button"
+                                                onClick={async () => {
+                                                    try {
+                                                        const currentLoc = await getCurrentLocation();
+                                                        setLocation(currentLoc);
+                                                    } catch (err) {
+                                                        alert("Could not get location. Please check permissions.");
+                                                    }
+                                                }}
+                                                className={`text-[10px] uppercase tracking-wider font-bold ${theme.text} hover:opacity-80 transition-colors flex items-center gap-1`}
+                                            >
+                                                <MapPin className="w-3 h-3" />
+                                                Use GPS
+                                            </button>
+                                        </div>
+                                        <LocationInput
+                                            value={location}
+                                            onChange={setLocation}
+                                            placeholder="City, Neighborhood, or Zip"
+                                            className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
+                                            updateProfileLocation={true}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* DYNAMIC SECTIONS */}
+                                {config.sections.map((section) => {
+                                    // Check visibility condition
+                                    if (section.condition) {
+                                        const triggerValues = selections[section.condition.sectionId] || [];
+                                        const isVisible = triggerValues.some(v => section.condition!.values.includes(v));
+                                        if (!isVisible) return null;
+                                    }
+
+                                    return (
+                                        <div key={section.id} className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                                {section.icon && <section.icon className={`w-4 h-4 ${theme.text}`} />}
+                                                {section.label}
+                                            </label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {section.options.map((option) => {
+                                                    const isActive = (selections[section.id] || []).includes(option);
+                                                    return (
+                                                        <button
+                                                            key={option}
+                                                            onClick={() => toggleSelection(option, section.id, section.type)}
+                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isActive
+                                                                ? theme.selected
+                                                                : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
+                                                                }`}
+                                                        >
+                                                            {option}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                            {section.allowCustom && (
+                                                <div className="mt-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Other (specify)..."
+                                                        value={customInputs[section.id] || ''}
+                                                        onChange={(e) => setCustomInputs(prev => ({ ...prev, [section.id]: e.target.value }))}
+                                                        className={`w-full px-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400`}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+
+                                {/* PRICE */}
+                                {config.hasPrice && (
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Price Range</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['any', 'cheap', 'moderate', 'expensive'].map((p) => (
+                                                <button
+                                                    key={p}
+                                                    type="button"
+                                                    onClick={() => setPrice(p)}
+                                                    className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-all ${price === p
+                                                        ? `${theme.lightBg} ${theme.border} ${theme.text}`
+                                                        : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'
+                                                        }`}
+                                                >
+                                                    {p === 'any' ? 'Any' : p.charAt(0).toUpperCase() + p.slice(1)} {p !== 'any' && `(${p === 'cheap' ? '$' : p === 'moderate' ? '$$' : '$$$'})`}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="py-2">
+                                <Button
+                                    type="button"
+                                    onClick={handleGetRecommendations}
+                                    disabled={isLoading}
+                                    className={`w-full text-white shadow-lg ${theme.button}`}
+                                >
+                                    {isLoading ? (
+                                        <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Thinking...</>
+                                    ) : (
+                                        <><Sparkles className="w-5 h-5 mr-2" /> Recommendations</>
+                                    )}
+                                </Button>
+                            </div>
+
+                            {/* RESULTS */}
+                            {recommendations.length > 0 && (
+                                <div ref={resultsRef} className="space-y-4 pt-4 border-t border-slate-200 dark:border-white/10">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Top Picks for You</h3>
+                                        <button
+                                            onClick={() => setIsPrivate(!isPrivate)}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-500'}`}
+                                        >
+                                            <Lock className="w-3.5 h-3.5" />
+                                            {isPrivate ? "Secret Mode On" : "Public Mode"}
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {recommendations.map((rec, index) => (
+                                            <ConciergeResultCard
+                                                key={index}
+                                                rec={rec}
+                                                categoryType={config.categoryType}
+                                                mainIcon={config.resultCard.mainIcon}
+                                                subtext={config.resultCard.subtextKey ? rec[config.resultCard.subtextKey] : undefined}
+                                                secondIcon={config.resultCard.secondIcon}
+                                                secondSubtext={config.resultCard.secondSubtextKey ? rec[config.resultCard.secondSubtextKey] : undefined}
+                                                isPrivate={isPrivate}
+                                                onFavorite={handleFavorite}
+                                                onAddToJar={handleAddToJar}
+                                                onGoAction={() => onGoAction(rec)}
+                                                goActionLabel={config.resultCard.goActionLabel || "Go Tonight"}
+                                                // Default style for now, can extract to config if needed
+                                                ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {showTrialUsedPrompt && demoConcierge && demoConcierge.triesRemaining === 0 && (
+                                <div className="mt-6">
+                                    <DemoUpgradePrompt
+                                        reason="premium"
+                                        message={`Loved the ${config.title}? Sign up for unlimited access to ALL 11 premium concierge tools!`}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </motion.div >
+                </div >
+            )}
+
+            <RichDetailsModal
+                isOpen={!!viewingItem}
+                onClose={() => setViewingItem(null)}
+                data={viewingItem}
+                onAddToJar={() => {
+                    if (viewingItem) handleAddToJar(viewingItem, config.categoryType, isPrivate);
+                    setViewingItem(null);
+                }}
+                onGoAction={() => {
+                    if (viewingItem) handleGoTonight(viewingItem, config.categoryType, isPrivate);
+                    setViewingItem(null);
+                }}
+            />
+        </AnimatePresence >
+    );
+}
