@@ -572,23 +572,27 @@ function DashboardContent() {
                     onSuccess={handleContentUpdate}
                 />
 
-                <SurpriseMeModal
-                    isOpen={isSurpriseModalOpen}
-                    onClose={() => setIsSurpriseModalOpen(false)}
-                    onIdeaAdded={fetchIdeas}
-                    initialLocation={userLocation || ""}
-                    jarTopic={jarTopic}
-                    customCategories={userData?.customCategories}
-                />
+                {!userData?.isCommunityJar && (
+                    <SurpriseMeModal
+                        isOpen={isSurpriseModalOpen}
+                        onClose={() => setIsSurpriseModalOpen(false)}
+                        onIdeaAdded={fetchIdeas}
+                        initialLocation={userLocation || ""}
+                        jarTopic={jarTopic}
+                        customCategories={userData?.customCategories}
+                    />
+                )}
 
-                <SpinFiltersModal
-                    isOpen={isFilterModalOpen}
-                    onClose={() => setIsFilterModalOpen(false)}
-                    onSpin={handleSpinJar}
-                    jarTopic={jarTopic}
-                    ideas={ideas}
-                    customCategories={userData?.customCategories}
-                />
+                {!userData?.isCommunityJar && (
+                    <SpinFiltersModal
+                        isOpen={isFilterModalOpen}
+                        onClose={() => setIsFilterModalOpen(false)}
+                        onSpin={handleSpinJar}
+                        jarTopic={jarTopic}
+                        ideas={ideas}
+                        customCategories={userData?.customCategories}
+                    />
+                )}
 
                 <SettingsModal
                     isOpen={isSettingsModalOpen}
@@ -607,131 +611,139 @@ function DashboardContent() {
                     currentLocation={userLocation ?? undefined}
                 />
 
-                <QuickDecisionsModal
-                    isOpen={isQuickToolsOpen}
-                    onClose={() => setIsQuickToolsOpen(false)}
-                />
+                {!userData?.isCommunityJar && (
+                    <QuickDecisionsModal
+                        isOpen={isQuickToolsOpen}
+                        onClose={() => setIsQuickToolsOpen(false)}
+                    />
+                )}
 
-                <WeekendPlannerModal
-                    isOpen={isPlannerOpen}
-                    onClose={() => setIsPlannerOpen(false)}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                {!userData?.isCommunityJar && (
+                    <WeekendPlannerModal
+                        isOpen={isPlannerOpen}
+                        onClose={() => setIsPlannerOpen(false)}
+                        userLocation={combinedLocation || undefined}
+                        onIdeaAdded={handleContentUpdate}
+                        onFavoriteUpdated={fetchFavorites}
+                    />
+                )}
 
-                <DiningConciergeModal
-                    isOpen={isDiningModalOpen}
-                    onClose={() => {
-                        setIsDiningModalOpen(false);
-                        setDiningSearchLocation(null);
-                    }}
-                    userLocation={diningSearchLocation || combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onGoTonight={(idea) => {
-                        setSelectedIdea(idea);
-                    }}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                {!userData?.isCommunityJar && (
+                    <>
+                        <DiningConciergeModal
+                            isOpen={isDiningModalOpen}
+                            onClose={() => {
+                                setIsDiningModalOpen(false);
+                                setDiningSearchLocation(null);
+                            }}
+                            userLocation={diningSearchLocation || combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                setSelectedIdea(idea);
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
 
-                <BarConciergeModal
-                    isOpen={isBarModalOpen}
-                    onClose={() => {
-                        setIsBarModalOpen(false);
-                    }}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onGoTonight={(idea) => {
-                        setSelectedIdea(idea);
-                    }}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                        <BarConciergeModal
+                            isOpen={isBarModalOpen}
+                            onClose={() => {
+                                setIsBarModalOpen(false);
+                            }}
+                            userLocation={combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                setSelectedIdea(idea);
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
 
-                <BarCrawlPlannerModal
-                    isOpen={isBarCrawlOpen}
-                    onClose={() => setIsBarCrawlOpen(false)}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                        <BarCrawlPlannerModal
+                            isOpen={isBarCrawlOpen}
+                            onClose={() => setIsBarCrawlOpen(false)}
+                            userLocation={combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
 
-                <NightClubConciergeModal
-                    isOpen={isNightClubModalOpen}
-                    onClose={() => {
-                        setIsNightClubModalOpen(false);
-                    }}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onGoTonight={(idea) => {
-                        setSelectedIdea(idea);
-                    }}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                        <NightClubConciergeModal
+                            isOpen={isNightClubModalOpen}
+                            onClose={() => {
+                                setIsNightClubModalOpen(false);
+                            }}
+                            userLocation={combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                setSelectedIdea(idea);
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
 
-                <HotelConciergeModal
-                    isOpen={isHotelModalOpen}
-                    onClose={() => {
-                        setIsHotelModalOpen(false);
-                    }}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onGoTonight={(idea) => {
-                        setSelectedIdea(idea);
-                    }}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                        <HotelConciergeModal
+                            isOpen={isHotelModalOpen}
+                            onClose={() => {
+                                setIsHotelModalOpen(false);
+                            }}
+                            userLocation={combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                setSelectedIdea(idea);
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
 
-                <MovieConciergeModal
-                    isOpen={isMovieModalOpen}
-                    onClose={() => {
-                        setIsMovieModalOpen(false);
-                    }}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onGoTonight={(idea) => {
-                        setSelectedIdea(idea);
-                    }}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                        <MovieConciergeModal
+                            isOpen={isMovieModalOpen}
+                            onClose={() => {
+                                setIsMovieModalOpen(false);
+                            }}
+                            userLocation={combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                setSelectedIdea(idea);
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
 
-                <WellnessConciergeModal
-                    isOpen={isWellnessModalOpen}
-                    onClose={() => {
-                        setIsWellnessModalOpen(false);
-                    }}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onGoTonight={(idea) => {
-                        setSelectedIdea(idea);
-                    }}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                        <WellnessConciergeModal
+                            isOpen={isWellnessModalOpen}
+                            onClose={() => {
+                                setIsWellnessModalOpen(false);
+                            }}
+                            userLocation={combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                setSelectedIdea(idea);
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
 
-                <FitnessConciergeModal
-                    isOpen={isFitnessModalOpen}
-                    onClose={() => {
-                        setIsFitnessModalOpen(false);
-                    }}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onGoTonight={(idea) => {
-                        setSelectedIdea(idea);
-                    }}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                        <FitnessConciergeModal
+                            isOpen={isFitnessModalOpen}
+                            onClose={() => {
+                                setIsFitnessModalOpen(false);
+                            }}
+                            userLocation={combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                setSelectedIdea(idea);
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
 
-                <TheatreConciergeModal
-                    isOpen={isTheatreModalOpen}
-                    onClose={() => {
-                        setIsTheatreModalOpen(false);
-                    }}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={handleContentUpdate}
-                    onGoTonight={(idea) => {
-                        setSelectedIdea(idea);
-                    }}
-                    onFavoriteUpdated={fetchFavorites}
-                />
+                        <TheatreConciergeModal
+                            isOpen={isTheatreModalOpen}
+                            onClose={() => {
+                                setIsTheatreModalOpen(false);
+                            }}
+                            userLocation={combinedLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                setSelectedIdea(idea);
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                        />
+                    </>
+                )}
 
                 <AdminControlsModal
                     isOpen={isAdminControlsOpen}
@@ -1132,25 +1144,26 @@ function DashboardContent() {
                                         </div>
                                     </motion.button>
 
-
-                                    <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setIsSurpriseModalOpen(true)}
-                                        className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 cursor-pointer transition-all bg-gradient-to-br from-yellow-500/20 to-orange-600/40 border border-yellow-500/30 hover:border-yellow-500/50 shadow-lg shadow-yellow-900/10 group"
-                                    >
-                                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        <div className="w-12 h-12 shrink-0 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-200 group-hover:scale-110 transition-transform relative z-10 border border-yellow-500/30">
-                                            <Sparkles className="w-6 h-6" />
-                                        </div>
-                                        <div className="text-left relative z-10">
-                                            <span className="block text-lg font-bold text-yellow-900 dark:text-white group-hover:text-yellow-700 dark:group-hover:text-yellow-200 transition-colors flex items-center gap-2">
-                                                Surprise Me
-                                                <span className="bg-yellow-500/30 text-yellow-700 dark:text-yellow-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+15 XP</span>
-                                            </span>
-                                            <span className="text-sm text-yellow-700 dark:text-yellow-200/60 group-hover:text-yellow-900 dark:group-hover:text-yellow-200/80 transition-colors leading-tight">Add a secret idea</span>
-                                        </div>
-                                    </motion.button>
+                                    {!userData?.isCommunityJar && (
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setIsSurpriseModalOpen(true)}
+                                            className="w-full relative overflow-hidden rounded-2xl p-6 flex flex-row items-center justify-start gap-4 cursor-pointer transition-all bg-gradient-to-br from-yellow-500/20 to-orange-600/40 border border-yellow-500/30 hover:border-yellow-500/50 shadow-lg shadow-yellow-900/10 group"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <div className="w-12 h-12 shrink-0 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-200 group-hover:scale-110 transition-transform relative z-10 border border-yellow-500/30">
+                                                <Sparkles className="w-6 h-6" />
+                                            </div>
+                                            <div className="text-left relative z-10">
+                                                <span className="block text-lg font-bold text-yellow-900 dark:text-white group-hover:text-yellow-700 dark:group-hover:text-yellow-200 transition-colors flex items-center gap-2">
+                                                    Surprise Me
+                                                    <span className="bg-yellow-500/30 text-yellow-700 dark:text-yellow-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+15 XP</span>
+                                                </span>
+                                                <span className="text-sm text-yellow-700 dark:text-yellow-200/60 group-hover:text-yellow-900 dark:group-hover:text-yellow-200/80 transition-colors leading-tight">Add a secret idea</span>
+                                            </div>
+                                        </motion.button>
+                                    )}
 
 
                                     <motion.div
