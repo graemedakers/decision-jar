@@ -108,7 +108,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
     if (!jar) return <div className="min-h-screen flex items-center justify-center">Community not found</div>;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-32">
             {/* Header Image */}
             <div className="h-64 md:h-80 w-full relative bg-slate-200 dark:bg-slate-800">
                 {jar.imageUrl ? (
@@ -243,7 +243,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
                             <Sparkles className="w-24 h-24 text-white" />
                         </div>
 
-                        <div className="relative z-10">
+                        <div className="relative z-10 pb-4">
                             <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2">
                                 Personal Curation
                                 <span className="bg-white/20 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-widest border border-white/20">Pro</span>

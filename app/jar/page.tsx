@@ -10,6 +10,8 @@ import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { PremiumModal } from "@/components/PremiumModal";
 import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
 import { MoveIdeaModal } from "@/components/MoveIdeaModal";
+import { CommunityAdminModal } from "@/components/CommunityAdminModal";
+import { Users } from "lucide-react";
 
 export default function JarPage() {
     const router = useRouter();
@@ -23,6 +25,7 @@ export default function JarPage() {
     const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
     const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
     const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+    const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
     const [ideaToMove, setIdeaToMove] = useState<any>(null);
     const [availableJars, setAvailableJars] = useState<any[]>([]);
 
@@ -181,6 +184,16 @@ export default function JarPage() {
                         <p className="text-slate-600 dark:text-slate-400 text-sm">{isLoading ? '...' : activeIdeas.length} ideas waiting</p>
                     </div>
                 </div>
+
+                {currentUser?.isCommunityJar && isAdmin && (
+                    <Button
+                        onClick={() => setIsAdminModalOpen(true)}
+                        className="bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold flex items-center gap-2"
+                    >
+                        <Users className="w-4 h-4" />
+                        Manage Members
+                    </Button>
+                )}
             </div>
 
 
@@ -410,6 +423,15 @@ export default function JarPage() {
                     fetchAvailableJars();
                 }}
             />
+
+            {currentUser?.activeJarId && (
+                <CommunityAdminModal
+                    isOpen={isAdminModalOpen}
+                    onClose={() => setIsAdminModalOpen(false)}
+                    jarId={currentUser.activeJarId}
+                    jarName={currentUser.jarName || "Community Jar"}
+                />
+            )}
         </main >
     );
 }
