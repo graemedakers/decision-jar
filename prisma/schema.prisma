@@ -15,6 +15,12 @@ enum JarType {
   GENERIC
 }
 
+enum IdeaStatus {
+  APPROVED
+  PENDING
+  ARCHIVED
+}
+
 enum MemberRole {
   ADMIN
   MEMBER
@@ -229,6 +235,7 @@ model Idea {
   // Real-life Context
   weather        String   @default("ANY") // ANY, SUNNY, RAINY, COLD
   requiresTravel Boolean  @default(false) // If true, it's an "Outing"
+  status         IdeaStatus @default(APPROVED)
 
   assignedToId   String?
   assignedTo     User?    @relation("AssignedTo", fields: [assignedToId], references: [id])

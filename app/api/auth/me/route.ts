@@ -133,6 +133,7 @@ export async function GET() {
                 jarTopic: activeJar.topic,
                 jarSelectionMode: (activeJar as any).selectionMode,
                 customCategories: (activeJar as any).customCategories,
+                isCommunityJar: Boolean((activeJar as any).isCommunityJar),
                 isCreator,
                 hasPartner,
                 premiumInviteToken: user.premiumInviteToken,

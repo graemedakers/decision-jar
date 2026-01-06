@@ -60,6 +60,18 @@ export async function POST(request: Request) {
         const requestedCategory = category || 'ACTIVITY';
         const finalCategory = getBestCategoryFit(requestedCategory, jar.topic, (jar as any).customCategories as any[]);
 
+        // Community Submission Queue Logic
+        const membership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: { userId: session.user.id, jarId: currentJarId }
+            }
+        });
+        const isAdmin = membership?.role === 'ADMIN';
+
+        // NEW: Status logic
+        // If it's a community jar and the contributor isn't an admin, it's PENDING.
+        // Otherwise it's APPROVED (standard behavior for private/romantic jars).
+        const ideaStatus = (jar.isCommunityJar && !isAdmin) ? 'PENDING' : 'APPROVED';
 
         const safeDuration = typeof duration === 'string' ? parseFloat(duration) : Number(duration);
 
@@ -86,6 +98,7 @@ export async function POST(request: Request) {
             isPrivate: Boolean(isPrivate),
             weather: weather || 'ANY',
             requiresTravel: Boolean(requiresTravel),
+            status: ideaStatus as any, // Cast to any to avoid Prisma stale type issues
         };
 
         const idea = await prisma.idea.create({
@@ -141,6 +154,13 @@ export async function GET(request: Request) {
 
         // Let's re-fetch to get ALL unselected ideas for the couple, but we'll mask the ones not created by me.
         // Use raw query to ensure we get 'isSurprise' even if Prisma Client is stale
+        const membership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: { userId: session.user.id, jarId: currentJarId }
+            }
+        });
+        const isAdmin = membership?.role === 'ADMIN';
+
         // Fetch all ideas for the couple (jar) and include jar type
         const allIdeas: any[] = await prisma.$queryRaw`
             SELECT i.*, 
@@ -153,15 +173,9 @@ export async function GET(request: Request) {
             LEFT JOIN "User" u ON i."createdById" = u.id
             LEFT JOIN "Couple" c ON i."coupleId" = c.id
             WHERE i."coupleId" = ${currentJarId} 
+              AND (i."status" = 'APPROVED' OR i."createdById" = ${session.user.id} OR (${isAdmin} = true))
             ORDER BY i."createdAt" DESC
         `;
-
-        const membership = await prisma.jarMember.findUnique({
-            where: {
-                userId_jarId: { userId: session.user.id, jarId: currentJarId }
-            }
-        });
-        const isAdmin = membership?.role === 'ADMIN';
 
         const maskedIdeas = allIdeas.map(idea => {
             const isMyIdea = idea.createdById === session.user.id;

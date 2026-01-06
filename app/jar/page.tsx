@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
@@ -130,6 +130,35 @@ export default function JarPage() {
         }
     };
 
+    const handleApprove = async (e: React.MouseEvent, ideaId: string) => {
+        e.stopPropagation();
+        try {
+            const res = await fetch(`/api/ideas/${ideaId}/approve`, { method: 'POST' });
+            if (res.ok) {
+                fetchIdeas();
+            } else {
+                alert("Failed to approve idea.");
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleReject = async (e: React.MouseEvent, ideaId: string) => {
+        e.stopPropagation();
+        if (!confirm("Are you sure you want to reject this submission? It will be archived.")) return;
+        try {
+            const res = await fetch(`/api/ideas/${ideaId}/reject`, { method: 'POST' });
+            if (res.ok) {
+                fetchIdeas();
+            } else {
+                alert("Failed to reject idea.");
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     const activeIdeas = ideas.filter(i => !i.selectedAt);
     const isAdminPickMode = currentUser?.jarSelectionMode === 'ADMIN_PICK';
     const isAdmin = !!currentUser?.isCreator; // Assuming creator is admin for now, or check role if available
@@ -201,8 +230,14 @@ export default function JarPage() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 key={idea.id}
                                 onClick={() => idea.canEdit && !idea.isMasked && setEditingIdea(idea)}
-                                className={`glass-card p-5 relative group cursor-pointer hover:border-slate-300 dark:hover:border-white/20 transition-all ${idea.isMasked ? 'opacity-75 bg-slate-100 dark:bg-slate-900/50' : 'hover:-translate-y-1 bg-white dark:bg-slate-900/40'}`}
+                                className={`glass-card p-5 relative group cursor-pointer hover:border-slate-300 dark:hover:border-white/20 transition-all ${idea.isMasked ? 'opacity-75 bg-slate-100 dark:bg-slate-900/50' : 'hover:-translate-y-1 bg-white dark:bg-slate-900/40'} ${idea.status === 'PENDING' ? 'ring-2 ring-yellow-500/20 bg-yellow-500/5' : ''}`}
                             >
+                                {idea.status === 'PENDING' && (
+                                    <div className="absolute -top-3 left-4 z-20 flex items-center gap-1.5 bg-gradient-to-r from-yellow-500 to-amber-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-yellow-500/20 ring-2 ring-white dark:ring-slate-900">
+                                        <Clock className="w-3 h-3" />
+                                        Review Required
+                                    </div>
+                                )}
 
                                 <div className="absolute top-4 right-4 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     {idea.canEdit && !idea.isMasked && availableJars.length > 1 && (
@@ -293,6 +328,27 @@ export default function JarPage() {
                                 {idea.isMasked && (
                                     <div className="mt-auto pt-2 flex items-center justify-center">
                                         <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                    </div>
+                                )}
+                                {idea.status === 'PENDING' && isAdmin && (
+                                    <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100 dark:border-white/5">
+                                        <Button
+                                            size="sm"
+                                            onClick={(e) => handleApprove(e, idea.id)}
+                                            className="h-9 flex-1 bg-green-600 hover:bg-green-700 text-white font-bold group/btn"
+                                        >
+                                            <CheckCircle className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+                                            Approve
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={(e) => handleReject(e, idea.id)}
+                                            className="h-9 flex-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold"
+                                        >
+                                            <XCircle className="w-4 h-4 mr-2" />
+                                            Reject
+                                        </Button>
                                     </div>
                                 )}
                             </motion.div>

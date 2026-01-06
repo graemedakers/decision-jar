@@ -2,11 +2,10 @@
 
 import { useEffect, useState, use } from "react";
 import { Button } from "@/components/ui/Button";
-import { Users, Lock, ArrowLeft, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { Users, Lock, ArrowLeft, CheckCircle, Clock, AlertTriangle, Shield, Sparkles, Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CommunityAdminModal } from "@/components/CommunityAdminModal";
-import { Shield } from "lucide-react";
 
 interface CommunityDetail {
     id: string;
@@ -26,6 +25,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
     const [jar, setJar] = useState<CommunityDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isJoining, setIsJoining] = useState(false);
+    const [isForking, setIsForking] = useState(false);
     const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
     useEffect(() => {
@@ -79,6 +79,28 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
             console.error(e);
         } finally {
             setIsJoining(false);
+        }
+    };
+
+    const handleFork = async () => {
+        setIsForking(true);
+        try {
+            const res = await fetch(`/api/jars/${id}/fork`, { method: 'POST' });
+            if (res.ok) {
+                const data = await res.json();
+                alert("✨ Successfully cloned! Taking you to your new jar...");
+                router.push('/dashboard');
+            } else if (res.status === 401) {
+                router.push(`/login?callbackUrl=${window.location.pathname}`);
+            } else {
+                const err = await res.json();
+                alert(err.error || "Failed to clone jar.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("An error occurred during cloning.");
+        } finally {
+            setIsForking(false);
         }
     };
 
@@ -212,6 +234,41 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ id: 
                                 </Button>
                             </div>
                         )}
+                    </div>
+
+                    {/* Personal Curation / Fork Section */}
+                    <div className="mt-8 bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
+                        {/* Background Sparkles Decal */}
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform">
+                            <Sparkles className="w-24 h-24 text-white" />
+                        </div>
+
+                        <div className="relative z-10">
+                            <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2">
+                                Personal Curation
+                                <span className="bg-white/20 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-widest border border-white/20">Pro</span>
+                            </h3>
+                            <p className="text-white/80 text-sm mb-6 leading-relaxed">
+                                Love these ideas? Clone this entire jar to your personal collection with one click.
+                            </p>
+                            <Button
+                                onClick={handleFork}
+                                disabled={isForking}
+                                className="w-full h-14 bg-white text-violet-700 hover:bg-slate-50 font-black text-lg rounded-2xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                            >
+                                {isForking ? (
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-700" />
+                                ) : (
+                                    <>
+                                        <Copy className="w-5 h-5" />
+                                        Clone to My Jars
+                                    </>
+                                )}
+                            </Button>
+                            <p className="text-center text-[10px] text-white/50 mt-4 font-medium uppercase tracking-tighter">
+                                Instant value • No Request Required
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

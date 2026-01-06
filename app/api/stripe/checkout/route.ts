@@ -51,11 +51,18 @@ export async function POST(req: Request) {
             customer_email: session.user.email, // Pre-fill email
             metadata: {
                 userId: session.user.id,
-                jarId: session.user.activeJarId, // Optional context
+                jarId: (session.user as any).activeJarId || "", // Optional context
                 type: isLifetime ? 'LIFETIME_CB' : 'SUBSCRIPTION_UPGRADE'
             },
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
+        });
+
+        console.log("[STRIPE_CHECKOUT_SESSION_CREATED]", {
+            sessionId: checkoutSession.id,
+            userId: session.user.id,
+            priceId: targetPriceId,
+            mode: mode
         });
 
         return NextResponse.json({ url: checkoutSession.url }, { headers: corsHeaders });

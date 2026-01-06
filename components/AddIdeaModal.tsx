@@ -141,6 +141,8 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         if (isOpen) setViewMode('PREVIEW');
     }, [isOpen, initialData?.id]);
 
+    const isCommunitySubmission = currentUser?.isCommunityJar && !currentUser?.isCreator && !initialData?.id;
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -183,6 +185,9 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
             if (res.ok) {
                 if (method === "POST" || method === "PUT") {
+                    if (isCommunitySubmission) {
+                        alert("🚀 Suggestion sent! The jar admin will review your idea soon.");
+                    }
                     onSuccess?.();
                 }
                 onClose();
@@ -544,9 +549,20 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                 ? (!(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id))
                                                     ? "View Only (Creator Access Required)"
                                                     : "Save Changes")
-                                                : <><Plus className="w-5 h-5 mr-2" /> Add to Jar</>
+                                                : (
+                                                    isCommunitySubmission ? (
+                                                        <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Suggest to Jar</span>
+                                                    ) : (
+                                                        <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Add to Jar</span>
+                                                    )
+                                                )
                                             }
                                         </button>
+                                        {isCommunitySubmission && (
+                                            <p className="text-[10px] text-center text-slate-400 font-medium">
+                                                This jar is curated. Your idea will be sent to the admin for review.
+                                            </p>
+                                        )}
                                     </div>
                                 </form>
                             )}

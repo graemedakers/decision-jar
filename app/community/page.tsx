@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Search, Users, Plus, Loader2, Lock, ArrowRight, ArrowLeft } from "lucide-react";
+import { Search, Users, Plus, Loader2, Lock, ArrowRight, ArrowLeft, Copy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -23,6 +23,7 @@ export default function CommunityIndexPage() {
     const [search, setSearch] = useState("");
     const [currentTopic, setCurrentTopic] = useState("All");
     const [sort, setSort] = useState("newest");
+    const [forkingJarId, setForkingJarId] = useState<string | null>(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -51,6 +52,28 @@ export default function CommunityIndexPage() {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         fetchJars(search, currentTopic, sort);
+    };
+
+    const handleFork = async (e: React.MouseEvent, jarId: string) => {
+        e.stopPropagation();
+        setForkingJarId(jarId);
+        try {
+            const res = await fetch(`/api/jars/${jarId}/fork`, { method: 'POST' });
+            if (res.ok) {
+                alert("✨ Successfully cloned! Taking you to your new jar...");
+                router.push('/dashboard');
+            } else if (res.status === 401) {
+                router.push(`/login?callbackUrl=${window.location.pathname}`);
+            } else {
+                const err = await res.json();
+                alert(err.error || "Failed to clone jar.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("An error occurred during cloning.");
+        } finally {
+            setForkingJarId(null);
+        }
     };
 
     return (
@@ -170,8 +193,20 @@ export default function CommunityIndexPage() {
                                         </div>
                                     )}
                                     <div className="absolute top-3 right-3 flex gap-2">
+                                        <button
+                                            onClick={(e) => handleFork(e, jar.id)}
+                                            disabled={forkingJarId === jar.id}
+                                            className="bg-white/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-800 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all border border-violet-500/20 text-violet-600 dark:text-violet-400"
+                                            title="Clone to My Jars"
+                                        >
+                                            {forkingJarId === jar.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Copy className="w-4 h-4" />
+                                            )}
+                                        </button>
                                         {jar.isFull && (
-                                            <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-sm">
+                                            <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-sm flex items-center">
                                                 Waitlist Only
                                             </span>
                                         )}
