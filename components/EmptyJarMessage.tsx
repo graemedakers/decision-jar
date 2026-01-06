@@ -5,7 +5,7 @@ import { Sparkles, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface EmptyJarMessageProps {
-    onOpenTemplates: () => void;
+    onOpenTemplates?: () => void;
     onAddIdea: () => void;
 }
 
@@ -26,17 +26,23 @@ export function EmptyJarMessage({ onOpenTemplates, onAddIdea }: EmptyJarMessageP
             </h2>
 
             <p className="text-lg text-slate-600 dark:text-slate-300 mb-6 max-w-md">
-                Get started in <span className="font-bold text-pink-600 dark:text-pink-400">10 seconds</span> with a pre-filled template
+                {onOpenTemplates ? (
+                    <>Get started in <span className="font-bold text-pink-600 dark:text-pink-400">10 seconds</span> with a pre-filled template</>
+                ) : (
+                    <>Start adding ideas to your community jar</>
+                )}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                    onClick={onOpenTemplates}
-                    className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none shadow-lg px-6 py-6 h-auto whitespace-nowrap"
-                >
-                    <Layers className="w-5 h-5 mr-2 flex-shrink-0" />
-                    <span className="font-semibold">Browse Templates</span>
-                </Button>
+                {onOpenTemplates && (
+                    <Button
+                        onClick={onOpenTemplates}
+                        className="bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-700 hover:to-purple-700 border-none shadow-lg px-6 py-6 h-auto whitespace-nowrap"
+                    >
+                        <Layers className="w-5 h-5 mr-2 flex-shrink-0" />
+                        <span className="font-semibold">Browse Templates</span>
+                    </Button>
+                )}
 
                 <Button
                     onClick={onAddIdea}
@@ -48,9 +54,11 @@ export function EmptyJarMessage({ onOpenTemplates, onAddIdea }: EmptyJarMessageP
                 </Button>
             </div>
 
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-6">
-                6 ready-made templates • 10+ ideas each • Instant setup
-            </p>
+            {onOpenTemplates && (
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-6">
+                    6 ready-made templates • 10+ ideas each • Instant setup
+                </p>
+            )}
         </motion.div>
     );
 }
