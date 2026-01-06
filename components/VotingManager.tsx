@@ -183,7 +183,9 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                                         <option value="180">3 Hours</option>
                                         <option value="1440">24 Hours</option>
                                         <option value="2880">48 Hours</option>
-                                        <option value="0">No Limit</option>
+                                        <option value="4320">3 Days</option>
+                                        <option value="10080">1 Week</option>
+                                        <option value="0">No Limit (Manual Resolve)</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
@@ -234,8 +236,16 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                         <Users className="w-5 h-5 text-purple-500" />
                         Cast Your Vote
                     </h3>
-                    <div className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
-                        Round {session?.round || 1}
+                    <div className="flex flex-col items-end gap-1">
+                        <div className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+                            Round {session?.round || 1}
+                        </div>
+                        {session?.endTime && (
+                            <div className="text-[10px] items-center flex gap-1 text-slate-500 font-medium">
+                                <Clock className="w-3 h-3" />
+                                Ends {new Date(session.endTime).toLocaleDateString()} {new Date(session.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -277,6 +287,12 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
             <div>
                 <h3 className="text-xl font-bold">Vote Submitted!</h3>
                 <p className="text-slate-500 dark:text-slate-400 mt-1">Waiting for others to finish...</p>
+                {session?.endTime && (
+                    <p className="text-xs text-slate-400 flex items-center justify-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Resolution scheduled for {new Date(session.endTime).toLocaleString()}
+                    </p>
+                )}
             </div>
 
             <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 max-w-sm mx-auto">

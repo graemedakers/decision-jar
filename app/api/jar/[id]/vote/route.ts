@@ -271,6 +271,11 @@ export async function GET(
         include: { votes: true }
     });
 
+    // Lazy Auto-Resolve: If session expired, resolve it now
+    if (activeSession?.endTime && new Date() > activeSession.endTime) {
+        return handleResolveVote(jarId);
+    }
+
     if (!activeSession) {
         // Check for recently completed (to show calculation results?)
         const lastCompleted = await prisma.voteSession.findFirst({

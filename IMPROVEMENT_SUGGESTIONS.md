@@ -17,7 +17,7 @@ Based on the architectural review and user journey mapping, the following sugges
 - **Gap**: New users struggling with "Blank Canvas Syndrome" might miss it.
 - **Suggestion**: Elevate "Surprise Me" to the Dashboard next to the "Add Idea" button (or as a secondary heavy-weight action).
 
-### C. Async Voting for Groups
+### C. Async Voting for Groups [Completed]
 - **Context**: The current `VotingManager` assumes all members are online simultaneously (Synchronous Timer).
 - **Gap**: Hard to coordinate for larger groups or busy schedules.
 - **Suggestion**: Implement **Async Voting**.
