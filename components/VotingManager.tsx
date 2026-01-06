@@ -81,11 +81,11 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                 timeLimitMinutes: parseInt(timeLimit)
             });
 
-            if (res.success) {
+            if ('success' in res && res.success) {
                 setIsStartModalOpen(false);
                 fetchStatus();
             } else {
-                alert(res.error || "Failed to start vote");
+                alert((res as any).error || "Failed to start vote");
             }
         } catch (e) {
             console.error(e);
@@ -100,10 +100,10 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
         try {
             const res = await castVote(jarId, selectedIdeaId);
 
-            if (res.success) {
+            if ('success' in res && res.success) {
                 fetchStatus();
             } else {
-                alert(res.error || "Failed to cast vote");
+                alert((res as any).error || "Failed to cast vote");
             }
         } catch (e) {
             console.error(e);
@@ -117,14 +117,14 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
         try {
             const data = await resolveVote(jarId);
 
-            if (data.success && data.winnerId) {
-                onVoteComplete(data.winnerId);
+            if ('success' in data && data.success && 'winnerId' in data) {
+                onVoteComplete((data as any).winnerId);
                 window.location.reload();
-            } else if (data.nextRound) {
+            } else if ('nextRound' in data) {
                 alert("Tie! Round 2 started.");
                 fetchStatus();
             } else {
-                alert(data.message || (data.error || "Resolved."));
+                alert((data as any).message || ((data as any).error || "Resolved."));
                 fetchStatus();
             }
         } finally {

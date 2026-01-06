@@ -99,7 +99,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 res = await createIdea(apiBody);
             }
 
-            if (res.success || res.idea) { // Handle both standard success and direct object return if changed later
+            if ('success' in res && res.success) { // Handle both standard success
                 if (!isEditing || isEditing) { // Logic simplified: on success always notify/close
                     if (isCommunitySubmission) {
                         alert("🚀 Suggestion sent! The jar admin will review your idea soon.");
@@ -108,7 +108,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 }
                 onClose();
             } else {
-                alert(res.error || "Failed to save idea");
+                alert((res as any).error || "Failed to save idea");
             }
         } catch (error) {
             console.error(error);

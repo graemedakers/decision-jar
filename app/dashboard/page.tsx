@@ -237,11 +237,11 @@ function DashboardContent() {
         try {
             const res = await spinJar(filters);
 
-            if (res.success && res.idea) {
-                openModal('DATE_REVEAL', { idea: res.idea });
+            if ('success' in res && res.success && 'idea' in res) {
+                openModal('DATE_REVEAL', { idea: (res as any).idea });
                 handleContentUpdate();
             } else {
-                alert(res.error || "Failed to pick a date. Try adding more ideas!");
+                alert((res as any).error || "Failed to pick a date. Try adding more ideas!");
             }
         } catch (error) {
             console.error(error);
@@ -257,10 +257,10 @@ function DashboardContent() {
                 try {
                     const res = await deleteIdea(id);
 
-                    if (res.success) {
+                    if ('success' in res && res.success) {
                         fetchIdeas();
                     } else {
-                        alert(`Failed to delete idea: ${res.error || "Unknown error"}`);
+                        alert(`Failed to delete idea: ${(res as any).error || "Unknown error"}`);
                         console.error("Delete failed:", res);
                     }
                 } catch (error: any) {
