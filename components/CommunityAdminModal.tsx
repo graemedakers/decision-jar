@@ -303,10 +303,19 @@ export function CommunityAdminModal({ isOpen, onClose, jarId, jarName }: Communi
                                         >
                                             <option value="General">General</option>
                                             <option value="Activities">Activities</option>
-                                            <option value="Movies">Movies</option>
+                                            <option value="Romantic">Romantic</option>
                                             <option value="Restaurants">Restaurants</option>
-                                            <option value="Travel">Travel</option>
+                                            <option value="Bars">Bars</option>
+                                            <option value="Nightclubs">Nightclubs</option>
+                                            <option value="Movies">Movies</option>
                                             <option value="Wellness">Wellness</option>
+                                            <option value="Fitness">Fitness</option>
+                                            <option value="Travel">Travel</option>
+                                            <option value="Hotel Stays">Hotel Stays</option>
+                                            <option value="Cooking & Recipes">Cooking & Recipes</option>
+                                            <option value="Books">Books</option>
+                                            <option value="System Development">System Development</option>
+                                            <option value="Custom">Custom</option>
                                         </select>
                                     </div>
 
