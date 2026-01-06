@@ -59,6 +59,8 @@ import { EmptyJarMessage } from "@/components/EmptyJarMessage";
 import { trackEvent } from "@/lib/analytics";
 import { PremiumWelcomeTip } from "@/components/PremiumWelcomeTip";
 import { TrialExpiredModal } from "@/components/TrialExpiredModal";
+import { CommunityAdminModal } from "@/components/CommunityAdminModal";
+import { Shield } from "lucide-react";
 
 
 interface UserData {
@@ -151,6 +153,7 @@ function DashboardContent() {
     const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
     const [isAdminControlsOpen, setIsAdminControlsOpen] = useState(false);
     const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
+    const [isCommunityAdminOpen, setIsCommunityAdminOpen] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -932,6 +935,15 @@ function DashboardContent() {
                                     hasPaid={hasPaid}
                                     isTrialExpired={coupleCreatedAt ? (Math.ceil(Math.abs(new Date().getTime() - new Date(coupleCreatedAt).getTime()) / (1000 * 60 * 60 * 24)) > 14) : false}
                                 />
+
+                                {userData?.activeJarId && (
+                                    <CommunityAdminModal
+                                        isOpen={isCommunityAdminOpen}
+                                        onClose={() => setIsCommunityAdminOpen(false)}
+                                        jarId={userData.activeJarId}
+                                        jarName={userData.jarName || "Community Jar"}
+                                    />
+                                )}
                             </div>
                         )}
 
@@ -1174,6 +1186,17 @@ function DashboardContent() {
                                             >
                                                 <Users className="w-6 h-6 mr-2" />
                                                 Distribute Tasks
+                                            </Button>
+                                        )}
+
+                                        {/* Community Jar Admin Button */}
+                                        {userData?.isCommunityJar && userData?.isCreator && (
+                                            <Button
+                                                onClick={() => setIsCommunityAdminOpen(true)}
+                                                className="w-full mb-4 bg-violet-800 hover:bg-violet-700 text-white border-2 border-violet-700 hover:border-violet-600 h-16 rounded-2xl text-lg font-bold shadow-lg shadow-violet-900/20 flex items-center justify-center gap-3"
+                                            >
+                                                <Shield className="w-6 h-6" />
+                                                Manage Community
                                             </Button>
                                         )}
 
