@@ -13,6 +13,7 @@ import { useIdeaForm } from "@/hooks/useIdeaForm";
 import { useMagicIdea } from "@/hooks/useMagicIdea";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
 import { Idea, UserData } from "@/lib/types";
+import { IdeaWizard } from "@/components/wizard/IdeaWizard"; // Import Wizard
 
 interface AddIdeaModalProps {
     isOpen: boolean;
@@ -28,6 +29,8 @@ interface AddIdeaModalProps {
 }
 
 export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser, onSuccess, initialMode = 'default' }: AddIdeaModalProps) {
+    // Default to wizard for new ideas, form for edits
+    const [isWizardMode, setIsWizardMode] = useState(!initialData?.id && initialMode !== 'magic');
     const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('PREVIEW');
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
@@ -147,6 +150,24 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                     )}
                                 </div>
                             )}
+
+                            {/* Wizard Toggle for New Ideas */}
+                            {!initialData?.id && !(itinerary || cateringPlan) && (
+                                <div className="flex bg-slate-100 dark:bg-black/40 p-1 rounded-lg w-fit">
+                                    <button
+                                        onClick={() => setIsWizardMode(true)}
+                                        className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${isWizardMode ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        Step-by-Step
+                                    </button>
+                                    <button
+                                        onClick={() => setIsWizardMode(false)}
+                                        className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${!isWizardMode ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        Quick Form
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-24 md:pb-8 custom-scrollbar">
@@ -158,6 +179,15 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         <CateringPreview plan={cateringPlan} />
                                     )}
                                 </div>
+                            ) : isWizardMode && !initialData?.id ? (
+                                <IdeaWizard
+                                    formData={formData}
+                                    setFormData={setFormData}
+                                    categories={categories}
+                                    onSubmit={handleSubmit}
+                                    onCancel={onClose}
+                                    isLoading={isLoading}
+                                />
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <fieldset disabled={!!initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">

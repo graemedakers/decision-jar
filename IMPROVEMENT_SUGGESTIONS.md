@@ -25,7 +25,7 @@ Based on the architectural review and user journey mapping, the following sugges
     - Notify users to cast votes at their leisure.
     - Auto-resolve when deadline hits.
 
-### D. "Wizard" Standardization (Priority Optimization)
+### D. "Wizard" Standardization (Priority Optimization) [Completed]
 - **Context**: Planners (`Menu`, `DateNight`) use similar but duplicated code.
 - **Suggestion**: Create a reusable `<WizardModal>` component.
     - *Benefit*: Consistent UI for multi-step forms, easier to add new AI tools, centralized error handling for API quotas.
