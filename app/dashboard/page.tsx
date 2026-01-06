@@ -947,6 +947,63 @@ function DashboardContent() {
                             </div>
                         )}
 
+                        {/* Community Jar Header */}
+                        {!isLoadingUser && userData?.isCommunityJar && (
+                            <div className="mb-8 rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-2xl">
+                                {/* Cover Image */}
+                                {userData.jarImageUrl && (
+                                    <div className="h-48 md:h-64 relative bg-slate-200 dark:bg-slate-800">
+                                        <img
+                                            src={userData.jarImageUrl}
+                                            alt={userData.jarName}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).style.display = 'none';
+                                            }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                    </div>
+                                )}
+
+                                {/* Community Info */}
+                                <div className="bg-white dark:bg-slate-900/80 p-6">
+                                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                                        <div className="flex-1 min-w-[200px]">
+                                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                                                {userData.jarName}
+                                            </h2>
+                                            {userData.jarDescription && (
+                                                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                                                    {userData.jarDescription}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Community Stats */}
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-center px-4 py-2 rounded-xl bg-violet-100 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20">
+                                                <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                                                    {userData.memberCount || "—"}
+                                                </div>
+                                                <div className="text-[10px] font-medium text-violet-600/70 dark:text-violet-400/70 uppercase tracking-wide">
+                                                    Members
+                                                </div>
+                                            </div>
+
+                                            <div className="text-center px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10">
+                                                <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                    {availableIdeasCount || "0"}
+                                                </div>
+                                                <div className="text-[10px] font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                                                    Ideas
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Gamification Level Banner */}
                         {/* Gamification Level Banner */}
                         {xp !== undefined ? (
@@ -1062,10 +1119,12 @@ function DashboardContent() {
                                         </div>
                                         <div className="text-left relative z-10">
                                             <span className="block text-lg font-bold text-violet-900 dark:text-white group-hover:text-violet-700 dark:group-hover:text-violet-200 transition-colors flex items-center gap-2">
-                                                Add Idea
+                                                {userData?.isCommunityJar && !userData?.isCreator ? "Suggest Idea" : "Add Idea"}
                                                 <span className="bg-violet-500/30 text-violet-700 dark:text-violet-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">+15 XP</span>
                                             </span>
-                                            <span className="text-sm text-violet-700 dark:text-violet-200/60 group-hover:text-violet-900 dark:group-hover:text-violet-200/80 transition-colors leading-tight">Fill your jar</span>
+                                            <span className="text-sm text-violet-700 dark:text-violet-200/60 group-hover:text-violet-900 dark:group-hover:text-violet-200/80 transition-colors leading-tight">
+                                                {userData?.isCommunityJar && !userData?.isCreator ? "Submit for review" : "Fill your jar"}
+                                            </span>
                                         </div>
                                     </motion.button>
 
