@@ -34,7 +34,8 @@ export function CommunityAdminModal({ isOpen, onClose, jarId, jarName }: Communi
         description: '',
         imageUrl: '',
         topic: '',
-        memberLimit: null as number | null
+        memberLimit: null as number | null,
+        selectionMode: 'RANDOM' as 'RANDOM' | 'VOTING' | 'ADMIN_PICK'
     });
     const [isSaving, setIsSaving] = useState(false);
 
@@ -117,7 +118,8 @@ export function CommunityAdminModal({ isOpen, onClose, jarId, jarName }: Communi
                     description: jar.description || '',
                     imageUrl: jar.imageUrl || '',
                     topic: jar.topic || 'General',
-                    memberLimit: jar.memberLimit
+                    memberLimit: jar.memberLimit,
+                    selectionMode: jar.selectionMode || 'RANDOM'
                 });
             }
         } catch (e) {
@@ -317,6 +319,25 @@ export function CommunityAdminModal({ isOpen, onClose, jarId, jarName }: Communi
                                             <option value="System Development">System Development</option>
                                             <option value="Custom">Custom</option>
                                         </select>
+                                    </div>
+
+                                    {/* Selection Mode */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Selection Mode</label>
+                                        <select
+                                            value={jarSettings.selectionMode}
+                                            onChange={(e) => setJarSettings(prev => ({ ...prev, selectionMode: e.target.value as any }))}
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 outline-none cursor-pointer"
+                                        >
+                                            <option value="RANDOM">Random Pick</option>
+                                            <option value="VOTING">Community Voting</option>
+                                            <option value="ADMIN_PICK">Admin Decides</option>
+                                        </select>
+                                        <p className="text-xs text-slate-500">
+                                            {jarSettings.selectionMode === 'RANDOM' && 'Ideas are randomly selected when spinning the jar'}
+                                            {jarSettings.selectionMode === 'VOTING' && 'Members vote on ideas, highest votes win'}
+                                            {jarSettings.selectionMode === 'ADMIN_PICK' && 'Only admins can select which idea to use'}
+                                        </p>
                                     </div>
 
                                     {/* Member Limit */}

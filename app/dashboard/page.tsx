@@ -886,9 +886,11 @@ function DashboardContent() {
                                 <Button variant="ghost" size="sm" className="!p-2 rounded-full hover:bg-white/10 md:hidden" onClick={() => setIsHelpOpen(true)}>
                                     <HelpCircle className="w-5 h-5 text-slate-400" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="!p-2 rounded-full hover:bg-white/10" title="Quick Tools" onClick={() => setIsQuickToolsOpen(true)}>
-                                    <Dices className="w-5 h-5 text-slate-400" />
-                                </Button>
+                                {!userData?.isCommunityJar && (
+                                    <Button variant="ghost" size="sm" className="!p-2 rounded-full hover:bg-white/10" title="Quick Tools" onClick={() => setIsQuickToolsOpen(true)}>
+                                        <Dices className="w-5 h-5 text-slate-400" />
+                                    </Button>
+                                )}
                                 {!userData?.isCommunityJar && (
                                     <Button variant="ghost" size="sm" className="!p-2 rounded-full hover:bg-white/10" title="Browse Templates" onClick={() => setIsTemplateBrowserOpen(true)}>
                                         <Layers className="w-5 h-5 text-purple-400" />
