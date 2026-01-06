@@ -5,7 +5,7 @@ import { SoundEffects, triggerHaptic } from "@/lib/feedback";
 import { Button } from "@/components/ui/Button";
 import { getApiUrl } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers, Users, Crown, Shield } from "lucide-react";
+import { Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers, Users, Crown, Shield, Share } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { Jar3D } from "@/components/Jar3D";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -32,9 +32,23 @@ import { useFavorites } from "@/hooks/useFavorites";
 function InviteCodeDisplay({ mobile, code }: { mobile?: boolean; code: string | null }) {
     const [copied, setCopied] = useState(false);
 
-    const copyToClipboard = () => {
+    const handleInvite = async () => {
         if (!code) return;
         const url = `${window.location.origin}/signup?code=${code}`;
+
+        if ((navigator as any).share) {
+            try {
+                await (navigator as any).share({
+                    title: 'Join my Decision Jar',
+                    text: `Use my invite code ${code} to join our jar!`,
+                    url: url
+                });
+                return;
+            } catch (err) {
+                // Ignore abort
+            }
+        }
+
         navigator.clipboard.writeText(url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -45,18 +59,18 @@ function InviteCodeDisplay({ mobile, code }: { mobile?: boolean; code: string | 
     if (mobile) {
         return (
             <button
-                onClick={copyToClipboard}
+                onClick={handleInvite}
                 className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 active:scale-95 transition-all"
             >
                 <span className="text-xs text-slate-400">Invite Partner:</span>
                 <span className="text-sm font-mono text-white font-bold">{code}</span>
-                {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3 text-slate-400" />}
+                {copied ? <Check className="w-3 h-3 text-green-400" /> : <Share className="w-3 h-3 text-slate-400" />}
             </button>
         );
     }
 
     return (
-        <button onClick={copyToClipboard} className="flex items-center gap-2 hover:text-white transition-colors group" title="Click to copy invite link">
+        <button onClick={handleInvite} className="flex items-center gap-2 hover:text-white transition-colors group" title="Click to share or copy invite link">
             <span>{code}</span>
             {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3 text-slate-500 group-hover:text-white" />}
         </button>

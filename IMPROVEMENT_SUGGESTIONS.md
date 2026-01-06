@@ -62,7 +62,7 @@ Based on the architectural review and user journey mapping, the following sugges
 
 ## 4. Mobile & PWA Specific
 
-### A. Native Sharing
+### A. Native Sharing [Completed]
 - **Context**: `MenuPlanner` uses `navigator.share` or Clipboard.
 - **Suggestion**: Deep integration for "Invite Partner".
 - **Deep Linking**: Ensure opening a shared link (`/join?code=XYZ`) installs the PWA prompt immediately if not installed.
