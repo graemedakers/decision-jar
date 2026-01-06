@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Star, Heart } from "lucide-react";
 import { useState } from "react";
+import { showError, showSuccess } from "@/lib/toast";
 
 interface ReviewAppModalProps {
     isOpen: boolean;
@@ -29,6 +30,7 @@ export function ReviewAppModal({ isOpen, onClose }: ReviewAppModalProps) {
 
             if (res.ok) {
                 setSubmitted(true);
+                showSuccess("💚 Thank you for your review!");
                 setTimeout(() => {
                     onClose();
                     setSubmitted(false);
@@ -36,11 +38,11 @@ export function ReviewAppModal({ isOpen, onClose }: ReviewAppModalProps) {
                     setRating(5);
                 }, 2000);
             } else {
-                alert("Failed to submit review. Please try again.");
+                showError("Failed to submit review. Please try again.");
             }
         } catch (error) {
             console.error(error);
-            alert("Error submitting review");
+            showError("Error submitting review");
         } finally {
             setIsSubmitting(false);
         }

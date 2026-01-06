@@ -6,6 +6,7 @@ import { X, Lock, Sparkles, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { isCapacitor } from "@/lib/utils";
 import { PRICING, BASE_DOMAIN } from "@/lib/config";
+import { showError } from "@/lib/toast";
 
 import { useRouter } from "next/navigation";
 
@@ -35,11 +36,11 @@ export function PremiumModal({ isOpen, onClose, title, description }: PremiumMod
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                alert("Failed to start checkout");
+                showError("Failed to start checkout");
             }
         } catch (error) {
             console.error(error);
-            alert("Something went wrong");
+            showError("Something went wrong");
         } finally {
             setIsLoading(false);
         }

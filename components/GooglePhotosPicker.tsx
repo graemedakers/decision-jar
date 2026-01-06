@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Image as ImageIcon, Loader2, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { isCapacitor } from "@/lib/utils";
+import { showError, showWarning, showInfo } from "@/lib/toast";
 
 interface GooglePhotosPickerProps {
     onPhotoSelected: (url: string) => void;
@@ -55,17 +56,17 @@ export function GooglePhotosPicker({ onPhotoSelected, onLoading, isPro }: Google
 
     const handlePick = async () => {
         if (!isPro) {
-            alert("Google Photos integration is a Pro feature. Please upgrade to Pro to use it!");
+            showWarning("🔒 Google Photos integration is a Pro feature. Please upgrade to Pro to use it!");
             return;
         }
 
         if (!CLIENT_ID || !API_KEY) {
-            alert("Please configure NEXT_PUBLIC_GOOGLE_CLIENT_ID and NEXT_PUBLIC_GOOGLE_API_KEY in your .env file to use Google Photos.");
+            showError("Please configure Google Photos API keys in your environment settings.");
             return;
         }
 
         if (!isScriptLoaded) {
-            alert("Google API is still loading, please try again in a moment.");
+            showInfo("⏳ Google Photos is loading, please try again in a moment.");
             return;
         }
 
@@ -136,7 +137,7 @@ export function GooglePhotosPicker({ onPhotoSelected, onLoading, isPro }: Google
 
     const createPicker = (oauthToken: string) => {
         if (!window.google || !window.google.picker) {
-            alert("Picker API not loaded.");
+            showError("Google Photos picker failed to load. Please refresh and try again.");
             setIsLoading(false);
             onLoading?.(false);
             return;
@@ -171,7 +172,7 @@ export function GooglePhotosPicker({ onPhotoSelected, onLoading, isPro }: Google
 
                 await uploadToCloudinary(photoUrl);
             } else {
-                alert("Could not get photo URL");
+                showError("Could not get photo URL from Google Photos");
                 setIsLoading(false);
                 onLoading?.(false);
             }
@@ -190,11 +191,11 @@ export function GooglePhotosPicker({ onPhotoSelected, onLoading, isPro }: Google
             if (data.success) {
                 onPhotoSelected(data.url);
             } else {
-                alert("Failed to upload photo from Google: " + (data.error || "Unknown error"));
+                showError("Failed to upload photo from Google: " + (data.error || "Unknown error"));
             }
         } catch (e) {
             console.error(e);
-            alert("Error uploading photo.");
+            showError("Error uploading photo. Please try again.");
         } finally {
             setIsLoading(false);
             onLoading?.(false);

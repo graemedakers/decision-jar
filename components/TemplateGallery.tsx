@@ -6,6 +6,7 @@ import { ArrowRight, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { showError } from '@/lib/toast';
 
 interface TemplateGalleryProps {
     isAuthenticated?: boolean;
@@ -39,7 +40,7 @@ export function TemplateGallery({ isAuthenticated = false }: TemplateGalleryProp
             router.push(`/dashboard?jar=${jar.id}`);
         } catch (error) {
             console.error('Error creating jar from template:', error);
-            alert('Failed to create jar. Please try again.');
+            showError('Failed to create jar. Please try again.');
         } finally {
             setCreatingTemplate(null);
         }

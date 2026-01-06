@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getCategoriesForTopic } from "@/lib/categories";
 import { createIdea, updateIdea } from "@/app/actions/ideas";
+import { showSuccess, showError } from "@/lib/toast";
 
 export const DEFAULT_FORM_DATA = {
     description: "",
@@ -99,20 +100,20 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 res = await createIdea(apiBody);
             }
 
-            if ('success' in res && res.success) { // Handle both standard success
-                if (!isEditing || isEditing) { // Logic simplified: on success always notify/close
-                    if (isCommunitySubmission) {
-                        alert("🚀 Suggestion sent! The jar admin will review your idea soon.");
-                    }
-                    if (onSuccess) onSuccess();
+            if ('success' in res && res.success) {
+                if (isCommunitySubmission) {
+                    showSuccess("🚀 Suggestion sent! The jar admin will review your idea soon.");
+                } else {
+                    showSuccess(isEditing ? "Idea updated successfully!" : "Idea added to jar!");
                 }
+                if (onSuccess) onSuccess();
                 onClose();
             } else {
-                alert((res as any).error || "Failed to save idea");
+                showError((res as any).error || "Failed to save idea");
             }
         } catch (error) {
             console.error(error);
-            alert("Error saving idea");
+            showError("Error saving idea");
         } finally {
             setIsLoading(false);
         }

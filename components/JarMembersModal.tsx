@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Users, Loader2, Crown, Shield, ShieldAlert, Check, Trash2, Copy, UserPlus } from "lucide-react";
 import { getApiUrl } from "@/lib/utils";
+import { showError, showSuccess, showWarning } from "@/lib/toast";
 
 interface Member {
     id: string;
@@ -67,13 +68,14 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
 
             if (res.ok) {
                 setMembers(prev => prev.filter(m => m.userId !== member.userId));
+                showSuccess(`✅ ${member.user.name} removed from jar`);
             } else {
                 const data = await res.json();
-                alert(data.error || "Failed to remove member");
+                showError(data.error || "Failed to remove member");
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred");
+            showError("An error occurred");
         } finally {
             setProcessingId(null);
         }
@@ -92,7 +94,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
         if (member.role === 'ADMIN') {
             const adminCount = members.filter(m => m.role === 'ADMIN').length;
             if (adminCount <= 1) {
-                alert("Cannot demote the last administrator. Promote someone else first.");
+                showWarning("⚠️ Cannot demote the last administrator. Promote someone else first.");
                 return;
             }
         }
@@ -109,14 +111,15 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                 setMembers(prev => prev.map(m =>
                     m.userId === member.userId ? { ...m, role: newRole as any } : m
                 ));
+                showSuccess(`👑 ${member.user.name} is now a${newRole === 'ADMIN' ? 'n admin' : ' member'}`);
                 if (onRoleUpdated) onRoleUpdated();
             } else {
                 const data = await res.json();
-                alert(data.error || "Failed to update role");
+                showError(data.error || "Failed to update role");
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred");
+            showError("An error occurred");
         } finally {
             setProcessingId(null);
         }

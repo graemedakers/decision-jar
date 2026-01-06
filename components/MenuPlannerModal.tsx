@@ -6,6 +6,7 @@ import { X, Calendar, Loader2, Sparkles, ChefHat, Plus, Lock, Check, Share2, Use
 import { Button } from "./ui/Button";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { trackAIToolUsed, trackEvent } from "@/lib/analytics";
+import { showSuccess, showError } from "@/lib/toast";
 
 interface MenuPlannerModalProps {
     isOpen: boolean;
@@ -85,11 +86,11 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                 setMealPlans(data.meals || []);
             } else {
                 const errorData = await res.json().catch(() => ({}));
-                alert(`Error: ${errorData.error || "Failed to generate meal plan."}`);
+                showError(`Error: ${errorData.error || "Failed to generate meal plan."}`);
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred while generating your meal plan.");
+            showError("An error occurred while generating your meal plan.");
         } finally {
             setIsLoading(false);
         }
@@ -146,10 +147,10 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
         } else {
             try {
                 await navigator.clipboard.writeText(shareText);
-                alert('✅ Meal plan copied to clipboard! Paste it anywhere to share.');
+                showSuccess('✅ Meal plan copied to clipboard! Paste it anywhere to share.');
             } catch (err) {
                 console.error('Failed to copy:', err);
-                alert('Could not copy to clipboard. Please try again.');
+                showError('Could not copy to clipboard. Please try again.');
             }
         }
     };

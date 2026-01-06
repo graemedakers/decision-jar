@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { getCurrentLocation } from "@/lib/utils";
 import { LocationInput } from "./LocationInput";
 import { trackAIToolUsed, trackEvent } from "@/lib/analytics";
+import { showSuccess, showError, showInfo } from "@/lib/toast";
 
 interface Suggestion {
     title: string;
@@ -120,13 +121,14 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
 
             if (res.ok) {
                 setAddedIdeas(prev => new Set(prev).add(idx));
+                showSuccess(`✅ "${item.title}" added to jar!`);
                 if (onIdeaAdded) onIdeaAdded();
             } else {
-                alert("Failed to add to jar");
+                showError("Failed to add to jar");
             }
         } catch (e) {
             console.error("Error adding to jar:", e);
-            alert("Error adding to jar");
+            showError("Error adding to jar");
         } finally {
             setAddingId(null);
         }
@@ -144,7 +146,7 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                     ));
                     if (onFavoriteUpdated) onFavoriteUpdated();
                 } else {
-                    alert("Failed to remove favorite");
+                    showError("Failed to remove favorite");
                 }
             } else {
                 const res = await fetch('/api/favorites', {
@@ -166,7 +168,7 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                     ));
                     if (onFavoriteUpdated) onFavoriteUpdated();
                 } else {
-                    alert("Failed to add favorite");
+                    showError("Failed to add favorite");
                 }
             }
         } catch (e) {
@@ -211,10 +213,10 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
             // Fallback: Copy to clipboard
             try {
                 await navigator.clipboard.writeText(shareText);
-                alert('✅ Weekend plan copied to clipboard! Paste it anywhere to share.');
+                showSuccess('✅ Weekend plan copied to clipboard! Paste it anywhere to share.');
             } catch (err) {
                 console.error('Failed to copy:', err);
-                alert('Could not copy to clipboard. Please try again.');
+                showError('Could not copy to clipboard. Please try again.');
             }
         }
     };
@@ -249,8 +251,9 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
                                             try {
                                                 const currentLoc = await getCurrentLocation();
                                                 setCustomLocation(currentLoc);
+                                                showSuccess("📍 Location detected!");
                                             } catch (err) {
-                                                alert("Could not get location. Please check permissions.");
+                                                showError("Could not get location. Please check permissions.");
                                             }
                                         }}
                                         className="text-[10px] uppercase tracking-wider font-bold text-secondary hover:text-secondary/80 transition-colors flex items-center gap-1"

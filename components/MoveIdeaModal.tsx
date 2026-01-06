@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/Button";
 import { X, ArrowRight, Loader2, Check } from "lucide-react";
 import { useState } from "react";
+import { showSuccess } from "@/lib/toast";
 
 interface MoveIdeaModalProps {
     isOpen: boolean;
@@ -37,7 +38,7 @@ export function MoveIdeaModal({ isOpen, onClose, idea, availableJars, onMoveComp
             if (res.ok) {
                 const data = await res.json();
                 if (onMoveComplete) onMoveComplete();
-                alert(`✅ ${data.message || "Idea moved successfully!"}`);
+                showSuccess(`✅ ${data.message || "Idea moved successfully!"}`);
                 onClose();
             } else {
                 const errData = await res.json();
@@ -95,8 +96,8 @@ export function MoveIdeaModal({ isOpen, onClose, idea, availableJars, onMoveComp
                                         key={jar.id}
                                         onClick={() => setSelectedJarId(jar.id)}
                                         className={`w-full text-left p-4 rounded-lg border-2 transition-all ${selectedJarId === jar.id
-                                                ? "border-primary bg-primary/10 dark:bg-primary/20"
-                                                : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20"
+                                            ? "border-primary bg-primary/10 dark:bg-primary/20"
+                                            : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20"
                                             }`}
                                     >
                                         <div className="flex items-center justify-between">

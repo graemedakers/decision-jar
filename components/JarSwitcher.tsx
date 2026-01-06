@@ -8,6 +8,7 @@ import { CreateJarModal } from "./CreateJarModal";
 import { JoinJarModal } from "./JoinJarModal";
 import { JarManagerModal } from "./JarManagerModal";
 import { Settings } from "lucide-react";
+import { showError } from "@/lib/toast";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -141,7 +142,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                 window.location.reload();
             } else {
                 const data = await res.json();
-                alert(data.error || "Failed to leave jar");
+                showError(data.error || "Failed to leave jar");
             }
         } catch (error) {
             console.error("Failed to leave jar", error);

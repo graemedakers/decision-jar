@@ -6,6 +6,7 @@ import { X, Trash2, LogOut, Users, Loader2, Crown, LayoutGrid, Calendar, Pencil,
 import { getApiUrl } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { JarMembersModal } from "./JarMembersModal";
+import { showError, showSuccess } from "@/lib/toast";
 
 interface JarSummary {
     id: string;
@@ -88,14 +89,15 @@ export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
             });
             if (res.ok) {
                 setJars(prev => prev.filter(j => j.id !== jarId));
+                showSuccess("✅ Jar deleted successfully");
                 router.refresh();
             } else {
                 const data = await res.json();
-                alert(data.error || "Failed to delete jar.");
+                showError(data.error || "Failed to delete jar.");
             }
         } catch (e) {
             console.error(e);
-            alert("An unexpected error occurred.");
+            showError("An unexpected error occurred.");
         } finally {
             setProcessingId(null);
         }
@@ -114,14 +116,15 @@ export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
                 setJars(prev => prev.map(j => j.id === jarId ? { ...j, name: editName.trim() } : j));
                 setEditingId(null);
                 setEditName("");
+                showSuccess("✏️ Jar renamed successfully");
                 router.refresh();
             } else {
                 const data = await res.json();
-                alert(data.error || "Failed to rename jar.");
+                showError(data.error || "Failed to rename jar.");
             }
         } catch (e) {
             console.error(e);
-            alert("An unexpected error occurred.");
+            showError("An unexpected error occurred.");
         } finally {
             setProcessingId(null);
         }

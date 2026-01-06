@@ -6,6 +6,7 @@ import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
 import { exportToPdf } from "@/lib/pdf-export";
 import { Button } from "./ui/Button";
+import { showError } from "@/lib/toast";
 
 interface ViewMemoryModalProps {
     isOpen: boolean;
@@ -28,7 +29,7 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
             await exportToPdf(contentRef.current, idea.description || 'plan');
         } catch (error) {
             console.error("PDF Export failed", error);
-            alert("Failed to export PDF");
+            showError("Failed to export PDF");
         } finally {
             setIsExporting(false);
         }

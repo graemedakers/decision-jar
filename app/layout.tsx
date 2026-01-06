@@ -10,6 +10,7 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { ModalProvider } from "@/components/ModalProvider";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -174,6 +175,7 @@ export default function RootLayout({
         />
         <PostHogProvider>
           <ModalProvider>
+            <Toaster position="top-center" expand={true} richColors />
             {children}
             <PWAInstaller />
             <InstallPrompt />

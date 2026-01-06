@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { getCategoriesForTopic } from "@/lib/categories";
 import { getCurrentLocation } from "@/lib/utils";
 import { LocationInput } from "./LocationInput";
+import { showError, showSuccess } from "@/lib/toast";
 
 interface SurpriseMeModalProps {
     isOpen: boolean;
@@ -53,15 +54,16 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
             });
 
             if (res.ok) {
+                showSuccess("✨ Surprise idea created! It's waiting in your jar...");
                 // Force reload to ensure everything is synced and new idea appears
                 window.location.reload();
             } else {
                 const data = await res.json();
-                alert(`Failed to create surprise: ${data.error || "Unknown error"}`);
+                showError(`Failed to create surprise: ${data.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
-            alert("Error creating surprise idea");
+            showError("Error creating surprise idea");
         } finally {
             setIsLoading(false);
         }
@@ -110,8 +112,9 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                                                 try {
                                                     const currentLoc = await getCurrentLocation();
                                                     setFormData({ ...formData, location: currentLoc });
+                                                    showSuccess("📍 Location detected!");
                                                 } catch (err) {
-                                                    alert("Could not get location. Please check permissions.");
+                                                    showError("Could not get location. Please check permissions.");
                                                 }
                                             }}
                                             className="text-[10px] uppercase tracking-wider font-bold text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 transition-colors flex items-center gap-1"

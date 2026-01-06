@@ -1,7 +1,9 @@
 
+
 import { useState } from "react";
 import { isDemoMode, addDemoIdea } from "@/lib/demo-storage";
 import { trackEvent } from "@/lib/analytics";
+import { showSuccess, showError, showInfo } from "@/lib/toast";
 
 interface ConciergeActionProps {
     onIdeaAdded?: () => void;
@@ -83,7 +85,7 @@ export function useConciergeActions({
                 });
 
                 if (onIdeaAdded) onIdeaAdded();
-                alert("Added to jar!");
+                showSuccess("✅ Added to jar!");
             } else {
                 const err = await res.json();
 
@@ -289,11 +291,11 @@ export function useConciergeActions({
                 }
 
                 // Other errors
-                alert(`Failed to add: ${err.error || 'Server error'}`);
+                showError(`Failed to add: ${err.error || 'Server error'}`);
             }
         } catch (error) {
             console.error(error);
-            alert("Failed to add to jar.");
+            showError("Failed to add to jar.");
         } finally {
             // FIX 1: Always reset loading state
             setIsAddingToJar(false);
@@ -375,7 +377,7 @@ export function useConciergeActions({
                     ));
                     if (onFavoriteUpdated) onFavoriteUpdated();
                 } else {
-                    alert("Failed to remove favorite.");
+                    showError("Failed to remove favorite.");
                 }
             } else {
                 const res = await fetch('/api/favorites', {
@@ -397,12 +399,12 @@ export function useConciergeActions({
                     ));
                     if (onFavoriteUpdated) onFavoriteUpdated();
                 } else {
-                    alert("Failed to save favorite.");
+                    showError("Failed to save favorite.");
                 }
             }
         } catch (error) {
             console.error(error);
-            alert("Error updating favorite.");
+            showError("Error updating favorite.");
         }
     };
 

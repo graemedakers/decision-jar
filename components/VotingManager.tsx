@@ -7,6 +7,7 @@ import { Loader2, Play, Users, Clock, AlertTriangle, Check, Trophy, RefreshCcw }
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
+import { showSuccess, showError, showInfo } from "@/lib/toast";
 
 import { startVote, castVote, cancelVote, extendVote, resolveVote } from "@/app/actions/vote";
 
@@ -85,7 +86,7 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                 setIsStartModalOpen(false);
                 fetchStatus();
             } else {
-                alert((res as any).error || "Failed to start vote");
+                showError((res as any).error || "Failed to start vote");
             }
         } catch (e) {
             console.error(e);
@@ -103,7 +104,7 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
             if ('success' in res && res.success) {
                 fetchStatus();
             } else {
-                alert((res as any).error || "Failed to cast vote");
+                showError((res as any).error || "Failed to cast vote");
             }
         } catch (e) {
             console.error(e);
@@ -121,10 +122,10 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                 onVoteComplete((data as any).winnerId);
                 window.location.reload();
             } else if ('nextRound' in data) {
-                alert("Tie! Round 2 started.");
+                showInfo("🔄 Tie! Round 2 started.");
                 fetchStatus();
             } else {
-                alert((data as any).message || ((data as any).error || "Resolved."));
+                showInfo((data as any).message || ((data as any).error || "Resolved."));
                 fetchStatus();
             }
         } finally {

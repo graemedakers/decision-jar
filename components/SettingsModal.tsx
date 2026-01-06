@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BASE_DOMAIN } from "@/lib/config";
 import { LocationInput } from "./LocationInput";
+import { showSuccess, showError, showInfo } from "@/lib/toast";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -101,14 +102,15 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
             }
 
             if (userRes.ok) {
+                showSuccess("Settings updated successfully!");
                 onClose();
                 router.refresh();
             } else {
-                alert("Failed to update settings");
+                showError("Failed to update settings");
             }
         } catch (error) {
             console.error(error);
-            alert("Error updating settings");
+            showError("Error updating settings");
         } finally {
             setIsLoading(false);
         }
@@ -126,17 +128,17 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
 
             if (res.ok) {
                 const data = await res.json();
-                alert(data.message);
+                showSuccess(data.message || "Jar emptied successfully!");
                 onClose();
                 router.refresh();
                 window.location.reload();
             } else {
                 const data = await res.json();
-                alert(`Failed to empty jar: ${data.details || "Unknown error"}`);
+                showError(`Failed to empty jar: ${data.details || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
-            alert("Error emptying jar");
+            showError("Error emptying jar");
         } finally {
             setIsLoading(false);
         }
@@ -154,16 +156,16 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
 
             if (res.ok) {
                 const data = await res.json();
-                alert(`Success! Your new invite code is: ${data.newCode}`);
+                showSuccess(`Success! Your new invite code is: ${data.newCode}`);
                 setInviteCode(data.newCode); // Update local state
                 router.refresh();
             } else {
                 const data = await res.json();
-                alert(`Failed to regenerate code: ${data.details || data.error || "Unknown error"}`);
+                showError(`Failed to regenerate code: ${data.details || data.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
-            alert("Error regenerating code");
+            showError("Error regenerating code");
         } finally {
             setIsLoading(false);
         }
@@ -180,16 +182,16 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
 
             if (res.ok) {
                 const data = await res.json();
-                alert("Success! Premium token valid.");
+                showSuccess("Success! Premium token valid.");
                 setPremiumInviteToken(data.token);
                 router.refresh();
             } else {
                 const data = await res.json();
-                alert(`Failed: ${data.error}`);
+                showError(`Failed: ${data.error}`);
             }
         } catch (error) {
             console.error(error);
-            alert("Error regenerating token");
+            showError("Error regenerating token");
         } finally {
             setIsLoading(false);
         }
@@ -206,11 +208,11 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                alert("Failed to create portal session");
+                showError("Failed to create portal session");
             }
         } catch (error) {
             console.error(error);
-            alert("Error managing subscription");
+            showError("Error managing subscription");
         } finally {
             setIsLoading(false);
         }
@@ -228,17 +230,17 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
 
             if (res.ok) {
                 const data = await res.json();
-                alert(data.message);
+                showSuccess(data.message || "Partner deleted successfully");
                 onClose();
                 router.refresh();
                 window.location.reload();
             } else {
                 const data = await res.json();
-                alert(`Failed to delete partner: ${data.details || data.error || "Unknown error"}`);
+                showError(`Failed to delete partner: ${data.details || data.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
-            alert("Error deleting partner");
+            showError("Error deleting partner");
         } finally {
             setIsLoading(false);
         }
@@ -279,8 +281,9 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                                 try {
                                                     const currentLoc = await getCurrentLocation();
                                                     setLocation(currentLoc);
+                                                    showSuccess("Location detected!");
                                                 } catch (err) {
-                                                    alert("Could not get location. Please ensure site permissions are enabled.");
+                                                    showError("Could not get location. Please ensure site permissions are enabled.");
                                                 }
                                             }}
                                             className="text-[10px] uppercase tracking-wider font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
@@ -418,7 +421,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
 
                                                     const url = `${window.location.origin}/signup?${params.toString()}`;
                                                     navigator.clipboard.writeText(url);
-                                                    alert(includePremiumToken ? "Premium Invite link copied!" : "Standard Invite link copied!");
+                                                    showSuccess(includePremiumToken ? "✨ Premium Invite link copied!" : "📋 Standard Invite link copied!");
                                                 }}
                                                 className="font-mono font-bold text-sm text-purple-600 hover:text-purple-800 dark:text-purple-300 dark:hover:text-purple-100 transition-colors flex items-center gap-2 break-all text-left"
                                             >
@@ -468,7 +471,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                                                         <button
                                                             onClick={() => {
                                                                 navigator.clipboard.writeText(`${window.location.origin}/signup?code=${inviteCode || ""}`);
-                                                                alert("Invite link copied to clipboard!");
+                                                                showSuccess("📋 Invite link copied to clipboard!");
                                                             }}
                                                             className="font-mono font-bold text-lg text-primary hover:text-primary/80 dark:hover:text-white transition-colors flex items-center gap-2"
                                                         >
