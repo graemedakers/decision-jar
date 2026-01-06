@@ -237,7 +237,7 @@ export function GenericConciergeModal({
         if (config.id === 'chef_concierge') {
             setViewingItem(rec);
         } else {
-            handleGoTonight(rec, config.categoryType, isPrivate);
+            handleGoTonightFromHook(rec, config.categoryType, isPrivate);
         }
     };
 
@@ -418,12 +418,12 @@ export function GenericConciergeModal({
                                                 {section.label}
                                             </label>
                                             <div className="flex flex-wrap gap-2">
-                                                {section.options.map((option) => {
+                                                {(section.options || []).map((option) => {
                                                     const isActive = (selections[section.id] || []).includes(option);
                                                     return (
                                                         <button
                                                             key={option}
-                                                            onClick={() => toggleSelection(option, section.id, section.type)}
+                                                            onClick={() => toggleSelection(option, section.id, section.type as 'multi-select' | 'single-select')}
                                                             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isActive
                                                                 ? theme.selected
                                                                 : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
@@ -545,7 +545,7 @@ export function GenericConciergeModal({
                     setViewingItem(null);
                 }}
                 onGoAction={() => {
-                    if (viewingItem) handleGoTonight(viewingItem, config.categoryType, isPrivate);
+                    if (viewingItem) handleGoTonightFromHook(viewingItem, config.categoryType, isPrivate);
                     setViewingItem(null);
                 }}
             />
