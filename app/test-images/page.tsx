@@ -5,6 +5,7 @@ import { Image } from "lucide-react";
 
 export default function ImageTestPage() {
     const [userData, setUserData] = useState<any>(null);
+    const [imageError, setImageError] = useState(false);
 
     useEffect(() => {
         fetchUserData();
@@ -50,27 +51,22 @@ export default function ImageTestPage() {
                                 <div className="space-y-3">
                                     <h2 className="font-bold text-slate-900 dark:text-white">Image Preview:</h2>
                                     <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-white/10">
-                                        <img
-                                            src={userData.jarImageUrl}
-                                            alt="Jar Cover"
-                                            className="w-full h-64 object-cover"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.style.display = 'none';
-                                                const parent = target.parentElement;
-                                                if (parent) {
-                                                    parent.innerHTML = `
-                                                        <div class="flex items-center justify-center h-64 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4">
-                                                            <div class="text-center">
-                                                                <p class="font-bold mb-2">❌ Image Failed to Load</p>
-                                                                <p class="text-sm">URL: ${userData.jarImageUrl}</p>
-                                                                <p class="text-xs mt-2">Check if the URL is correct and accessible</p>
-                                                            </div>
-                                                        </div>
-                                                    `;
-                                                }
-                                            }}
-                                        />
+                                        {imageError ? (
+                                            <div className="flex items-center justify-center h-64 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4">
+                                                <div className="text-center">
+                                                    <p className="font-bold mb-2">❌ Image Failed to Load</p>
+                                                    <p className="text-sm">URL: {userData.jarImageUrl}</p>
+                                                    <p className="text-xs mt-2">Check if the URL is correct and accessible</p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={userData.jarImageUrl}
+                                                alt="Jar Cover"
+                                                className="w-full h-64 object-cover"
+                                                onError={() => setImageError(true)}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             ) : (
@@ -108,10 +104,6 @@ export default function ImageTestPage() {
                                             src="/bug-jar-cover.png"
                                             alt="Bug Jar"
                                             className="w-full h-48 object-cover rounded-xl border border-slate-200"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).alt = "❌ Not loaded yet (needs deployment)";
-                                                (e.target as HTMLImageElement).className = "w-full h-48 flex items-center justify-center bg-red-100 rounded-xl border border-red-200";
-                                            }}
                                         />
                                     </div>
                                     <div>
@@ -120,10 +112,6 @@ export default function ImageTestPage() {
                                             src="/feature-requests-cover.png"
                                             alt="Feature Requests"
                                             className="w-full h-48 object-cover rounded-xl border border-slate-200"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).alt = "❌ Not loaded yet (needs deployment)";
-                                                (e.target as HTMLImageElement).className = "w-full h-48 flex items-center justify-center bg-red-100 rounded-xl border border-red-200";
-                                            }}
                                         />
                                     </div>
                                 </div>
