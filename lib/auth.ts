@@ -95,7 +95,7 @@ export async function getSession() {
                         email: user.email,
                         name: user.name,
                         activeJarId: user.activeJarId,
-                        coupleId: user.coupleId
+                        coupleId: user.legacyJarId // Legacy mapping
                     },
                     expires: nextAuthSession.expires
                 };

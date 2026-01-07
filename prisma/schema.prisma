@@ -7,38 +7,82 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Jar {
+  id            String   @id @default(uuid())
+  referenceCode String   @unique
+  name          String   @default("Our Jar")
+  type          JarType  @default(SOCIAL)
+  selectionMode SelectionMode @default(RANDOM)
+  topic         String?  @default("General") // e.g. "Movies", "Food"
+  customCategories Json? // Array of { id: string, label: string }
+  
+  members       JarMember[]
+  ideas         Idea[]
+  
+  // Legacy access for migration
+  legacyUsers   User[]
+
+  location      String?  // e.g. "New York, NY" or "London, UK"
+  createdAt     DateTime @default(now())
+  isPremium     Boolean  @default(false)
+  isTrialEligible Boolean @default(true)
+  
+  // Community / Public Jar Fields
+  isCommunityJar Boolean @default(false)
+  description    String? // Public description
+  imageUrl       String? // Public banner/icon
+  memberLimit    Int?    // Max members, null = unlimited
+  
+  // Subscription Fields (Platform / Community)
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  subscriptionStatus String? // "active", "trialing", "past_due", "canceled"
+  subscriptionRenewsAt DateTime?
+  
+  isLegacyPremium Boolean @default(false) // For grandfathering existing users
+  
+  // Gamification
+  xp          Int      @default(0)
+  level       Int      @default(1)
+
+  deletedLogs   DeletedLog[]
+  favorites     FavoriteVenue[]
+  achievements  UnlockedAchievement[]
+  voteSessions  VoteSession[]
+}
+
 model UnlockedAchievement {
   id            String   @id @default(uuid())
-  coupleId      String
+  jarId         String
   achievementId String
   unlockedAt    DateTime @default(now())
-  Couple        Couple   @relation(fields: [coupleId], references: [id])
+  jar           Jar      @relation(fields: [jarId], references: [id])
 
-  @@unique([coupleId, achievementId])
+  @@unique([jarId, achievementId])
 }
 
 model DeletedLog {
   id          String   @id @default(uuid())
-  coupleId    String
+  jarId       String
+  jar         Jar      @relation(fields: [jarId], references: [id])
   description String
-  deletedBy   String
+  deletedBy   String   // Name of the user who deleted it
   deletedAt   DateTime @default(now())
-  Couple      Couple   @relation(fields: [coupleId], references: [id])
 }
 
 model JarMember {
-  id       String       @id @default(uuid())
-  userId   String
-  jarId    String
-  role     MemberRole   @default(MEMBER)
-  joinedAt DateTime     @default(now())
-  status   MemberStatus @default(ACTIVE)
-  jar      Couple       @relation(fields: [jarId], references: [id])
-  user     User         @relation(fields: [userId], references: [id])
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  jarId     String
+  jar       Jar        @relation(fields: [jarId], references: [id])
+  role      MemberRole @default(MEMBER)
+  status    MemberStatus @default(ACTIVE)
+  joinedAt  DateTime   @default(now())
 
   @@unique([userId, jarId])
-  @@index([userId])
-  @@index([status])
+  @@index([userId])              // Speeds up "user's jars" queries
+  @@index([status])              // Speeds up filtering active members
 }
 
 model User {
@@ -47,35 +91,173 @@ model User {
   name                  String
   passwordHash          String?
   mustChangePassword    Boolean          @default(false)
-  coupleId              String?
+  
+  // Legacy single-jar support (for backward compatibility)
+  legacyJarId           String?          @map("coupleId")
+  legacyJar             Jar?             @relation(fields: [legacyJarId], references: [id])
+  
   createdAt             DateTime         @default(now())
   homeTown              String?
   interests             String?
-  hasUsedTrial          Boolean          @default(false)
+  hasUsedTrial          Boolean          @default(false) // Track if they used the 14-day trial
+  
   emailVerified         DateTime?
   verificationToken     String?
+  
   passwordResetToken    String?
   passwordResetTokenExp DateTime?
-  activeJarId           String?
-  isLifetimePro         Boolean          @default(false)
+
+  // Managing "Active" Jar
+  activeJarId           String?          // The jar they are currently viewing
+  
+  // Platform-wide Subscription (User level)
+  isLifetimePro         Boolean          @default(false) // Manual override / Lifetime purchase
   stripeCustomerId      String?          @unique
   stripeSubscriptionId  String?          @unique
   subscriptionEndsAt    DateTime?
-  subscriptionStatus    String?
-  premiumInviteToken    String?
-  image                 String?
+  subscriptionStatus    String?          // "active", "trialing", "past_due", "canceled"
+
+  premiumInviteToken    String?          // Token they can share to invite friends to their pro jars
+
+  image                 String?          // User avatar
+
   accounts              Account[]
-  analyticsEvents       AnalyticsEvent[]
-  appReviews            AppReview[]
-  favorites             FavoriteVenue[]
-  assignedTasks         Idea[]           @relation("AssignedTo")
-  createdIdeas          Idea[]           @relation("CreatedBy")
-  memberships           JarMember[]
-  rateLimit             RateLimit?
-  ratings               Rating[]
   sessions              Session[]
-  couple                Couple?          @relation(fields: [coupleId], references: [id])
+  
+  // Relationships
+  memberships           JarMember[]
+  createdIdeas          Idea[]           @relation("CreatedBy")
+  assignedTasks         Idea[]           @relation("AssignedTo")
+  ratings               Rating[]
   votes                 Vote[]
+  favorites             FavoriteVenue[]
+  appReviews            AppReview[]
+  analyticsEvents       AnalyticsEvent[]
+  rateLimit             RateLimit?
+}
+
+model Idea {
+  id             String   @id @default(uuid())
+  description    String
+  indoor         Boolean // true = indoor, false = outdoor
+  duration       Float // 0.25, 0.5, 0.75, 1.0
+  activityLevel  String // LOW, MEDIUM, HIGH
+  cost           String // FREE, $, $$, $$$
+  timeOfDay      String   @default("ANY") // DAY, EVENING, ANY
+  category       String   @default("ACTIVITY") // ACTIVITY, MEAL, EVENT
+  
+  jarId          String
+  jar            Jar      @relation(fields: [jarId], references: [id])
+  
+  createdById    String
+  createdBy      User     @relation("CreatedBy", fields: [createdById], references: [id])
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  selectedAt     DateTime? // If null, it's still in the jar
+  selectedDate   DateTime? // The actual date they went on (optional)
+  rating         Int?      // 1-5 stars (Legacy/Average)
+  notes          String?   // "Best pizza ever!"
+  details        String?   // "Wear comfortable shoes", "Bring a swimsuit"
+  
+  // Rich Data Fields
+  address        String?
+  website        String?
+  googleRating   Float?
+  openingHours   String?
+  photoUrls      String[]
+  
+  isSurprise     Boolean  @default(false)
+  isPrivate      Boolean  @default(false)
+
+  // Real-life Context
+  weather        String   @default("ANY") // ANY, SUNNY, RAINY, COLD
+  requiresTravel Boolean  @default(false) // If true, it's an "Outing"
+  status         IdeaStatus @default(APPROVED)
+
+  assignedToId   String?
+  assignedTo     User?    @relation("AssignedTo", fields: [assignedToId], references: [id])
+
+  ratings        Rating[]
+  wonSessions    VoteSession[] @relation("SessionWinner")
+  votes          Vote[]
+
+  @@index([jarId, selectedAt])  // Speeds up "available ideas" queries
+  @@index([createdById])         // Speeds up "user's ideas" lookups
+  @@index([status])              // Speeds up filtering by approval status
+  @@index([jarId, status, selectedAt])  // Composite for complex filters
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  value     Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([ideaId, userId])
+}
+
+model FavoriteVenue {
+  id          String   @id @default(uuid())
+  jarId       String
+  jar         Jar      @relation(fields: [jarId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  name        String
+  address     String?
+  description String?
+  websiteUrl  String?
+  googleRating Float?
+  type        String   @default("VENUE") // VENUE, RESTAURANT, ACTIVITY
+  createdAt   DateTime @default(now())
+  isShared    Boolean  @default(false)
+
+  @@index([jarId])
+}
+
+model VoteSession {
+  id              String         @id @default(uuid())
+  jarId           String
+  jar             Jar            @relation(fields: [jarId], references: [id])
+  
+  status          VoteStatus     @default(ACTIVE)
+  startTime       DateTime       @default(now())
+  endTime         DateTime?
+  tieBreakerMode  TieBreakerMode @default(RANDOM_PICK)
+  round           Int            @default(1)
+  
+  winnerId        String?
+  winner          Idea?          @relation("SessionWinner", fields: [winnerId], references: [id])
+  
+  eligibleIdeaIds String[]       // If empty, all available ideas in jar are eligible
+  
+  votes           Vote[]
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model Vote {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   VoteSession @relation(fields: [sessionId], references: [id])
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  
+  createdAt DateTime @default(now())
+
+  @@unique([sessionId, userId])
 }
 
 model Account {
@@ -84,14 +266,15 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -112,220 +295,88 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Idea {
-  id             String        @id @default(uuid())
-  description    String
-  indoor         Boolean
-  duration       Float
-  activityLevel  String
-  cost           String
-  timeOfDay      String        @default("ANY")
-  coupleId       String
-  createdById    String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  selectedAt     DateTime?
-  selectedDate   DateTime?
-  rating         Int?
-  notes          String?
-  details        String?
-  category       String        @default("ACTIVITY")
-  address        String?
-  googleRating   Float?
-  openingHours   String?
-  website        String?
-  isSurprise     Boolean       @default(false)
-  photoUrls      String[]
-  isPrivate      Boolean       @default(false)
-  requiresTravel Boolean       @default(false)
-  weather        String        @default("ANY")
-  assignedToId   String?
-  status         IdeaStatus    @default(APPROVED)
-  assignedTo     User?         @relation("AssignedTo", fields: [assignedToId], references: [id])
-  Couple         Couple        @relation(fields: [coupleId], references: [id])
-  createdBy      User          @relation("CreatedBy", fields: [createdById], references: [id])
-  ratings        Rating[]
-  votes          Vote[]
-  wonSessions    VoteSession[] @relation("SessionWinner")
-
-  @@index([createdById])
-  @@index([status])
-  @@index([coupleId, selectedAt])
-  @@index([coupleId, status, selectedAt])
-}
-
-model Rating {
-  id        String   @id @default(uuid())
-  ideaId    String
-  userId    String
-  value     Int
-  comment   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@unique([ideaId, userId])
-}
-
-model FavoriteVenue {
-  id           String   @id @default(uuid())
-  coupleId     String
-  userId       String
-  name         String
-  address      String?
-  description  String?
-  websiteUrl   String?
-  googleRating Float?
-  type         String   @default("VENUE")
-  createdAt    DateTime @default(now())
-  isShared     Boolean  @default(false)
-  Couple       Couple   @relation(fields: [coupleId], references: [id])
-  user         User     @relation(fields: [userId], references: [id])
-
-  @@index([coupleId])
-}
-
 model AppReview {
   id        String   @id @default(uuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id])
   rating    Int
   comment   String
   isPublic  Boolean  @default(true)
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-model VoteSession {
-  id              String         @id @default(uuid())
-  coupleId        String
-  status          VoteStatus     @default(ACTIVE)
-  startTime       DateTime       @default(now())
-  endTime         DateTime?
-  tieBreakerMode  TieBreakerMode @default(RANDOM_PICK)
-  round           Int            @default(1)
-  winnerId        String?
-  eligibleIdeaIds String[]
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  votes           Vote[]
-  Couple          Couple         @relation(fields: [coupleId], references: [id])
-  winner          Idea?          @relation("SessionWinner", fields: [winnerId], references: [id])
-}
-
-model Vote {
-  id        String      @id @default(uuid())
-  sessionId String
-  userId    String
-  ideaId    String
-  createdAt DateTime    @default(now())
-  idea      Idea        @relation(fields: [ideaId], references: [id])
-  session   VoteSession @relation(fields: [sessionId], references: [id])
-  user      User        @relation(fields: [userId], references: [id])
-
-  @@unique([sessionId, userId])
 }
 
 model AICache {
   id        String   @id @default(cuid())
   key       String   @unique
-  value     String
+  value     String //@db.Text
   createdAt DateTime @default(now())
   expiresAt DateTime
 }
 
 model RateLimit {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  count       Int      @default(0)
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  count     Int      @default(0)
   windowStart DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AnalyticsEvent {
   id        String   @id @default(uuid())
-  type      String
-  name      String
-  value     Float?
-  metadata  Json?
+  type      String   // 'page_view', 'click', 'spin', 'vote', etc.
+  name      String   // 'view_dashboard', 'spin_jar', etc.
+  value     Float?   // Optional numeric value (e.g., duration, count)
+  metadata  Json?    // Flexible JSON for event details
+  
   userId    String?
-  sessionId String?
-  path      String?
-  createdAt DateTime @default(now())
   user      User?    @relation(fields: [userId], references: [id])
-
-  @@index([type, name])
+  
+  createdAt DateTime @default(now())
+  
   @@index([createdAt])
+  @@index([type, name])
 }
 
-model Couple {
-  id                   String                @id
-  referenceCode        String                @unique
-  location             String?
-  createdAt            DateTime              @default(now())
-  isPremium            Boolean               @default(false)
-  isTrialEligible      Boolean               @default(true)
-  isLegacyPremium      Boolean               @default(false)
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  subscriptionStatus   String?
-  level                Int                   @default(1)
-  xp                   Int                   @default(0)
-  name                 String                @default("Our Jar")
-  type                 JarType               @default(SOCIAL)
-  topic                String?               @default("General")
-  customCategories     Json?
-  selectionMode        SelectionMode         @default(RANDOM)
-  description          String?
-  imageUrl             String?
-  isCommunityJar       Boolean               @default(false)
-  memberLimit          Int?
-  subscriptionRenewsAt DateTime?
-  DeletedLog           DeletedLog[]
-  FavoriteVenue        FavoriteVenue[]
-  Idea                 Idea[]
-  members              JarMember[]
-  UnlockedAchievement  UnlockedAchievement[]
-  legacyUsers          User[]
-  VoteSession          VoteSession[]
-}
 
 enum JarType {
-  ROMANTIC
-  SOCIAL
-  GENERIC
-}
-
-enum IdeaStatus {
-  APPROVED
-  PENDING
-  ARCHIVED
-}
-
-enum MemberRole {
-  ADMIN
-  MEMBER
-}
-
-enum MemberStatus {
-  ACTIVE
-  PENDING
-  WAITLISTED
-  INVITED
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  TRIALLING
+  ROMANTIC // Date ideas (Couple)
+  SOCIAL   // Hangouts (Friends)
+  FAMILY   // Family activities
+  SOLO     // Self-care / Personal goals
+  WORK     // Team building
+  GENERIC  // Custom
 }
 
 enum SelectionMode {
   RANDOM
-  VOTING
+  VOTE     @map("VOTING") // Database has VOTING
+  WHEEL    // Not in DB?
   ALLOCATION
   ADMIN_PICK
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum MemberStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+  PENDING
+  WAITLISTED
+}
+
+enum IdeaStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  ARCHIVED
+  PENDING
 }
 
 enum VoteStatus {
@@ -337,4 +388,12 @@ enum VoteStatus {
 enum TieBreakerMode {
   RANDOM_PICK
   RE_VOTE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  EXPIRED
 }

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Priority: 1. activeJarId, 2. First membership, 3. Legacy coupleId
     const currentJarId = user.activeJarId ||
         (user.memberships?.[0]?.jarId) ||
-        user.coupleId;
+        user.legacyJarId;
 
     if (!currentJarId) {
         return NextResponse.json({ error: 'No active jar' }, { status: 400 });

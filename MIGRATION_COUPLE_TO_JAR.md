@@ -1,7 +1,26 @@
 # ⚠️ IMPORTANT: READ BEFORE RUNNING
 
-## Database Migration: Couple → Jar Rename
+## Database# Migration Log: Couple to Jar (Recovery Phase)
 
+## Critical Issues & Fixes (Jan 8, 2026)
+
+### 1. Raw SQL Queries
+We found several `prisma.$queryRaw` and `prisma.$executeRaw` calls that were manually referencing `"Couple"` table and `"coupleId"` column. Since the table was renamed in the DB, these crashed immediately.
+**Fix:** Updated all raw SQL to use `"Jar"` and `"jarId"`.
+
+### 2. Prisma Schema Drift (Enum Mismatch)
+The `MemberStatus` enum in the database contained `PENDING` and `WAITLISTED`, but the `schema.prisma` file was missing them (likely reverted or never updated during original dev). This caused crashes when Prisma tried to read `JarMember` records.
+**Fix:** Added `PENDING` and `WAITLISTED` to `MemberStatus` enum.
+
+### 3. Code References to `user.couple`
+The codebase still referenced `user.couple` and `user.coupleId` extensively.
+**Fix:**
+- Updated `schema.prisma`: Added `legacyJar Jar?` relation and `legacyJarId` field to User model for backward compatibility mapping (but using correct DB columns).
+- Updated `lib/auth.ts`: Mapped `session.user.coupleId` -> `user.legacyJarId` to keep frontend working.
+- Updated API Routes: Replaced `user.couple` -> `user.legacyJar` and `user.coupleId` (Prisma) -> `user.legacyJarId`.
+
+---
+# Original Migration Plan
 This migration renames the legacy "Couple" table to "Jar" throughout the database.
 
 ### ⚠️ WARNING

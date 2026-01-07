@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         });
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-        const currentJarId = user.activeJarId || user.coupleId;
+        const currentJarId = user.activeJarId || user.legacyJarId;
         if (!currentJarId) return NextResponse.json({ error: 'No active jar' }, { status: 400 });
 
         const body = await request.json();
@@ -53,7 +53,7 @@ export async function DELETE(request: Request) {
         });
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-        const currentJarId = user.activeJarId || user.coupleId;
+        const currentJarId = user.activeJarId || user.legacyJarId;
 
         const { searchParams } = new URL(request.url);
         const name = searchParams.get('name');
@@ -92,8 +92,8 @@ export async function GET(request: Request) {
 
         // Collect all jar IDs the user is a member of
         const myJarIds = user.memberships.map(m => m.jarId);
-        if (user.coupleId && !myJarIds.includes(user.coupleId)) {
-            myJarIds.push(user.coupleId);
+        if (user.legacyJarId && !myJarIds.includes(user.legacyJarId)) {
+            myJarIds.push(user.legacyJarId);
         }
 
         // If no jars, just get personal favorites (though user logic implies they are in a jar usually)

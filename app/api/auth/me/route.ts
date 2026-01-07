@@ -29,7 +29,8 @@ export async function GET() {
                     }
                 },
                 // Legacy fallback support
-                couple: {
+                // Legacy fallback support
+                legacyJar: {
                     include: {
                         members: {
                             include: { user: { select: { id: true } } }
@@ -58,9 +59,9 @@ export async function GET() {
                     where: { id: user.id },
                     data: { activeJarId: activeJar.id }
                 });
-            } else if (user.couple) {
+            } else if (user.legacyJar) {
                 // Legacy Fallback
-                activeJar = user.couple;
+                activeJar = user.legacyJar;
                 // Auto-persist the active jar choice for future consistency
                 await prisma.user.update({
                     where: { id: user.id },
