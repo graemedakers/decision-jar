@@ -36,7 +36,8 @@ export async function POST(request: Request) {
             style = 'Any',
             numPeople = 2,
             portionSize = 'Standard',
-            audience = 'Adults'
+            audience = 'Adults',
+            unitSystem = 'Metric'
         } = body;
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
         }
 
         // Cache key based on parameters
-        const cacheKey = `menu-planner-${numDays}-${dietaryPreference.toLowerCase()}-${cookingSkill.toLowerCase()}-${JSON.stringify(cuisines)}-${style.toLowerCase()}-${numPeople}-${audience.toLowerCase()}-${portionSize.toLowerCase()}`;
+        const cacheKey = `menu-planner-${numDays}-${dietaryPreference.toLowerCase()}-${cookingSkill.toLowerCase()}-${JSON.stringify(cuisines)}-${style.toLowerCase()}-${numPeople}-${audience.toLowerCase()}-${portionSize.toLowerCase()}-${unitSystem.toLowerCase()}`;
 
         try {
             const cached: any[] = await prisma.$queryRaw`
@@ -87,6 +88,8 @@ export async function POST(request: Request) {
                 ? 'Include some gourmet techniques and unique ingredient combinations.'
                 : 'Balance of accessible and interesting recipes.';
 
+        const unitNote = `Use ONLY ${unitSystem} units (e.g. ${unitSystem === 'Metric' ? 'grams, ml, celsius' : 'oz, lbs, cups, fahrenheit'}) for all ingredients and instructions.`;
+
         const prompt = `
         Generate a ${numDays}-day meal plan. 
         ${dietaryNote} 
@@ -95,6 +98,7 @@ export async function POST(request: Request) {
         ${audienceNote}
         ${familyNote}
         ${skillNote}
+        ${unitNote}
         
         IMPORTANT REQUIREMENTS:
         - Provide exactly ${numDays} meals (one per day - dinner only)
@@ -109,7 +113,9 @@ export async function POST(request: Request) {
             "meal": "string", // Name of the dish
             "description": "string", // Brief appetizing description
             "prep_time": "string", // e.g., "30 mins", "1 hour"
-            "difficulty": "string" // "Easy", "Medium", or "Hard"
+            "difficulty": "string", // "Easy", "Medium", or "Hard"
+            "ingredients": ["string"], // List of key ingredients (approx quantities if helpful)
+            "instructions": ["string"] // 3-5 high-level cooking steps
         }
         
         Return ONLY a JSON array of ${numDays} meal objects. No markdown, no extra text.

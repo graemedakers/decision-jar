@@ -100,7 +100,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 res = await createIdea(apiBody);
             }
 
-            if ('success' in res && res.success) {
+            if (res.success) {
                 if (isCommunitySubmission) {
                     showSuccess("🚀 Suggestion sent! The jar admin will review your idea soon.");
                 } else {
@@ -109,7 +109,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 if (onSuccess) onSuccess();
                 onClose();
             } else {
-                showError((res as any).error || "Failed to save idea");
+                showError(res.error || "Failed to save idea");
             }
         } catch (error) {
             console.error(error);

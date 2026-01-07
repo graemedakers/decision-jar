@@ -364,7 +364,7 @@ export function useConciergeActions({
         }
     };
 
-    const handleFavorite = async (rec: any, type: "BAR" | "RESTAURANT" | "CLUB" | "HOTEL" | "MOVIE" | "WELLNESS" | "FITNESS" | "THEATRE" | "GAME" | "ACTIVITY") => {
+    const handleFavorite = async (rec: any, type: "BAR" | "RESTAURANT" | "CLUB" | "HOTEL" | "MOVIE" | "WELLNESS" | "FITNESS" | "THEATRE" | "GAME" | "ACTIVITY" | "MEAL") => {
         try {
             if (rec.isFavorite) {
                 const res = await fetch(`/api/favorites?name=${encodeURIComponent(rec.name)}`, {
@@ -373,7 +373,7 @@ export function useConciergeActions({
 
                 if (res.ok) {
                     setRecommendations(prev => prev.map(item =>
-                        item.name === rec.name ? { ...item, isFavorite: false } : item
+                        (item.name === rec.name || (type === 'MEAL' && item.meal === rec.name)) ? { ...item, isFavorite: false } : item
                     ));
                     if (onFavoriteUpdated) onFavoriteUpdated();
                 } else {
@@ -395,7 +395,7 @@ export function useConciergeActions({
 
                 if (res.ok) {
                     setRecommendations(prev => prev.map(item =>
-                        item.name === rec.name ? { ...item, isFavorite: true } : item
+                        (item.name === rec.name || (type === 'MEAL' && item.meal === rec.name)) ? { ...item, isFavorite: true } : item
                     ));
                     if (onFavoriteUpdated) onFavoriteUpdated();
                 } else {

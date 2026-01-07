@@ -9,6 +9,7 @@ export type ModalType =
     | 'JOIN_JAR'
     | 'SETTINGS'
     | 'FILTERS'
+    | 'SPIN_FILTERS'
     | 'SURPRISE_ME'
     | 'QUICK_TOOLS'
     | 'WEEKEND_PLANNER'

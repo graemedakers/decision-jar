@@ -1,12 +1,12 @@
-"use client";
-
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Loader2, Sparkles, ChefHat, Plus, Lock, Check, Share2, Users } from "lucide-react";
+import { X, Calendar, Loader2, Sparkles, ChefHat, Plus, Lock, Check, Share2, Users, ShoppingCart, RefreshCw, ClipboardList, Heart } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { trackAIToolUsed, trackEvent } from "@/lib/analytics";
 import { showSuccess, showError } from "@/lib/toast";
+import { generateShoppingList, regenerateMeal } from "@/app/actions/menu";
+import { ShoppingListModal } from "./ShoppingListModal";
 
 interface MenuPlannerModalProps {
     isOpen: boolean;
@@ -20,6 +20,8 @@ interface MealPlan {
     description: string;
     prep_time: string;
     difficulty: string;
+    ingredients?: string[];
+    instructions?: string[];
 }
 
 export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerModalProps) {
@@ -27,17 +29,24 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
     const [numDays, setNumDays] = useState(7);
     const [numPeople, setNumPeople] = useState(2);
     const [portionSize, setPortionSize] = useState("Standard");
+    const [unitSystem, setUnitSystem] = useState("Metric");
     const [audience, setAudience] = useState("Adults");
     const [dietaryPreference, setDietaryPreference] = useState("None");
     const [cookingSkill, setCookingSkill] = useState("Intermediate");
     const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+    const [customCuisine, setCustomCuisine] = useState("");
     const [foodStyle, setFoodStyle] = useState("Any");
     const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
     const [addedMeals, setAddedMeals] = useState<Set<number>>(new Set());
     const [isPrivate, setIsPrivate] = useState(false);
     const resultsRef = useRef<HTMLDivElement>(null);
 
-    const { handleAddToJar } = useConciergeActions({
+    // New State for enhancements
+    const [shoppingList, setShoppingList] = useState<any>(null);
+    const [isListLoading, setIsListLoading] = useState(false);
+    const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
+
+    const { handleAddToJar, handleFavorite } = useConciergeActions({
         onIdeaAdded,
         onClose,
         setRecommendations: setMealPlans as any
@@ -48,13 +57,15 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
         if (isOpen) {
             setMealPlans([]);
             setAddedMeals(new Set());
-            // Don't reset preferences to allow easy regeneration
+            setShoppingList(null);
+            setCustomCuisine("");
         }
     }, [isOpen]);
 
     const handleGeneratePlan = async () => {
         setIsLoading(true);
         setMealPlans([]);
+        setShoppingList(null);
         setAddedMeals(new Set());
 
         trackAIToolUsed('menu_planner', {
@@ -62,8 +73,14 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
             numPeople,
             audience,
             dietaryPreference,
-            cookingSkill
+            cookingSkill,
+            unitSystem
         });
+
+        const finalCuisines = selectedCuisines.filter(c => c !== 'Other');
+        if (selectedCuisines.includes('Other') && customCuisine.trim()) {
+            finalCuisines.push(customCuisine.trim());
+        }
 
         try {
             const res = await fetch('/api/menu-planner', {
@@ -76,8 +93,9 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                     audience,
                     dietaryPreference,
                     cookingSkill,
-                    cuisines: selectedCuisines,
-                    style: foodStyle
+                    cuisines: finalCuisines,
+                    style: foodStyle,
+                    unitSystem
                 }),
             });
 
@@ -96,21 +114,73 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
         }
     };
 
+    const handleRegenerateItem = async (index: number) => {
+        if (regeneratingIndex !== null) return;
+        setRegeneratingIndex(index);
+
+        try {
+            const res = await regenerateMeal(mealPlans, index, {
+                numPeople,
+                audience,
+                dietaryPreference,
+                style: foodStyle,
+                cookingSkill
+            });
+
+            if (res.success) {
+                const updatedPlans = [...mealPlans];
+                // Preserve day label if returned wrong, but trust AI usually
+                updatedPlans[index] = { ...res.meal, day: mealPlans[index].day };
+                setMealPlans(updatedPlans);
+                showSuccess("Meal updated!");
+            } else {
+                showError(res.error || "Failed to replace meal.");
+            }
+        } catch (err) {
+            showError("Error regenerating meal.");
+        } finally {
+            setRegeneratingIndex(null);
+        }
+    };
+
+    const handleGenerateShoppingList = async () => {
+        if (mealPlans.length === 0) return;
+        setIsListLoading(true);
+        try {
+            const res = await generateShoppingList(mealPlans, numPeople);
+            if (res.success) {
+                setShoppingList(res.list);
+            } else {
+                showError(res.error || "Failed to create shopping list.");
+            }
+        } catch (err) {
+            showError("Error creating shopping list.");
+        } finally {
+            setIsListLoading(false);
+        }
+    };
+
     useEffect(() => {
-        if (mealPlans.length > 0 && resultsRef.current) {
-            setTimeout(() => {
-                resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
+        if (mealPlans.length > 0 && resultsRef.current && !regeneratingIndex) {
+            // Only scroll on initial gen, not single regen
+            if (!shoppingList) {
+                setTimeout(() => {
+                    resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
         }
     }, [mealPlans]);
 
     const handleAddMealToJar = async (meal: MealPlan, idx: number) => {
         if (addedMeals.has(idx)) return;
 
+        const ingredientList = meal.ingredients ? `\n\nIngredients: ${meal.ingredients.join(', ')}` : '';
+        const instructionList = meal.instructions ? `\n\nQuick Steps:\n${meal.instructions.join('\n')}` : '';
+
         await handleAddToJar({
             name: `${meal.day}: ${meal.meal}`,
             description: meal.description,
-            details: `Prep Time: ${meal.prep_time}\\nDifficulty: ${meal.difficulty}`,
+            details: `Prep Time: ${meal.prep_time}\nDifficulty: ${meal.difficulty}${ingredientList}${instructionList}`,
             price: meal.difficulty
         }, "MEAL", isPrivate);
 
@@ -227,17 +297,34 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                                             </select>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Audience</label>
-                                            <select
-                                                value={audience}
-                                                onChange={(e) => setAudience(e.target.value)}
-                                                className="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2.5 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                                            >
-                                                <option value="Adults">Adults Only</option>
-                                                <option value="Kids">Kid Friendly</option>
-                                                <option value="Mixed">Mixed / Family</option>
-                                            </select>
+                                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Units</label>
+                                            <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
+                                                {['Metric', 'Imperial'].map((unit) => (
+                                                    <button
+                                                        key={unit}
+                                                        onClick={() => setUnitSystem(unit)}
+                                                        className={`flex-1 py-1.5 text-xs font-black rounded-lg transition-all ${unitSystem === unit
+                                                            ? 'bg-white dark:bg-white/10 shadow-sm text-green-600'
+                                                            : 'text-slate-500'
+                                                            }`}
+                                                    >
+                                                        {unit}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Audience</label>
+                                        <select
+                                            value={audience}
+                                            onChange={(e) => setAudience(e.target.value)}
+                                            className="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2.5 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        >
+                                            <option value="Adults">Adults Only</option>
+                                            <option value="Kids">Kid Friendly</option>
+                                            <option value="Mixed">Mixed / Family</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -264,7 +351,7 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                                 <div className="space-y-2">
                                     <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Preferred Cuisines</label>
                                     <div className="flex flex-wrap gap-2">
-                                        {['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian', 'French'].map((cuisine) => {
+                                        {['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian', 'French', 'Other'].map((cuisine) => {
                                             const isSelected = selectedCuisines.includes(cuisine);
                                             return (
                                                 <button
@@ -282,6 +369,17 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                                             );
                                         })}
                                     </div>
+                                    {selectedCuisines.includes('Other') && (
+                                        <motion.input
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            type="text"
+                                            placeholder="Specify other cuisines (e.g. Thai, Greek)..."
+                                            value={customCuisine}
+                                            onChange={(e) => setCustomCuisine(e.target.value)}
+                                            className="w-full px-4 py-2 mt-2 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-green-500 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400"
+                                        />
+                                    )}
                                 </div>
 
                                 {/* Food Style */}
@@ -351,18 +449,88 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
 
                                     <div className="space-y-3">
                                         {mealPlans.map((meal, idx) => (
-                                            <div key={idx} className="bg-white dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors">
-                                                <div className="flex justify-between items-start mb-2">
+                                            <div key={idx} className="bg-white dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors relative group">
+                                                {/* Action Buttons: Refresh & Favorite */}
+                                                <div className="absolute top-3 right-3 flex items-center gap-1">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const rec = {
+                                                                name: meal.meal,
+                                                                description: meal.description,
+                                                                isFavorite: (meal as any).isFavorite
+                                                            };
+                                                            handleFavorite(rec, "MEAL");
+                                                        }}
+                                                        className={`p-1.5 rounded-full transition-all ${(meal as any).isFavorite
+                                                            ? "text-pink-500 bg-pink-500/10"
+                                                            : "text-slate-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20"
+                                                            }`}
+                                                        title="Add to Favorites"
+                                                    >
+                                                        <Heart className={`w-4 h-4 ${(meal as any).isFavorite ? "fill-current" : ""}`} />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleRegenerateItem(idx);
+                                                        }}
+                                                        disabled={regeneratingIndex === idx}
+                                                        className="p-1.5 text-slate-400 hover:text-green-600 dark:text-slate-500 dark:hover:text-green-400 bg-transparent hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-all"
+                                                        title="Regenerate this meal"
+                                                    >
+                                                        <RefreshCw className={`w-4 h-4 ${regeneratingIndex === idx ? "animate-spin text-green-500" : ""}`} />
+                                                    </button>
+                                                </div>
+
+                                                <div className="flex justify-between items-start mb-4 pr-8">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <span className="text-xs font-bold px-2 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300 rounded-full">{meal.day}</span>
                                                             <span className="text-xs text-slate-400">{meal.difficulty}</span>
                                                         </div>
-                                                        <h4 className="font-bold text-slate-900 dark:text-white">{meal.meal}</h4>
+                                                        <h4 className="font-bold text-slate-900 dark:text-white text-lg">{meal.meal}</h4>
                                                         <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{meal.description}</p>
                                                         <p className="text-xs text-slate-400 mt-2">⏱️ {meal.prep_time}</p>
                                                     </div>
                                                 </div>
+
+                                                {/* Ingredients & Instructions (Simple View) */}
+                                                {(meal.ingredients || meal.instructions) && (
+                                                    <div className="grid md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100 dark:border-white/5">
+                                                        {meal.ingredients && (
+                                                            <div>
+                                                                <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 flex items-center gap-1.5"><ChefHat className="w-3 h-3" /> Ingredients</h5>
+                                                                <ul className="space-y-1">
+                                                                    {meal.ingredients.slice(0, 5).map((ing, i) => (
+                                                                        <li key={i} className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-1.5">
+                                                                            <span className="w-1 h-1 bg-green-400 rounded-full mt-1.5 shrink-0" />
+                                                                            <span className="leading-tight">{ing}</span>
+                                                                        </li>
+                                                                    ))}
+                                                                    {meal.ingredients.length > 5 && (
+                                                                        <li className="text-[10px] text-slate-400 italic pl-2.5">+ {meal.ingredients.length - 5} more...</li>
+                                                                    )}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                        {meal.instructions && (
+                                                            <div>
+                                                                <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 flex items-center gap-1.5"><ClipboardList className="w-3 h-3" /> Quick Steps</h5>
+                                                                <ol className="space-y-1.5">
+                                                                    {meal.instructions.slice(0, 3).map((step, i) => (
+                                                                        <li key={i} className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-1.5">
+                                                                            <span className="font-bold text-slate-400 shrink-0 text-[10px] mt-0.5">{i + 1}.</span>
+                                                                            <span className="leading-tight">{step}</span>
+                                                                        </li>
+                                                                    ))}
+                                                                </ol>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
                                                 <Button
                                                     size="sm"
                                                     variant={addedMeals.has(idx) ? "ghost" : "secondary"}
@@ -380,28 +548,44 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
                                         ))}
                                     </div>
 
-                                    <div className="flex gap-2 pt-4">
+                                    <div className="flex flex-col gap-2 pt-4">
                                         <Button
-                                            onClick={handleSharePlan}
-                                            variant="outline"
-                                            className="flex-1 border-primary/30 text-primary hover:bg-primary/10"
+                                            onClick={handleGenerateShoppingList}
+                                            disabled={isListLoading}
+                                            className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900"
                                         >
-                                            <Share2 className="w-4 h-4 mr-2" />
-                                            Share
+                                            {isListLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ShoppingCart className="w-4 h-4 mr-2" />}
+                                            Create Shopping List
                                         </Button>
-                                        <Button
-                                            onClick={handleGeneratePlan}
-                                            variant="secondary"
-                                            className="flex-1"
-                                        >
-                                            <Sparkles className="w-4 h-4 mr-2" />
-                                            Regenerate
-                                        </Button>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                onClick={handleSharePlan}
+                                                variant="outline"
+                                                className="flex-1 border-primary/30 text-primary hover:bg-primary/10"
+                                            >
+                                                <Share2 className="w-4 h-4 mr-2" />
+                                                Share
+                                            </Button>
+                                            <Button
+                                                onClick={handleGeneratePlan}
+                                                variant="secondary"
+                                                className="flex-1"
+                                            >
+                                                <Sparkles className="w-4 h-4 mr-2" />
+                                                Regenerate All
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
                         </div>
                     </motion.div>
+
+                    <ShoppingListModal
+                        isOpen={!!shoppingList}
+                        onClose={() => setShoppingList(null)}
+                        list={shoppingList}
+                    />
                 </div>
             )}
         </AnimatePresence>

@@ -306,6 +306,7 @@ export function GenericConciergeModal({
             }
 
             const body = {
+                toolId: config.id,
                 ...selectionMap,
                 location: config.hasLocation ? location : undefined,
                 price: config.hasPrice ? price : undefined

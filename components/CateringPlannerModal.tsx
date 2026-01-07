@@ -18,6 +18,7 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
     const [ageGroup, setAgeGroup] = useState("Adults");
     const [complexity, setComplexity] = useState("Moderate");
     const [theme, setTheme] = useState("");
+    const [unitSystem, setUnitSystem] = useState("Metric");
     const [numCourses, setNumCourses] = useState(3);
     const [includeDessert, setIncludeDessert] = useState(true);
     const [portionSize, setPortionSize] = useState("Normal");
@@ -49,7 +50,8 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                     theme,
                     numCourses,
                     includeDessert,
-                    portionSize
+                    portionSize,
+                    unitSystem
                 }),
             });
 
@@ -139,17 +141,38 @@ export function CateringPlannerModal({ isOpen, onClose, onIdeaAdded }: CateringP
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-yellow-500" /> Theme or Style
-                                </label>
-                                <input
-                                    type="text"
-                                    value={theme}
-                                    onChange={(e) => setTheme(e.target.value)}
-                                    placeholder="e.g. Italian Summer, 5yo Birthday, Romantic French Night"
-                                    className="glass-input w-full px-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-yellow-500 transition-all font-bold"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-yellow-500" /> Theme or Style
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={theme}
+                                        onChange={(e) => setTheme(e.target.value)}
+                                        placeholder="e.g. Italian Summer, 5yo Birthday, Romantic French Night"
+                                        className="glass-input w-full px-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-yellow-500 transition-all font-bold"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                        Units
+                                    </label>
+                                    <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
+                                        {['Metric', 'Imperial'].map((unit) => (
+                                            <button
+                                                key={unit}
+                                                onClick={() => setUnitSystem(unit)}
+                                                className={`flex-1 py-2 text-xs font-black rounded-lg transition-all ${unitSystem === unit
+                                                    ? 'bg-white dark:bg-white/10 shadow-sm text-orange-600 scale-105'
+                                                    : 'text-slate-500'
+                                                    }`}
+                                            >
+                                                {unit}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

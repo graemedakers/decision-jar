@@ -1,5 +1,6 @@
 'use server';
 
+import { ActionResponse, Idea } from '@/lib/types';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
@@ -8,10 +9,10 @@ import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { getBestCategoryFit } from '@/lib/categories';
 import { revalidatePath } from 'next/cache';
 
-export async function createIdea(data: any) {
+export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea }>> {
     const session = await getSession();
     if (!session?.user?.id) {
-        return { error: 'Unauthorized', status: 401 };
+        return { success: false, error: 'Unauthorized', status: 401 };
     }
 
     const user = await prisma.user.findUnique({
@@ -20,7 +21,7 @@ export async function createIdea(data: any) {
     });
 
     if (!user) {
-        return { error: 'User not found', status: 404 };
+        return { success: false, error: 'User not found', status: 404 };
     }
 
     // Priority: 1. activeJarId, 2. First membership, 3. Legacy coupleId
@@ -29,12 +30,12 @@ export async function createIdea(data: any) {
         user.coupleId;
 
     if (!currentJarId) {
-        return { error: 'No active jar', status: 400 };
+        return { success: false, error: 'No active jar', status: 400 };
     }
 
     const jar = await prisma.jar.findUnique({ where: { id: currentJarId } });
     if (!jar) {
-        return { error: 'Jar not found', status: 404 };
+        return { success: false, error: 'Jar not found', status: 404 };
     }
 
     // Check if Voting is Active
@@ -43,14 +44,14 @@ export async function createIdea(data: any) {
     });
 
     if (activeVote) {
-        return { error: "Cannot add new ideas while a vote is in progress.", status: 403 };
+        return { success: false, error: "Cannot add new ideas while a vote is in progress.", status: 403 };
     }
 
     try {
         const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, selectedAt, notes, address, website, googleRating, openingHours, rating, photoUrls, selectedDate, isPrivate, weather, requiresTravel } = data;
 
         if (!description) {
-            return { error: 'Description is required', status: 400 };
+            return { success: false, error: 'Description is required', status: 400 };
         }
 
         const requestedCategory = category || 'ACTIVITY';
@@ -108,19 +109,19 @@ export async function createIdea(data: any) {
         revalidatePath('/dashboard');
         revalidatePath('/jar');
 
-        return { success: true, idea };
+        return { success: true, idea: idea as any };
     } catch (error: any) {
         console.error('Error creating idea:', error);
-        return { error: error.message || 'Unknown error', status: 500 };
+        return { success: false, error: error.message || 'Unknown error', status: 500 };
     }
 }
 
-export async function updateIdea(id: string, data: any) {
+export async function updateIdea(id: string, data: any): Promise<ActionResponse<{ idea: Idea }>> {
     const session = await getSession();
-    if (!session?.user?.id) return { error: 'Unauthorized', status: 401 };
+    if (!session?.user?.id) return { success: false, error: 'Unauthorized', status: 401 };
 
     const idea = await prisma.idea.findUnique({ where: { id } });
-    if (!idea) return { error: 'Idea not found', status: 404 };
+    if (!idea) return { success: false, error: 'Idea not found', status: 404 };
 
     // Check permissions (Owner or Admin)
     const membership = await prisma.jarMember.findUnique({
@@ -128,7 +129,7 @@ export async function updateIdea(id: string, data: any) {
     });
     const isAdmin = membership?.role === 'ADMIN';
     if (idea.createdById !== session.user.id && !isAdmin) {
-        return { error: 'Forbidden', status: 403 };
+        return { success: false, error: 'Forbidden', status: 403 };
     }
 
     try {
@@ -154,18 +155,18 @@ export async function updateIdea(id: string, data: any) {
 
         revalidatePath('/dashboard');
         revalidatePath('/jar');
-        return { success: true, idea: updated };
+        return { success: true, idea: updated as any };
     } catch (e: any) {
-        return { error: e.message || 'Error updating', status: 500 };
+        return { success: false, error: e.message || 'Error updating', status: 500 };
     }
 }
 
-export async function deleteIdea(id: string) {
+export async function deleteIdea(id: string): Promise<ActionResponse> {
     const session = await getSession();
-    if (!session?.user?.id) return { error: 'Unauthorized', status: 401 };
+    if (!session?.user?.id) return { success: false, error: 'Unauthorized', status: 401 };
 
     const idea = await prisma.idea.findUnique({ where: { id } });
-    if (!idea) return { error: 'Idea not found', status: 404 };
+    if (!idea) return { success: false, error: 'Idea not found', status: 404 };
 
     // Permissions
     const membership = await prisma.jarMember.findUnique({
@@ -173,7 +174,7 @@ export async function deleteIdea(id: string) {
     });
     const isAdmin = membership?.role === 'ADMIN';
     if (idea.createdById !== session.user.id && !isAdmin) {
-        return { error: 'Forbidden', status: 403 };
+        return { success: false, error: 'Forbidden', status: 403 };
     }
 
     try {
@@ -182,6 +183,6 @@ export async function deleteIdea(id: string) {
         revalidatePath('/jar');
         return { success: true };
     } catch (e: any) {
-        return { error: e.message || 'Error deleting', status: 500 };
+        return { success: false, error: e.message || 'Error deleting', status: 500 };
     }
 }

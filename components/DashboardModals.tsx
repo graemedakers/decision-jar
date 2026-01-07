@@ -1,33 +1,37 @@
 "use client";
 
-import { GenericConciergeModal } from "@/components/GenericConciergeModal";
-import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
-import { BarCrawlPlannerModal } from "@/components/BarCrawlPlannerModal";
-import { AdminControlsModal } from "@/components/AdminControlsModal";
-import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
-import { DateNightPlannerModal } from "@/components/DateNightPlannerModal";
-import { CateringPlannerModal } from "@/components/CateringPlannerModal";
-import { MenuPlannerModal } from "@/components/MenuPlannerModal";
-import { RateDateModal } from "@/components/RateDateModal";
-import { DateReveal } from "@/components/DateReveal";
-import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { PremiumModal } from "@/components/PremiumModal";
 import { ReviewAppModal } from "@/components/ReviewAppModal";
 import { HelpModal } from "@/components/HelpModal";
-import { FavoritesModal } from "@/components/FavoritesModal";
-import { AddIdeaModal } from "@/components/AddIdeaModal";
-import { SurpriseMeModal } from "@/components/SurpriseMeModal";
-import { SpinFiltersModal } from "@/components/SpinFiltersModal";
-import { SettingsModal } from "@/components/SettingsModal";
-import { QuickDecisionsModal } from "@/components/QuickDecisionsModal";
-import { WeekendPlannerModal } from "@/components/WeekendPlannerModal";
-import { CommunityAdminModal } from "@/components/CommunityAdminModal";
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { TrialExpiredModal } from "@/components/TrialExpiredModal";
 import { Confetti } from "@/components/Confetti";
 import { LevelUpModal } from "@/components/Gamification/LevelUpModal";
 import { PremiumWelcomeTip } from "@/components/PremiumWelcomeTip";
 import { useModalSystem } from "@/components/ModalProvider";
 import { Idea, UserData } from "@/lib/types";
+import dynamic from "next/dynamic";
+
+// Lazy Load Heavy Modals
+const GenericConciergeModal = dynamic(() => import("@/components/GenericConciergeModal").then(m => m.GenericConciergeModal), { ssr: false });
+const BarCrawlPlannerModal = dynamic(() => import("@/components/BarCrawlPlannerModal").then(m => m.BarCrawlPlannerModal), { ssr: false });
+const AdminControlsModal = dynamic(() => import("@/components/AdminControlsModal").then(m => m.AdminControlsModal), { ssr: false });
+const TemplateBrowserModal = dynamic(() => import("@/components/TemplateBrowserModal").then(m => m.TemplateBrowserModal), { ssr: false });
+const DateNightPlannerModal = dynamic(() => import("@/components/DateNightPlannerModal").then(m => m.DateNightPlannerModal), { ssr: false });
+const CateringPlannerModal = dynamic(() => import("@/components/CateringPlannerModal").then(m => m.CateringPlannerModal), { ssr: false });
+const MenuPlannerModal = dynamic(() => import("@/components/MenuPlannerModal").then(m => m.MenuPlannerModal), { ssr: false });
+const RateDateModal = dynamic(() => import("@/components/RateDateModal").then(m => m.RateDateModal), { ssr: false });
+const DateReveal = dynamic(() => import("@/components/DateReveal").then(m => m.DateReveal), { ssr: false });
+const FavoritesModal = dynamic(() => import("@/components/FavoritesModal").then(m => m.FavoritesModal), { ssr: false });
+const AddIdeaModal = dynamic(() => import("@/components/AddIdeaModal").then(m => m.AddIdeaModal), { ssr: false });
+const SurpriseMeModal = dynamic(() => import("@/components/SurpriseMeModal").then(m => m.SurpriseMeModal), { ssr: false });
+const SpinFiltersModal = dynamic(() => import("@/components/SpinFiltersModal").then(m => m.SpinFiltersModal), { ssr: false });
+const SettingsModal = dynamic(() => import("@/components/SettingsModal").then(m => m.SettingsModal), { ssr: false });
+const QuickDecisionsModal = dynamic(() => import("@/components/QuickDecisionsModal").then(m => m.QuickDecisionsModal), { ssr: false });
+const WeekendPlannerModal = dynamic(() => import("@/components/WeekendPlannerModal").then(m => m.WeekendPlannerModal), { ssr: false });
+const CommunityAdminModal = dynamic(() => import("@/components/CommunityAdminModal").then(m => m.CommunityAdminModal), { ssr: false });
+
+import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
 interface DashboardModalsProps {
     // Data Props
@@ -55,13 +59,14 @@ interface DashboardModalsProps {
     showConfetti: boolean;
     setShowConfetti: (show: boolean) => void;
     onRestartTour?: () => void;
+    onCloseLevelUp?: () => void;
 }
 
 export function DashboardModals({
     isPremium, userData, ideas, userLocation, setUserLocation, combinedLocation,
     jarTopic, level, favoritesCount, hasPaid, coupleCreatedAt, isTrialEligible,
     handleContentUpdate, fetchFavorites, fetchIdeas, refreshUser, handleSpinJar,
-    showConfetti, setShowConfetti, onRestartTour
+    showConfetti, setShowConfetti, onRestartTour, onCloseLevelUp
 }: DashboardModalsProps) {
 
     const { activeModal, modalProps, closeModal, openModal } = useModalSystem();
@@ -152,6 +157,15 @@ export function DashboardModals({
                 onClose={closeModal}
                 currentLocation={userLocation ?? undefined}
                 onRestartTour={onRestartTour}
+            />
+
+            <SpinFiltersModal
+                isOpen={activeModal === 'SPIN_FILTERS'}
+                onClose={closeModal}
+                onSpin={handleSpinJar}
+                jarTopic={jarTopic}
+                ideas={ideas}
+                customCategories={userData?.customCategories}
             />
 
             {!isCommunityJar && (
@@ -259,6 +273,7 @@ export function DashboardModals({
                 idea={activeModal === 'DATE_REVEAL' ? modalProps?.idea : null}
                 onClose={closeModal}
                 userLocation={userLocation ?? undefined}
+                isViewOnly={modalProps?.viewOnly}
                 onFindDining={(location) => {
                     if (location) setUserLocation(location);
                     // Open Concierge Dining
@@ -294,10 +309,7 @@ export function DashboardModals({
                 level={modalProps?.level || level}
                 onClose={() => {
                     closeModal();
-                    // Persist level to prevent loop
-                    if (typeof window !== 'undefined') {
-                        localStorage.setItem('datejar_user_level', (modalProps?.level || level).toString());
-                    }
+                    onCloseLevelUp?.();
                 }}
             />
 

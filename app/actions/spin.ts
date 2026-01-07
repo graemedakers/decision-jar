@@ -1,5 +1,6 @@
-'use server';
+"use server";
 
+import { ActionResponse, Idea } from '@/lib/types';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { sendDateNotificationEmail } from '@/lib/mailer';
@@ -8,13 +9,13 @@ import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { COST_VALUES, ACTIVITY_VALUES } from '@/lib/constants';
 import { revalidatePath } from 'next/cache';
 
-export async function spinJar(filters: any) {
+export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea }>> {
     try {
         const session = await getSession();
         const { maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly } = filters;
 
         if (!session?.user?.id) {
-            return { error: 'Unauthorized', status: 401 };
+            return { success: false, error: 'Unauthorized', status: 401 };
         }
 
         // 1. Fetch User and Active Jar
@@ -23,10 +24,10 @@ export async function spinJar(filters: any) {
             include: { memberships: true }
         });
 
-        if (!user) return { error: 'User not found', status: 404 };
+        if (!user) return { success: false, error: 'User not found', status: 404 };
 
         const currentJarId = user.activeJarId || user.memberships?.[0]?.jarId || user.coupleId;
-        if (!currentJarId) return { error: 'No active jar found', status: 400 };
+        if (!currentJarId) return { success: false, error: 'No active jar found', status: 400 };
 
         // 2. Build Prisma-level Filters
         const whereClause: any = {
@@ -75,7 +76,7 @@ export async function spinJar(filters: any) {
         });
 
         if (filteredIdeas.length === 0) {
-            return { error: 'No matching ideas found', status: 404 };
+            return { success: false, error: 'No matching ideas found', status: 404 };
         }
 
         // 4. Random Selection
@@ -125,11 +126,11 @@ export async function spinJar(filters: any) {
                 ...selectedIdea,
                 canEdit: isMyIdea || isAdmin,
                 canDelete: isMyIdea || isAdmin
-            }
+            } as any
         };
 
     } catch (error: any) {
         console.error('Spin error:', error);
-        return { error: error.message || 'Error spinning', status: 500 };
+        return { success: false, error: error.message || 'Error spinning', status: 500 };
     }
 }

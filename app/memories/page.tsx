@@ -12,6 +12,8 @@ import { ViewMemoryModal } from "@/components/ViewMemoryModal";
 import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
 import { useFavorites } from "@/hooks/useFavorites";
+import { deleteIdea } from "@/app/actions/ideas";
+import { toggleFavorite } from "@/app/actions/favorites";
 
 export default function MemoriesPage() {
     const router = useRouter();
@@ -32,43 +34,26 @@ export default function MemoriesPage() {
     const isLoading = isIdeasLoading || isUserLoading;
 
     const isFavorite = (idea: any) => {
-        return favorites.some(f => f.name === idea.description);
+        return favorites.some((f: any) => f.name === idea.description);
     };
 
-    const toggleFavorite = async (idea: any) => {
-        if (isFavorite(idea)) {
-            // Remove
-            try {
-                const res = await fetch(`/api/favorites?name=${encodeURIComponent(idea.description)}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-                if (res.ok) {
-                    fetchFavorites();
-                }
-            } catch (err) {
-                console.error("Failed to remove favorite", err);
+    const handleToggleFavorite = async (idea: any) => {
+        try {
+            const res = await toggleFavorite({
+                name: idea.description,
+                address: idea.address || idea.location || idea.details || "",
+                description: `Memory from ${new Date(idea.selectedDate || idea.selectedAt || Date.now()).toLocaleDateString()}`,
+                type: idea.category === 'MEAL' ? 'RESTAURANT' : 'VENUE'
+            });
+
+            if (res.success) {
+                fetchFavorites();
+            } else {
+                console.error("Failed to toggle favorite:", res.error);
+                // Optionally show toast
             }
-        } else {
-            // Add
-            try {
-                const res = await fetch('/api/favorites', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: idea.description,
-                        address: idea.address || idea.location || idea.details || "",
-                        description: `Memory from ${new Date(idea.selectedDate || idea.selectedAt || Date.now()).toLocaleDateString()}`,
-                        type: idea.category === 'MEAL' ? 'RESTAURANT' : 'VENUE'
-                    }),
-                    credentials: 'include'
-                });
-                if (res.ok) {
-                    fetchFavorites();
-                }
-            } catch (err) {
-                console.error("Failed to add favorite", err);
-            }
+        } catch (err) {
+            console.error("Failed to toggle favorite:", err);
         }
     };
 
@@ -79,11 +64,12 @@ export default function MemoriesPage() {
     const confirmDelete = async () => {
         if (!ideaToDelete) return;
         try {
-            const res = await fetch(`/api/ideas/${ideaToDelete}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-            if (res.ok) fetchIdeas();
+            const res = await deleteIdea(ideaToDelete);
+            if (res.success) {
+                fetchIdeas();
+            } else {
+                console.error("Error deleting idea:", res.error);
+            }
         } catch (error) {
             console.error("Error deleting idea:", error);
         } finally {
@@ -206,7 +192,7 @@ export default function MemoriesPage() {
                                     <Eye className="w-5 h-5" />
                                 </button>
                                 <button
-                                    onClick={() => toggleFavorite(idea)}
+                                    onClick={() => handleToggleFavorite(idea)}
                                     className={`p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors ${isFavorite(idea) ? "text-pink-500 hover:text-pink-600 dark:hover:text-pink-400" : "text-slate-500 dark:text-slate-400 hover:text-pink-500 dark:hover:text-pink-400"} `}
                                     title={isFavorite(idea) ? "Remove from Favorites" : "Add to Favorites"}
                                 >

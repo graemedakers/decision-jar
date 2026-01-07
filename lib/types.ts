@@ -107,3 +107,7 @@ export const SELECTION_MODES = {
     VOTING: 'VOTING',
     ALLOCATION: 'ALLOCATION'
 } as const;
+
+export type ActionResponse<T = void> =
+    | ({ success: true } & T)
+    | { success: false; error: string; status?: number };

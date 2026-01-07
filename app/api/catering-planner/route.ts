@@ -28,7 +28,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
         }
 
-        const { numPeople, ageGroup, complexity, theme, numCourses, includeDessert, portionSize } = await request.json();
+        const { numPeople, ageGroup, complexity, theme, numCourses, includeDessert, portionSize, unitSystem = 'Metric' } = await request.json();
+
+        const unitNote = `Use ONLY ${unitSystem} units (e.g. ${unitSystem === 'Metric' ? 'kg, g, l, ml, celsius' : 'lbs, oz, gallons, cups, fahrenheit'}) for all scaled ingredients.`;
 
         const prompt = `
             Act as a Michelin-star catering consultant. 
@@ -39,6 +41,7 @@ export async function POST(request: Request) {
             - Theme: ${theme}
             - Number of courses: ${numCourses}. ${includeDessert ? (Number(numCourses) === 1 ? "IMPORTANT: The user requested dessert. As only 1 course is specified, this SINGLE course MUST be a dessert." : "This count INCLUDES dessert. Ensure the final course is a dessert.") : ""}
             - Portion Sizes: ${portionSize}
+            - Units: ${unitNote}
 
             For EACH of the 3 options, provide:
             1. Title and Description.

@@ -1,0 +1,173 @@
+'use client';
+
+/**
+ * EXAMPLE INTEGRATION
+ * This demonstrates how to integrate the Enhanced Empty State components
+ * into your dashboard or main app page.
+ */
+
+import { useState } from 'react';
+import { EnhancedEmptyState } from '@/components/EnhancedEmptyState';
+import { PreferenceQuizModal, QuizPreferences } from '@/components/PreferenceQuizModal';
+import { AddIdeaModal } from '@/components/AddIdeaModal';
+import { SurpriseMeModal } from '@/components/SurpriseMeModal';
+import { JarTemplatesModal } from '@/components/JarTemplatesModal';
+import { useToast } from '@/hooks/useToast';
+import { useIdeas } from '@/hooks/useIdeas';
+
+export function DashboardWithEnhancedEmpty() {
+    // Modal States
+    const [showQuiz, setShowQuiz] = useState(false);
+    const [showAddIdea, setShowAddIdea] = useState(false);
+    const [showSurpriseMe, setShowSurpriseMe] = useState(false);
+    const [showTemplates, setShowTemplates] = useState(false);
+
+    // Hooks
+    const { toast } = useToast();
+    const { ideas, refreshIdeas, isLoading } = useIdeas();
+
+    /**
+     * Handler for quiz completion
+     * Calls the bulk generation API with user preferences
+     */
+    const handleQuizComplete = async (preferences: QuizPreferences) => {
+        try {
+            const response = await fetch('/api/ideas/bulk-generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    preferences,
+                    // Optional: pass current jar ID if you have one
+                    // jarId: currentJar?.id
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate ideas');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Refresh the ideas list to show new ideas
+                await refreshIdeas();
+
+                // Show success message
+                toast({
+                    title: 'Ideas Generated! 🎉',
+                    description: `${data.count} personalized ideas have been added to your jar!`,
+                    variant: 'success'
+                });
+
+                // Close the quiz modal
+                setShowQuiz(false);
+            }
+        } catch (error) {
+            console.error('Quiz completion error:', error);
+            toast({
+                title: 'Generation Failed',
+                description: 'Unable to generate ideas. Please try again.',
+                variant: 'error'
+            });
+        }
+    };
+
+    /**
+     * Handler for manual idea addition
+     */
+    const handleIdeaAdded = async () => {
+        await refreshIdeas();
+        setShowAddIdea(false);
+        toast({
+            title: 'Idea Added!',
+            description: 'Your idea has been added to the jar.',
+            variant: 'success'
+        });
+    };
+
+    /**
+     * Handler for template import
+     */
+    const handleTemplateImport = async (templateId: string) => {
+        // Your template import logic here
+        await refreshIdeas();
+        setShowTemplates(false);
+        toast({
+            title: 'Template Imported!',
+            description: 'Ideas from the template have been added to your jar.',
+            variant: 'success'
+        });
+    };
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            {/* Show enhanced empty state when no ideas */}
+            {ideas.length === 0 && !isLoading && (
+                <EnhancedEmptyState
+                    onAddIdea={() => setShowAddIdea(true)}
+                    onSurpriseMe={() => setShowSurpriseMe(true)}
+                    onBrowseTemplates={() => setShowTemplates(true)}
+                    onTakeQuiz={() => setShowQuiz(true)}
+                />
+            )}
+
+            {/* Show ideas list when there are ideas */}
+            {ideas.length > 0 && (
+                <div>
+                    {/* Your ideas display component */}
+                    <h2>Your Ideas ({ideas.length})</h2>
+                    {/* ... idea cards ... */}
+                </div>
+            )}
+
+            {/* Modals */}
+            <PreferenceQuizModal
+                isOpen={showQuiz}
+                onClose={() => setShowQuiz(false)}
+                onComplete={handleQuizComplete}
+            />
+
+            {showAddIdea && (
+                <AddIdeaModal
+                    isOpen={showAddIdea}
+                    onClose={() => setShowAddIdea(false)}
+                    onSuccess={handleIdeaAdded}
+                />
+            )}
+
+            {showSurpriseMe && (
+                <SurpriseMeModal
+                    isOpen={showSurpriseMe}
+                    onClose={() => setShowSurpriseMe(false)}
+                    onSuccess={handleIdeaAdded}
+                />
+            )}
+
+            {showTemplates && (
+                <JarTemplatesModal
+                    isOpen={showTemplates}
+                    onClose={() => setShowTemplates(false)}
+                    onUseTemplate={handleTemplateImport}
+                />
+            )}
+        </div>
+    );
+}
+
+/**
+ * USAGE NOTES:
+ * 
+ * 1. Replace your existing empty state component with EnhancedEmptyState
+ * 2. Add the PreferenceQuizModal to your modals
+ * 3. Implement handleQuizComplete to call the bulk-generate API
+ * 4. Ensure you refresh ideas list after any modal completion
+ * 5. Toast notifications enhance user feedback
+ * 
+ * CUSTOMIZATION:
+ * 
+ * - Adjust ideal count slider range in PreferenceQuizModal
+ * - Add more categories in CATEGORIES array
+ * - Customize budget/duration/activity options
+ * - Change color schemes in EnhancedEmptyState
+ * - Add analytics tracking to each CTA
+ */

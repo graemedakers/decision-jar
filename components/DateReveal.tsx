@@ -21,9 +21,10 @@ interface DateRevealProps {
     onClose: () => void;
     userLocation?: string;
     onFindDining?: (location: string) => void;
+    isViewOnly?: boolean;
 }
 
-export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRevealProps) {
+export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOnly }: DateRevealProps) {
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
     const [showAI, setShowAI] = useState(false);
@@ -120,7 +121,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                     exit={{ opacity: 0 }}
                     className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
                 >
-                    <Confetti />
+                    {!isViewOnly && <Confetti />}
                     <motion.div
                         initial={{ scale: 0.8, y: 50, opacity: 0 }}
                         animate={{ scale: 1, y: 0, opacity: 1 }}
@@ -147,7 +148,9 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining }: DateRe
                             </motion.div>
 
                             <div>
-                                <h2 className="text-sm font-bold text-primary uppercase tracking-wider mb-2">It's Decided!</h2>
+                                <h2 className="text-sm font-bold text-primary uppercase tracking-wider mb-2">
+                                    {isViewOnly ? "Idea Details" : "It's Decided!"}
+                                </h2>
                                 <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-tight break-words">
                                     {idea.description}
                                 </h3>
