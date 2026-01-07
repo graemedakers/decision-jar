@@ -27,6 +27,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
     const [interests, setInterests] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
     const [hasPartner, setHasPartner] = useState(false);
     const [inviteCode, setInviteCode] = useState("");
@@ -58,6 +59,11 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                         setLocation(data.user.homeTown || data.user.location || "");
                         setInterests(data.user.interests || "");
                         setIsCreator(!!data.user.isCreator);
+
+                        // Role-based Check
+                        const activeMembership = data.user.memberships?.find((m: any) => m.jarId === data.user.activeJarId);
+                        setIsAdmin(activeMembership?.role === 'ADMIN' || !!data.user.isCreator);
+
                         setHasPartner(!!data.user.hasPartner);
                         setInviteCode(data.user.coupleReferenceCode || "");
                         setIsPremium(!!data.user.isPremium);
@@ -91,8 +97,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                 credentials: 'include',
             });
 
-            // Update Jar settings if creator
-            if (isCreator) {
+            // Update Jar settings if admin
+            if (isAdmin) {
                 await fetch(getApiUrl('/api/jar/settings'), {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -288,7 +294,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                 >
                                     My Preferences
                                 </button>
-                                {isCreator && (
+                                {isAdmin && (
                                     <button
                                         onClick={() => setActiveTab('JAR')}
                                         className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'JAR' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
@@ -400,7 +406,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                         </motion.div>
                                     )}
 
-                                    {activeTab === 'JAR' && isCreator && (
+                                    {activeTab === 'JAR' && isAdmin && (
                                         <motion.div
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
