@@ -228,6 +228,18 @@ body {
   display: none !important;
 }
 
+/* Navigation Spacing Utilities */
+/* Mobile: Bottom nav, so add bottom padding */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Pages need padding for fixed navigation */
+/* Mobile bottom nav = pb-20, Desktop top nav = pt-14 */
+.page-with-nav {
+  @apply pb-20 md:pb-0 md:pt-14;
+}
+
 /* PWA Install Prompt Animation */
 @keyframes slide-up {
   from {

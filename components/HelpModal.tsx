@@ -25,6 +25,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "getting-started", title: "Getting Started", icon: MapPin },
         { id: "admin-roles", title: "Admin & Roles", icon: Crown },
         { id: "community", title: "Manage Jars", icon: Users },
+        { id: "selection-modes", title: "Selection Modes", icon: RefreshCcw },
         { id: "organize-life", title: "Organizing Your Life", icon: Layers },
         { id: "task-allocation", title: "Task Allocation", icon: Shield },
         { id: "explore", title: "The Explore Tab", icon: Compass },
@@ -157,6 +158,81 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                         </div>
                     </div>
                 );
+            case "selection-modes":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Selection Modes</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            When creating a jar, you choose how decisions are made. Each mode suits different use cases.
+                        </p>
+                        <div className="space-y-4">
+                            <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-xl border border-purple-200 dark:border-purple-800/50">
+                                <h4 className="font-bold text-purple-800 dark:text-purple-300 mb-2 flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5" /> Random Selection
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    <strong>Best for:</strong> Date nights, personal jars, couples
+                                </p>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Click <strong>"Spin the Jar"</strong> to randomly pick an idea. Apply filters (cost, duration, energy) to narrow options. Perfect when you want fate to decide!
+                                </p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800/50">
+                                <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                                    <Users className="w-5 h-5" /> Voting Mode
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    <strong>Best for:</strong> Friend groups, teams, democratic decisions
+                                </p>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    <strong>How it works:</strong>
+                                </p>
+                                <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300 ml-2">
+                                    <li>Admin creates a vote session with selected ideas</li>
+                                    <li>All members receive notification to vote</li>
+                                    <li>Each member ranks their preferences</li>
+                                    <li>System tallies votes and announces the winner</li>
+                                </ol>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">
+                                    Great for settling "where should we eat?" debates democratically!
+                                </p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                                <h4 className="font-bold text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-2">
+                                    <Crown className="w-5 h-5" /> Administrator Pick
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    <strong>Best for:</strong> Organized events, planned outings, curated experiences
+                                </p>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    The jar admin (organizer) manually selects which idea to do. Members can still suggest ideas, but the final decision is curated by the admin. Perfect for event planners, trip organizers, or when one person is coordinating the group.
+                                </p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800/50">
+                                <h4 className="font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center gap-2">
+                                    <Shield className="w-5 h-5" /> Task Allocation
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    <strong>Best for:</strong> Chores, responsibilities, fair distribution
+                                </p>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Instead of picking one idea, this mode distributes ALL ideas fairly among members. Each person gets a private list of assigned tasks. Perfect for household chores, project tasks, or any scenario requiring fair division of work.
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                    💡 See the "Task Allocation" section for detailed instructions
+                                </p>
+                            </div>
+                        </div>
+                        <div className="bg-slate-100 dark:bg-white/5 p-3 rounded-lg border border-slate-200 dark:border-white/10 mt-4">
+                            <p className="text-sm text-slate-600 dark:text-slate-300">
+                                <strong>Note:</strong> You can change your jar's selection mode at any time in Settings (admins only).
+                            </p>
+                        </div>
+                    </div>
+                );
             case "task-allocation":
                 return (
                     <div className="space-y-4">
@@ -244,8 +320,17 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                         <div className="space-y-4">
                             <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
                                 <h4 className="font-bold text-slate-800 dark:text-white mb-2">1. Create Your First Jar</h4>
-                                <p className="text-sm text-slate-600 dark:text-slate-300">
-                                    Choose a <strong>Name</strong> and <strong>Topic</strong> (e.g., "Date Nights", "Family Activities"). Select a <strong>Type</strong> (Romantic or Social) and <strong>Selection Mode</strong> (Random, Voting, or Task Allocation).
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    Choose a <strong>Name</strong> and <strong>Topic</strong> (e.g., "Date Nights", "Family Activities"). Select a <strong>Type</strong> (Romantic or Social) and <strong>Selection Mode</strong>:
+                                </p>
+                                <ul className="list-disc list-inside space-y-1 text-xs text-slate-600 dark:text-slate-300 ml-4">
+                                    <li><strong>Random:</strong> Spin to pick randomly</li>
+                                    <li><strong>Voting:</strong> Group votes democratically</li>
+                                    <li><strong>Admin Pick:</strong> Organizer curates selections</li>
+                                    <li><strong>Task Allocation:</strong> Distribute tasks fairly</li>
+                                </ul>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                    💡 See "Selection Modes" section for detailed explanations
                                 </p>
                             </div>
                             <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
