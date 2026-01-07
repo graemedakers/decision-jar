@@ -16,10 +16,11 @@ interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     currentLocation?: string;
+    onRestartTour?: () => void;
 }
 
 
-export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModalProps) {
+export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour }: SettingsModalProps) {
     const router = useRouter();
     const [location, setLocation] = useState(currentLocation || "");
     const [interests, setInterests] = useState("");
@@ -501,6 +502,21 @@ export function SettingsModal({ isOpen, onClose, currentLocation }: SettingsModa
                             )}
 
                             <div className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
+                                {onRestartTour && (
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="w-full justify-start text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white"
+                                        onClick={() => {
+                                            onRestartTour();
+                                            onClose();
+                                        }}
+                                    >
+                                        <Sparkles className="w-4 h-4 mr-2" />
+                                        Restart Tour
+                                    </Button>
+                                )}
+
                                 <Button
                                     type="button"
                                     variant="ghost"

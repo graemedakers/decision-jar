@@ -30,6 +30,8 @@ import { useIdeas } from "@/hooks/useIdeas";
 import { useFavorites } from "@/hooks/useFavorites";
 import { spinJar } from "@/app/actions/spin";
 import { deleteIdea } from "@/app/actions/ideas";
+import { OnboardingTour } from "@/components/Onboarding/OnboardingTour";
+import { ONBOARDING_STEPS } from "@/lib/onboarding-steps";
 
 function InviteCodeDisplay({ mobile, code }: { mobile?: boolean; code: string | null }) {
     const [copied, setCopied] = useState(false);
@@ -104,6 +106,26 @@ function DashboardContent() {
     const [userLocation, setUserLocation] = useState<string | null>(null);
     const [inviteCode, setInviteCode] = useState<string | null>(null);
     const [showConfetti, setShowConfetti] = useState(false);
+    const [showOnboarding, setShowOnboarding] = useState(false);
+
+    // Check if user should see onboarding on first visit
+    useEffect(() => {
+        const hasCompletedOnboarding = localStorage.getItem('onboarding_completed');
+        if (!hasCompletedOnboarding && !isLoadingUser && userData) {
+            // Show onboarding after a brief delay to let the page settle
+            setTimeout(() => setShowOnboarding(true), 1000);
+        }
+    }, [isLoadingUser, userData]);
+
+    const handleCompleteOnboarding = () => {
+        localStorage.setItem('onboarding_completed', 'true');
+        trackEvent('onboarding_completed', {});
+    };
+
+    const handleSkipOnboarding = () => {
+        localStorage.setItem('onboarding_completed', 'true');
+        trackEvent('onboarding_skipped', {});
+    };
 
     // Sync user location and invite code when userData loads
     useEffect(() => {
@@ -307,6 +329,7 @@ function DashboardContent() {
                     handleContentUpdate={handleContentUpdate} fetchFavorites={fetchFavorites} fetchIdeas={fetchIdeas}
                     refreshUser={refreshUser} handleSpinJar={handleSpinJar}
                     showConfetti={showConfetti} setShowConfetti={setShowConfetti}
+                    onRestartTour={() => setShowOnboarding(true)}
                 />
 
                 {/* Header */}
@@ -376,6 +399,7 @@ function DashboardContent() {
                     <div className="mt-4 md:mt-6">
                         <PremiumBanner hasPaid={!!hasPaid} coupleCreatedAt={coupleCreatedAt || ''} isTrialEligible={isTrialEligible} isPremium={isPremium} />
                         <CollapsibleTrophyCase
+                            data-tour="trophy-case"
                             xp={xp || 0}
                             level={level || 1}
                             unlockedIds={achievements || []}
@@ -433,6 +457,7 @@ function DashboardContent() {
                     {/* Left Column: Input & Management */}
                     <div className="flex flex-col gap-6 order-2 xl:order-1">
                         <motion.button
+                            data-tour="add-idea-button"
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={handleAddIdeaClick}
@@ -455,6 +480,7 @@ function DashboardContent() {
 
                         {!userData?.isCommunityJar && (
                             <motion.button
+                                data-tour="surprise-me-button"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => openModal('ADD_IDEA', { initialMode: 'magic' })}
@@ -475,6 +501,7 @@ function DashboardContent() {
                         )}
 
                         <motion.div
+                            data-tour="open-jar-button"
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => router.push('/jar')}
@@ -520,7 +547,7 @@ function DashboardContent() {
                                     />
                                 ) : (
                                     <>
-                                        <div className="relative w-full aspect-square max-w-[450px] flex items-center justify-center">
+                                        <div data-tour="jar-visual" className="relative w-full aspect-square max-w-[450px] flex items-center justify-center">
                                             {/* Cinematic Podium / Stage */}
                                             <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[70%] h-[15%] rounded-[100%] bg-gradient-to-t from-slate-200 dark:from-white/10 to-transparent blur-md opacity-50" />
                                             <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[40%] h-[20px] rounded-[100%] bg-slate-400/20 dark:bg-white/5 blur-sm" />
@@ -561,6 +588,7 @@ function DashboardContent() {
                                                         className="mt-6 xl:hidden w-full max-w-[280px]"
                                                     >
                                                         <Button
+                                                            data-tour="spin-button"
                                                             onClick={() => availableIdeasCount > 0 && openModal('FILTERS')}
                                                             disabled={availableIdeasCount === 0 || isLoadingIdeas}
                                                             className="w-full h-14 rounded-full text-lg font-bold shadow-xl shadow-pink-500/20 bg-gradient-to-r from-pink-500 to-rose-600 border-none hover:opacity-90 transition-opacity"
@@ -680,6 +708,7 @@ function DashboardContent() {
 
                         {!userData?.isCommunityJar && (
                             <motion.div
+                                data-tour="vault-button"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => router.push('/memories')}
@@ -734,6 +763,17 @@ function DashboardContent() {
                     </button>
                 )}
             </div>
+
+            {/* Onboarding Tour */}
+            <OnboardingTour
+                steps={ONBOARDING_STEPS}
+                isOpen={showOnboarding}
+                onClose={() => {
+                    setShowOnboarding(false);
+                    handleSkipOnboarding();
+                }}
+                onComplete={handleCompleteOnboarding}
+            />
         </main>
     );
 }

@@ -54,13 +54,14 @@ interface DashboardModalsProps {
     // UI Callbacks
     showConfetti: boolean;
     setShowConfetti: (show: boolean) => void;
+    onRestartTour?: () => void;
 }
 
 export function DashboardModals({
     isPremium, userData, ideas, userLocation, setUserLocation, combinedLocation,
     jarTopic, level, favoritesCount, hasPaid, coupleCreatedAt, isTrialEligible,
     handleContentUpdate, fetchFavorites, fetchIdeas, refreshUser, handleSpinJar,
-    showConfetti, setShowConfetti
+    showConfetti, setShowConfetti, onRestartTour
 }: DashboardModalsProps) {
 
     const { activeModal, modalProps, closeModal, openModal } = useModalSystem();
@@ -150,6 +151,7 @@ export function DashboardModals({
                 isOpen={activeModal === 'SETTINGS'}
                 onClose={closeModal}
                 currentLocation={userLocation ?? undefined}
+                onRestartTour={onRestartTour}
             />
 
             {!isCommunityJar && (
