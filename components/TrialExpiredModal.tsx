@@ -17,9 +17,14 @@ export function TrialExpiredModal({ isTrialExpired, hasPaid, isPremiumCandidate 
     const router = useRouter();
 
     useEffect(() => {
+        // Safety: If user is premium or paid, ensure modal is closed
+        if (isPremiumCandidate || hasPaid) {
+            setIsOpen(false);
+            return;
+        }
+
         // Show modal if trial is expired AND they are not effectively premium
-        // If they are premium (paid or otherwise), never show this.
-        if (isTrialExpired && !hasPaid && !isPremiumCandidate) {
+        if (isTrialExpired) {
             const hasSeenRecently = sessionStorage.getItem('trial_expired_modal_shown');
             if (!hasSeenRecently) {
                 setIsOpen(true);
