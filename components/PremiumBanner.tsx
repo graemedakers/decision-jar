@@ -12,9 +12,10 @@ interface PremiumBannerProps {
     hasPaid: boolean;
     coupleCreatedAt: string;
     isTrialEligible?: boolean;
+    isPremium?: boolean;
 }
 
-export function PremiumBanner({ hasPaid, coupleCreatedAt, isTrialEligible = true }: PremiumBannerProps) {
+export function PremiumBanner({ hasPaid, coupleCreatedAt, isTrialEligible = true, isPremium = false }: PremiumBannerProps) {
     const [isVisible, setIsVisible] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [daysRemaining, setDaysRemaining] = useState<number>(0);
@@ -42,7 +43,7 @@ export function PremiumBanner({ hasPaid, coupleCreatedAt, isTrialEligible = true
 
     const router = useRouter();
 
-    if (hasPaid) return null; // Don't show if already paid
+    if (hasPaid || isPremium) return null; // Don't show if already paid or premium
 
     return (
         <div className="mb-8">

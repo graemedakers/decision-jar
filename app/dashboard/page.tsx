@@ -374,7 +374,7 @@ function DashboardContent() {
                     )}
 
                     <div className="mt-4 md:mt-6">
-                        <PremiumBanner hasPaid={!!hasPaid} coupleCreatedAt={coupleCreatedAt || ''} isTrialEligible={isTrialEligible} />
+                        <PremiumBanner hasPaid={!!hasPaid} coupleCreatedAt={coupleCreatedAt || ''} isTrialEligible={isTrialEligible} isPremium={isPremium} />
                         <CollapsibleTrophyCase
                             xp={xp || 0}
                             level={level || 1}
