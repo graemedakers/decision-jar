@@ -345,7 +345,7 @@ export function useConciergeActions({
                     googleRating: rec.google_rating,
                     id: (savedIdea as any).id || 'temp-' + Date.now(),
                 });
-                onClose();
+                // onClose(); // Handled by onGoTonight
             }
 
         } catch (error) {
@@ -359,7 +359,7 @@ export function useConciergeActions({
                     googleRating: rec.google_rating,
                     id: 'temp-' + Date.now(),
                 });
-                onClose();
+                // onClose(); // Handled by onGoTonight
             }
         }
     };
