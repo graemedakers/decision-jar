@@ -64,7 +64,7 @@ export async function POST(request: Request) {
                     passwordHash,
                     homeTown: location || 'Unknown',
                     activeJarId: jar.id,
-                    coupleId: jar.id, // Legacy support
+                    legacyJarId: jar.id, // Legacy support
                     hasUsedTrial: false,
                     verificationToken,
                     emailVerified: null,
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
                     passwordHash,
                     homeTown: location || 'Unknown',
                     activeJarId: jar.id,
-                    coupleId: jar.id, // Legacy support
+                    legacyJarId: jar.id, // Legacy support
                     verificationToken,
                     emailVerified: null,
                     isLifetimePro: isPremiumGifted, // Grant Premium
