@@ -1,7 +1,5 @@
-
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { getSession } from '@/lib/auth';
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { streamText } from 'ai';
@@ -26,7 +24,7 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
     try {
         // 1. Auth & Subscription Check
-        const session = await getServerSession(authOptions);
+        const session = await getSession();
         if (!session?.user?.email) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -101,7 +99,7 @@ export async function POST(req: NextRequest) {
             // We can add tools here later for real Google Maps search if needed
         });
 
-        return result.toDataStreamResponse();
+        return result.toTextStreamResponse();
 
     } catch (error: any) {
         console.error('Unified Concierge Error:', error);
