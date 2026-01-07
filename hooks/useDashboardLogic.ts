@@ -130,20 +130,72 @@ export function useDashboardLogic() {
         }
     }, [refreshUser]);
 
-    // Deep Linking: Open Idea
+    // Unified Deep Link Action Router
     useEffect(() => {
+        if (isLoadingUser || isLoadingIdeas) return;
+
+        const action = searchParams?.get('action');
         const ideaId = searchParams?.get('ideaId');
-        if (ideaId && !isLoadingIdeas && ideas.length > 0) {
+        const toolId = searchParams?.get('tool');
+
+        let urlCleaned = false;
+        const newParams = new URLSearchParams(searchParams.toString());
+
+        // 1. Direct Idea Opening (Legacy support + new structure)
+        if (ideaId && ideas.length > 0) {
             const targetIdea = ideas.find((i: any) => i.id === ideaId);
             if (targetIdea) {
                 openModal('DATE_REVEAL', { idea: targetIdea, isViewOnly: true });
-                // Clean URL
-                const newParams = new URLSearchParams(searchParams.toString());
                 newParams.delete('ideaId');
-                window.history.replaceState({}, '', `${window.location.pathname}?${newParams.toString()}`);
+                urlCleaned = true;
             }
         }
-    }, [searchParams, isLoadingIdeas, ideas, openModal]);
+
+        // 2. Action Routing
+        if (action) {
+            switch (action) {
+                case 'add':
+                    openModal('ADD_IDEA');
+                    break;
+                case 'spin':
+                    // Scroll to jar or open filters
+                    const jarElement = document.getElementById('jar-container');
+                    if (jarElement) jarElement.scrollIntoView({ behavior: 'smooth' });
+                    // Optional: open filters immediately
+                    // openModal('SPIN_FILTERS'); 
+                    break;
+                case 'quiz':
+                    setShowQuiz(true);
+                    break;
+                case 'concierge':
+                    if (toolId) {
+                        openModal('CONCIERGE', { toolId: toolId.toUpperCase() });
+                        newParams.delete('tool');
+                    } else {
+                        // Default to EXPLORE tab (which isn't a modal, but we can redirect or show generic)
+                        router.push('/explore');
+                        return; // Don't clean param yet if we redirect
+                    }
+                    break;
+                case 'settings':
+                    openModal('SETTINGS');
+                    break;
+                case 'invite':
+                    openModal('COMMUNITY_ADMIN'); // Or scroll to invite code
+                    break;
+                case 'onboarding':
+                    setShowOnboarding(true);
+                    break;
+            }
+            newParams.delete('action');
+            urlCleaned = true;
+        }
+
+        // Clean URL if we took action
+        if (urlCleaned) {
+            window.history.replaceState({}, '', `${window.location.pathname}?${newParams.toString()}`);
+        }
+    }, [searchParams, isLoadingUser, isLoadingIdeas, ideas, openModal, setShowQuiz, setShowOnboarding, router]);
 
     // 5. Handlers
     const handleLogout = async () => {

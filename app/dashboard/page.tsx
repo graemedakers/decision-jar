@@ -192,6 +192,12 @@ function DashboardContent() {
                                 </Button>
                             </Link>
 
+                            <Link href="/community" aria-label="Discover Communities">
+                                <Button variant="outline" size="icon" className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-primary transition-colors hover:border-primary/30">
+                                    <Users className="w-5 h-5" />
+                                </Button>
+                            </Link>
+
                             <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Help">
                                 <HelpCircle className="w-5 h-5" />
                             </Button>
@@ -203,6 +209,7 @@ function DashboardContent() {
                             <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Settings">
                                 <Settings className="w-5 h-5" />
                             </Button>
+
 
                             <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-colors" aria-label="Logout">
                                 <LogOut className="w-5 h-5" />
@@ -239,6 +246,12 @@ function DashboardContent() {
                             <Link href="/memories" className="shrink-0" aria-label="View Memories">
                                 <Button variant="outline" size="icon" className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
                                     <ImageIcon className="w-5 h-5 text-slate-500" />
+                                </Button>
+                            </Link>
+
+                            <Link href="/community" className="shrink-0" aria-label="Discover Communities">
+                                <Button variant="outline" size="icon" className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
+                                    <Users className="w-5 h-5 text-slate-500" />
                                 </Button>
                             </Link>
 

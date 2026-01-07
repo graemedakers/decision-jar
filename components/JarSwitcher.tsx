@@ -310,12 +310,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                             <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Join Existing Jar</span>
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem onClick={() => router.push('/community')} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md py-2">
-                            <div className="w-7 h-7 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
-                                <Users className="w-3.5 h-3.5 text-slate-400" />
-                            </div>
-                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Discover Communities</span>
-                        </DropdownMenuItem>
+
                     </div>
                 </DropdownMenuContent>
             </DropdownMenu>
