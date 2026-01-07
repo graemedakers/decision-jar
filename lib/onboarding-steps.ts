@@ -13,7 +13,7 @@ export interface OnboardingStep {
 export const ONBOARDING_STEPS: OnboardingStep[] = [
     {
         id: 'welcome',
-        title: '👋 Welcome to Date Jar!',
+        title: '👋 Welcome to Decision Jar!',
         description: 'Your personal idea jar for dates, activities, and adventures. Let\'s take a quick tour to get you started!',
         position: 'center'
     },

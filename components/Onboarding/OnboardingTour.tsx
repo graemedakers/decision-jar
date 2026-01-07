@@ -196,6 +196,19 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
             }
         }
 
+        // Clamp all positions to stay within viewport bounds
+        if (position.left && !position.left.includes('%')) {
+            const leftPx = parseFloat(position.left);
+            const clampedLeft = Math.max(16, Math.min(viewportWidth - 16, leftPx));
+            position.left = `${clampedLeft}px`;
+        }
+
+        if (position.top && !position.top.includes('%')) {
+            const topPx = parseFloat(position.top);
+            const clampedTop = Math.max(16, Math.min(viewportHeight - 16, topPx));
+            position.top = `${clampedTop}px`;
+        }
+
         return position;
     };
 
@@ -251,11 +264,19 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: -20 }}
                     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="fixed pointer-events-auto mx-4 sm:mx-0"
+                    className="fixed pointer-events-auto"
                     style={{
                         ...getTooltipPosition(),
-                        maxWidth: 'min(448px, calc(100vw - 2rem))',
-                        width: currentStep.position === 'center' ? 'min(448px, calc(100vw - 2rem))' : 'auto'
+                        // Ensure tooltip never goes off-screen
+                        left: currentStep.position === 'center' ? '50%' : undefined,
+                        maxWidth: 'calc(100vw - 2rem)',
+                        width: currentStep.position === 'center' ? 'calc(100vw - 2rem)' : 'auto',
+                        maxHeight: 'calc(100vh - 2rem)',
+                        // Add constraints for non-centered tooltips
+                        ...(currentStep.position !== 'center' && {
+                            minWidth: '280px',
+                            width: 'min(calc(100vw - 2rem), 448px)'
+                        })
                     }}
                 >
                     <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-pink-500/30 rounded-3xl shadow-2xl shadow-pink-500/20 overflow-hidden">
