@@ -85,11 +85,14 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
     };
 
     const getTooltipPosition = () => {
+        // For center-positioned tooltips (like welcome), use CSS positioning
         if (!highlightedElement || currentStep.position === 'center') {
             return {
                 top: '50%',
                 left: '50%',
-                transform: 'translate(-50%, -50%)'
+                transform: 'translate(-50%, -50%)',
+                right: 'auto',
+                bottom: 'auto'
             };
         }
 
@@ -216,12 +219,12 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
     return (
         <AnimatePresence>
             <div className="fixed inset-0 z-[200] pointer-events-none">
-                {/* Backdrop Overlay */}
+                {/* Backdrop Overlay - Lighter to see highlighted elements */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm pointer-events-auto"
+                    className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm pointer-events-auto"
                     onClick={handleSkip}
                 />
 
@@ -234,8 +237,8 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                         className="absolute pointer-events-none"
                         style={{
                             ...getSpotlightStyle(),
-                            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 60px 10px rgba(236, 72, 153, 0.6), inset 0 0 0 3px rgba(236, 72, 153, 0.8)',
-                            border: '3px solid rgba(236, 72, 153, 0.8)',
+                            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 80px 15px rgba(236, 72, 153, 0.8), inset 0 0 20px 5px rgba(236, 72, 153, 0.5)',
+                            border: '4px solid rgba(236, 72, 153, 0.9)',
                             zIndex: 201
                         }}
                     />
@@ -248,8 +251,12 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: -20 }}
                     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="absolute pointer-events-auto w-[calc(100vw-2rem)] max-w-md sm:w-full"
-                    style={getTooltipPosition()}
+                    className="fixed pointer-events-auto mx-4 sm:mx-0"
+                    style={{
+                        ...getTooltipPosition(),
+                        maxWidth: 'min(448px, calc(100vw - 2rem))',
+                        width: currentStep.position === 'center' ? 'min(448px, calc(100vw - 2rem))' : 'auto'
+                    }}
                 >
                     <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-pink-500/30 rounded-3xl shadow-2xl shadow-pink-500/20 overflow-hidden">
                         {/* Decorative accents */}
