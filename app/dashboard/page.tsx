@@ -431,7 +431,7 @@ function DashboardContent() {
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-center relative">
 
                     {/* Left Column: Input & Management */}
-                    <div className="space-y-6 order-2 xl:order-1">
+                    <div className="flex flex-col gap-6 order-2 xl:order-1">
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.95 }}
@@ -580,7 +580,7 @@ function DashboardContent() {
 
 
                     {/* Right Column: Action & History */}
-                    <div className="space-y-6 order-3 xl:order-3">
+                    <div className="flex flex-col gap-6 order-3 xl:order-3">
                         {/* Desktop Spin Button (Hidden on Mobile) */}
                         <div className="hidden xl:block">
                             {userData?.jarSelectionMode === 'ALLOCATION' && userData?.memberships?.find((m: any) => m.jarId === userData.activeJarId)?.role === 'ADMIN' && (
