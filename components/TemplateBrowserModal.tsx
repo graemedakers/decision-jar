@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { trackTemplateBrowsed, trackTemplateUsed } from '@/lib/analytics';
+import { showSuccess, showError } from '@/lib/toast';
 
 interface TemplateBrowserModalProps {
     isOpen: boolean;
@@ -91,7 +92,7 @@ export function TemplateBrowserModal({
             }, 500);
         } catch (error) {
             console.error('Error creating jar from template:', error);
-            alert('Failed to create jar. Please try again.');
+            showError('Failed to create jar. Please try again.');
         } finally {
             setCreatingTemplate(null);
         }
@@ -119,10 +120,10 @@ export function TemplateBrowserModal({
             router.refresh();
 
             // Show success message
-            alert(`Successfully added ${result.count} ideas to your jar!`);
+            showSuccess(`Successfully added ${result.count} ideas to your jar!`);
         } catch (error) {
             console.error('Error adding template ideas to jar:', error);
-            alert('Failed to add ideas to jar. Please try again.');
+            showError('Failed to add ideas to jar. Please try again.');
         } finally {
             setCreatingTemplate(null);
         }

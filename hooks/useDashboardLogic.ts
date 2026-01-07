@@ -11,6 +11,7 @@ import { spinJar } from "@/app/actions/spin";
 import { deleteIdea } from "@/app/actions/ideas";
 import { signOut } from "next-auth/react";
 import { getApiUrl } from "@/lib/utils";
+import { showSuccess, showError } from "@/lib/toast";
 
 export function useDashboardLogic() {
     const { openModal } = useModalSystem();
@@ -186,7 +187,7 @@ export function useDashboardLogic() {
 
     const handleSpinJar = async (filters: any = {}) => {
         if (ideas.length === 0) {
-            alert("Add some ideas first!");
+            showError("Add some ideas first!");
             return;
         }
         setIsSpinning(true);
@@ -216,7 +217,7 @@ export function useDashboardLogic() {
                 openModal('DATE_REVEAL', { idea: res.idea });
                 handleContentUpdate();
             } else {
-                alert(res.error || "Failed to pick a date. Try adding more ideas!");
+                showError(res.error || "Failed to pick a date. Try adding more ideas!");
             }
         } catch (error) {
             console.error(error);
@@ -234,10 +235,10 @@ export function useDashboardLogic() {
                     if (res.success) {
                         fetchIdeas();
                     } else {
-                        alert(`Failed: ${res.error}`);
+                        showError(`Failed: ${res.error}`);
                     }
                 } catch (error: any) {
-                    alert(`Error: ${error.message}`);
+                    showError(`Error: ${error.message}`);
                 }
             }
         });
@@ -266,13 +267,13 @@ export function useDashboardLogic() {
                 setShowQuiz(false);
                 await fetchIdeas();
                 await refreshUser();
-                alert(`🎉 ${data.count} ideas generated successfully!`);
+                showSuccess(`🎉 ${data.count} ideas generated successfully!`);
             } else {
-                alert('Failed to generate ideas. Please try again.');
+                showError('Failed to generate ideas. Please try again.');
             }
         } catch (error) {
             console.error('Quiz completion error:', error);
-            alert('An error occurred.');
+            showError('An error occurred.');
         }
     };
 
