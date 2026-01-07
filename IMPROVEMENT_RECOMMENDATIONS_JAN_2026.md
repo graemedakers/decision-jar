@@ -32,7 +32,7 @@
 *   **Solution**: Immediately append the idea to the local list state upon submission. Revert if the server returns an error.
 *   **Benefit**: App feels "instant" and "native".
 
-### 2.2 Global Error Boundary
+### 2.2 Global Error Boundary (COMPLETED)
 *   **Problem**: If a component crashes (e.g., rendering a malformed idea), the whole page turns white.
 *   **Solution**: precise `ErrorBoundaries` around the Dashboard and Modal implementation.
 *   **Benefit**: Users can recover (e.g., "Reload Jar") instead of refreshing the browser.

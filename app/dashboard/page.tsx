@@ -24,6 +24,8 @@ import { DashboardModals } from "@/components/DashboardModals";
 import { useDashboardLogic } from "@/hooks/useDashboardLogic";
 import { ONBOARDING_STEPS } from "@/lib/onboarding-steps";
 import { getJarLabels } from "@/lib/labels";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import React from "react";
 
 // Lazy Loading
 const PreferenceQuizModal = dynamic(() => import("@/components/PreferenceQuizModal").then(m => m.PreferenceQuizModal), { ssr: false });
@@ -73,375 +75,378 @@ function InviteCodeDisplay({ code, topic }: { code: string | null; topic?: strin
 export default function DashboardPage() {
     return (
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-slate-400">Loading...</div></div>}>
-            <DashboardContent />
-        </Suspense>
-    );
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-slate-400">Loading...</div></div>}>
+                <ErrorBoundary>
+                    <DashboardContent />
+                </ErrorBoundary>
+            </Suspense>
+            );
 }
 
-function DashboardContent() {
+            function DashboardContent() {
     const {
-        // State
-        userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
-        ideas, isLoadingIdeas, favoritesCount,
-        isSpinning, userLocation, inviteCode, showConfetti, showOnboarding, showQuiz,
+                // State
+                userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
+                ideas, isLoadingIdeas, favoritesCount,
+                isSpinning, userLocation, inviteCode, showConfetti, showOnboarding, showQuiz,
 
-        // State Setters (explicitly destructured for usage)
-        setUserLocation, setShowConfetti, setShowOnboarding, setShowQuiz,
+                // State Setters (explicitly destructured for usage)
+                setUserLocation, setShowConfetti, setShowOnboarding, setShowQuiz,
 
-        // Actions
-        handleSpinJar, handleDeleteClick, handleDuplicate, handleQuizComplete,
-        handleAddIdeaClick, handleContentUpdate, handleLogout,
-        refreshUser, fetchIdeas, fetchFavorites,
-        handleCompleteOnboarding, handleSkipOnboarding,
+                // Actions
+                handleSpinJar, handleDeleteClick, handleDuplicate, handleQuizComplete,
+                handleAddIdeaClick, handleContentUpdate, handleLogout,
+                refreshUser, fetchIdeas, fetchFavorites,
+                handleCompleteOnboarding, handleSkipOnboarding,
 
-        // Utils
-        openModal
-    } = useDashboardLogic();
+                // Utils
+                openModal
+            } = useDashboardLogic();
 
-    // --- View Logic / Layout Calculations ---
-    const jarTopic = userData?.jarTopic;
-    const jarSelectionMode = userData?.jarSelectionMode;
-    const isVotingMode = jarSelectionMode === 'VOTING';
-    const isAllocationMode = jarSelectionMode === 'ALLOCATION';
-    // const theme = getThemeForTopic(jarTopic); // Theme usage removed from Jar3D as it accepts no props
+            // --- View Logic / Layout Calculations ---
+            const jarTopic = userData?.jarTopic;
+            const jarSelectionMode = userData?.jarSelectionMode;
+            const isVotingMode = jarSelectionMode === 'VOTING';
+            const isAllocationMode = jarSelectionMode === 'ALLOCATION';
+            // const theme = getThemeForTopic(jarTopic); // Theme usage removed from Jar3D as it accepts no props
 
-    const labels = getJarLabels(jarTopic);
-    const activityPlannerTitle = labels.plannerTitle;
-    const titleText = labels.jarBranding;
-    const isAdminPickMode = jarSelectionMode === 'ADMIN_PICK';
+            const labels = getJarLabels(jarTopic);
+            const activityPlannerTitle = labels.plannerTitle;
+            const titleText = labels.jarBranding;
+            const isAdminPickMode = jarSelectionMode === 'ADMIN_PICK';
 
-    const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
-    const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas;
-    const showAdminStatus = isAdminPickMode;
-    const showStatusSection = showNoJars || showAdminStatus || showEmptyState;
+            const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
+            const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas;
+            const showAdminStatus = isAdminPickMode;
+            const showStatusSection = showNoJars || showAdminStatus || showEmptyState;
 
     const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
-    const combinedLocation = userLocation || "";
+            const combinedLocation = userLocation || "";
 
     const handleCloseLevelUp = () => {
-        localStorage.setItem('datejar_user_level', level.toString());
+                localStorage.setItem('datejar_user_level', level.toString());
     };
 
-    return (
-        <main className="page-with-nav min-h-screen bg-slate-50 dark:bg-slate-950 px-4 md:px-8 relative overflow-hidden w-full transition-colors duration-500">
-            {/* Ambient Background Elements */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full animate-pulse-slow" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/5 dark:bg-accent/20 blur-[120px] rounded-full animate-pulse-slow delay-700" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] dark:opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-            </div>
+            return (
+            <main className="page-with-nav min-h-screen bg-slate-50 dark:bg-slate-950 px-4 md:px-8 relative overflow-hidden w-full transition-colors duration-500">
+                {/* Ambient Background Elements */}
+                <div className="fixed inset-0 pointer-events-none">
+                    <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full animate-pulse-slow" />
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/5 dark:bg-accent/20 blur-[120px] rounded-full animate-pulse-slow delay-700" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] dark:opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+                </div>
 
-            <div className="max-w-7xl mx-auto relative z-10">
-                {/* HEADER */}
-                <header className="flex flex-col gap-6 mb-8 md:mt-4">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="relative shrink-0">
-                                <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform">
-                                    <Sparkles className="w-6 h-6 text-white" />
+                <div className="max-w-7xl mx-auto relative z-10">
+                    {/* HEADER */}
+                    <header className="flex flex-col gap-6 mb-8 md:mt-4">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="relative shrink-0">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform">
+                                        <Sparkles className="w-6 h-6 text-white" />
+                                    </div>
+                                    {isPremium && (
+                                        <div className="absolute -top-1 -right-1 bg-amber-400 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-900 shadow-sm flex items-center gap-0.5">
+                                            <Crown className="w-2.5 h-2.5" />
+                                        </div>
+                                    )}
                                 </div>
-                                {isPremium && (
-                                    <div className="absolute -top-1 -right-1 bg-amber-400 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-900 shadow-sm flex items-center gap-0.5">
-                                        <Crown className="w-2.5 h-2.5" />
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        {userData && <JarSwitcher user={userData as any} variant="title" />}
+                                        {!userData && <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white">Decision Jar</h1>}
+                                    </div>
+                                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 hidden sm:flex items-center gap-1">
+                                        make moments happen
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Center: Trophy Case - Desktop Only (Wide) */}
+                            <div className="hidden lg:flex justify-center flex-1 px-4 lg:px-8">
+                                <CollapsibleTrophyCase
+                                    xp={xp || 0}
+                                    level={level}
+                                    unlockedIds={achievements || []}
+                                />
+                            </div>
+
+                            {/* Right: Utility Tools - Desktop Only (Wide) */}
+                            <div className="hidden lg:flex items-center justify-end gap-2 shrink-0">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openModal('FAVORITES')}
+                                    className="hidden md:flex gap-2 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors px-4 h-11"
+                                >
+                                    <Heart className={`w-4 h-4 ${favoritesCount > 0 ? "text-red-500 fill-red-500" : "text-slate-600 dark:text-slate-300"}`} />
+                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Favorites</span>
+                                    {favoritesCount > 0 && (
+                                        <span className="ml-1 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full ring-2 ring-white dark:ring-slate-900">
+                                            {favoritesCount}
+                                        </span>
+                                    )}
+                                </Button>
+
+                                <Link href="/memories" className="hidden md:block" aria-label="View Memories">
+                                    <Button variant="outline" size="icon" className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-primary transition-colors hover:border-primary/30">
+                                        <ImageIcon className="w-5 h-5" />
+                                    </Button>
+                                </Link>
+
+                                <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Help">
+                                    <HelpCircle className="w-5 h-5" />
+                                </Button>
+
+                                <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Quick Tools">
+                                    <Dices className="w-5 h-5" />
+                                </Button>
+
+                                <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Settings">
+                                    <Settings className="w-5 h-5" />
+                                </Button>
+
+                                <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-colors" aria-label="Logout">
+                                    <LogOut className="w-5 h-5" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Mobile/Tablet Quick Actions Row (Stacked when narrow) */}
+                        <div className="flex flex-col lg:hidden gap-4">
+                            <div className="flex justify-center -mb-2">
+                                <CollapsibleTrophyCase
+                                    xp={xp || 0}
+                                    level={level}
+                                    unlockedIds={achievements || []}
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 h-12">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => openModal('FAVORITES')}
+                                    className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0 relative"
+                                    aria-label="Favorites"
+                                >
+                                    <Heart className={`w-5 h-5 ${favoritesCount > 0 ? "text-red-500 fill-red-500" : "text-slate-400"}`} />
+                                    {favoritesCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full border-2 border-white dark:border-slate-900">
+                                            {favoritesCount}
+                                        </span>
+                                    )}
+                                </Button>
+
+                                <Link href="/memories" className="shrink-0" aria-label="View Memories">
+                                    <Button variant="outline" size="icon" className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
+                                        <ImageIcon className="w-5 h-5 text-slate-500" />
+                                    </Button>
+                                </Link>
+
+                                <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Quick Tools">
+                                    <Dices className="w-5 h-5 text-slate-500" />
+                                </Button>
+
+                                <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Help">
+                                    <HelpCircle className="w-5 h-5 text-slate-500" />
+                                </Button>
+
+                                <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Settings">
+                                    <Settings className="w-5 h-5 text-slate-500" />
+                                </Button>
+
+                                <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-xl shrink-0 text-slate-400 hover:text-red-500" aria-label="Logout">
+                                    <LogOut className="w-5 h-5" />
+                                </Button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* MAIN DASHBOARD CONTAINER: Centered Single Column */}
+                    <div className="max-w-4xl mx-auto space-y-8 pb-12">
+
+                        {/* Invite Code Banner */}
+                        <div className="animate-in fade-in slide-in-from-top-4 duration-700">
+                            <InviteCodeDisplay code={inviteCode} topic={jarTopic} />
+                        </div>
+
+                        {/* JAR VISUALIZATION SECTION */}
+                        <div className="flex flex-col items-center">
+                            {/* Premium Info / Alerts */}
+                            <div className="w-full max-w-2xl mb-6">
+                                {!isPremium && !isLoadingUser && !hasPaid && (
+                                    <PremiumBanner
+                                        hasPaid={hasPaid}
+                                        coupleCreatedAt={coupleCreatedAt || ''}
+                                        isTrialEligible={isTrialEligible}
+                                        isPremium={isPremium}
+                                    />
+                                )}
+
+                                {showStatusSection && (
+                                    <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                        {showNoJars && (
+                                            <DashboardOnboarding onJarCreated={handleContentUpdate} isPro={isPremium} topic={jarTopic} />
+                                        )}
+                                        {showEmptyState && (
+                                            <EnhancedEmptyState
+                                                onAddIdea={() => openModal('ADD_IDEA')}
+                                                onSurpriseMe={() => openModal('SURPRISE_ME')}
+                                                onBrowseTemplates={() => openModal('TEMPLATE_BROWSER')}
+                                                onTakeQuiz={() => setShowQuiz(true)}
+                                            />
+                                        )}
+                                        {showAdminStatus && (
+                                            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 rounded-[2.5rem] flex items-start gap-4">
+                                                <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
+                                                    <Shield className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-black text-amber-900 dark:text-amber-100 uppercase tracking-wider text-sm">Admin Pick Mode</h3>
+                                                    <p className="text-sm text-amber-700 dark:text-amber-300/80 mt-1 font-medium">
+                                                        An admin is manually selecting the next {labels.plannerTitle.includes('Date') ? 'date' : 'idea'}. Spinning is disabled.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                    {userData && <JarSwitcher user={userData as any} variant="title" />}
-                                    {!userData && <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white">Decision Jar</h1>}
-                                </div>
-                                <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 hidden sm:flex items-center gap-1">
-                                    make moments happen
-                                </p>
-                            </div>
-                        </div>
 
-                        {/* Center: Trophy Case - Desktop Only (Wide) */}
-                        <div className="hidden lg:flex justify-center flex-1 px-4 lg:px-8">
-                            <CollapsibleTrophyCase
-                                xp={xp || 0}
-                                level={level}
-                                unlockedIds={achievements || []}
-                            />
-                        </div>
+                            {!showEmptyState && !showNoJars && (
+                                <div className="relative z-10 w-full flex flex-col items-center py-4 md:py-8 animate-in fade-in zoom-in duration-1000">
+                                    <motion.div
+                                        animate={isSpinning
+                                            ? { rotate: [0, -8, 8, -8, 8, 0], scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 0.5 } }
+                                            : { rotate: 0, scale: 1 }
+                                        }
+                                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                        className="relative mb-8 md:mb-12"
+                                    >
+                                        <div className="scale-110 md:scale-[1.35] transform transition-transform duration-700 ease-out">
+                                            <Jar3D />
+                                        </div>
 
-                        {/* Right: Utility Tools - Desktop Only (Wide) */}
-                        <div className="hidden lg:flex items-center justify-end gap-2 shrink-0">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openModal('FAVORITES')}
-                                className="hidden md:flex gap-2 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors px-4 h-11"
-                            >
-                                <Heart className={`w-4 h-4 ${favoritesCount > 0 ? "text-red-500 fill-red-500" : "text-slate-600 dark:text-slate-300"}`} />
-                                <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Favorites</span>
-                                {favoritesCount > 0 && (
-                                    <span className="ml-1 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full ring-2 ring-white dark:ring-slate-900">
-                                        {favoritesCount}
-                                    </span>
-                                )}
-                            </Button>
+                                        <div className="absolute top-8 md:top-10 right-4 md:right-0 z-20">
+                                            <motion.div
+                                                initial={{ scale: 0, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                transition={{ delay: 0.5, type: "spring" }}
+                                                className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 py-2 rounded-2xl text-[10px] md:text-xs font-black shadow-2xl border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white flex items-center gap-2 ring-4 ring-white/10"
+                                            >
+                                                <Layers className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+                                                {availableIdeasCount} Ideas
+                                            </motion.div>
+                                        </div>
+                                    </motion.div>
 
-                            <Link href="/memories" className="hidden md:block" aria-label="View Memories">
-                                <Button variant="outline" size="icon" className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-primary transition-colors hover:border-primary/30">
-                                    <ImageIcon className="w-5 h-5" />
-                                </Button>
-                            </Link>
+                                    {/* Main Spin Action */}
+                                    {!isVotingMode && !isAdminPickMode && (
+                                        <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
+                                            <Button
+                                                size="lg"
+                                                className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
+                                                onClick={() => handleSpinJar()}
+                                                disabled={ideas.length === 0 || isSpinning}
+                                            >
+                                                {isSpinning ? (
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                                                        <span>Spinning...</span>
+                                                    </div>
+                                                ) : "Spin the Jar!"}
+                                            </Button>
 
-                            <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Help">
-                                <HelpCircle className="w-5 h-5" />
-                            </Button>
-
-                            <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Quick Tools">
-                                <Dices className="w-5 h-5" />
-                            </Button>
-
-                            <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Settings">
-                                <Settings className="w-5 h-5" />
-                            </Button>
-
-                            <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-colors" aria-label="Logout">
-                                <LogOut className="w-5 h-5" />
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* Mobile/Tablet Quick Actions Row (Stacked when narrow) */}
-                    <div className="flex flex-col lg:hidden gap-4">
-                        <div className="flex justify-center -mb-2">
-                            <CollapsibleTrophyCase
-                                xp={xp || 0}
-                                level={level}
-                                unlockedIds={achievements || []}
-                            />
-                        </div>
-
-                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 h-12">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => openModal('FAVORITES')}
-                                className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0 relative"
-                                aria-label="Favorites"
-                            >
-                                <Heart className={`w-5 h-5 ${favoritesCount > 0 ? "text-red-500 fill-red-500" : "text-slate-400"}`} />
-                                {favoritesCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full border-2 border-white dark:border-slate-900">
-                                        {favoritesCount}
-                                    </span>
-                                )}
-                            </Button>
-
-                            <Link href="/memories" className="shrink-0" aria-label="View Memories">
-                                <Button variant="outline" size="icon" className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
-                                    <ImageIcon className="w-5 h-5 text-slate-500" />
-                                </Button>
-                            </Link>
-
-                            <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Quick Tools">
-                                <Dices className="w-5 h-5 text-slate-500" />
-                            </Button>
-
-                            <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Help">
-                                <HelpCircle className="w-5 h-5 text-slate-500" />
-                            </Button>
-
-                            <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Settings">
-                                <Settings className="w-5 h-5 text-slate-500" />
-                            </Button>
-
-                            <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-xl shrink-0 text-slate-400 hover:text-red-500" aria-label="Logout">
-                                <LogOut className="w-5 h-5" />
-                            </Button>
-                        </div>
-                    </div>
-                </header>
-
-                {/* MAIN DASHBOARD CONTAINER: Centered Single Column */}
-                <div className="max-w-4xl mx-auto space-y-8 pb-12">
-
-                    {/* Invite Code Banner */}
-                    <div className="animate-in fade-in slide-in-from-top-4 duration-700">
-                        <InviteCodeDisplay code={inviteCode} topic={jarTopic} />
-                    </div>
-
-                    {/* JAR VISUALIZATION SECTION */}
-                    <div className="flex flex-col items-center">
-                        {/* Premium Info / Alerts */}
-                        <div className="w-full max-w-2xl mb-6">
-                            {!isPremium && !isLoadingUser && !hasPaid && (
-                                <PremiumBanner
-                                    hasPaid={hasPaid}
-                                    coupleCreatedAt={coupleCreatedAt || ''}
-                                    isTrialEligible={isTrialEligible}
-                                    isPremium={isPremium}
-                                />
-                            )}
-
-                            {showStatusSection && (
-                                <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                                    {showNoJars && (
-                                        <DashboardOnboarding onJarCreated={handleContentUpdate} isPro={isPremium} topic={jarTopic} />
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-14 w-14 md:h-16 md:w-16 border-2 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
+                                                onClick={() => openModal('SPIN_FILTERS')}
+                                                title="Filter Spin"
+                                                aria-label="Filter Spin"
+                                            >
+                                                <Filter className="w-6 h-6 md:w-7 md:h-7" />
+                                            </Button>
+                                        </div>
                                     )}
-                                    {showEmptyState && (
-                                        <EnhancedEmptyState
-                                            onAddIdea={() => openModal('ADD_IDEA')}
-                                            onSurpriseMe={() => openModal('SURPRISE_ME')}
-                                            onBrowseTemplates={() => openModal('TEMPLATE_BROWSER')}
-                                            onTakeQuiz={() => setShowQuiz(true)}
-                                        />
-                                    )}
-                                    {showAdminStatus && (
-                                        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 rounded-[2.5rem] flex items-start gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
-                                                <Shield className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-black text-amber-900 dark:text-amber-100 uppercase tracking-wider text-sm">Admin Pick Mode</h3>
-                                                <p className="text-sm text-amber-700 dark:text-amber-300/80 mt-1 font-medium">
-                                                    An admin is manually selecting the next {labels.plannerTitle.includes('Date') ? 'date' : 'idea'}. Spinning is disabled.
-                                                </p>
-                                            </div>
+
+                                    {isVotingMode && userData && (
+                                        <div className="w-full max-w-2xl animate-in zoom-in-95 duration-500">
+                                            <VotingManager
+                                                jarId={userData.activeJarId || ''}
+                                                userId={userData.id}
+                                                isAdmin={userData.memberships?.[0]?.role === 'ADMIN'}
+                                                onVoteComplete={handleContentUpdate}
+                                                onAddIdea={() => openModal('ADD_IDEA')}
+                                            />
                                         </div>
                                     )}
                                 </div>
                             )}
                         </div>
-
-                        {!showEmptyState && !showNoJars && (
-                            <div className="relative z-10 w-full flex flex-col items-center py-4 md:py-8 animate-in fade-in zoom-in duration-1000">
-                                <motion.div
-                                    animate={isSpinning
-                                        ? { rotate: [0, -8, 8, -8, 8, 0], scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 0.5 } }
-                                        : { rotate: 0, scale: 1 }
-                                    }
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className="relative mb-8 md:mb-12"
-                                >
-                                    <div className="scale-110 md:scale-[1.35] transform transition-transform duration-700 ease-out">
-                                        <Jar3D />
-                                    </div>
-
-                                    <div className="absolute top-8 md:top-10 right-4 md:right-0 z-20">
-                                        <motion.div
-                                            initial={{ scale: 0, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            transition={{ delay: 0.5, type: "spring" }}
-                                            className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 py-2 rounded-2xl text-[10px] md:text-xs font-black shadow-2xl border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white flex items-center gap-2 ring-4 ring-white/10"
-                                        >
-                                            <Layers className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
-                                            {availableIdeasCount} Ideas
-                                        </motion.div>
-                                    </div>
-                                </motion.div>
-
-                                {/* Main Spin Action */}
-                                {!isVotingMode && !isAdminPickMode && (
-                                    <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
-                                        <Button
-                                            size="lg"
-                                            className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
-                                            onClick={() => handleSpinJar()}
-                                            disabled={ideas.length === 0 || isSpinning}
-                                        >
-                                            {isSpinning ? (
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                                                    <span>Spinning...</span>
-                                                </div>
-                                            ) : "Spin the Jar!"}
-                                        </Button>
-
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-14 w-14 md:h-16 md:w-16 border-2 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
-                                            onClick={() => openModal('SPIN_FILTERS')}
-                                            title="Filter Spin"
-                                            aria-label="Filter Spin"
-                                        >
-                                            <Filter className="w-6 h-6 md:w-7 md:h-7" />
-                                        </Button>
-                                    </div>
-                                )}
-
-                                {isVotingMode && userData && (
-                                    <div className="w-full max-w-2xl animate-in zoom-in-95 duration-500">
-                                        <VotingManager
-                                            jarId={userData.activeJarId || ''}
-                                            userId={userData.id}
-                                            isAdmin={userData.memberships?.[0]?.role === 'ADMIN'}
-                                            onVoteComplete={handleContentUpdate}
-                                            onAddIdea={() => openModal('ADD_IDEA')}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        )}
                     </div>
                 </div>
-            </div>
 
-            {/* MODALS CONTAINER */}
-            <DashboardModals
-                // Data
-                isPremium={isPremium}
-                userData={userData}
-                ideas={ideas}
-                userLocation={userLocation}
-                setUserLocation={setUserLocation}
-                combinedLocation={combinedLocation}
-                jarTopic={jarTopic || 'Date'}
-                level={level}
-                favoritesCount={favoritesCount}
-                hasPaid={hasPaid}
-                coupleCreatedAt={coupleCreatedAt || ''}
-                isTrialEligible={isTrialEligible}
+                {/* MODALS CONTAINER */}
+                <DashboardModals
+                    // Data
+                    isPremium={isPremium}
+                    userData={userData}
+                    ideas={ideas}
+                    userLocation={userLocation}
+                    setUserLocation={setUserLocation}
+                    combinedLocation={combinedLocation}
+                    jarTopic={jarTopic || 'Date'}
+                    level={level}
+                    favoritesCount={favoritesCount}
+                    hasPaid={hasPaid}
+                    coupleCreatedAt={coupleCreatedAt || ''}
+                    isTrialEligible={isTrialEligible}
 
-                // Callbacks
-                handleContentUpdate={handleContentUpdate}
-                fetchFavorites={fetchFavorites}
-                fetchIdeas={fetchIdeas}
-                refreshUser={refreshUser}
-                handleSpinJar={handleSpinJar}
+                    // Callbacks
+                    handleContentUpdate={handleContentUpdate}
+                    fetchFavorites={fetchFavorites}
+                    fetchIdeas={fetchIdeas}
+                    refreshUser={refreshUser}
+                    handleSpinJar={handleSpinJar}
 
-                // UI
-                showConfetti={showConfetti}
-                setShowConfetti={setShowConfetti}
-                onCloseLevelUp={handleCloseLevelUp}
-            />
-
-            {/* Preference Quiz (Lazy) */}
-            {showQuiz && (
-                <PreferenceQuizModal
-                    isOpen={showQuiz}
-                    onClose={() => setShowQuiz(false)}
-                    onComplete={handleQuizComplete}
+                    // UI
+                    showConfetti={showConfetti}
+                    setShowConfetti={setShowConfetti}
+                    onCloseLevelUp={handleCloseLevelUp}
                 />
-            )}
 
-            {/* Onboarding Tour (Lazy) */}
-            <OnboardingTour
-                isOpen={showOnboarding}
-                onClose={() => {
-                    handleSkipOnboarding();
-                    setShowOnboarding(false);
-                }}
-                onComplete={() => {
-                    handleCompleteOnboarding();
-                    setShowOnboarding(false);
-                }}
-                steps={ONBOARDING_STEPS}
-            />
+                {/* Preference Quiz (Lazy) */}
+                {showQuiz && (
+                    <PreferenceQuizModal
+                        isOpen={showQuiz}
+                        onClose={() => setShowQuiz(false)}
+                        onComplete={handleQuizComplete}
+                    />
+                )}
 
-            {/* Confetti Effect handled via state passed to Modals, but separate container if needed */}
-            {showConfetti && (
-                <div className="fixed inset-0 pointer-events-none z-[100]" id="confetti-container">
-                    {/* Placeholder for optional direct confetti */}
-                </div>
-            )}
+                {/* Onboarding Tour (Lazy) */}
+                <OnboardingTour
+                    isOpen={showOnboarding}
+                    onClose={() => {
+                        handleSkipOnboarding();
+                        setShowOnboarding(false);
+                    }}
+                    onComplete={() => {
+                        handleCompleteOnboarding();
+                        setShowOnboarding(false);
+                    }}
+                    steps={ONBOARDING_STEPS}
+                />
 
-        </main>
-    );
+                {/* Confetti Effect handled via state passed to Modals, but separate container if needed */}
+                {showConfetti && (
+                    <div className="fixed inset-0 pointer-events-none z-[100]" id="confetti-container">
+                        {/* Placeholder for optional direct confetti */}
+                    </div>
+                )}
+
+            </main>
+            );
 }
