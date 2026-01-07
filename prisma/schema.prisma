@@ -83,12 +83,12 @@ model Jar {
   achievements  UnlockedAchievement[]
   voteSessions  VoteSession[]
 
-  @@map("Couple")
+
 }
 
 model UnlockedAchievement {
   id            String   @id @default(uuid())
-  jarId         String   @map("coupleId")
+  jarId         String
   jar           Jar      @relation(fields: [jarId], references: [id])
   achievementId String   // Constant ID from code
   unlockedAt    DateTime @default(now())
@@ -98,7 +98,7 @@ model UnlockedAchievement {
 
 model DeletedLog {
   id          String   @id @default(uuid())
-  jarId       String   @map("coupleId")
+  jarId       String
   jar         Jar      @relation(fields: [jarId], references: [id])
   description String
   deletedBy   String   // Name of the user who deleted it
@@ -209,7 +209,7 @@ model Idea {
   timeOfDay      String   @default("ANY") // DAY, EVENING, ANY
   category       String   @default("ACTIVITY") // ACTIVITY, MEAL, EVENT
   
-  jarId          String   @map("coupleId")
+  jarId          String
   jar            Jar      @relation(fields: [jarId], references: [id])
   
   createdById    String
@@ -268,7 +268,7 @@ model Rating {
 
 model FavoriteVenue {
   id          String   @id @default(uuid())
-  jarId       String   @map("coupleId")
+  jarId       String
   jar         Jar      @relation(fields: [jarId], references: [id])
   userId      String
   user        User     @relation(fields: [userId], references: [id])
@@ -316,7 +316,7 @@ enum TieBreakerMode {
 
 model VoteSession {
   id              String         @id @default(uuid())
-  jarId           String         @map("coupleId")
+  jarId           String
   jar             Jar            @relation(fields: [jarId], references: [id])
   
   status          VoteStatus     @default(ACTIVE)
