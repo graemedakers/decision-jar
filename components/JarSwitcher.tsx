@@ -74,6 +74,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const [isManagerOpen, setIsManagerOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
 
     const activeMembership = user.memberships.find(m => m.jarId === user.activeJarId) || user.memberships[0];
@@ -202,99 +203,117 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                         </button>
                     )}
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-64 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200">
-                    <DropdownMenuLabel className="text-slate-500 text-xs uppercase tracking-wider">Switch Jar</DropdownMenuLabel>
+                <DropdownMenuContent align="start" className="w-72 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200 p-0 overflow-hidden flex flex-col max-h-[85vh]">
+                    <div className="p-2 border-b border-slate-100 dark:border-slate-800">
+                        <DropdownMenuLabel className="text-slate-500 text-[10px] uppercase tracking-wider px-2 py-1">Switch Jar</DropdownMenuLabel>
+                        {user.memberships.length > 5 && (
+                            <div className="px-2 pb-1">
+                                <input
+                                    type="text"
+                                    placeholder="Search jars..."
+                                    className="w-full text-xs bg-slate-100 dark:bg-white/5 border-none rounded-md px-2 py-1.5 focus:ring-1 focus:ring-purple-500 outline-none"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </div>
+                        )}
+                    </div>
 
-                    {/* Current Active Jar */}
-                    {activeJar && (
-                        <>
-                            <DropdownMenuItem className="bg-slate-50 dark:bg-white/5 data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-white/10 cursor-default flex justify-between group">
-                                <div className="flex items-center gap-3">
-                                    <div className={cn(
-                                        "w-8 h-8 rounded-full flex items-center justify-center border",
-                                        getJarColorClasses(activeJar.type as any)
-                                    )}>
-                                        {getJarIcon(activeJar, "w-4 h-4")}
-                                    </div>
-                                    <div className="text-left">
-                                        <div className="text-sm font-medium text-slate-900 dark:text-white">{activeJar.name || "My Jar"}</div>
-                                        <div className="text-xs text-slate-500">{activeJar.topic || (activeJar.type === 'ROMANTIC' ? 'Personal' : 'Group')}</div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleLeaveJar(activeJar.id);
-                                    }}
-                                    className="p-1 hover:bg-red-500/20 rounded text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                                    title="Leave Jar"
-                                >
-                                    <LogOut className="w-3.5 h-3.5" />
-                                </button>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-800" />
-                        </>
-                    )}
-
-                    {/* Other Jars */}
-                    {otherMemberships.length > 0 && (
-                        <>
-                            {otherMemberships.map((membership) => (
-                                <DropdownMenuItem
-                                    key={membership.jarId}
-                                    onClick={() => handleSwitchJar(membership.jarId)}
-                                    disabled={isLoading}
-                                    className="flex items-center justify-between cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5"
-                                >
+                    {/* Scrollable Jar List */}
+                    <div className="overflow-y-auto flex-1 custom-scrollbar">
+                        {/* Current Active Jar (Highlighted at top of list if no search or matches search) */}
+                        {activeJar && (!searchQuery || activeJar.name?.toLowerCase().includes(searchQuery.toLowerCase())) && (
+                            <div className="p-1">
+                                <DropdownMenuItem className="bg-slate-50 dark:bg-white/5 data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-white/10 cursor-default flex justify-between group rounded-md">
                                     <div className="flex items-center gap-3">
                                         <div className={cn(
                                             "w-8 h-8 rounded-full flex items-center justify-center border",
-                                            getJarColorClasses(membership.jar.type as any)
+                                            getJarColorClasses(activeJar.type as any)
                                         )}>
-                                            {getJarIcon(membership.jar, "w-4 h-4")}
+                                            {getJarIcon(activeJar, "w-4 h-4")}
                                         </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                {membership.jar.name || "Untitled Jar"}
-                                            </div>
-                                            <div className="text-xs text-slate-500">
-                                                {membership.role === 'ADMIN' ? 'Admin' : 'Member'}
-                                            </div>
+                                        <div className="text-left">
+                                            <div className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-[140px]">{activeJar.name || "My Jar"}</div>
+                                            <div className="text-xs text-slate-500">Active • {activeJar.topic || (activeJar.type === 'ROMANTIC' ? 'Personal' : 'Group')}</div>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleLeaveJar(activeJar.id);
+                                        }}
+                                        className="p-1 hover:bg-red-500/20 rounded text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                                        title="Leave Jar"
+                                    >
+                                        <LogOut className="w-3.5 h-3.5" />
+                                    </button>
                                 </DropdownMenuItem>
-                            ))}
-                            <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-800" />
-                        </>
-                    )}
+                            </div>
+                        )}
 
-                    <DropdownMenuItem onClick={() => setIsManagerOpen(true)} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-                            <Settings className="w-4 h-4 text-slate-400" />
+                        {/* Other Jars */}
+                        <div className="p-1 space-y-0.5">
+                            {otherMemberships
+                                .filter(m => !searchQuery || m.jar.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+                                .map((membership) => (
+                                    <DropdownMenuItem
+                                        key={membership.jarId}
+                                        onClick={() => handleSwitchJar(membership.jarId)}
+                                        disabled={isLoading}
+                                        className="flex items-center justify-between cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn(
+                                                "w-8 h-8 rounded-full flex items-center justify-center border",
+                                                getJarColorClasses(membership.jar.type as any)
+                                            )}>
+                                                {getJarIcon(membership.jar, "w-4 h-4")}
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate max-w-[160px]">
+                                                    {membership.jar.name || "Untitled Jar"}
+                                                </div>
+                                                <div className="text-xs text-slate-500">
+                                                    {membership.role === 'ADMIN' ? 'Admin' : 'Member'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </DropdownMenuItem>
+                                ))}
                         </div>
-                        <span className="text-slate-600 dark:text-slate-300">Manage My Jars</span>
-                    </DropdownMenuItem>
+                    </div>
 
-                    <DropdownMenuItem onClick={handleCreateJar} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-                            <Plus className="w-4 h-4 text-slate-400" />
-                        </div>
-                        <span className="text-slate-600 dark:text-slate-300">Create New Jar</span>
-                    </DropdownMenuItem>
+                    {/* Fixed Footer Actions */}
+                    <div className="p-1 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-white/[0.02]">
+                        <DropdownMenuItem onClick={() => setIsManagerOpen(true)} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md py-2">
+                            <div className="w-7 h-7 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+                                <Settings className="w-3.5 h-3.5 text-slate-400" />
+                            </div>
+                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Manage My Jars</span>
+                        </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={handleJoinJar} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-                            <LogOut className="w-4 h-4 text-slate-400 rotate-180" />
-                        </div>
-                        <span className="text-slate-600 dark:text-slate-300">Join Existing Jar</span>
-                    </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleCreateJar} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md py-2">
+                            <div className="w-7 h-7 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+                                <Plus className="w-3.5 h-3.5 text-slate-400" />
+                            </div>
+                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Create New Jar</span>
+                        </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={() => router.push('/community')} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-                            <Users className="w-4 h-4 text-slate-400" />
-                        </div>
-                        <span className="text-slate-600 dark:text-slate-300">Discover Communities</span>
-                    </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleJoinJar} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md py-2">
+                            <div className="w-7 h-7 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+                                <LogOut className="w-3.5 h-3.5 text-slate-400 rotate-180" />
+                            </div>
+                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Join Existing Jar</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem onClick={() => router.push('/community')} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md py-2">
+                            <div className="w-7 h-7 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+                                <Users className="w-3.5 h-3.5 text-slate-400" />
+                            </div>
+                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Discover Communities</span>
+                        </DropdownMenuItem>
+                    </div>
                 </DropdownMenuContent>
             </DropdownMenu>
 
