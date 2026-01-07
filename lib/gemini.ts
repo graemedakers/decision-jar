@@ -37,9 +37,14 @@ export async function reliableGeminiCall<T>(prompt: string, options: GenerateOpt
             // gemini-1.0-pro might not support it well with JSON mode, but we will try.
 
             const body: any = {
-                contents: [{ parts: [{ text: prompt }] }],
-                tools: [{ google_search: {} }]
+                contents: [{ parts: [{ text: prompt }] }]
             };
+
+            // Google Search Tool is incompatible with JSON Mode (responseMimeType: "application/json")
+            // So we only enable search if we are NOT in strict JSON mode.
+            if (!options.jsonMode) {
+                body.tools = [{ google_search: {} }];
+            }
 
             // Enforce JSON mode if requested
             if (options.jsonMode) {
