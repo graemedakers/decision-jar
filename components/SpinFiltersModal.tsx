@@ -73,6 +73,7 @@ export function SpinFiltersModal({ isOpen, onClose, onSpin, jarTopic, ideas, cus
                             <button
                                 onClick={onClose}
                                 className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
+                                aria-label="Close"
                             >
                                 <X className="w-6 h-6" />
                             </button>
@@ -212,6 +213,8 @@ export function SpinFiltersModal({ isOpen, onClose, onSpin, jarTopic, ideas, cus
                                             ? "bg-blue-500 text-white border-blue-400 shadow-md"
                                             : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400"
                                             }`}
+                                        aria-label="Include Travel (Trips & Outings)"
+                                        aria-pressed={!localOnly}
                                     >
                                         <Car className="w-5 h-5 shrink-0" />
                                         <div className="text-left">
@@ -225,6 +228,8 @@ export function SpinFiltersModal({ isOpen, onClose, onSpin, jarTopic, ideas, cus
                                             ? "bg-green-600 text-white border-green-500 shadow-md"
                                             : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400"
                                             }`}
+                                        aria-label="Local Only (No Driving)"
+                                        aria-pressed={localOnly}
                                     >
                                         <Home className="w-5 h-5 shrink-0" />
                                         <div className="text-left">

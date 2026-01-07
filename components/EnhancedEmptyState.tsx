@@ -128,6 +128,15 @@ export function EnhancedEmptyState({
                                 ${hoveredCard === option.id ? 'shadow-2xl' : 'shadow-lg'}
                             `}
                             onClick={option.onClick}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${option.title}: ${option.description}`}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    option.onClick();
+                                }
+                            }}
                         >
                             {/* Featured Badge */}
                             {option.featured && (

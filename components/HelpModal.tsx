@@ -682,6 +682,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                         <button
                             onClick={onClose}
                             className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors z-20"
+                            aria-label="Close Help"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -701,6 +702,8 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                             ? "bg-primary text-white border-primary shadow-md"
                                             : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5 border-transparent"
                                             }`}
+                                        aria-label={`View ${section.title} section`}
+                                        aria-current={activeSection === section.id ? 'true' : undefined}
                                     >
                                         <section.icon className="w-4 h-4" />
                                         {section.title}

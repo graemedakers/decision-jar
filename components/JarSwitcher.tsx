@@ -165,7 +165,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     {variant === 'title' ? (
-                        <button className="flex items-center gap-1 group outline-none text-left min-w-0 max-w-full">
+                        <button className="flex items-center gap-1 group outline-none text-left min-w-0 max-w-full" aria-label="Switch Jar">
                             <h1 className="text-lg md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1 min-w-0">
                                 {activeJar ? (
                                     <>
@@ -185,6 +185,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                     ) : (
                         <button
                             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 transition-colors border border-slate-200 dark:border-white/5 outline-none"
+                            aria-label="Switch Jar"
                         >
                             {activeJar ? (
                                 <>
@@ -214,6 +215,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                     className="w-full text-xs bg-slate-100 dark:bg-white/5 border-none rounded-md px-2 py-1.5 focus:ring-1 focus:ring-purple-500 outline-none"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
+                                    aria-label="Search jars"
                                     onClick={(e) => e.stopPropagation()}
                                 />
                             </div>
@@ -245,6 +247,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                         }}
                                         className="p-1 hover:bg-red-500/20 rounded text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                                         title="Leave Jar"
+                                        aria-label="Leave Jar"
                                     >
                                         <LogOut className="w-3.5 h-3.5" />
                                     </button>

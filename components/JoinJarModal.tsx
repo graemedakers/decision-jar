@@ -69,20 +69,24 @@ export function JoinJarModal({ isOpen, onClose }: JoinJarModalProps) {
                             required
                             maxLength={6}
                             className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 font-mono text-center text-lg tracking-widest uppercase"
+                            aria-label="Enter Jar Code"
+                            aria-invalid={code.length > 0 && code.length < 3}
+                            aria-describedby={error ? "join-error" : undefined}
                         />
                         {error && (
-                            <p className="text-sm text-red-400 mt-1">{error}</p>
+                            <p id="join-error" className="text-sm text-red-400 mt-1" role="alert">{error}</p>
                         )}
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
+                        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} aria-label="Cancel Joining Jar">
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             disabled={isLoading || code.length < 3}
                             className="bg-blue-600 hover:bg-blue-700 text-white"
+                            aria-label={isLoading ? "Joining Jar..." : "Join Jar"}
                         >
                             {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                             Join Jar

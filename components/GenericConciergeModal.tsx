@@ -380,6 +380,7 @@ export function GenericConciergeModal({
                             <button
                                 onClick={onClose}
                                 className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
+                                aria-label="Close"
                             >
                                 <X className="w-6 h-6" />
                             </button>
@@ -459,6 +460,7 @@ export function GenericConciergeModal({
                                                         value={customInputs[section.id] || ''}
                                                         onChange={(e) => setCustomInputs(prev => ({ ...prev, [section.id]: e.target.value }))}
                                                         className={`w-full px-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400`}
+                                                        aria-label={`Custom ${section.label}`}
                                                     />
                                                 </div>
                                             )}
@@ -512,6 +514,7 @@ export function GenericConciergeModal({
                                         <button
                                             onClick={() => setIsPrivate(!isPrivate)}
                                             className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-500'}`}
+                                            aria-label={isPrivate ? "Switch to Public Mode" : "Switch to Private Mode"}
                                         >
                                             <Lock className="w-3.5 h-3.5" />
                                             {isPrivate ? "Secret Mode On" : "Public Mode"}

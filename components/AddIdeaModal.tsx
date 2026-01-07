@@ -130,12 +130,14 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         <button
                                             onClick={() => setViewMode('PREVIEW')}
                                             className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${viewMode === 'PREVIEW' ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                            aria-label="Switch to Preview Mode"
                                         >
                                             Formatted View
                                         </button>
                                         <button
                                             onClick={() => setViewMode('EDIT')}
                                             className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${viewMode === 'EDIT' ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                            aria-label="Switch to Edit Mode"
                                         >
                                             Edit Details
                                         </button>
@@ -146,6 +148,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                             onClick={handleExportPdf}
                                             disabled={isExporting}
                                             className="text-xs font-bold text-slate-500 hover:text-orange-600 flex items-center gap-1 transition-colors disabled:opacity-50"
+                                            aria-label="Export as PDF"
                                         >
                                             {isExporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <ExternalLink className="w-3 h-3" />} Export PDF
                                         </button>
@@ -159,12 +162,14 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                     <button
                                         onClick={() => setIsWizardMode(true)}
                                         className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${isWizardMode ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                        aria-label="Use Step-by-Step Wizard"
                                     >
                                         Step-by-Step
                                     </button>
                                     <button
                                         onClick={() => setIsWizardMode(false)}
                                         className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${!isWizardMode ? 'bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                                        aria-label="Use Quick Form"
                                     >
                                         Quick Form
                                     </button>
@@ -219,11 +224,13 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                 {formData.category === 'MEAL' || formData.category === 'RESTAURANT' ? "Name of place" : "Short Description"}
                                             </label>
                                             <Input
+                                                id="description-input"
                                                 value={formData.description}
                                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                                 placeholder={categories.find(c => c.id === formData.category)?.placeholder || "e.g. Build a blanket fort"}
                                                 className="w-full"
                                                 required
+                                                aria-label="Description"
                                             />
                                         </div>
 
@@ -275,6 +282,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                 })()
                                             }
                                             className={`glass-input w-full min-h-[80px] py-2 px-3 resize-none text-slate-800 dark:text-white placeholder:text-slate-400 disabled:opacity-80 ${getItinerary(formData.details) ? 'font-mono text-xs opacity-70' : ''}`}
+                                            aria-label="Details"
                                         />
                                         {getItinerary(formData.details) && (
                                             <p className="text-[10px] text-slate-400 text-right">
@@ -301,6 +309,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                             ? "bg-primary text-white shadow-lg"
                                                             : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
                                                             }`}
+                                                        aria-label="Indoor Setting"
                                                     >
                                                         <Home className="w-4 h-4" /> Indoor
                                                     </button>
@@ -311,6 +320,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                             ? "bg-primary text-white shadow-lg"
                                                             : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
                                                             }`}
+                                                        aria-label="Outdoor Setting"
                                                     >
                                                         <Trees className="w-4 h-4" /> Outdoor
                                                     </button>
@@ -325,6 +335,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                         value={formData.duration}
                                                         onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                                                         className="glass-input pl-10 cursor-pointer w-full text-slate-800 dark:text-white"
+                                                        aria-label="Duration"
                                                     >
                                                         <option value="0.25">15 mins</option>
                                                         <option value="0.5">30 mins</option>
@@ -346,6 +357,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                         value={formData.cost}
                                                         onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
                                                         className="glass-input pl-10 cursor-pointer w-full text-slate-800 dark:text-white"
+                                                        aria-label="Cost"
                                                     >
                                                         {COST_LEVELS.map(level => (
                                                             <option key={level.id} value={level.id}>{level.label}</option>
@@ -362,6 +374,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                         value={formData.activityLevel}
                                                         onChange={(e) => setFormData({ ...formData, activityLevel: e.target.value })}
                                                         className="glass-input pl-10 cursor-pointer w-full text-slate-800 dark:text-white"
+                                                        aria-label="Energy Level"
                                                     >
                                                         {ACTIVITY_LEVELS.map(level => (
                                                             <option key={level.id} value={level.id}>{level.label}</option>
@@ -383,6 +396,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                             ? "bg-secondary text-white shadow-lg"
                                                             : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
                                                             }`}
+                                                        aria-label={`Time of Day: ${time.label}`}
                                                     >
                                                         {time.label}
                                                     </button>
@@ -395,6 +409,10 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         <div className="p-4 bg-slate-100 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/10 space-y-4">
                                             <div className="flex items-start justify-between group cursor-pointer"
                                                 onClick={() => setFormData({ ...formData, requiresTravel: !formData.requiresTravel })}
+                                                role="button"
+                                                tabIndex={0}
+                                                aria-pressed={formData.requiresTravel}
+                                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFormData({ ...formData, requiresTravel: !formData.requiresTravel }) }}
                                             >
                                                 <div className="flex items-start gap-3 flex-1 min-w-0">
                                                     <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all ${formData.requiresTravel ? 'bg-blue-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
@@ -424,6 +442,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                                     ? "bg-amber-500 text-white border-amber-400 shadow-md"
                                                                     : "bg-white/5 border-transparent text-slate-500 dark:text-slate-400 hover:bg-white/10"
                                                                     }`}
+                                                                aria-label={`Weather: ${w.label}`}
                                                             >
                                                                 <Icon className="w-4 h-4" />
                                                                 {w.label}
@@ -436,6 +455,10 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
                                         <div className="flex items-start justify-between p-4 bg-slate-100 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/10 group cursor-pointer transition-all hover:bg-slate-200 dark:hover:bg-black/30"
                                             onClick={() => setFormData({ ...formData, isPrivate: !formData.isPrivate })}
+                                            role="button"
+                                            tabIndex={0}
+                                            aria-pressed={formData.isPrivate}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFormData({ ...formData, isPrivate: !formData.isPrivate }) }}
                                         >
                                             <div className="flex items-start gap-3 flex-1 min-w-0">
                                                 <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all ${formData.isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>

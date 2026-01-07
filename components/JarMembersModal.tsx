@@ -152,6 +152,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                         <button
                             onClick={onClose}
                             className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors"
+                            aria-label="Close"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -169,6 +170,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                                 <button
                                     onClick={copyInviteCode}
                                     className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white transition-all shadow-sm shadow-violet-500/20 active:scale-95 text-sm font-bold"
+                                    aria-label="Copy invite code"
                                 >
                                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                     <span>{copied ? 'Copied!' : 'Copy'}</span>
@@ -218,6 +220,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                                                         ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/20 dark:text-amber-400'
                                                         : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-white/10 dark:text-slate-400'
                                                         }`}
+                                                    aria-label={member.role === 'ADMIN' ? 'Demote to Member' : 'Promote to Admin'}
                                                 >
                                                     {processingId === member.userId ? (
                                                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -232,6 +235,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                                                     disabled={processingId === member.userId}
                                                     title="Remove from Jar"
                                                     className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 transition-colors"
+                                                    aria-label="Remove from Jar"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>

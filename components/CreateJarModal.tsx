@@ -179,6 +179,8 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             onChange={(e) => setName(e.target.value)}
                             required
                             className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                            aria-label="Jar Name"
+                            aria-invalid={!name && isLoading}
                         />
                         {error && (
                             <p className="text-sm text-red-400 mt-1">{error}</p>
@@ -192,6 +194,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                 value={type}
                                 onChange={(e) => setType(e.target.value)}
                                 className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                aria-label="Select Relationship Type"
                             >
                                 <option value="ROMANTIC">Couple</option>
                                 <option value="SOCIAL">Social/Friends</option>
@@ -204,6 +207,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                 value={selectionMode}
                                 onChange={(e) => setSelectionMode(e.target.value)}
                                 className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                aria-label="Select Mode"
                             >
                                 <option value="RANDOM">Spin (Lucky Dip)</option>
                                 <option value="ADMIN_PICK">Admin Pick (Curated)</option>
@@ -219,6 +223,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             value={topic}
                             onChange={(e) => setTopic(e.target.value)}
                             className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
+                            aria-label="Select Jar Topic"
                         >
                             {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom' && k !== 'General').map(k => (
                                 <option key={k} value={k}>
@@ -239,6 +244,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                     placeholder="e.g. Board Games, Work Lunches"
                                     className="bg-white dark:bg-slate-800"
                                     autoFocus
+                                    aria-label="Custom Topic Name"
                                 />
                             </div>
 
@@ -252,6 +258,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                                 onChange={(e) => updateCategory(idx, e.target.value)}
                                                 placeholder={`Category ${idx + 1}`}
                                                 className="bg-white dark:bg-slate-800"
+                                                aria-label={`Category ${idx + 1}`}
                                             />
                                             {customCategories.length > 1 && (
                                                 <Button
@@ -260,6 +267,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                                     size="icon"
                                                     onClick={() => removeCategory(idx)}
                                                     className="shrink-0 text-slate-400 hover:text-red-400"
+                                                    aria-label={`Remove Category ${idx + 1}`}
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </Button>
@@ -282,7 +290,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                     )}
 
                     <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
+                        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} aria-label="Cancel Jar Creation">
                             Cancel
                         </Button>
                         <Button

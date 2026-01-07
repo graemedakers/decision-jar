@@ -266,6 +266,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                             <button
                                 onClick={onClose}
                                 className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
+                                aria-label="Close Settings"
                             >
                                 <X className="w-6 h-6" />
                             </button>
@@ -291,6 +292,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                                 }
                                             }}
                                             className="text-[10px] uppercase tracking-wider font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                            aria-label="Detect Current Location"
                                         >
                                             <MapPin className="w-3 h-3" />
                                             Locate Me
@@ -307,12 +309,14 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Your Interests</label>
+                                    <label htmlFor="interests-input" className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Your Interests</label>
                                     <Input
+                                        id="interests-input"
                                         value={interests}
                                         onChange={(e) => setInterests(e.target.value)}
                                         placeholder="e.g. Hiking, Sushi, Jazz, Art"
                                         className="text-slate-900 dark:text-white"
+                                        aria-label="Interests"
                                     />
                                     <p className="text-xs text-slate-500 dark:text-slate-400 ml-1">
                                         Comma separated. Used to personalize smart suggestions.
@@ -327,12 +331,14 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                         </h3>
 
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Jar Name</label>
+                                            <label htmlFor="jar-name-input" className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-1">Jar Name</label>
                                             <Input
+                                                id="jar-name-input"
                                                 value={jarName}
                                                 onChange={(e) => setJarName(e.target.value)}
                                                 placeholder="Our Great Ideas"
                                                 className="text-slate-900 dark:text-white"
+                                                aria-label="Jar Name"
                                             />
                                         </div>
 
@@ -343,6 +349,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                                     value={jarTopic}
                                                     onChange={(e) => setJarTopic(e.target.value)}
                                                     className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white appearance-none focus:outline-none focus:border-primary/50"
+                                                    aria-label="Select Jar Topic"
                                                 >
                                                     <option value="General" className="bg-white dark:bg-slate-900">General (Activities)</option>
                                                     <option value="Romantic" className="bg-white dark:bg-slate-900">Date Night (Romantic)</option>
@@ -369,6 +376,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                                     value={jarSelectionMode}
                                                     onChange={(e) => setJarSelectionMode(e.target.value as any)}
                                                     className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white appearance-none focus:outline-none focus:border-primary/50"
+                                                    aria-label="Select Jar Selection Mode"
                                                 >
                                                     <option value="RANDOM">Random Spin (Standard)</option>
                                                     <option value="ADMIN_PICK">Admin Pick (Curated)</option>
@@ -410,6 +418,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                                 checked={includePremiumToken}
                                                 onChange={(e) => setIncludePremiumToken(e.target.checked)}
                                                 className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                                                aria-label="Include Premium Gift in Link"
                                             />
                                             <label htmlFor="includePremium" className="text-xs font-medium text-slate-700 dark:text-slate-300 select-none cursor-pointer">
                                                 Include Premium Gift in Link
@@ -441,6 +450,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                         className="w-full text-purple-600 border-purple-200 hover:bg-purple-50"
                                         onClick={handleRegeneratePremiumToken}
                                         disabled={isLoading}
+                                        aria-label="Regenerate Premium Token"
                                     >
                                         <RefreshCw className="w-3 h-3 mr-2" />
                                         Regenerate Premium Token
@@ -478,6 +488,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                                                 showSuccess("📋 Invite link copied to clipboard!");
                                                             }}
                                                             className="font-mono font-bold text-lg text-primary hover:text-primary/80 dark:hover:text-white transition-colors flex items-center gap-2"
+                                                            aria-label="Copy Invite Code"
                                                         >
                                                             {inviteCode || "Loading..."}
                                                             <span className="text-xs bg-slate-200 dark:bg-white/10 px-2 py-1 rounded text-slate-500 dark:text-slate-400">Copy</span>
@@ -588,6 +599,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                             className="w-full border-red-500/50 text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-700 dark:hover:text-red-300"
                                             onClick={handleEmptyJar}
                                             disabled={isLoading}
+                                            aria-label="Empty Jar"
                                         >
                                             {labels.emptyJarAction}
                                         </Button>
@@ -597,8 +609,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                                 type="button"
                                                 variant="secondary"
                                                 className="w-full border-red-500/50 text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-700 dark:hover:text-red-300"
-                                                onClick={handleDeletePartner}
-                                                disabled={isLoading}
+                                                aria-label={`Delete ${labels.memberLabel}`}
                                             >
                                                 <UserMinus className="w-4 h-4 mr-2" />
                                                 Delete {labels.memberLabel}

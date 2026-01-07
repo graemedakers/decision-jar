@@ -50,23 +50,22 @@ function InviteCodeDisplay({ code, topic }: { code: string | null; topic?: strin
     if (!code) return null;
 
     return (
-        <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-6 flex items-center justify-between shadow-sm group hover:border-primary/30 transition-all">
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 transition-transform">
-                    <Users className="w-6 h-6" />
+        <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 flex items-center justify-between shadow-sm group hover:border-primary/30 transition-all">
+            <div className="flex items-center gap-3 md:gap-4">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 transition-transform">
+                    <Users className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div className="text-left">
-                    <span className="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-1">{labels.connectionAction}</span>
-                    <code className="text-xl font-mono font-black text-primary tracking-[0.2em]">{code}</code>
+                    <span className="block text-[9px] md:text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] md:tracking-[0.2em] mb-0.5 md:mb-1 leading-tight">{labels.connectionAction}</span>
+                    <code className="text-lg md:text-xl font-mono font-black text-primary tracking-[0.15em] md:tracking-[0.2em]">{code}</code>
                 </div>
             </div>
             <Button
-                size="lg"
                 variant="outline"
                 onClick={handleInvite}
-                className="rounded-2xl border-primary/20 text-primary hover:bg-primary/5 px-6 h-12 font-bold shadow-sm"
+                className="rounded-xl md:rounded-2xl border-primary/20 text-primary hover:bg-primary/5 px-4 md:px-6 h-9 md:h-12 text-xs md:text-sm font-bold shadow-sm"
             >
-                {copied ? <><Check className="w-4 h-4 mr-2" /> Copied</> : <><Copy className="w-4 h-4 mr-2" /> Copy Link</>}
+                {copied ? <><Check className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-2" /> Copied</> : <><Copy className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-2" /> Copy</>}
             </Button>
         </div>
     );

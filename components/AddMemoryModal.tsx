@@ -188,6 +188,7 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                         <button
                             onClick={onClose}
                             className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors z-10"
+                            aria-label="Close"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -198,8 +199,9 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-400">What did you do?</label>
+                                <label htmlFor="description" className="text-sm font-medium text-slate-700 dark:text-slate-400">What did you do?</label>
                                 <input
+                                    id="description"
                                     type="text"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
@@ -210,9 +212,10 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-400">When was it?</label>
+                                <label htmlFor="date" className="text-sm font-medium text-slate-700 dark:text-slate-400">When was it?</label>
                                 <div className="relative">
                                     <input
+                                        id="date"
                                         type="date"
                                         value={date}
                                         onChange={(e) => setDate(e.target.value)}
@@ -232,6 +235,7 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                                             type="button"
                                             onClick={() => setRating(star)}
                                             className="focus:outline-none transition-transform hover:scale-110"
+                                            aria-label={`Rate ${star} stars`}
                                         >
                                             <Star
                                                 className={`w-8 h-8 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-slate-600"}`}
@@ -243,9 +247,10 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
 
                             {allowedCategories.length > 0 && (
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-400">Category</label>
+                                    <label htmlFor="category" className="text-sm font-medium text-slate-700 dark:text-slate-400">Category</label>
                                     <div className="relative">
                                         <select
+                                            id="category"
                                             value={category}
                                             onChange={(e) => setCategory(e.target.value)}
                                             className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white appearance-none focus:outline-none focus:border-primary/50"
@@ -260,8 +265,9 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                             )}
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-400">Notes (Optional)</label>
+                                <label htmlFor="notes" className="text-sm font-medium text-slate-700 dark:text-slate-400">Notes (Optional)</label>
                                 <textarea
+                                    id="notes"
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     placeholder="Any special memories?"
@@ -282,10 +288,11 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                                                     onClick={() => handleRemovePhoto(index)}
                                                     className="p-1.5 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
                                                     title="Remove"
+                                                    aria-label="Remove photo"
                                                 >
                                                     <Trash2 className="w-4 h-4 text-white" />
                                                 </button>
-                                                <label className="p-1.5 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors cursor-pointer" title="Replace">
+                                                <label className="p-1.5 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors cursor-pointer" title="Replace" aria-label="Replace photo">
                                                     <Camera className="w-4 h-4 text-white" />
                                                     <input
                                                         type="file"
@@ -331,6 +338,7 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
                                                     onChange={handleFileSelect}
                                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                     disabled={isUploading}
+                                                    aria-label="Add photo"
                                                 />
                                                 <div className={`w-full h-full flex flex-col items-center justify-center gap-2 transition-colors ${isUploading ? 'bg-slate-100 dark:bg-white/5' : 'hover:bg-slate-100 dark:hover:bg-white/5 hover:border-slate-400 dark:hover:border-white/20'}`}>
                                                     {isUploading ? (

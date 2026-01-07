@@ -55,7 +55,7 @@ export function useUser(options: UseUserOptions = {}) {
 
     // Derived State (Convenience wrappers)
     const xp = userData?.xp;
-    const level = userData?.level || 1;
+    const level = userData?.level;
     const achievements = userData?.unlockedAchievements || [];
     const isPremium = !!userData?.isPremium;
     const hasPaid = !!userData?.hasPaid;
@@ -64,10 +64,12 @@ export function useUser(options: UseUserOptions = {}) {
 
     // Level Up Side Effect
     useEffect(() => {
-        if (level && prevLevelRef.current !== null && level > prevLevelRef.current) {
-            onLevelUp?.(level);
+        if (typeof level === 'number') {
+            if (prevLevelRef.current !== null && level > prevLevelRef.current) {
+                onLevelUp?.(level);
+            }
+            prevLevelRef.current = level;
         }
-        prevLevelRef.current = level;
     }, [level, onLevelUp]);
 
     // Wrapper to match previous interface
@@ -79,7 +81,7 @@ export function useUser(options: UseUserOptions = {}) {
         isPremium,
         refreshUser,
         xp,
-        level,
+        level: level || 1,
         achievements,
         hasPaid,
         coupleCreatedAt,

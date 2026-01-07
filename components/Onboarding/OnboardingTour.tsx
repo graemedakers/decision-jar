@@ -289,6 +289,7 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                             <button
                                 onClick={handleSkip}
                                 className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                                aria-label="Close Tour"
                             >
                                 <X className="w-4 h-4 text-slate-400" />
                             </button>
@@ -324,6 +325,7 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                                             onClick={handlePrevious}
                                             variant="outline"
                                             className="border-slate-700 hover:bg-slate-800"
+                                            aria-label="Previous Step"
                                         >
                                             <ChevronLeft className="w-4 h-4" />
                                         </Button>
@@ -336,6 +338,7 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                                             onClick={handleSkip}
                                             variant="outline"
                                             className="border-slate-700 hover:bg-slate-800 text-slate-400"
+                                            aria-label="Skip Tour"
                                         >
                                             Skip Tour
                                         </Button>
@@ -343,6 +346,7 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                                     <Button
                                         onClick={handleNext}
                                         className="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 border-none shadow-lg shadow-pink-500/20"
+                                        aria-label={isLastStep ? "Finish Tour" : "Next Step"}
                                     >
                                         {isLastStep ? (
                                             <>
