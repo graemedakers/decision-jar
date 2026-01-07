@@ -114,24 +114,24 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
         const isMobile = viewportWidth < 640; // sm breakpoint
 
         if (isMobile) {
-            // On mobile, always center horizontally and position above or below
-            const centerX = viewportWidth / 2;
+            // Mobile: Snap to top or bottom based on element position
+            // This ensures visibility regardless of tooltip height
+            const elementCenterY = rect.top + rect.height / 2;
+            const screenCenterY = viewportHeight / 2;
 
-            if (rect.bottom + tooltipHeight + tooltipOffset <= viewportHeight - padding) {
-                // Position below
-                position.top = `${rect.bottom + tooltipOffset}px`;
-                position.left = `${centerX}px`;
-                position.transform = 'translate(-50%, 0)';
-            } else if (rect.top - tooltipHeight - tooltipOffset >= padding) {
-                // Position above
-                position.top = `${rect.top - tooltipOffset}px`;
-                position.left = `${centerX}px`;
-                position.transform = 'translate(-50%, -100%)';
+            position.left = '50%';
+
+            // If element is in top half, put tooltip at bottom. Otherwise top.
+            if (elementCenterY < screenCenterY) {
+                // Element is up top -> Tooltip goes to bottom
+                position.bottom = '24px';
+                position.top = 'auto'; // Clear top
+                position.transform = 'translateX(-50%)';
             } else {
-                // Center on screen if no room above or below
-                position.top = '50%';
-                position.left = '50%';
-                position.transform = 'translate(-50%, -50%)';
+                // Element is down low -> Tooltip goes to top
+                position.top = '24px';
+                position.bottom = 'auto'; // Clear bottom
+                position.transform = 'translateX(-50%)';
             }
         } else {
             // Desktop positioning logic
