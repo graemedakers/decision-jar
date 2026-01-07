@@ -1,10 +1,10 @@
-import { NextAuthOptions } from "next-auth";
+import { NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
-export const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthConfig = {
     adapter: PrismaAdapter(prisma) as any,
     cookies: {
         sessionToken: {
