@@ -93,14 +93,26 @@ export async function POST(req: NextRequest) {
 
         // 8. Call AI
         // Using streamText from 'ai' library which is standard across the app
-        const result = await streamText({
-            model: google('gemini-1.5-flash'),
-            system: "You are a helpful, expert lifestyle concierge. You MUST return valid JSON only. No markdown formatting.",
-            prompt: prompt,
-            // We can add tools here later for real Google Maps search if needed
-        });
+        // 8. Call AI (Blocking for stability)
+        const { generateText } = await import('ai');
 
-        return result.toTextStreamResponse();
+        try {
+            const { text } = await generateText({
+                model: google('gemini-1.5-flash'),
+                system: "You are a helpful, expert lifestyle concierge. You MUST return valid JSON only. No markdown formatting. Return strictly the JSON object.",
+                prompt: prompt,
+            });
+
+            // Parse valid JSON from text (cleanup potential markdown fences)
+            const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            const jsonResponse = JSON.parse(cleanedText);
+
+            return NextResponse.json(jsonResponse);
+
+        } catch (genError: any) {
+            console.error("AI Generation Failed:", genError);
+            return apiError("AI Generation Failed: " + genError.message, 500, "AI_ERROR");
+        }
 
     } catch (error: any) {
         return handleApiError(error);
