@@ -181,6 +181,10 @@ function DashboardContent() {
     const activityPlannerTitle = (jarTopic === 'Dates' || jarTopic === 'Romantic') ? "Date Night Planner" : `${jarTopic && jarTopic !== 'General' && jarTopic !== 'Activities' ? jarTopic : "Activity"} Planner`;
     const isAdminPickMode = jarSelectionMode === 'ADMIN_PICK';
 
+    const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
+    const showAdminStatus = isAdminPickMode;
+    const showStatusSection = showNoJars || showAdminStatus;
+
     const handleContentUpdate = () => {
         fetchIdeas();
         refreshUser();
@@ -306,7 +310,7 @@ function DashboardContent() {
                 />
 
                 {/* Header */}
-                <header className="mb-8 md:mb-12">
+                <header className="mb-4 md:mb-6">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div className="flex flex-col gap-1 min-w-0">
                             {userData ? (
@@ -369,7 +373,7 @@ function DashboardContent() {
                         </div>
                     )}
 
-                    <div className="mt-6 md:mt-8">
+                    <div className="mt-4 md:mt-6">
                         <PremiumBanner hasPaid={!!hasPaid} coupleCreatedAt={coupleCreatedAt || ''} isTrialEligible={isTrialEligible} />
                         <CollapsibleTrophyCase
                             xp={xp || 0}
@@ -379,47 +383,49 @@ function DashboardContent() {
                     </div>
                 </header>
 
-                <div className="flex flex-col gap-6 mb-8">
-                    {/* Jar Status Indicators */}
-                    {(!userData?.activeJarId && userData?.memberships?.length === 0) && (
-                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
-                                <HelpCircle className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-amber-700 dark:text-amber-400 text-sm">No Jars Found</h3>
-                                <p className="text-xs text-amber-600/80 dark:text-amber-400/60">Create a new jar or join one to get started.</p>
-                            </div>
-                            <Button size="sm" onClick={() => openModal('CREATE_JAR')} variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400">
-                                Create Jar
-                            </Button>
-                        </div>
-                    )}
-                    {isAdminPickMode && (
-                        userData?.isCreator ? (
-                            <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                                <Crown className="w-5 h-5 text-amber-500" />
+                {showStatusSection && (
+                    <div className="flex flex-col gap-6 mb-8">
+                        {/* Jar Status Indicators */}
+                        {showNoJars && (
+                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+                                    <HelpCircle className="w-5 h-5" />
+                                </div>
                                 <div className="flex-1">
-                                    <h3 className="text-sm font-bold text-amber-800 dark:text-amber-200">Admin Pick Mode Active</h3>
-                                    <p className="text-xs text-amber-700/70 dark:text-amber-300/70">As the jar admin, you choose the winner directly.</p>
+                                    <h3 className="font-bold text-amber-700 dark:text-amber-400 text-sm">No Jars Found</h3>
+                                    <p className="text-xs text-amber-600/80 dark:text-amber-400/60">Create a new jar or join one to get started.</p>
                                 </div>
+                                <Button size="sm" onClick={() => openModal('CREATE_JAR')} variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400">
+                                    Create Jar
+                                </Button>
                             </div>
-                        ) : (
-                            <div className="w-full flex justify-center py-4">
-                                <div className="flex items-center gap-3 relative z-10">
-                                    <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border bg-slate-700 text-slate-400 border-slate-600">
-                                        <Lock className="w-4 h-4" />
-                                    </div>
-                                    <div className="text-left">
-                                        <span className="block text-base font-bold text-slate-400">
-                                            Waiting for Admin
-                                        </span>
+                        )}
+                        {showAdminStatus && (
+                            userData?.isCreator ? (
+                                <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                    <Crown className="w-5 h-5 text-amber-500" />
+                                    <div className="flex-1">
+                                        <h3 className="text-sm font-bold text-amber-800 dark:text-amber-200">Admin Pick Mode Active</h3>
+                                        <p className="text-xs text-amber-700/70 dark:text-amber-300/70">As the jar admin, you choose the winner directly.</p>
                                     </div>
                                 </div>
-                            </div>
-                        )
-                    )}
-                </div>
+                            ) : (
+                                <div className="w-full flex justify-center py-4">
+                                    <div className="flex items-center gap-3 relative z-10">
+                                        <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border bg-slate-700 text-slate-400 border-slate-600">
+                                            <Lock className="w-4 h-4" />
+                                        </div>
+                                        <div className="text-left">
+                                            <span className="block text-base font-bold text-slate-400">
+                                                Waiting for Admin
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        )}
+                    </div>
+                )}
 
                 {/* Upper Section: Jar Control Center */}
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-center relative">
