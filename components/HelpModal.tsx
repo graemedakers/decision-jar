@@ -194,25 +194,25 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-slate-800 dark:text-white">The Explore Tab</h3>
                         <p className="text-slate-600 dark:text-slate-300">
-                            Looking for new ideas? The <strong>Explore</strong> page is your destination for discovery.
+                            The <strong>Explore</strong> tab is your discovery hub for finding new ideas and activities.
                         </p>
                         <div className="space-y-4 mt-4">
                             <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
-                                <h4 className="font-bold text-slate-800 dark:text-white mb-2">Planners & Tools</h4>
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2">AI Planners</h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-300">
-                                    All your favorite planners live here now to keep your dashboard clean:
+                                    Generate complete itineraries and activity plans:
                                 </p>
                                 <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300 mt-2">
-                                    <li><strong>Weekend Planner:</strong> Get a 5-item itinerary for the weekend.</li>
-                                    <li><strong>Night Out Planner:</strong> Plan a coherent Dinner-Drinks-Event evening.</li>
-                                    <li><strong>Catering Planner:</strong> Plan food for 20+ people.</li>
-                                    <li><strong>Bar Crawl Planner:</strong> Map out a route of top bars.</li>
+                                    <li><strong>Weekend Planner:</strong> Get a 5-item itinerary for the weekend</li>
+                                    <li><strong>Night Out Planner:</strong> Plan a complete evening with drinks, dinner, and events</li>
+                                    <li><strong>Catering Planner:</strong> Design menus for groups and parties</li>
+                                    <li><strong>Bar Crawl Planner:</strong> Map out a route of top bars in your area</li>
                                 </ul>
                             </div>
                             <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
                                 <h4 className="font-bold text-slate-800 dark:text-white mb-2">Concierge Services</h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-300">
-                                    Access the full suite of "Scouts" (Dining, Movies, Hotels, etc.) to find venues near you.
+                                    Our AI scouts help you find specific venues like restaurants, bars, hotels, theaters, and more. Each scout provides ratings, reviews, and can add recommendations directly to your jar.
                                 </p>
                             </div>
                         </div>
@@ -223,14 +223,217 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-slate-800 dark:text-white">The Dashboard</h3>
                         <p className="text-slate-600 dark:text-slate-300">
-                            Your home base is now cleaner and focused entirely on <strong>The Jar</strong> and your **Favorites**.
+                            Your home base for managing your jar and making decisions.
                         </p>
                         <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
-                            <li><strong>The Jar:</strong> The 3D jar shows how many ideas you have available.</li>
-                            <li><strong>Favorites:</strong> improved visibility! Quickly access your saved "Go-To" ideas from the heart icon in the header.</li>
-                            <li><strong>In The Jar:</strong> Your list of ideas is right there. Add, Edit, or Delete efficiently.</li>
-                            <li><strong>Spin:</strong> The main action—Spin to win!</li>
+                            <li><strong>The Jar:</strong> The 3D jar visualization shows how many ideas you have available</li>
+                            <li><strong>Favorites:</strong> Access your saved "Go-To" ideas from the heart icon in the header</li>
+                            <li><strong>In The Jar:</strong> Browse your complete list of ideas, add new ones, or edit existing entries</li>
+                            <li><strong>Spin Button:</strong> The main action — click to randomly select an idea based on your filters</li>
+                            <li><strong>Explore Tab:</strong> Navigate here to discover new activities using AI planners and scouts</li>
                         </ul>
+                    </div>
+                );
+            case "getting-started":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Getting Started</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Welcome to Decision Jar! Let's get you set up in just a few steps.
+                        </p>
+                        <div className="space-y-4">
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2">1. Create Your First Jar</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Choose a <strong>Name</strong> and <strong>Topic</strong> (e.g., "Date Nights", "Family Activities"). Select a <strong>Type</strong> (Romantic or Social) and <strong>Selection Mode</strong> (Random, Voting, or Task Allocation).
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2">2. Set Your Location</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Go to <strong>Settings</strong> and enter your city (e.g., "Sydney, Australia"). This helps our AI Concierges find venues and activities near you.
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2">3. Add Some Ideas</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Click <strong>+ Add Idea</strong> to manually enter activities, or use the <strong>Explore</strong> tab to discover ideas with our AI planners and concierge services.
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2">4. Spin the Jar!</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    When you're ready, click <strong>Spin the Jar</strong> to randomly select an activity. Apply filters to narrow down your options by cost, duration, or energy level.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case "gamification":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Levels & XP</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Decision Jar rewards you for making decisions and completing activities!
+                        </p>
+                        <div className="space-y-4">
+                            <div className="bg-blue-50 dark:bg-blue-500/10 p-4 rounded-xl border border-blue-200 dark:border-blue-500/20">
+                                <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2">Earn XP</h4>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                    <li><strong>+15 XP:</strong> Add a new idea to your jar</li>
+                                    <li><strong>+5 XP:</strong> Spin the jar and make a decision</li>
+                                    <li><strong>+100 XP:</strong> Complete and rate an activity</li>
+                                </ul>
+                            </div>
+                            <div className="bg-amber-50 dark:bg-amber-500/10 p-4 rounded-xl border border-amber-200 dark:border-amber-500/20">
+                                <h4 className="font-bold text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-2">
+                                    <Trophy className="w-4 h-4" /> Unlock Achievements
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Reach milestones to unlock special trophies! View your trophy case in the dashboard header to see your progress.
+                                </p>
+                            </div>
+                            <div className="bg-purple-50 dark:bg-purple-500/10 p-4 rounded-xl border border-purple-200 dark:border-purple-500/20">
+                                <h4 className="font-bold text-purple-800 dark:text-purple-300 mb-2">Level Up</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    As you earn XP, you'll level up and gain new <strong>Decision Ranks</strong>. Higher levels unlock special badges and recognition!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case "date-night-planner":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Night Out Planner <span className="text-xs bg-gradient-to-r from-pink-500 to-purple-500 text-white px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Want a complete evening plan without the hassle? The Night Out Planner curates a cohesive itinerary for you.
+                        </p>
+                        <div className="space-y-2">
+                            <h4 className="font-bold text-slate-800 dark:text-white text-sm border-b border-slate-200 dark:border-white/10 pb-1">How it Works</h4>
+                            <ol className="list-decimal list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
+                                <li>Access from the <strong>Explore</strong> tab</li>
+                                <li>The planner generates a timeline including Drinks, Dinner, and an Event/Activity</li>
+                                <li>All venues are chosen to be within walking distance for a smooth evening</li>
+                            </ol>
+                        </div>
+                        <div className="space-y-2">
+                            <h4 className="font-bold text-slate-800 dark:text-white text-sm border-b border-slate-200 dark:border-white/10 pb-1">Customizing the Plan</h4>
+                            <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300 text-sm">
+                                <li>
+                                    <strong><RefreshCcw className="inline w-3 h-3 text-slate-400" /> Regenerate:</strong>
+                                    Don't like a specific venue? Click the refresh icon to find a better alternative nearby.
+                                </li>
+                                <li>
+                                    <strong><Pencil className="inline w-3 h-3 text-slate-400" /> Edit Details:</strong>
+                                    Manually edit any part of the itinerary item.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                );
+            case "adding-ideas":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Adding Ideas</h3>
+                        <div className="space-y-4">
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-primary mb-2">Manual Entry</h4>
+                                <p className="text-slate-600 dark:text-slate-300 text-sm">
+                                    Click the <Plus className="inline w-4 h-4" /> button in the dashboard. Fill in details like Description, Setting (Indoor/Outdoor), Cost, Duration, and Energy Level.
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-secondary mb-2">Surprise Me</h4>
+                                <p className="text-slate-600 dark:text-slate-300 text-sm mb-2">
+                                    Stuck on what to do? The AI assistant can generate custom ideas tailored to your location and interests.
+                                </p>
+                                <ol className="list-decimal list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
+                                    <li>Access from the <strong>Explore</strong> tab</li>
+                                    <li>Select your preferences (Category, Cost, Energy, Time)</li>
+                                    <li>The planner uses your <strong>Interests</strong> (from Settings) to generate ideas</li>
+                                    <li>Ideas are added as <strong>Hidden Surprises</strong> — details stay secret until you spin them!</li>
+                                </ol>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-accent mb-2">Use AI Planners</h4>
+                                <p className="text-slate-600 dark:text-slate-300 text-sm">
+                                    Visit the <strong>Explore</strong> tab to discover planners and concierge services that can add complete itineraries or venue recommendations to your jar.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case "activity-planner":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Activity Planner <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Need a custom plan for the day? The Activity Planner creates a broader itinerary than the Night Out Planner.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Occasion:</strong> Plan for "Family Day", "Romantic Date", "Solo Adventure", etc.</li>
+                            <li><strong>Custom AI:</strong> The planner uses advanced AI to build a unique schedule based on your specific request.</li>
+                            <li><strong>Flexible:</strong> Perfect for multi-activity days or special occasions.</li>
+                        </ul>
+                    </div>
+                );
+            case "dining-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Dining Concierge <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Can't decide where to eat? Let our Concierge find the perfect spot for you.
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong>Preferences:</strong> Enter your craving (e.g., "Sushi", "Italian") and desired vibe (e.g., "Romantic", "Lively").</li>
+                            <li><strong>Recommendations:</strong> Get 5 top-rated local restaurants with <strong>Google Ratings</strong> and review links.</li>
+                            <li><strong>Go Tonight:</strong> Instantly select a restaurant. We'll fetch opening hours and provide a direct website link!</li>
+                            <li><strong>Add to Jar:</strong> Save recommendations for later spins.</li>
+                        </ul>
+                    </div>
+                );
+            case "bar-concierge":
+            case "nightclub-concierge":
+            case "theatre-concierge":
+            case "movie-concierge":
+            case "hotel-concierge":
+            case "game-concierge":
+            case "escape-room-concierge":
+            case "sports-concierge":
+            case "wellness-concierge":
+            case "fitness-concierge":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Concierge Services <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Our AI-powered scouts help you discover the best venues and activities near you.
+                        </p>
+                        <div className="grid gap-3 mt-4">
+                            <div className="bg-purple-50 dark:bg-purple-500/10 p-3 rounded-lg border border-purple-200 dark:border-purple-500/20">
+                                <h4 className="font-bold text-purple-800 dark:text-purple-300 text-sm mb-1">🍷 Bar Scout</h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">Find cocktail bars, speakeasies, rooftops, and craft beer spots.</p>
+                            </div>
+                            <div className="bg-pink-50 dark:bg-pink-500/10 p-3 rounded-lg border border-pink-200 dark:border-pink-500/20">
+                                <h4 className="font-bold text-pink-800 dark:text-pink-300 text-sm mb-1">🎵 Nightclub Scout</h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">Discover clubs by music genre and energy level.</p>
+                            </div>
+                            <div className="bg-amber-50 dark:bg-amber-500/10 p-3 rounded-lg border border-amber-200 dark:border-amber-500/20">
+                                <h4 className="font-bold text-amber-800 dark:text-amber-300 text-sm mb-1">🎭 Theatre Scout</h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">Find plays, musicals, comedy shows, and live performances.</p>
+                            </div>
+                            <div className="bg-blue-50 dark:bg-blue-500/10 p-3 rounded-lg border border-blue-200 dark:border-blue-500/20">
+                                <h4 className="font-bold text-blue-800 dark:text-blue-300 text-sm mb-1">🎬 Movie Scout</h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">Get cinema showtimes and streaming recommendations.</p>
+                            </div>
+                            <div className="bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-lg border border-emerald-200 dark:border-emerald-500/20">
+                                <h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm mb-1">🏨 Hotel Finder</h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">Plan staycations with boutique and luxury options.</p>
+                            </div>
+                        </div>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
+                            <strong>Pro Tip:</strong> All scouts provide direct booking links, ratings, and can add recommendations to your jar for future spins.
+                        </p>
                     </div>
                 );
             case "weekend-planner":
@@ -241,9 +444,9 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             Need a full plan for the upcoming weekend? The Weekend Planner creates a curated list of 5 distinct activity ideas based on your location and the current day of the week.
                         </p>
                         <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
-                            <li><strong>Smart Timing:</strong> If it's Monday-Thursday, it plans for the upcoming weekend. If it's Friday-Sunday, it plans for the current weekend.</li>
-                            <li><strong>Local Context:</strong> Uses your location to find relevant events and weather-appropriate activities.</li>
-                            <li><strong>Location Auto-Save:</strong> Once you set your location here, all our Concierge tools will remember it for next time!</li>
+                            <li><strong>Smart Timing:</strong> Plans for the upcoming weekend (Mon-Thu) or current weekend (Fri-Sun)</li>
+                            <li><strong>Local Context:</strong> Finds relevant events and weather-appropriate activities in your area</li>
+                            <li><strong>Saves Time:</strong> Get 5 diverse activity ideas in seconds instead of hours of research</li>
                         </ul>
                     </div>
                 );
@@ -257,7 +460,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                         <div className="space-y-2">
                             <h4 className="font-bold text-slate-800 dark:text-white text-sm">International Support</h4>
                             <p className="text-slate-600 dark:text-slate-300 text-sm">
-                                You can now toggle between <strong>Metric (g/kg)</strong> and <strong>Imperial (oz/lb)</strong> units for all recipes and shopping lists.
+                                Toggle between <strong>Metric (g/kg)</strong> and <strong>Imperial (oz/lb)</strong> units for all recipes and shopping lists.
                             </p>
                         </div>
                         <div className="space-y-2">

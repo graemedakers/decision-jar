@@ -64,7 +64,8 @@ The Dashboard is your command center.
 - **The Jar:** A visual representation that fills up as you add more ideas.
 - **Level Banner:** Shows your rank, XP progress, and earned Trophies.
 - **Jar Tools:** Quick access to "Spin Jar" and "Add Idea".
-- **Explore Tab:** Your destination for all Concierge Services and Planners.
+- **Explore Tab:** Browse all AI Planners and Concierge Services.
+- **Favorites:** Heart icon in the header provides quick access to your saved "Go-To" ideas.
 - **Ideas List:** Quick view of what's currently "In the Jar".
 - **Memories/Vault:** A history of your completed activities.
 

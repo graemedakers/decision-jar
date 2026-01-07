@@ -11,7 +11,7 @@ import { EnhancedEmptyState } from '@/components/EnhancedEmptyState';
 import { PreferenceQuizModal, QuizPreferences } from '@/components/PreferenceQuizModal';
 import { AddIdeaModal } from '@/components/AddIdeaModal';
 import { SurpriseMeModal } from '@/components/SurpriseMeModal';
-import { JarTemplatesModal } from '@/components/JarTemplatesModal';
+// import { JarTemplatesModal } from '@/components/JarTemplatesModal'; // TODO: Implement if needed
 import { useToast } from '@/hooks/useToast';
 import { useIdeas } from '@/hooks/useIdeas';
 
@@ -20,7 +20,7 @@ export function DashboardWithEnhancedEmpty() {
     const [showQuiz, setShowQuiz] = useState(false);
     const [showAddIdea, setShowAddIdea] = useState(false);
     const [showSurpriseMe, setShowSurpriseMe] = useState(false);
-    const [showTemplates, setShowTemplates] = useState(false);
+    // const [showTemplates, setShowTemplates] = useState(false); // Template feature not yet implemented
 
     // Hooks
     const { toast } = useToast();
@@ -87,17 +87,18 @@ export function DashboardWithEnhancedEmpty() {
 
     /**
      * Handler for template import
+     * TODO: Re-enable when JarTemplatesModal is implemented
      */
-    const handleTemplateImport = async (templateId: string) => {
-        // Your template import logic here
-        await refreshIdeas();
-        setShowTemplates(false);
-        toast({
-            title: 'Template Imported!',
-            description: 'Ideas from the template have been added to your jar.',
-            variant: 'success'
-        });
-    };
+    // const handleTemplateImport = async (templateId: string) => {
+    //     // Your template import logic here
+    //     await refreshIdeas();
+    //     setShowTemplates(false);
+    //     toast({
+    //         title: 'Template Imported!',
+    //         description: 'Ideas from the template have been added to your jar.',
+    //         variant: 'success'
+    //     });
+    // };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -106,7 +107,7 @@ export function DashboardWithEnhancedEmpty() {
                 <EnhancedEmptyState
                     onAddIdea={() => setShowAddIdea(true)}
                     onSurpriseMe={() => setShowSurpriseMe(true)}
-                    onBrowseTemplates={() => setShowTemplates(true)}
+                    // onBrowseTemplates={() => setShowTemplates(true)} // TODO: Re-enable when templates implemented
                     onTakeQuiz={() => setShowQuiz(true)}
                 />
             )}
@@ -143,6 +144,7 @@ export function DashboardWithEnhancedEmpty() {
                 />
             )}
 
+            {/* TODO: Re-enable when JarTemplatesModal is implemented
             {showTemplates && (
                 <JarTemplatesModal
                     isOpen={showTemplates}
@@ -150,6 +152,7 @@ export function DashboardWithEnhancedEmpty() {
                     onUseTemplate={handleTemplateImport}
                 />
             )}
+            */}
         </div>
     );
 }
