@@ -9,24 +9,24 @@ import { motion, AnimatePresence } from "framer-motion";
 interface TrialExpiredModalProps {
     isTrialExpired: boolean;
     hasPaid: boolean;
+    isPremiumCandidate: boolean; // Renamed to clarify we check effective premium status
 }
 
-export function TrialExpiredModal({ isTrialExpired, hasPaid }: TrialExpiredModalProps) {
+export function TrialExpiredModal({ isTrialExpired, hasPaid, isPremiumCandidate }: TrialExpiredModalProps) {
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        // Show modal if trial is expired and they haven't paid
-        // Only show once per session or use localStorage to be less annoying?
-        // For now, let's show it when they land on dashboard
-        if (isTrialExpired && !hasPaid) {
+        // Show modal if trial is expired AND they are not effectively premium
+        // If they are premium (paid or otherwise), never show this.
+        if (isTrialExpired && !hasPaid && !isPremiumCandidate) {
             const hasSeenRecently = sessionStorage.getItem('trial_expired_modal_shown');
             if (!hasSeenRecently) {
                 setIsOpen(true);
                 sessionStorage.setItem('trial_expired_modal_shown', 'true');
             }
         }
-    }, [isTrialExpired, hasPaid]);
+    }, [isTrialExpired, hasPaid, isPremiumCandidate]);
 
     if (!isOpen) return null;
 

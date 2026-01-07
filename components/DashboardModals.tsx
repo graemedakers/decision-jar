@@ -273,6 +273,7 @@ export function DashboardModals({
             <TrialExpiredModal
                 hasPaid={hasPaid}
                 isTrialExpired={coupleCreatedAt ? (Math.ceil(Math.abs(new Date().getTime() - new Date(coupleCreatedAt).getTime()) / (1000 * 60 * 60 * 24)) > 14) : false}
+                isPremiumCandidate={isPremium}
             />
 
             {userData?.activeJarId && (
@@ -286,13 +287,14 @@ export function DashboardModals({
 
             <LevelUpModal
                 isOpen={activeModal === 'LEVEL_UP'}
-                // Actually `showLevelUp` was passed from parent. I'll need to refactor Gamification to use Context or keep it prop-driven for now?
-                // For now, I'll pass it via modalProps if opened via openModal('LEVEL_UP')?
-                // But LevelUp is usually auto-triggered.
-                // Keeping it as-is for now (controlled by props from parent) might be tricky if we removed the props.
-                // Let's assume we invoke openModal('LEVEL_UP', { level }) from the parent effect.
                 level={modalProps?.level || level}
-                onClose={closeModal}
+                onClose={() => {
+                    closeModal();
+                    // Persist level to prevent loop
+                    if (typeof window !== 'undefined') {
+                        localStorage.setItem('datejar_user_level', (modalProps?.level || level).toString());
+                    }
+                }}
             />
 
             <PremiumWelcomeTip
