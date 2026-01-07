@@ -7,6 +7,7 @@ import { google } from '@ai-sdk/google';
 import { CONCIERGE_CONFIGS } from '@/lib/concierge-configs';
 import { getConciergePromptAndMock } from '@/lib/concierge-prompts';
 import { checkSubscriptionAccess } from '@/lib/premium';
+import { apiError, handleApiError } from '@/lib/api-response';
 
 // Initialize rate limiter if Redis is available
 let ratelimit: Ratelimit | undefined;
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
         // 1. Auth & Subscription Check
         const session = await getSession();
         if (!session?.user?.email) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return apiError('Unauthorized', 401, 'UNAUTHORIZED');
         }
 
         // 2. Parse Request Body
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
         );
 
         if (!toolKey) {
-            return NextResponse.json({ error: `Invalid config ID: ${configId}` }, { status: 400 });
+            return apiError(`Invalid config ID: ${configId}`, 400, 'INVALID_CONFIG');
         }
 
         const config = CONCIERGE_CONFIGS[toolKey];
@@ -49,14 +50,14 @@ export async function POST(req: NextRequest) {
             const identifier = session.user.id;
             const { success } = await ratelimit.limit(identifier);
             if (!success) {
-                return NextResponse.json({ error: 'Rate limit exceeded. Please try again later.' }, { status: 429 });
+                return apiError('Rate limit exceeded. Please try again later.', 429, 'RATE_LIMIT');
             }
         }
 
         // 5. Subscription Check
         const access = await checkSubscriptionAccess(session.user.id, config.id);
         if (!access.allowed) {
-            return NextResponse.json({ error: access.reason || 'Premium required' }, { status: 403 });
+            return apiError(access.reason || 'Premium required', 403, 'PREMIUM_REQUIRED');
         }
 
         // 6. Location Context
@@ -102,10 +103,6 @@ export async function POST(req: NextRequest) {
         return result.toTextStreamResponse();
 
     } catch (error: any) {
-        console.error('Unified Concierge Error:', error);
-        return NextResponse.json(
-            { error: error.message || 'Failed to generate recommendations' },
-            { status: 500 }
-        );
+        return handleApiError(error);
     }
 }
