@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { streamText } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-
-const google = createGoogleGenerativeAI({
-    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-});
+import { reliableGeminiCall } from '@/lib/gemini';
 import { CONCIERGE_CONFIGS } from '@/lib/concierge-configs';
 import { getConciergePromptAndMock } from '@/lib/concierge-prompts';
 import { checkSubscriptionAccess } from '@/lib/premium';
@@ -95,27 +90,13 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // 8. Call AI
-        // Using streamText from 'ai' library which is standard across the app
-        // 8. Call AI (Blocking for stability)
-        const { generateText } = await import('ai');
-
+        // 8. Call AI (Using centralized reliable helper)
         try {
-            const { text } = await generateText({
-                model: google('gemini-1.5-flash-latest'),
-                system: "You are a helpful, expert lifestyle concierge. You MUST return valid JSON only. No markdown formatting. Return strictly the JSON object.",
-                prompt: prompt,
-            });
-
-            // Parse valid JSON from text (cleanup potential markdown fences)
-            const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-            const jsonResponse = JSON.parse(cleanedText);
-
+            const jsonResponse = await reliableGeminiCall(prompt);
             return NextResponse.json(jsonResponse);
-
         } catch (genError: any) {
-            console.error("AI Generation Failed:", genError);
-            return apiError("AI Generation Failed: " + genError.message, 500, "AI_ERROR");
+            console.error("Concierge AI Failed:", genError);
+            return apiError("AI Service Unavailable: " + genError.message, 500, "AI_ERROR");
         }
 
     } catch (error: any) {
