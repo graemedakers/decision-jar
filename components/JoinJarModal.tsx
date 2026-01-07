@@ -54,7 +54,7 @@ export function JoinJarModal({ isOpen, onClose }: JoinJarModalProps) {
                         <Users className="w-6 h-6 text-blue-500 dark:text-blue-400" />
                     </DialogTitle>
                     <DialogDescription className="text-slate-600 dark:text-slate-400">
-                        Enter the code shared by your partner or friend.
+                        Enter the invitation code to instantly sync with an existing jar.
                     </DialogDescription>
                 </DialogHeader>
 

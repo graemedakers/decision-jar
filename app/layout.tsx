@@ -25,8 +25,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'),
   title: {
-    default: "Spin the Jar | AI Date Night Planner for Couples",
-    template: "%s | Spin the Jar",
+    default: "Decision Jar | AI Collective Decision Maker",
+    template: "%s | Decision Jar",
   },
   description: "Never waste 30 minutes deciding where to eat. Your AI-powered decision maker for date nights, friend hangs, and family adventures. We find perfect places, you spin to decide. No more arguments.",
   keywords: [
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
     "spin the jar", "random date picker", "couples decision maker"
   ],
   authors: [{ name: "Spin the Jar Team" }],
-  creator: "Spin the Jar",
-  applicationName: "Spin the Jar",
+  creator: "Decision Jar",
+  applicationName: "Decision Jar",
   alternates: {
     canonical: '/',
   },
@@ -60,9 +60,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: process.env.NEXT_PUBLIC_APP_URL || "https://spinthejar.com",
-    title: "Spin the Jar | Never Waste 30 Minutes Deciding Where to Eat",
+    title: "Decision Jar | Never Waste 30 Minutes Deciding Together",
     description: "Your AI-powered decision maker for date nights and hangouts. We find perfect places to go, you spin to decide. No more arguments. No more analysis paralysis.",
-    siteName: "Spin the Jar",
+    siteName: "Decision Jar",
     images: [
       {
         url: '/opengraph-image.png',
@@ -83,7 +83,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Spin the Jar',
+    title: 'Decision Jar',
   },
   icons: {
     icon: [
@@ -105,7 +105,7 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Spin the Jar",
+  "name": "Decision Jar",
   "description": "AI-powered decision maker for date nights and hangouts. Never waste 30 minutes deciding where to eat again.",
   "url": "https://spinthejar.com",
   "applicationCategory": "LifestyleApplication",

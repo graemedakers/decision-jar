@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Date Jar</string>
-    <string name="title_activity_main">Date Jar</string>
+    <string name="app_name">Decision Jar</string>
+    <string name="title_activity_main">Decision Jar</string>
     <string name="package_name">com.datejar.app</string>
     <string name="custom_url_scheme">com.datejar.app</string>
 </resources>

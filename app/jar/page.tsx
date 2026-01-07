@@ -138,33 +138,49 @@ export default function JarPage() {
     const isLoading = isIdeasLoading || isLoadingUser;
 
     return (
-        <main className="min-h-screen p-4 md:p-8 relative overflow-hidden w-full max-w-[1600px] mx-auto">
+        <main className="page-with-nav min-h-screen bg-slate-50 dark:bg-slate-950 px-4 md:px-8 relative overflow-hidden w-full max-w-5xl mx-auto transition-colors duration-500">
             {/* Background Elements */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[100px]" />
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full animate-pulse-slow" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/5 dark:bg-accent/20 blur-[120px] rounded-full animate-pulse-slow delay-700" />
             </div>
 
-            <div className="mb-8 flex items-center justify-between">
+            <div className="mb-8 flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" className="rounded-full p-2 hidden md:flex" onClick={() => router.push('/dashboard')}>
-                        <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white" />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full bg-white dark:bg-white/5 shadow-sm border border-slate-200 dark:border-white/10 hidden md:flex"
+                        onClick={() => router.push('/dashboard')}
+                    >
+                        <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">In the Jar</h1>
-                        <p className="text-slate-600 dark:text-slate-400 text-sm">{isLoading ? '...' : activeIdeas.length} ideas waiting</p>
+                        <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">In the Jar</h1>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{isLoading ? '...' : activeIdeas.length} ideas waiting</p>
                     </div>
                 </div>
 
-                {userData?.isCommunityJar && isAdmin && (
+                <div className="flex items-center gap-2">
                     <Button
-                        onClick={() => setIsAdminModalOpen(true)}
-                        className="bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold flex items-center gap-2"
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-6 h-11 shadow-lg shadow-primary/20 flex items-center gap-2"
                     >
-                        <Users className="w-4 h-4" />
-                        Manage Members
+                        <Plus className="w-4 h-4" />
+                        <span>Add Idea</span>
                     </Button>
-                )}
+
+                    {userData?.isCommunityJar && isAdmin && (
+                        <Button
+                            onClick={() => setIsAdminModalOpen(true)}
+                            variant="outline"
+                            className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 flex items-center gap-2"
+                        >
+                            <Users className="w-4 h-4" />
+                            <span className="hidden sm:inline">Members</span>
+                        </Button>
+                    )}
+                </div>
             </div>
 
 

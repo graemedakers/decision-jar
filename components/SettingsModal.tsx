@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { BASE_DOMAIN } from "@/lib/config";
 import { LocationInput } from "./LocationInput";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
+import { getJarLabels } from "@/lib/labels";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -70,7 +71,9 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                     }
                 });
         }
-    }, [isOpen, currentLocation]);
+    }, [isOpen, currentLocation, jarTopic]);
+
+    const labels = getJarLabels(jarTopic);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -118,7 +121,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
     };
 
     const handleEmptyJar = async () => {
-        if (!confirm("Are you sure you want to empty the jar? This will delete ALL ideas, including your history of past sessions. This action cannot be undone.")) return;
+        if (!confirm(`Are you sure you want to ${labels.emptyJarAction.toLowerCase()}? This will delete ALL ideas, including your history of past sessions. This action cannot be undone.`)) return;
 
         setIsLoading(true);
         try {
@@ -220,7 +223,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
     };
 
     const handleDeletePartner = async () => {
-        if (!confirm("Are you sure you want to remove this member? This will remove them from the group, delete ALL ideas they created, and delete ALL related history. This action cannot be undone.")) return;
+        if (!confirm(`Are you sure you want to remove this ${labels.memberLabel.toLowerCase()}? This will remove them from the group, delete ALL ideas they created, and delete ALL related history. This action cannot be undone.`)) return;
 
         setIsLoading(true);
         try {
@@ -231,17 +234,17 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
 
             if (res.ok) {
                 const data = await res.json();
-                showSuccess(data.message || "Partner deleted successfully");
+                showSuccess(data.message || `${labels.memberLabel} deleted successfully`);
                 onClose();
                 router.refresh();
                 window.location.reload();
             } else {
                 const data = await res.json();
-                showError(`Failed to delete partner: ${data.details || data.error || "Unknown error"}`);
+                showError(`Failed to delete ${labels.memberLabel.toLowerCase()}: ${data.details || data.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
-            showError("Error deleting partner");
+            showError(`Error deleting ${labels.memberLabel.toLowerCase()}`);
         } finally {
             setIsLoading(false);
         }
@@ -451,16 +454,16 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                             {isCreator && (
                                 <div className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
                                     <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-2">
-                                        Manage {jarType === 'ROMANTIC' ? 'Partner' : 'Group'}
+                                        Manage {labels.memberLabelPlural}
                                     </h3>
 
-                                    {jarType === 'ROMANTIC' && hasPartner ? (
+                                    {hasPartner ? (
                                         <div className="p-4 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
                                             <p className="text-sm text-slate-600 dark:text-slate-300 text-center">
-                                                You are currently linked with a partner.
+                                                You are currently linked with a {labels.memberLabel.toLowerCase()}.
                                             </p>
                                             <p className="text-xs text-slate-500 text-center mt-2">
-                                                To invite a new partner, you must first remove your current partner in the Danger Zone below.
+                                                To invite a new {labels.memberLabel.toLowerCase()}, you must first remove your current {labels.memberLabel.toLowerCase()} in the Danger Zone below.
                                             </p>
                                         </div>
                                     ) : (
@@ -482,7 +485,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                                     </div>
                                                 </div>
                                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                    Share this code or link with your {jarType === 'ROMANTIC' ? 'partner' : 'friends'} to sync your jars.
+                                                    Share this code or link with your {labels.memberLabel.toLowerCase()} to sync your jars.
                                                 </p>
                                             </div>
 
@@ -586,7 +589,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                             onClick={handleEmptyJar}
                                             disabled={isLoading}
                                         >
-                                            Empty Jar (Delete All Ideas)
+                                            {labels.emptyJarAction}
                                         </Button>
 
                                         {hasPartner && (
@@ -598,7 +601,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
                                                 disabled={isLoading}
                                             >
                                                 <UserMinus className="w-4 h-4 mr-2" />
-                                                {jarType === 'ROMANTIC' ? 'Delete Partner' : 'Remove Members'}
+                                                Delete {labels.memberLabel}
                                             </Button>
                                         )}
                                     </div>

@@ -19,7 +19,7 @@ export default function MemoriesPage() {
     const router = useRouter();
 
     // Hooks
-    const { isPremium, isLoading: isUserLoading } = useUser();
+    const { isPremium, isLoading: isUserLoading, userData } = useUser();
     const { ideas, isLoading: isIdeasLoading, fetchIdeas } = useIdeas();
     const { favorites, fetchFavorites } = useFavorites();
 
@@ -87,11 +87,11 @@ export default function MemoriesPage() {
         .sort((a, b) => new Date(a.selectedDate || a.selectedAt || 0).getTime() - new Date(b.selectedDate || b.selectedAt || 0).getTime());
 
     return (
-        <main className="min-h-screen p-4 md:p-8 pb-32 relative overflow-hidden w-full max-w-[1600px] mx-auto">
-            {/* Background Elements */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[100px]" />
+        <main className="page-with-nav min-h-screen bg-slate-50 dark:bg-slate-950 px-4 md:px-8 relative overflow-hidden w-full max-w-5xl mx-auto transition-colors duration-500">
+            {/* Ambient Background Elements */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full animate-pulse-slow" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/5 dark:bg-accent/20 blur-[120px] rounded-full animate-pulse-slow delay-700" />
             </div>
 
             <div className="mb-8 flex items-center justify-between">
@@ -240,6 +240,7 @@ export default function MemoriesPage() {
                 isOpen={!!viewingIdea}
                 onClose={() => setViewingIdea(null)}
                 idea={viewingIdea}
+                topic={userData?.jarTopic}
             />
 
             <RateDateModal

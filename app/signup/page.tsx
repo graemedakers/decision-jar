@@ -3,8 +3,8 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-    title: "Sign Up",
-    description: "Create a Date Jar account to start planning better dates with your partner.",
+    title: "Sign Up | Decision Jar",
+    description: "Create a Decision Jar account to start making better collective decisions.",
 };
 
 export default function SignupPage() {

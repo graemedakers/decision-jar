@@ -7,14 +7,17 @@ import { CateringPreview } from "./CateringPreview";
 import { exportToPdf } from "@/lib/pdf-export";
 import { Button } from "./ui/Button";
 import { showError } from "@/lib/toast";
+import { getJarLabels } from "@/lib/labels";
 
 interface ViewMemoryModalProps {
     isOpen: boolean;
     onClose: () => void;
     idea: any;
+    topic?: string;
 }
 
-export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps) {
+export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModalProps) {
+    const labels = getJarLabels(topic);
     const [ratings, setRatings] = useState<any[]>([]);
     const [showCalendarOptions, setShowCalendarOptions] = useState(false);
 
@@ -241,12 +244,12 @@ export function ViewMemoryModal({ isOpen, onClose, idea }: ViewMemoryModalProps)
                     {/* Ratings Section */}
                     {ratings.length > 0 ? (
                         <div className="space-y-3">
-                            <h4 className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Couple Ratings</h4>
+                            <h4 className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">{labels.ratingsLabel}</h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {ratings.map((rating: any, index: number) => (
                                     <div key={index} className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm dark:shadow-none">
                                         <div className="flex justify-between items-start mb-2">
-                                            <div className="font-bold text-slate-900 dark:text-white text-sm">{rating.user?.name || "Partner"}</div>
+                                            <div className="font-bold text-slate-900 dark:text-white text-sm">{rating.user?.name || labels.memberLabel}</div>
                                             <div className="flex items-center gap-1 text-yellow-500">
                                                 <span className="font-bold">{rating.value}</span>
                                                 <Star className="w-4 h-4 fill-yellow-500" />

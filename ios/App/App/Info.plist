@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Date Jar</string>
+        <string>Decision Jar</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -48,10 +48,10 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Date Jar needs access to your camera to capture memories from your dates.</string>
+	<string>Decision Jar needs access to your camera to capture memories.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Date Jar needs access to your photos to upload memories.</string>
+	<string>Decision Jar needs access to your photos to upload memories.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Date Jar needs access to your photos to save memories.</string>
+	<string>Decision Jar needs access to your photos to save memories.</string>
 </dict>
 </plist>

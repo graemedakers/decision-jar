@@ -235,9 +235,9 @@ body {
 }
 
 /* Pages need padding for fixed navigation */
-/* Mobile bottom nav = pb-20, Desktop top nav = pt-14 */
+/* Mobile bottom nav = pb-24, Desktop top nav = pt-24 */
 .page-with-nav {
-  @apply pb-20 md:pb-0 md:pt-14;
+  @apply pb-24 md:pb-8 md:pt-24;
 }
 
 /* PWA Install Prompt Animation */

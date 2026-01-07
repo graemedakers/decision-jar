@@ -4,13 +4,16 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Heart, ExternalLink, Trash2, MapPin, Star, Share2, Users } from "lucide-react";
 import { Button } from "./ui/Button";
+import { getJarLabels } from "@/lib/labels";
 
 interface FavoritesModalProps {
     isOpen: boolean;
     onClose: () => void;
+    topic?: string;
 }
 
-export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
+export function FavoritesModal({ isOpen, onClose, topic }: FavoritesModalProps) {
+    const labels = getJarLabels(topic);
     const [favorites, setFavorites] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -107,7 +110,7 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                                                     <div className="flex items-center gap-2">
                                                         <h4 className="font-bold text-slate-900 dark:text-white text-lg">{fav.name}</h4>
                                                         {fav.isShared && (
-                                                            <div title="Shared with partner" className="flex items-center gap-1 text-[10px] uppercase font-bold text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-500/20">
+                                                            <div title={labels.sharedLabel} className="flex items-center gap-1 text-[10px] uppercase font-bold text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-500/20">
                                                                 <Users className="w-3 h-3" />
                                                             </div>
                                                         )}

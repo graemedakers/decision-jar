@@ -18,20 +18,20 @@ export function LevelBanner({ xp, level }: LevelBannerProps) {
             animate={{ opacity: 1, y: 0 }}
             className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl p-4 mb-8 shadow-md dark:shadow-none"
         >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-yellow-500/10 dark:bg-yellow-500/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400 ring-1 ring-yellow-500/30 dark:ring-yellow-500/50">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-yellow-500/10 dark:bg-yellow-500/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400 ring-1 ring-yellow-500/30 dark:ring-yellow-500/50">
                         <Trophy className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="text-slate-900 dark:text-white font-bold text-lg leading-none">{currentTitle}</h3>
-                        <p className="text-slate-600 dark:text-slate-400 text-xs mt-1">Level {level} • {xp} XP</p>
+                        <h3 className="text-slate-900 dark:text-white font-bold text-base md:text-lg leading-tight">{currentTitle}</h3>
+                        <p className="text-slate-600 dark:text-slate-400 text-[10px] md:text-xs">Level {level} • {xp} XP</p>
                     </div>
                 </div>
-                <div className="text-right">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider font-bold">Next Rank</span>
-                    <p className="text-slate-700 dark:text-slate-300 text-xs font-medium">{nextTitle}</p>
-                    <p className="text-slate-500 text-[10px]">{Math.floor(xpToNext)} XP to go</p>
+                <div className="sm:text-right flex flex-col sm:items-end">
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Next Rank</span>
+                    <p className="text-slate-700 dark:text-slate-300 text-xs font-bold leading-tight">{nextTitle}</p>
+                    <p className="text-slate-500 text-[10px] whitespace-nowrap">{Math.floor(xpToNext)} XP left</p>
                 </div>
             </div>
 

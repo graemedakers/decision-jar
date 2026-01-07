@@ -16,7 +16,7 @@ export function CollapsibleTrophyCase({ xp, level, unlockedIds }: CollapsibleTro
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="w-full">
+        <div className="w-full max-w-md mx-auto">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900/40 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group shadow-sm dark:shadow-none"
@@ -42,10 +42,9 @@ export function CollapsibleTrophyCase({ xp, level, unlockedIds }: CollapsibleTro
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                     >
-                        <div className="pt-4">
+                        <div className="pt-4 max-w-lg mx-auto">
                             <LevelBanner xp={xp} level={level} />
-                            <div className="mt-[-2rem]">
-                                {/* Negative margin to pull AchievementCase closer since LevelBanner has huge bottom margin */}
+                            <div className="mt-4">
                                 <AchievementCase unlockedIds={unlockedIds} />
                             </div>
                         </div>

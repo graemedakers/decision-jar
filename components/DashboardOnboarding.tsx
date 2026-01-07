@@ -8,13 +8,16 @@ import { CreateJarModal } from "./CreateJarModal";
 import { JoinJarModal } from "./JoinJarModal";
 import { useRouter } from "next/navigation";
 import { TemplateBrowserModal } from "./TemplateBrowserModal";
+import { getJarLabels } from "@/lib/labels";
 
 interface DashboardOnboardingProps {
     onJarCreated: () => void;
     isPro?: boolean;
+    topic?: string;
 }
 
-export function DashboardOnboarding({ onJarCreated, isPro }: DashboardOnboardingProps) {
+export function DashboardOnboarding({ onJarCreated, isPro, topic }: DashboardOnboardingProps) {
+    const labels = getJarLabels(topic);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isJoinOpen, setIsJoinOpen] = useState(false);
     const [isTemplateOpen, setIsTemplateOpen] = useState(false);
@@ -57,7 +60,7 @@ export function DashboardOnboarding({ onJarCreated, isPro }: DashboardOnboarding
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Starts Here.</span>
                     </h1>
                     <p className="text-lg text-slate-600 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">
-                        Welcome to Decision Jar! You're just moments away from making better decisions with your partner, friends, or family.
+                        Welcome to {labels.jarBranding}! You're just moments away from making better decisions with {labels.welcomeContext}.
                     </p>
                 </div>
 

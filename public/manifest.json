@@ -1,6 +1,6 @@
 {
-    "name": "Spin the Jar - Decision Maker",
-    "short_name": "Spin the Jar",
+    "name": "Decision Jar - Collective Decision Maker",
+    "short_name": "Decision Jar",
     "description": "Never ask 'what should we do?' again. Perfect for couples, groups, and solo decisions.",
     "start_url": "/",
     "display": "standalone",

@@ -108,6 +108,7 @@ export function DashboardModals({
 
             <FavoritesModal
                 isOpen={activeModal === 'FAVORITES'}
+                topic={jarTopic}
                 onClose={() => {
                     closeModal();
                     fetchFavorites();

@@ -1,5 +1,5 @@
 // Service Worker for PWA - Simplified and Safe Version
-const CACHE_NAME = 'spin-the-jar-v1';
+const CACHE_NAME = 'decision-jar-v1';
 const RUNTIME_CACHE = 'runtime-v1';
 
 // Only cache static assets, not pages
