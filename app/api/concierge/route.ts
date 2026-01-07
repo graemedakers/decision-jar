@@ -3,7 +3,11 @@ import { getSession } from '@/lib/auth';
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { streamText } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+
+const google = createGoogleGenerativeAI({
+    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+});
 import { CONCIERGE_CONFIGS } from '@/lib/concierge-configs';
 import { getConciergePromptAndMock } from '@/lib/concierge-prompts';
 import { checkSubscriptionAccess } from '@/lib/premium';
@@ -98,7 +102,7 @@ export async function POST(req: NextRequest) {
 
         try {
             const { text } = await generateText({
-                model: google('gemini-1.5-flash'),
+                model: google('gemini-1.5-flash-latest'),
                 system: "You are a helpful, expert lifestyle concierge. You MUST return valid JSON only. No markdown formatting. Return strictly the JSON object.",
                 prompt: prompt,
             });
