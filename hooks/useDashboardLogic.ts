@@ -6,12 +6,17 @@ import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
 import { useFavorites } from "@/hooks/useFavorites";
 import { trackEvent } from "@/lib/analytics";
-import { SoundEffects, triggerHaptic } from "@/lib/feedback";
-import { spinJar } from "@/app/actions/spin";
-import { useIdeaMutations } from "@/hooks/mutations/useIdeaMutations";
+import { triggerHaptic } from "@/lib/feedback";
 import { signOut } from "next-auth/react";
 import { getApiUrl } from "@/lib/utils";
 import { showSuccess, showError } from "@/lib/toast";
+
+// Feature Hooks
+import { useSpin } from "@/hooks/features/useSpin";
+import { usePWAHandler } from "@/hooks/features/usePWAHandler";
+import { useUrlSync } from "@/hooks/features/useUrlSync";
+import { useOnboarding } from "@/hooks/features/useOnboarding";
+import { useIdeaMutations } from "@/hooks/mutations/useIdeaMutations";
 
 export function useDashboardLogic() {
     const { openModal } = useModalSystem();
@@ -36,13 +41,12 @@ export function useDashboardLogic() {
 
     const { ideas, isLoading: isLoadingIdeas, fetchIdeas } = useIdeas();
     const { favoritesCount, fetchFavorites } = useFavorites();
+    const { deleteIdea } = useIdeaMutations();
 
     // 2. Local State
-    const [isSpinning, setIsSpinning] = useState(false);
     const [userLocation, setUserLocation] = useState<string | null>(null);
     const [inviteCode, setInviteCode] = useState<string | null>(null);
     const [showConfetti, setShowConfetti] = useState(false);
-    const [showOnboarding, setShowOnboarding] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
 
     const handleContentUpdate = () => {
@@ -50,16 +54,30 @@ export function useDashboardLogic() {
         refreshUser();
     };
 
-    // 3. Effects
+    // 3. Feature Composition
+    const { isSpinning, handleSpinJar } = useSpin({
+        ideas,
+        onSpinComplete: handleContentUpdate
+    });
 
-    // Onboarding Check
-    useEffect(() => {
-        const hasCompletedOnboarding = localStorage.getItem('onboarding_completed');
-        if (!hasCompletedOnboarding && !isLoadingUser && userData) {
-            setTimeout(() => setShowOnboarding(true), 1000);
-        }
-    }, [isLoadingUser, userData]);
+    const { showOnboarding, setShowOnboarding, handleCompleteOnboarding, handleSkipOnboarding } = useOnboarding({
+        userData,
+        isLoadingUser
+    });
 
+    usePWAHandler({
+        userData,
+        isLoadingUser,
+        isPremium,
+        refreshUser
+    });
+
+    useUrlSync({
+        userData,
+        onJarSwitched: handleContentUpdate
+    });
+
+    // 4. Remaining Effects
     // Data Sync
     useEffect(() => {
         if (userData) {
@@ -79,80 +97,6 @@ export function useDashboardLogic() {
         }
     }, [searchParams, isPremium, isLoadingUser, openModal]);
 
-    // PWA Shortcuts
-    useEffect(() => {
-        const tool = searchParams?.get('tool');
-        if (!tool) return;
-
-        trackEvent('pwa_shortcut_used', { tool, from_home_screen: true });
-
-        const checkAndOpenTool = async () => {
-            if (isLoadingUser || !userData) {
-                setTimeout(checkAndOpenTool, 100);
-                return;
-            }
-
-            if (!isPremium) {
-                trackEvent('pwa_shortcut_blocked', { tool, reason: 'requires_premium' });
-                openModal('PREMIUM');
-                return;
-            }
-
-            // Auto-select jar if strictly necessary (Legacy logic preserved)
-            if (!userData.activeJarId && userData.memberships && userData.memberships.length > 0) {
-                const firstJar = userData.memberships[0];
-                try {
-                    await fetch('/api/jar/set-active', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ jarId: firstJar.jarId }),
-                    });
-                    trackEvent('pwa_shortcut_jar_auto_selected', { tool, jarId: firstJar.jarId });
-                    refreshUser();
-                } catch (error) {
-                    console.error('Failed to auto-select jar:', error);
-                }
-            }
-
-            trackEvent('pwa_shortcut_opened', { tool, user_type: 'premium' });
-
-            switch (tool) {
-                case 'dining': openModal('CONCIERGE', { toolId: 'DINING' }); break;
-                case 'bar': openModal('CONCIERGE', { toolId: 'BAR' }); break;
-                case 'weekend': openModal('WEEKEND_PLANNER'); break;
-                case 'movie': openModal('CONCIERGE', { toolId: 'MOVIE' }); break;
-                default: console.warn(`Unknown PWA shortcut tool: ${tool}`);
-            }
-        };
-
-        checkAndOpenTool();
-    }, [searchParams, isPremium, isLoadingUser, userData, openModal, refreshUser]);
-
-    // URL-based Jar Switching
-    useEffect(() => {
-        const jarIdInUrl = searchParams?.get('jar');
-        if (jarIdInUrl && userData && jarIdInUrl !== userData.activeJarId) {
-            const switchJar = async () => {
-                try {
-                    const res = await fetch(`/api/jar/${jarIdInUrl}/switch`, {
-                        method: 'POST',
-                    });
-                    if (res.ok) {
-                        // Clear the param and refresh
-                        const newParams = new URLSearchParams(window.location.search);
-                        newParams.delete('jar');
-                        const newUrl = window.location.pathname + (newParams.toString() ? '?' + newParams.toString() : '');
-                        window.history.replaceState({}, '', newUrl);
-                        handleContentUpdate();
-                    }
-                } catch (error) {
-                    console.error('Failed to switch jar from URL:', error);
-                }
-            };
-            switchJar();
-        }
-    }, [searchParams, userData, handleContentUpdate]);
-
     // Stripe Success
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -167,66 +111,12 @@ export function useDashboardLogic() {
         }
     }, [refreshUser]);
 
-    // 4. Handlers
-
-    const handleCompleteOnboarding = () => {
-        localStorage.setItem('onboarding_completed', 'true');
-        trackEvent('onboarding_completed', {});
-    };
-
-    const handleSkipOnboarding = () => {
-        localStorage.setItem('onboarding_completed', 'true');
-        trackEvent('onboarding_skipped', {});
-    };
-
+    // 5. Handlers
     const handleLogout = async () => {
         await signOut({ redirect: false });
         await fetch(getApiUrl('/api/auth/logout'), { method: 'POST' });
         window.location.href = '/';
     };
-
-    const handleSpinJar = async (filters: any = {}) => {
-        if (ideas.length === 0) {
-            showError("Add some ideas first!");
-            return;
-        }
-        setIsSpinning(true);
-
-        // Animation Loop
-        const spinDuration = 2000;
-        const tickInterval = 150;
-        let elapsed = 0;
-
-        const tickLoop = setInterval(() => {
-            SoundEffects.playTick();
-            triggerHaptic(10);
-            elapsed += tickInterval;
-            if (elapsed >= spinDuration) clearInterval(tickLoop);
-        }, tickInterval);
-
-        await new Promise(resolve => setTimeout(resolve, spinDuration));
-
-        clearInterval(tickLoop);
-        triggerHaptic([50, 50, 50]);
-        SoundEffects.playFanfare();
-
-        try {
-            const res = await spinJar(filters);
-
-            if (res.success) {
-                openModal('DATE_REVEAL', { idea: res.idea });
-                handleContentUpdate();
-            } else {
-                showError(res.error || "Failed to pick a date. Try adding more ideas!");
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsSpinning(false);
-        }
-    };
-
-    const { deleteIdea } = useIdeaMutations();
 
     const handleDeleteClick = (id: string, e?: React.MouseEvent) => {
         e?.stopPropagation();
@@ -282,7 +172,7 @@ export function useDashboardLogic() {
         favoritesCount,
         isSpinning, userLocation, inviteCode, showConfetti, showOnboarding, showQuiz,
 
-        // State Setters (if needed expose them, otherwise wrap in handlers)
+        // State Setters
         setShowConfetti, setShowOnboarding, setShowQuiz, setUserLocation,
 
         // Handlers
