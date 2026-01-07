@@ -79,19 +79,14 @@ export async function getSession() {
 
     // 2. Check NextAuth session
     try {
-        const { getServerSession } = await import('next-auth');
-        const { authOptions } = await import('./auth-options');
-        const nextAuthSession = await getServerSession(authOptions);
-
-        console.log("NextAuth Session check:", !!nextAuthSession, nextAuthSession?.user?.email);
+        const { auth } = await import('./next-auth-helper');
+        const nextAuthSession = await auth();
 
         if (nextAuthSession?.user?.email) {
             // Map NextAuth session to match custom session structure
-            const user = await (prisma as any).user.findUnique({
-                where: { email: nextAuthSession.user.email }
+            const user = await (prisma as any).user.findFirst({
+                where: { email: { equals: nextAuthSession.user.email, mode: 'insensitive' } }
             });
-
-            console.log("Database user lookup for NextAuth:", !!user);
 
             if (user) {
                 return {
@@ -105,6 +100,12 @@ export async function getSession() {
                     expires: nextAuthSession.expires
                 };
             }
+
+            // If user not in DB, return basic session so api/auth/me can handle it
+            return {
+                user: { email: nextAuthSession.user.email },
+                expires: nextAuthSession.expires
+            };
         }
     } catch (error) {
         console.error("Error checking NextAuth session:", error);

@@ -12,8 +12,8 @@ export async function GET() {
     }
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
+        const user = await prisma.user.findFirst({
+            where: { email: { equals: session.user.email, mode: 'insensitive' } },
             include: {
                 // Fetch the active jar details
                 memberships: {
@@ -144,6 +144,9 @@ export async function GET() {
         });
     } catch (error) {
         console.error("Error fetching user in /api/auth/me:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({
+            error: error instanceof Error ? error.message : "Internal Server Error",
+            stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
+        }, { status: 500 });
     }
 }

@@ -1,8 +1,6 @@
-@import "tailwindcss";
-
-@variant dark (&:where(.dark, .dark *));
-
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   /* Professional, Vibrant Theme Palette (Light Mode Default) */
@@ -57,42 +55,7 @@
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
 
-  --animate-float: float 6s ease-in-out infinite;
-  --animate-pulse-glow: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-
-  @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-
-    50% {
-      transform: translateY(-20px);
-    }
-  }
-
-  @keyframes pulse-glow {
-
-    0%,
-    100% {
-      opacity: 1;
-      box-shadow: 0 0 20px rgba(219, 39, 119, 0.5);
-    }
-
-    50% {
-      opacity: 0.8;
-      box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
-    }
-  }
-}
 
 html,
 body {
@@ -152,7 +115,7 @@ body {
   /* Force hide Google Maps API error background icons */
   background-image: none !important;
 
-  @apply w-full rounded-xl px-4 py-3 outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20;
+  @apply w-full rounded-xl px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary;
 
   &::placeholder {
     color: #94a3b8;

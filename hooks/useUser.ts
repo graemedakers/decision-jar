@@ -4,6 +4,8 @@ import { useState, useCallback, useEffect } from "react";
 import { getApiUrl } from "@/lib/utils";
 import { UserData } from "@/lib/types";
 import { trackEvent } from "@/lib/analytics";
+import { showError } from "@/lib/toast";
+import { signOut } from "next-auth/react";
 
 interface UseUserOptions {
     onLevelUp?: (newLevel: number) => void;
@@ -54,10 +56,18 @@ export function useUser(options: UseUserOptions = {}) {
 
             if (!res.ok) {
                 if (res.status === 401 && redirectToLogin) {
-                    console.warn("Invalid session. Redirecting to login.");
-                    window.location.href = '/';
+                    console.warn("Invalid session. Redirecting to nuke session.");
+                    window.location.href = '/api/auth/nuke-session';
+                    return;
                 }
-                throw new Error('Failed to fetch user');
+
+                let errorMsg = 'Failed to fetch user';
+                try {
+                    const errData = await res.json();
+                    if (errData.error) errorMsg = errData.error;
+                } catch { }
+
+                throw new Error(errorMsg);
             }
 
             const data = await res.json();
@@ -118,9 +128,16 @@ export function useUser(options: UseUserOptions = {}) {
                     setLevel(newLevel);
                 }
 
+            } else if (redirectToLogin) {
+                console.warn("No session found (User null). Nuking session.");
+                window.location.href = '/api/auth/nuke-session';
+                return;
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error fetching user:", err);
+            if (err instanceof Error && err.message !== 'Failed to fetch user') {
+                showError(`User Error: ${err.message}`);
+            }
         } finally {
             setIsLoading(false);
         }
