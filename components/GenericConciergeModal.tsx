@@ -242,16 +242,14 @@ export function GenericConciergeModal({
         }
     };
 
-    // Reset state when config changes or modal opens
+
+
+    // Late-load sync: If userLocation arrives after open and input is empty, fill it.
     useEffect(() => {
-        if (isOpen) {
-            setLocation('');
-            setSelections({});
-            setRecommendations([]);
-        } else {
-            setPrevOpen(false);
+        if (isOpen && userLocation && !location) {
+            setLocation(userLocation);
         }
-    }, [isOpen, userLocation]); // Depend on isOpen and userLocation
+    }, [userLocation, isOpen, location]);
 
     const toggleSelection = (option: string, sectionId: string, type: 'multi-select' | 'single-select') => {
         setSelections(prev => {

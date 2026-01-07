@@ -18,10 +18,11 @@ interface SettingsModalProps {
     onClose: () => void;
     currentLocation?: string;
     onRestartTour?: () => void;
+    onSettingsChanged?: () => void;
 }
 
 
-export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour }: SettingsModalProps) {
+export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour, onSettingsChanged }: SettingsModalProps) {
     const router = useRouter();
     const [location, setLocation] = useState(currentLocation || "");
     const [interests, setInterests] = useState("");
@@ -113,6 +114,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour 
 
             if (userRes.ok) {
                 showSuccess("Settings updated successfully!");
+                onSettingsChanged?.();
                 onClose();
                 router.refresh();
             } else {

@@ -158,6 +158,7 @@ export function DashboardModals({
                 onClose={closeModal}
                 currentLocation={userLocation ?? undefined}
                 onRestartTour={onRestartTour}
+                onSettingsChanged={refreshUser}
             />
 
             <SpinFiltersModal
