@@ -495,7 +495,7 @@ function DashboardContent() {
                     </div>
 
                     {/* Center Column: The Visualization */}
-                    <div className="order-1 xl:order-2 flex flex-col items-center justify-center relative py-8">
+                    <div className="order-1 xl:order-2 flex flex-col items-center justify-center relative py-0 xl:py-8">
                         {isVotingMode && userData ? (
                             <div className="w-full max-w-md">
                                 <VotingManager

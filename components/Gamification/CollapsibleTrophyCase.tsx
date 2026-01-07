@@ -16,7 +16,7 @@ export function CollapsibleTrophyCase({ xp, level, unlockedIds }: CollapsibleTro
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="w-full mb-6">
+        <div className="w-full">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900/40 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group shadow-sm dark:shadow-none"
