@@ -44,6 +44,11 @@ export function useDashboardLogic() {
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
 
+    const handleContentUpdate = () => {
+        fetchIdeas();
+        refreshUser();
+    };
+
     // 3. Effects
 
     // Onboarding Check
@@ -122,6 +127,31 @@ export function useDashboardLogic() {
         checkAndOpenTool();
     }, [searchParams, isPremium, isLoadingUser, userData, openModal, refreshUser]);
 
+    // URL-based Jar Switching
+    useEffect(() => {
+        const jarIdInUrl = searchParams?.get('jar');
+        if (jarIdInUrl && userData && jarIdInUrl !== userData.activeJarId) {
+            const switchJar = async () => {
+                try {
+                    const res = await fetch(`/api/jar/${jarIdInUrl}/switch`, {
+                        method: 'POST',
+                    });
+                    if (res.ok) {
+                        // Clear the param and refresh
+                        const newParams = new URLSearchParams(window.location.search);
+                        newParams.delete('jar');
+                        const newUrl = window.location.pathname + (newParams.toString() ? '?' + newParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                        handleContentUpdate();
+                    }
+                } catch (error) {
+                    console.error('Failed to switch jar from URL:', error);
+                }
+            };
+            switchJar();
+        }
+    }, [searchParams, userData, handleContentUpdate]);
+
     // Stripe Success
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -137,11 +167,6 @@ export function useDashboardLogic() {
     }, [refreshUser]);
 
     // 4. Handlers
-
-    const handleContentUpdate = () => {
-        fetchIdeas();
-        refreshUser();
-    };
 
     const handleCompleteOnboarding = () => {
         localStorage.setItem('onboarding_completed', 'true');

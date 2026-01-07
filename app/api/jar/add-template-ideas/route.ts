@@ -35,24 +35,29 @@ export async function POST(request: NextRequest) {
         }
 
         // Add all template ideas to the existing jar
-        const createdIdeas = await prisma.idea.createMany({
-            data: template.ideas.map(idea => ({
-                description: idea.description,
-                category: idea.category || 'ACTIVITY',
-                duration: idea.duration || 1,
-                cost: idea.cost || '$',
-                activityLevel: idea.activityLevel || 'MEDIUM',
-                indoor: idea.indoor ?? true,
-                timeOfDay: idea.timeOfDay || 'ANY',
-                details: idea.details || null,
-                createdById: session.user.id,
-                jarId: jarId
-            }))
-        });
+        const creations = template.ideas.map(idea =>
+            prisma.idea.create({
+                data: {
+                    description: idea.description,
+                    category: idea.category || 'ACTIVITY',
+                    duration: idea.duration || 1,
+                    cost: idea.cost || '$',
+                    activityLevel: idea.activityLevel || 'MEDIUM',
+                    indoor: idea.indoor ?? true,
+                    timeOfDay: idea.timeOfDay || 'ANY',
+                    details: idea.details || null,
+                    createdById: session.user.id,
+                    jarId: jarId,
+                    status: 'APPROVED' as any
+                }
+            })
+        );
+
+        const results = await prisma.$transaction(creations);
 
         return NextResponse.json({
             success: true,
-            count: createdIdeas.count,
+            count: results.length,
             jarId
         });
     } catch (error) {

@@ -66,6 +66,12 @@ export async function POST(request: NextRequest) {
             }
         });
 
+        // Set as active jar for the user
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { activeJarId: jar.id }
+        });
+
         return NextResponse.json(jar);
     } catch (error) {
         console.error('Error creating jar from template:', error);

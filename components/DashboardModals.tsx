@@ -239,6 +239,7 @@ export function DashboardModals({
                 onClose={closeModal}
                 currentJarId={userData?.activeJarId}
                 currentJarName={userData?.jarName || null}
+                hasJars={!!userData?.activeJarId || (userData?.memberships?.length || 0) > 0}
                 onSuccess={handleContentUpdate}
             />
 
