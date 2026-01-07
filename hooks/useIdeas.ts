@@ -1,31 +1,33 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getApiUrl } from "@/lib/utils";
 import { Idea } from "@/lib/types";
 
+// Fetcher Function
+const fetchIdeasApi = async (): Promise<Idea[]> => {
+    const res = await fetch(getApiUrl('/api/ideas'), { credentials: 'include' });
+    if (!res.ok) throw new Error("Failed to fetch ideas");
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+};
+
 export function useIdeas() {
-    const [ideas, setIdeas] = useState<Idea[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const queryClient = useQueryClient();
 
-    const fetchIdeas = useCallback(async () => {
-        try {
-            const res = await fetch(getApiUrl('/api/ideas'), { credentials: 'include' });
-            if (res.ok) {
-                const data = await res.json();
-                setIdeas(Array.isArray(data) ? data : []);
-            }
-        } catch (error) {
-            console.error('Failed to fetch ideas', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    const query = useQuery({
+        queryKey: ['ideas'],
+        queryFn: fetchIdeasApi,
+        staleTime: 1000 * 60, // 1 minute fresh
+    });
 
-    // Initial fetch
-    useEffect(() => {
-        fetchIdeas();
-    }, [fetchIdeas]);
+    // Wrapper to match previous interface
+    const fetchIdeas = () => queryClient.invalidateQueries({ queryKey: ['ideas'] });
 
-    return { ideas, isLoading, fetchIdeas };
+    return {
+        ideas: query.data || [],
+        isLoading: query.isLoading,
+        fetchIdeas,
+        error: query.error
+    };
 }
