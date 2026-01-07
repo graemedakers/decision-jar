@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { getCategoriesForTopic } from "@/lib/categories";
-import { createIdea, updateIdea } from "@/app/actions/ideas";
 import { showSuccess, showError } from "@/lib/toast";
+import { useIdeaMutations } from "@/hooks/mutations/useIdeaMutations";
 
 export const DEFAULT_FORM_DATA = {
     description: "",
@@ -29,7 +29,6 @@ interface UseIdeaFormProps {
 
 export function useIdeaForm({ initialData, currentUser, jarTopic, customCategories, onSuccess, onClose }: UseIdeaFormProps) {
     const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
-    const [isLoading, setIsLoading] = useState(false);
 
     // Initialize form data when initialData changes
     useEffect(() => {
@@ -67,9 +66,12 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
 
     const isCommunitySubmission = currentUser?.isCommunityJar && !currentUser?.isCreator && !initialData?.id;
 
+    const { addIdea, updateIdea } = useIdeaMutations();
+    // Combine loading states
+    const isLoading = addIdea.isPending || updateIdea.isPending;
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
 
         try {
             const isEditing = initialData && initialData.id;
@@ -93,29 +95,24 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 requiresTravel: formData.requiresTravel
             };
 
-            let res;
             if (isEditing) {
-                res = await updateIdea(initialData.id, apiBody);
+                await updateIdea.mutateAsync({ id: initialData.id, data: apiBody });
+                showSuccess("Idea updated successfully!");
             } else {
-                res = await createIdea(apiBody);
-            }
-
-            if (res.success) {
+                await addIdea.mutateAsync(apiBody);
                 if (isCommunitySubmission) {
                     showSuccess("🚀 Suggestion sent! The jar admin will review your idea soon.");
                 } else {
-                    showSuccess(isEditing ? "Idea updated successfully!" : "Idea added to jar!");
+                    showSuccess("Idea added to jar!");
                 }
-                if (onSuccess) onSuccess();
-                onClose();
-            } else {
-                showError(res.error || "Failed to save idea");
             }
+
+            if (onSuccess) onSuccess();
+            onClose();
+
         } catch (error) {
             console.error(error);
-            showError("Error saving idea");
-        } finally {
-            setIsLoading(false);
+            // Error toast handled by mutation hook
         }
     };
 

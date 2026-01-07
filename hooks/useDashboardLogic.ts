@@ -8,7 +8,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { trackEvent } from "@/lib/analytics";
 import { SoundEffects, triggerHaptic } from "@/lib/feedback";
 import { spinJar } from "@/app/actions/spin";
-import { deleteIdea } from "@/app/actions/ideas";
+import { useIdeaMutations } from "@/hooks/mutations/useIdeaMutations";
 import { signOut } from "next-auth/react";
 import { getApiUrl } from "@/lib/utils";
 import { showSuccess, showError } from "@/lib/toast";
@@ -226,19 +226,17 @@ export function useDashboardLogic() {
         }
     };
 
+    const { deleteIdea } = useIdeaMutations();
+
     const handleDeleteClick = (id: string, e?: React.MouseEvent) => {
         e?.stopPropagation();
         openModal('DELETE_CONFIRM', {
             onConfirm: async () => {
                 try {
-                    const res = await deleteIdea(id);
-                    if (res.success) {
-                        fetchIdeas();
-                    } else {
-                        showError(`Failed: ${res.error}`);
-                    }
+                    await deleteIdea.mutateAsync(id);
+                    showSuccess("Idea deleted");
                 } catch (error: any) {
-                    showError(`Error: ${error.message}`);
+                    // Error handled by mutation hook
                 }
             }
         });
