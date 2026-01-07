@@ -95,87 +95,102 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
 
         const rect = highlightedElement.getBoundingClientRect();
         const tooltipOffset = 20;
-        const tooltipWidth = 400; // Approximate max-width
-        const tooltipHeight = 300; // Approximate height
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const padding = 20; // Padding from viewport edges
+        const padding = 16; // 1rem in pixels
+
+        // Calculate actual tooltip width based on viewport
+        const tooltipWidth = Math.min(448, viewportWidth - (padding * 2)); // max-w-md is 448px
+        const tooltipHeight = 300; // Approximate height
 
         let position: { top?: string; left?: string; bottom?: string; right?: string; transform: string } = {
             transform: 'translate(0, 0)'
         };
 
-        switch (currentStep.position) {
-            case 'top':
-                // Check if there's room above
-                if (rect.top - tooltipHeight - tooltipOffset >= padding) {
-                    position.top = `${rect.top - tooltipOffset}px`;
-                    position.left = `${rect.left + rect.width / 2}px`;
-                    position.transform = 'translate(-50%, -100%)';
-                } else {
-                    // Fallback to bottom
-                    position.top = `${rect.bottom + tooltipOffset}px`;
-                    position.left = `${rect.left + rect.width / 2}px`;
-                    position.transform = 'translate(-50%, 0)';
-                }
-                break;
-            case 'bottom':
-                // Check if there's room below
-                if (rect.bottom + tooltipHeight + tooltipOffset <= viewportHeight - padding) {
-                    position.top = `${rect.bottom + tooltipOffset}px`;
-                    position.left = `${rect.left + rect.width / 2}px`;
-                    position.transform = 'translate(-50%, 0)';
-                } else {
-                    // Fallback to top
-                    position.top = `${rect.top - tooltipOffset}px`;
-                    position.left = `${rect.left + rect.width / 2}px`;
-                    position.transform = 'translate(-50%, -100%)';
-                }
-                break;
-            case 'left':
-                // Check if there's room on the left
-                if (rect.left - tooltipWidth - tooltipOffset >= padding) {
-                    position.top = `${rect.top + rect.height / 2}px`;
-                    position.left = `${rect.left - tooltipOffset}px`;
-                    position.transform = 'translate(-100%, -50%)';
-                } else {
-                    // Fallback to right
-                    position.top = `${rect.top + rect.height / 2}px`;
-                    position.left = `${rect.right + tooltipOffset}px`;
-                    position.transform = 'translate(0, -50%)';
-                }
-                break;
-            case 'right':
-                // Check if there's room on the right
-                if (rect.right + tooltipWidth + tooltipOffset <= viewportWidth - padding) {
-                    position.top = `${rect.top + rect.height / 2}px`;
-                    position.left = `${rect.right + tooltipOffset}px`;
-                    position.transform = 'translate(0, -50%)';
-                } else {
-                    // Fallback to left
-                    position.top = `${rect.top + rect.height / 2}px`;
-                    position.left = `${rect.left - tooltipOffset}px`;
-                    position.transform = 'translate(-100%, -50%)';
-                }
-                break;
-            default:
+        // For mobile screens, prefer top/bottom positioning and center horizontally
+        const isMobile = viewportWidth < 640; // sm breakpoint
+
+        if (isMobile) {
+            // On mobile, always center horizontally and position above or below
+            const centerX = viewportWidth / 2;
+
+            if (rect.bottom + tooltipHeight + tooltipOffset <= viewportHeight - padding) {
+                // Position below
+                position.top = `${rect.bottom + tooltipOffset}px`;
+                position.left = `${centerX}px`;
+                position.transform = 'translate(-50%, 0)';
+            } else if (rect.top - tooltipHeight - tooltipOffset >= padding) {
+                // Position above
+                position.top = `${rect.top - tooltipOffset}px`;
+                position.left = `${centerX}px`;
+                position.transform = 'translate(-50%, -100%)';
+            } else {
+                // Center on screen if no room above or below
                 position.top = '50%';
                 position.left = '50%';
                 position.transform = 'translate(-50%, -50%)';
-        }
+            }
+        } else {
+            // Desktop positioning logic
+            switch (currentStep.position) {
+                case 'top':
+                    if (rect.top - tooltipHeight - tooltipOffset >= padding) {
+                        position.top = `${rect.top - tooltipOffset}px`;
+                        position.left = `${rect.left + rect.width / 2}px`;
+                        position.transform = 'translate(-50%, -100%)';
+                    } else {
+                        position.top = `${rect.bottom + tooltipOffset}px`;
+                        position.left = `${rect.left + rect.width / 2}px`;
+                        position.transform = 'translate(-50%, 0)';
+                    }
+                    break;
+                case 'bottom':
+                    if (rect.bottom + tooltipHeight + tooltipOffset <= viewportHeight - padding) {
+                        position.top = `${rect.bottom + tooltipOffset}px`;
+                        position.left = `${rect.left + rect.width / 2}px`;
+                        position.transform = 'translate(-50%, 0)';
+                    } else {
+                        position.top = `${rect.top - tooltipOffset}px`;
+                        position.left = `${rect.left + rect.width / 2}px`;
+                        position.transform = 'translate(-50%, -100%)';
+                    }
+                    break;
+                case 'left':
+                    if (rect.left - tooltipWidth - tooltipOffset >= padding) {
+                        position.top = `${rect.top + rect.height / 2}px`;
+                        position.left = `${rect.left - tooltipOffset}px`;
+                        position.transform = 'translate(-100%, -50%)';
+                    } else {
+                        position.top = `${rect.top + rect.height / 2}px`;
+                        position.left = `${rect.right + tooltipOffset}px`;
+                        position.transform = 'translate(0, -50%)';
+                    }
+                    break;
+                case 'right':
+                    if (rect.right + tooltipWidth + tooltipOffset <= viewportWidth - padding) {
+                        position.top = `${rect.top + rect.height / 2}px`;
+                        position.left = `${rect.right + tooltipOffset}px`;
+                        position.transform = 'translate(0, -50%)';
+                    } else {
+                        position.top = `${rect.top + rect.height / 2}px`;
+                        position.left = `${rect.left - tooltipOffset}px`;
+                        position.transform = 'translate(-100%, -50%)';
+                    }
+                    break;
+                default:
+                    position.top = '50%';
+                    position.left = '50%';
+                    position.transform = 'translate(-50%, -50%)';
+            }
 
-        // Ensure horizontal position stays within viewport
-        if (position.left) {
-            const leftValue = parseInt(position.left);
-            const adjustedLeft = Math.max(padding + tooltipWidth / 2, Math.min(viewportWidth - padding - tooltipWidth / 2, leftValue));
-            position.left = `${adjustedLeft}px`;
-        }
-
-        // Ensure vertical position stays within viewport
-        if (position.top) {
-            const topValue = parseInt(position.top);
-            const adjustedTop = Math.max(padding, Math.min(viewportHeight - padding - tooltipHeight, topValue));
-            position.top = `${adjustedTop}px`;
+            // Ensure horizontal position stays within viewport (desktop only)
+            if (position.left && position.transform.includes('-50%')) {
+                const leftValue = parseInt(position.left);
+                const minLeft = padding + tooltipWidth / 2;
+                const maxLeft = viewportWidth - padding - tooltipWidth / 2;
+                const adjustedLeft = Math.max(minLeft, Math.min(maxLeft, leftValue));
+                position.left = `${adjustedLeft}px`;
+            }
         }
 
         return position;
@@ -219,8 +234,8 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                         className="absolute pointer-events-none"
                         style={{
                             ...getSpotlightStyle(),
-                            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5), 0 0 40px rgba(236, 72, 153, 0.3)',
-                            border: '3px solid rgba(236, 72, 153, 0.5)',
+                            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 60px 10px rgba(236, 72, 153, 0.6), inset 0 0 0 3px rgba(236, 72, 153, 0.8)',
+                            border: '3px solid rgba(236, 72, 153, 0.8)',
                             zIndex: 201
                         }}
                     />
@@ -233,7 +248,7 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: -20 }}
                     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="absolute pointer-events-auto max-w-md"
+                    className="absolute pointer-events-auto w-[calc(100vw-2rem)] max-w-md sm:w-full"
                     style={getTooltipPosition()}
                 >
                     <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-pink-500/30 rounded-3xl shadow-2xl shadow-pink-500/20 overflow-hidden">
