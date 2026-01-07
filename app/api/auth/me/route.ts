@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     const session = await getSession();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
         return NextResponse.json({ user: null });
     }
 

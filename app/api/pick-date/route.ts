@@ -11,7 +11,7 @@ export async function POST(request: Request) {
         const session = await getSession();
         const { maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly } = await request.json().catch(() => ({}));
 
-        if (!session?.user?.email) {
+        if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

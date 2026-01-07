@@ -5,14 +5,14 @@ import { prisma } from '@/lib/prisma';
 export async function PUT(request: Request) {
     try {
         const session = await getSession();
-        if (!session?.user?.email) {
+        if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { interests, location } = await request.json();
 
         const updatedUser = await prisma.user.update({
-            where: { email: session.user.email },
+            where: { id: session.user.id },
             data: {
                 interests,
                 homeTown: location, // Save location to homeTown field
@@ -30,7 +30,7 @@ export async function PUT(request: Request) {
 export async function PATCH(request: Request) {
     try {
         const session = await getSession();
-        if (!session?.user?.email) {
+        if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -38,12 +38,17 @@ export async function PATCH(request: Request) {
         const dataToUpdate: any = {};
 
         // Handle inconsistent naming
-        if (body.defaultLocation !== undefined) dataToUpdate.homeTown = body.defaultLocation;
-        if (body.location !== undefined) dataToUpdate.homeTown = body.location;
         if (body.interests !== undefined) dataToUpdate.interests = body.interests;
+        if (body.location !== undefined) dataToUpdate.homeTown = body.location;
+        if (body.homeTown !== undefined) dataToUpdate.homeTown = body.homeTown;
+        if (body.unitSystem !== undefined) dataToUpdate.unitSystem = body.unitSystem;
+
+        if (Object.keys(dataToUpdate).length === 0) {
+            return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+        }
 
         const updatedUser = await prisma.user.update({
-            where: { email: session.user.email },
+            where: { id: session.user.id },
             data: dataToUpdate,
         });
 

@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 export async function POST(request: Request) {
     const session = await getSession();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
         const token = crypto.randomUUID();
 
         await prisma.user.update({
-            where: { email: session.user.email },
+            where: { id: session.user.id },
             data: { premiumInviteToken: token }
         });
 

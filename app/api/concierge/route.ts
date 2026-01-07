@@ -18,13 +18,13 @@ export async function POST(request: Request) {
 
         if (!isDemoMode) {
             const session = await getSession();
-            if (!session?.user?.email) {
+            if (!session?.user?.id) {
                 return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
             }
 
             // Check premium status
             user = await prisma.user.findUnique({
-                where: { email: session.user.email },
+                where: { id: session.user.id },
                 include: {
                     memberships: { include: { jar: true } },
                     couple: true

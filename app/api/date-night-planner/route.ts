@@ -8,13 +8,13 @@ import { reliableGeminiCall } from '@/lib/gemini';
 export async function POST(request: Request) {
     try {
         const session = await getSession();
-        if (!session?.user?.email) {
+        if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         // Check premium status
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
+            where: { id: session.user.id },
             include: {
                 memberships: { include: { jar: true } },
                 couple: true

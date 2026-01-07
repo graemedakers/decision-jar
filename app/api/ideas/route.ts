@@ -123,7 +123,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
     const session = await getSession();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
