@@ -26,8 +26,8 @@ export function CollapsibleTrophyCase({ xp, level, unlockedIds }: CollapsibleTro
                         <Trophy className="w-5 h-5" />
                     </div>
                     <div className="text-left">
-                        <span className="block text-sm font-bold text-slate-900 dark:text-white">Level {level} Dashboard</span>
-                        <span className="text-xs text-slate-600 dark:text-slate-400">{unlockedIds.length} Achievements • Tap to expand</span>
+                        <span className="block text-sm font-bold text-slate-900 dark:text-white">Level {level}</span>
+                        <span className="text-xs text-slate-500">{unlockedIds.length} Achievements</span>
                     </div>
                 </div>
                 <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
