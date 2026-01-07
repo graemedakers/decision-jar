@@ -46,8 +46,8 @@ export async function DELETE(req: NextRequest, props: Context) {
 
             // 1. Remove Legacy User links
             await tx.user.updateMany({
-                where: { coupleId: jarId },
-                data: { coupleId: null }
+                where: { legacyJarId: jarId },
+                data: { legacyJarId: null }
             });
 
             // 2. Clear activeJarId for users who had this jar active

@@ -15,10 +15,10 @@ export async function POST(request: Request) {
         // Check premium status
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
-            include: { couple: true },
+            include: { legacyJar: true },
         });
 
-        if (!user || (!isCouplePremium(user.couple) && !isUserPro(user))) {
+        if (!user || (!isCouplePremium(user.legacyJar) && !isUserPro(user))) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
         }
 

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         // Fetch user for context (location, interests)
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
-            include: { couple: true },
+            include: { legacyJar: true },
         });
 
         if (!user) {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             });
         }
 
-        const coupleLocation = (user.couple as any)?.location;
+        const coupleLocation = (user.legacyJar as any)?.location;
 
         // Determine which location to use
         const location = coupleLocation || "Unknown";
