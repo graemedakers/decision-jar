@@ -183,25 +183,25 @@ function DashboardContent() {
                                 )}
                             </Button>
 
-                            <Link href="/memories" className="hidden md:block">
+                            <Link href="/memories" className="hidden md:block" aria-label="View Memories">
                                 <Button variant="outline" size="icon" className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-primary transition-colors hover:border-primary/30">
                                     <ImageIcon className="w-5 h-5" />
                                 </Button>
                             </Link>
 
-                            <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors">
+                            <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Help">
                                 <HelpCircle className="w-5 h-5" />
                             </Button>
 
-                            <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors">
+                            <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Quick Tools">
                                 <Dices className="w-5 h-5" />
                             </Button>
 
-                            <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors">
+                            <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Settings">
                                 <Settings className="w-5 h-5" />
                             </Button>
 
-                            <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-colors">
+                            <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-colors" aria-label="Logout">
                                 <LogOut className="w-5 h-5" />
                             </Button>
                         </div>
@@ -223,6 +223,7 @@ function DashboardContent() {
                                 size="icon"
                                 onClick={() => openModal('FAVORITES')}
                                 className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0 relative"
+                                aria-label="Favorites"
                             >
                                 <Heart className={`w-5 h-5 ${favoritesCount > 0 ? "text-red-500 fill-red-500" : "text-slate-400"}`} />
                                 {favoritesCount > 0 && (
@@ -232,25 +233,25 @@ function DashboardContent() {
                                 )}
                             </Button>
 
-                            <Link href="/memories" className="shrink-0">
+                            <Link href="/memories" className="shrink-0" aria-label="View Memories">
                                 <Button variant="outline" size="icon" className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
                                     <ImageIcon className="w-5 h-5 text-slate-500" />
                                 </Button>
                             </Link>
 
-                            <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0">
+                            <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Quick Tools">
                                 <Dices className="w-5 h-5 text-slate-500" />
                             </Button>
 
-                            <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0">
+                            <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Help">
                                 <HelpCircle className="w-5 h-5 text-slate-500" />
                             </Button>
 
-                            <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0">
+                            <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Settings">
                                 <Settings className="w-5 h-5 text-slate-500" />
                             </Button>
 
-                            <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-xl shrink-0 text-slate-400 hover:text-red-500">
+                            <Button variant="ghost" size="icon" onClick={handleLogout} className="w-11 h-11 rounded-xl shrink-0 text-slate-400 hover:text-red-500" aria-label="Logout">
                                 <LogOut className="w-5 h-5" />
                             </Button>
                         </div>
@@ -358,6 +359,7 @@ function DashboardContent() {
                                             className="h-14 w-14 md:h-16 md:w-16 border-2 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
                                             onClick={() => openModal('SPIN_FILTERS')}
                                             title="Filter Spin"
+                                            aria-label="Filter Spin"
                                         >
                                             <Filter className="w-6 h-6 md:w-7 md:h-7" />
                                         </Button>

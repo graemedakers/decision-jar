@@ -133,6 +133,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                         <button
                             onClick={onClose}
                             className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors z-10"
+                            aria-label="Close modal"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -375,6 +376,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                                                                             rel="noopener noreferrer"
                                                                                             className="shrink-0 p-2 bg-white/50 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 rounded-full text-secondary transition-colors"
                                                                                             title="View Info / Tickets"
+                                                                                            aria-label="View Info / Tickets"
                                                                                         >
                                                                                             <ExternalLink className="w-3 h-3" />
                                                                                         </a>
@@ -384,6 +386,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                                                                             onClick={() => onFindDining(rec.title)}
                                                                                             className="shrink-0 p-2 bg-orange-500/10 hover:bg-orange-500/20 rounded-full text-orange-400 transition-colors"
                                                                                             title="Find Food Nearby"
+                                                                                            aria-label="Find Food Nearby"
                                                                                         >
                                                                                             <Utensils className="w-3 h-3" />
                                                                                         </button>

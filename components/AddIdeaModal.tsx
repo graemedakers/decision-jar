@@ -101,6 +101,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                         <button
                             onClick={onClose}
                             className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors z-20"
+                            aria-label="Close modal"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -116,6 +117,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         disabled={isMagicLoading}
                                         className="p-1.5 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-colors disabled:opacity-50"
                                         title="Auto-fill with random idea"
+                                        aria-label="Auto-fill with random idea"
                                     >
                                         {isMagicLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
                                     </button>
