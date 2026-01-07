@@ -46,14 +46,14 @@
 
 ## 3. Testing Strategy
 
-### 3.1 Critical Path Automation
+### 3.1 Critical Path Automation (COMPLETED - Setup)
 *   **Recommendation**: Implement Playwright E2E tests for the "Cold Start" journey.
-    *   Test: Register -> Import Template -> Spin Jar.
+*   **Status**: Playwright installed and configured. Sample test created.
 *   **Why**: This is the revenue/conversion funnel. It must never break.
 
-### 3.2 Unit Tests for Logic
+### 3.2 Unit Tests for Logic (COMPLETED - Setup)
 *   **Recommendation**: Jest/Vitest for `spin.ts` (Server Action).
-    *   Test: Ensure filters (Indoor, Cost) strictly apply.
+*   **Status**: Vitest installed and configured. Sample test running.
 *   **Why**: Logic errors here frustrate users immediately.
 
 ---
