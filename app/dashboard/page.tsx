@@ -195,11 +195,27 @@ function DashboardContent() {
 
 
                         {/* Favorites */}
+                        {/* Favorites - Explicitly labeled as requested */}
                         <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openModal('FAVORITES')}
+                            className="hidden md:flex gap-2 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors relative px-3"
+                            title="Favorites"
+                        >
+                            <Heart className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Favorites</span>
+                            {favoritesCount > 0 && (
+                                <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full flex items-center justify-center shadow-sm">
+                                    {favoritesCount}
+                                </span>
+                            )}
+                        </Button>
+                        <Button // Mobile Icon Only
                             variant="outline"
                             size="icon"
                             onClick={() => openModal('FAVORITES')}
-                            className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors relative"
+                            className="flex md:hidden w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors relative"
                             title="Favorites"
                         >
                             <Heart className="w-5 h-5 text-slate-600 dark:text-slate-300" />
@@ -363,13 +379,8 @@ function DashboardContent() {
                     {/* RIGHT COLUMN: Ideas & Tools */}
                     <div className="lg:col-span-8 flex flex-col space-y-6">
 
-                        {/* Smart Tools Grid (Quick Access to Concierge/Tools) */}
-                        <SmartToolsGrid
-                            onOpenModal={openModal}
-                            isPremium={isPremium}
-                            userLocation={combinedLocation}
-                            jarTopic={jarTopic}
-                        />
+                        {/* Smart Tools Grid Removed for "Clean Home" Option 1 - Now exclusive to Explore page */}
+                        {/* <SmartToolsGrid ... /> */}
 
                         {/* Idea List / Empty State */}
                         <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-white/5 flex-1 flex flex-col overflow-hidden relative min-h-[500px]">
