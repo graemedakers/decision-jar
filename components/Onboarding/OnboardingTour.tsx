@@ -106,8 +106,9 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
         const tooltipWidth = Math.min(448, viewportWidth - (padding * 2)); // max-w-md is 448px
         const tooltipHeight = 300; // Approximate height
 
-        let position: { top?: string; left?: string; bottom?: string; right?: string; transform: string } = {
-            transform: 'translate(0, 0)'
+        let position: any = {
+            transform: 'translate(0, 0)',
+            width: '448px'
         };
 
         // For mobile screens, prefer top/bottom positioning and center horizontally
@@ -115,23 +116,26 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
 
         if (isMobile) {
             // Mobile: Snap to top or bottom based on element position
-            // This ensures visibility regardless of tooltip height
+            // Use left/right: 0 + margin: auto for robust centering without transforms
             const elementCenterY = rect.top + rect.height / 2;
             const screenCenterY = viewportHeight / 2;
 
-            position.left = '50%';
+            position.left = '16px';
+            position.right = '16px';
+            position.margin = '0 auto';
+            position.width = 'auto';
+            // Clear transform to avoid conflicts with Framer Motion
+            delete position.transform;
 
             // If element is in top half, put tooltip at bottom. Otherwise top.
             if (elementCenterY < screenCenterY) {
                 // Element is up top -> Tooltip goes to bottom
                 position.bottom = '24px';
                 position.top = 'auto'; // Clear top
-                position.transform = 'translateX(-50%)';
             } else {
                 // Element is down low -> Tooltip goes to top
                 position.top = '24px';
                 position.bottom = 'auto'; // Clear bottom
-                position.transform = 'translateX(-50%)';
             }
         } else {
             // Desktop positioning logic
@@ -197,13 +201,13 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
         }
 
         // Clamp all positions to stay within viewport bounds
-        if (position.left && !position.left.includes('%')) {
+        if (position.left && !position.left.includes('%') && position.transform) {
             const leftPx = parseFloat(position.left);
             const clampedLeft = Math.max(16, Math.min(viewportWidth - 16, leftPx));
             position.left = `${clampedLeft}px`;
         }
 
-        if (position.top && !position.top.includes('%')) {
+        if (position.top && !position.top.includes('%') && position.transform) {
             const topPx = parseFloat(position.top);
             const clampedTop = Math.max(16, Math.min(viewportHeight - 16, topPx));
             position.top = `${clampedTop}px`;
@@ -268,7 +272,6 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                     style={{
                         ...getTooltipPosition(),
                         // Width constraints - use maxWidth to ensure it never exceeds viewport
-                        width: '448px',
                         maxWidth: 'calc(100vw - 2rem)',
                         boxSizing: 'border-box',
                         ...(currentStep.position !== 'center' && {
