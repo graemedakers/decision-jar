@@ -17,6 +17,7 @@ import { usePWAHandler } from "@/hooks/features/usePWAHandler";
 import { useUrlSync } from "@/hooks/features/useUrlSync";
 import { useOnboarding } from "@/hooks/features/useOnboarding";
 import { useIdeaMutations } from "@/hooks/mutations/useIdeaMutations";
+import { useSquadMode } from "@/hooks/features/useSquadMode";
 
 export function useDashboardLogic() {
     const { openModal } = useModalSystem();
@@ -55,10 +56,28 @@ export function useDashboardLogic() {
     };
 
     // 3. Feature Composition
-    const { isSpinning, handleSpinJar } = useSpin({
+    const {
+        isSpinning,
+        handleSpinJar: _internalSpin,
+        handleExternalSpinStart,
+        handleExternalSpinComplete
+    } = useSpin({
         ideas,
         onSpinComplete: handleContentUpdate
     });
+
+    const { broadcastSpinStart, broadcastSpinResult } = useSquadMode(
+        userData?.activeJarId,
+        handleExternalSpinStart,
+        handleExternalSpinComplete
+    );
+
+    const handleSpinJar = async (filters: any = {}) => {
+        await _internalSpin(filters, {
+            onBroadcastStart: broadcastSpinStart,
+            onBroadcastResult: broadcastSpinResult
+        });
+    };
 
     const { showOnboarding, setShowOnboarding, handleCompleteOnboarding, handleSkipOnboarding } = useOnboarding({
         userData,

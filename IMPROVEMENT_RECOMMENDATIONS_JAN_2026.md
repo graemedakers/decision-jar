@@ -60,9 +60,9 @@
 
 ## 4. Feature Opportunities
 
-### 4.1 "Squad Mode" (Real-time)
-*   **Concept**: Live voting where multiple users see the same spin result at the same time.
-*   **Tech**: Use Supabase Realtime or Pusher.
+### 4.1 "Squad Mode" (Real-time) (COMPLETED - Beta)
+*   **Concept**: Live spin synchronization where multiple users see the same spin result at the same time.
+*   **Tech**: Implemented using Supabase Realtime Broadcast channels.
 
 ### 4.2 Calendar Integration
 *   **Concept**: "Push to Google Calendar" button on the Dates (Memories) page.
