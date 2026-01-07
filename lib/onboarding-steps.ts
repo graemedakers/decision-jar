@@ -42,7 +42,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         id: 'spin-jar',
         title: '🎯 Spin the Jar',
         description: 'Ready to decide? Click here to randomly select an idea from your jar. You can filter by budget, duration, and more!',
-        targetElement: '[data-tour="spin-button"]',
+        targetElement: '[data-tour="spin-button-desktop"], [data-tour="spin-button"]',
         position: 'top'
     },
     {

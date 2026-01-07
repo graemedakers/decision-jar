@@ -27,11 +27,28 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
             return;
         }
 
-        const element = document.querySelector(currentStep.targetElement) as HTMLElement;
+        // Try to find the element - handle multiple selectors for responsive elements
+        let element: HTMLElement | null = null;
+
+        // Split by comma to support multiple selectors
+        const selectors = currentStep.targetElement.split(',').map(s => s.trim());
+
+        for (const selector of selectors) {
+            const el = document.querySelector(selector) as HTMLElement;
+            // Check if element exists and is visible
+            if (el && el.offsetParent !== null) {
+                element = el;
+                break;
+            }
+        }
+
         if (element) {
             setHighlightedElement(element);
             // Scroll element into view smoothly
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            // If no element found, clear highlight but keep tooltip centered
+            setHighlightedElement(null);
         }
     }, [currentStepIndex, isOpen, currentStep]);
 
@@ -71,39 +88,90 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
 
         const rect = highlightedElement.getBoundingClientRect();
         const tooltipOffset = 20;
+        const tooltipWidth = 400; // Approximate max-width
+        const tooltipHeight = 300; // Approximate height
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const padding = 20; // Padding from viewport edges
+
+        let position: { top?: string; left?: string; bottom?: string; right?: string; transform: string } = {
+            transform: 'translate(0, 0)'
+        };
 
         switch (currentStep.position) {
             case 'top':
-                return {
-                    top: `${rect.top - tooltipOffset}px`,
-                    left: `${rect.left + rect.width / 2}px`,
-                    transform: 'translate(-50%, -100%)'
-                };
+                // Check if there's room above
+                if (rect.top - tooltipHeight - tooltipOffset >= padding) {
+                    position.top = `${rect.top - tooltipOffset}px`;
+                    position.left = `${rect.left + rect.width / 2}px`;
+                    position.transform = 'translate(-50%, -100%)';
+                } else {
+                    // Fallback to bottom
+                    position.top = `${rect.bottom + tooltipOffset}px`;
+                    position.left = `${rect.left + rect.width / 2}px`;
+                    position.transform = 'translate(-50%, 0)';
+                }
+                break;
             case 'bottom':
-                return {
-                    top: `${rect.bottom + tooltipOffset}px`,
-                    left: `${rect.left + rect.width / 2}px`,
-                    transform: 'translate(-50%, 0)'
-                };
+                // Check if there's room below
+                if (rect.bottom + tooltipHeight + tooltipOffset <= viewportHeight - padding) {
+                    position.top = `${rect.bottom + tooltipOffset}px`;
+                    position.left = `${rect.left + rect.width / 2}px`;
+                    position.transform = 'translate(-50%, 0)';
+                } else {
+                    // Fallback to top
+                    position.top = `${rect.top - tooltipOffset}px`;
+                    position.left = `${rect.left + rect.width / 2}px`;
+                    position.transform = 'translate(-50%, -100%)';
+                }
+                break;
             case 'left':
-                return {
-                    top: `${rect.top + rect.height / 2}px`,
-                    left: `${rect.left - tooltipOffset}px`,
-                    transform: 'translate(-100%, -50%)'
-                };
+                // Check if there's room on the left
+                if (rect.left - tooltipWidth - tooltipOffset >= padding) {
+                    position.top = `${rect.top + rect.height / 2}px`;
+                    position.left = `${rect.left - tooltipOffset}px`;
+                    position.transform = 'translate(-100%, -50%)';
+                } else {
+                    // Fallback to right
+                    position.top = `${rect.top + rect.height / 2}px`;
+                    position.left = `${rect.right + tooltipOffset}px`;
+                    position.transform = 'translate(0, -50%)';
+                }
+                break;
             case 'right':
-                return {
-                    top: `${rect.top + rect.height / 2}px`,
-                    left: `${rect.right + tooltipOffset}px`,
-                    transform: 'translate(0, -50%)'
-                };
+                // Check if there's room on the right
+                if (rect.right + tooltipWidth + tooltipOffset <= viewportWidth - padding) {
+                    position.top = `${rect.top + rect.height / 2}px`;
+                    position.left = `${rect.right + tooltipOffset}px`;
+                    position.transform = 'translate(0, -50%)';
+                } else {
+                    // Fallback to left
+                    position.top = `${rect.top + rect.height / 2}px`;
+                    position.left = `${rect.left - tooltipOffset}px`;
+                    position.transform = 'translate(-100%, -50%)';
+                }
+                break;
             default:
-                return {
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)'
-                };
+                position.top = '50%';
+                position.left = '50%';
+                position.transform = 'translate(-50%, -50%)';
         }
+
+        // Ensure horizontal position stays within viewport
+        if (position.left) {
+            const leftValue = parseInt(position.left);
+            const adjustedLeft = Math.max(padding + tooltipWidth / 2, Math.min(viewportWidth - padding - tooltipWidth / 2, leftValue));
+            position.left = `${adjustedLeft}px`;
+        }
+
+        // Ensure vertical position stays within viewport
+        if (position.top) {
+            const topValue = parseInt(position.top);
+            const adjustedTop = Math.max(padding, Math.min(viewportHeight - padding - tooltipHeight, topValue));
+            position.top = `${adjustedTop}px`;
+        }
+
+        return position;
     };
 
     const getSpotlightStyle = () => {
@@ -181,10 +249,10 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                                     <div
                                         key={index}
                                         className={`h-1 rounded-full transition-all ${index === currentStepIndex
-                                                ? 'w-8 bg-pink-500'
-                                                : index < currentStepIndex
-                                                    ? 'w-4 bg-pink-500/50'
-                                                    : 'w-4 bg-slate-700'
+                                            ? 'w-8 bg-pink-500'
+                                            : index < currentStepIndex
+                                                ? 'w-4 bg-pink-500/50'
+                                                : 'w-4 bg-slate-700'
                                             }`}
                                     />
                                 ))}

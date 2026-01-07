@@ -667,6 +667,7 @@ function DashboardContent() {
 
                             {!isVotingMode && !isAllocationMode && !isAdminPickMode && !userData?.isCommunityJar && (
                                 <motion.button
+                                    data-tour="spin-button-desktop"
                                     whileHover={availableIdeasCount > 0 ? { scale: 1.02 } : {}}
                                     whileTap={availableIdeasCount > 0 ? { scale: 0.95 } : {}}
                                     onClick={() => availableIdeasCount > 0 && openModal('FILTERS')}
