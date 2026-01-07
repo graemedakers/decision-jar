@@ -20,6 +20,9 @@ A premium, interactive onboarding tutorial has been added to guide new users thr
 - **Automatic Trigger**: Shows on first visit (1 second delay for page to settle)
 - **Spotlight Effect**: Highlights active UI elements with pink glow
 - **Smart Positioning**: Tooltips auto-position around target elements
+- **Viewport Boundary Detection**: Tooltips stay within screen bounds and flip sides intelligently
+- **Responsive Element Support**: Handles mobile/desktop variants automatically
+- **Visibility Detection**: Only highlights elements that are actually visible
 - **Skip Anytime**: Users can skip or close the tour
 - **Manual Restart**: "Restart Tour" button in Settings modal
 - **Progress Indicator**: Visual progress dots show current step

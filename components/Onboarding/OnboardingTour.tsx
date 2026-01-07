@@ -21,6 +21,13 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
     const isFirstStep = currentStepIndex === 0;
     const isLastStep = currentStepIndex === steps.length - 1;
 
+    // Reset to first step whenever the tour is opened
+    useEffect(() => {
+        if (isOpen) {
+            setCurrentStepIndex(0);
+        }
+    }, [isOpen]);
+
     useEffect(() => {
         if (!isOpen || !currentStep.targetElement) {
             setHighlightedElement(null);
