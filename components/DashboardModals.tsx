@@ -239,6 +239,7 @@ export function DashboardModals({
                 onClose={closeModal}
                 currentJarId={userData?.activeJarId}
                 currentJarName={userData?.jarName || null}
+                onSuccess={handleContentUpdate}
             />
 
             <DateNightPlannerModal

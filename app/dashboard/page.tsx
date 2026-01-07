@@ -111,10 +111,11 @@ function DashboardContent() {
     const isAdminPickMode = jarSelectionMode === 'ADMIN_PICK';
 
     const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
+    const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas;
     const showAdminStatus = isAdminPickMode;
-    const showStatusSection = showNoJars || showAdminStatus;
+    const showStatusSection = showNoJars || showAdminStatus || showEmptyState;
 
-    const availableIdeasCount = ideas.filter(i => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
+    const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
     const combinedLocation = userLocation || "";
 
     const handleCloseLevelUp = () => {
@@ -280,7 +281,15 @@ function DashboardContent() {
                             {showStatusSection && (
                                 <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                     {showNoJars && (
-                                        <DashboardOnboarding onJarCreated={refreshUser} isPro={isPremium} topic={jarTopic} />
+                                        <DashboardOnboarding onJarCreated={handleContentUpdate} isPro={isPremium} topic={jarTopic} />
+                                    )}
+                                    {showEmptyState && (
+                                        <EnhancedEmptyState
+                                            onAddIdea={() => openModal('ADD_IDEA')}
+                                            onSurpriseMe={() => openModal('SURPRISE_ME')}
+                                            onBrowseTemplates={() => openModal('TEMPLATE_BROWSER')}
+                                            onTakeQuiz={() => setShowQuiz(true)}
+                                        />
                                     )}
                                     {showAdminStatus && (
                                         <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 rounded-[2.5rem] flex items-start gap-4">
@@ -299,74 +308,75 @@ function DashboardContent() {
                             )}
                         </div>
 
-                        {/* The Jar Experience */}
-                        <div className="relative z-10 w-full flex flex-col items-center py-4 md:py-8 animate-in fade-in zoom-in duration-1000">
-                            <motion.div
-                                animate={isSpinning
-                                    ? { rotate: [0, -8, 8, -8, 8, 0], scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 0.5 } }
-                                    : { rotate: 0, scale: 1 }
-                                }
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                className="relative mb-8 md:mb-12"
-                            >
-                                <div className="scale-110 md:scale-[1.35] transform transition-transform duration-700 ease-out">
-                                    <Jar3D />
-                                </div>
+                        {!showEmptyState && !showNoJars && (
+                            <div className="relative z-10 w-full flex flex-col items-center py-4 md:py-8 animate-in fade-in zoom-in duration-1000">
+                                <motion.div
+                                    animate={isSpinning
+                                        ? { rotate: [0, -8, 8, -8, 8, 0], scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 0.5 } }
+                                        : { rotate: 0, scale: 1 }
+                                    }
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="relative mb-8 md:mb-12"
+                                >
+                                    <div className="scale-110 md:scale-[1.35] transform transition-transform duration-700 ease-out">
+                                        <Jar3D />
+                                    </div>
 
-                                <div className="absolute top-8 md:top-10 right-4 md:right-0 z-20">
-                                    <motion.div
-                                        initial={{ scale: 0, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        transition={{ delay: 0.5, type: "spring" }}
-                                        className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 py-2 rounded-2xl text-[10px] md:text-xs font-black shadow-2xl border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white flex items-center gap-2 ring-4 ring-white/10"
-                                    >
-                                        <Layers className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
-                                        {availableIdeasCount} Ideas
-                                    </motion.div>
-                                </div>
-                            </motion.div>
+                                    <div className="absolute top-8 md:top-10 right-4 md:right-0 z-20">
+                                        <motion.div
+                                            initial={{ scale: 0, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            transition={{ delay: 0.5, type: "spring" }}
+                                            className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 py-2 rounded-2xl text-[10px] md:text-xs font-black shadow-2xl border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white flex items-center gap-2 ring-4 ring-white/10"
+                                        >
+                                            <Layers className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+                                            {availableIdeasCount} Ideas
+                                        </motion.div>
+                                    </div>
+                                </motion.div>
 
-                            {/* Main Spin Action */}
-                            {!isVotingMode && !isAdminPickMode && (
-                                <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
-                                    <Button
-                                        size="lg"
-                                        className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
-                                        onClick={() => handleSpinJar()}
-                                        disabled={ideas.length === 0 || isSpinning}
-                                    >
-                                        {isSpinning ? (
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                                                <span>Spinning...</span>
-                                            </div>
-                                        ) : "Spin the Jar!"}
-                                    </Button>
+                                {/* Main Spin Action */}
+                                {!isVotingMode && !isAdminPickMode && (
+                                    <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
+                                        <Button
+                                            size="lg"
+                                            className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
+                                            onClick={() => handleSpinJar()}
+                                            disabled={ideas.length === 0 || isSpinning}
+                                        >
+                                            {isSpinning ? (
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    <span>Spinning...</span>
+                                                </div>
+                                            ) : "Spin the Jar!"}
+                                        </Button>
 
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-14 w-14 md:h-16 md:w-16 border-2 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
-                                        onClick={() => openModal('SPIN_FILTERS')}
-                                        title="Filter Spin"
-                                    >
-                                        <Filter className="w-6 h-6 md:w-7 md:h-7" />
-                                    </Button>
-                                </div>
-                            )}
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className="h-14 w-14 md:h-16 md:w-16 border-2 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
+                                            onClick={() => openModal('SPIN_FILTERS')}
+                                            title="Filter Spin"
+                                        >
+                                            <Filter className="w-6 h-6 md:w-7 md:h-7" />
+                                        </Button>
+                                    </div>
+                                )}
 
-                            {isVotingMode && userData && (
-                                <div className="w-full max-w-2xl animate-in zoom-in-95 duration-500">
-                                    <VotingManager
-                                        jarId={userData.activeJarId || ''}
-                                        userId={userData.id}
-                                        isAdmin={userData.memberships?.[0]?.role === 'ADMIN'}
-                                        onVoteComplete={handleContentUpdate}
-                                        onAddIdea={() => openModal('ADD_IDEA')}
-                                    />
-                                </div>
-                            )}
-                        </div>
+                                {isVotingMode && userData && (
+                                    <div className="w-full max-w-2xl animate-in zoom-in-95 duration-500">
+                                        <VotingManager
+                                            jarId={userData.activeJarId || ''}
+                                            userId={userData.id}
+                                            isAdmin={userData.memberships?.[0]?.role === 'ADMIN'}
+                                            onVoteComplete={handleContentUpdate}
+                                            onAddIdea={() => openModal('ADD_IDEA')}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

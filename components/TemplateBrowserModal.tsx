@@ -14,6 +14,7 @@ interface TemplateBrowserModalProps {
     currentJarId?: string | null;
     currentJarName?: string | null;
     hasJars?: boolean;
+    onSuccess?: () => void;
 }
 
 export function TemplateBrowserModal({
@@ -21,7 +22,8 @@ export function TemplateBrowserModal({
     onClose,
     currentJarId = null,
     currentJarName = null,
-    hasJars = false
+    hasJars = false,
+    onSuccess
 }: TemplateBrowserModalProps) {
     const router = useRouter();
     const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null);
@@ -80,6 +82,7 @@ export function TemplateBrowserModal({
 
             // Close modal and navigate to the new jar
             onClose();
+            onSuccess?.();
             router.refresh(); // Refresh to show new jar in list
 
             // Small delay to allow refresh, then set active jar
@@ -112,6 +115,7 @@ export function TemplateBrowserModal({
 
             // Close modal and refresh to show new ideas
             onClose();
+            onSuccess?.();
             router.refresh();
 
             // Show success message
