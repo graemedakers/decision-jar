@@ -12,6 +12,7 @@ interface GenerateOptions {
     apiKey?: string;
     models?: string[];
     temperature?: number;
+    jsonMode?: boolean; // New option
 }
 
 /**
@@ -35,15 +36,20 @@ export async function reliableGeminiCall<T>(prompt: string, options: GenerateOpt
             // Google Search Tool is only supported on some models, but 1.5-flash and pro support it.
             // gemini-1.0-pro might not support it well with JSON mode, but we will try.
 
+            const body: any = {
+                contents: [{ parts: [{ text: prompt }] }],
+                tools: [{ google_search: {} }]
+            };
+
+            // Enforce JSON mode if requested
+            if (options.jsonMode) {
+                body.generationConfig = { responseMimeType: "application/json" };
+            }
+
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    tools: [{ google_search: {} }]
-                    // REMOVED: generationConfig with responseMimeType: "application/json" 
-                    // because it often conflicts with Search Grounding on some models.
-                })
+                body: JSON.stringify(body)
             });
 
             if (!response.ok) {

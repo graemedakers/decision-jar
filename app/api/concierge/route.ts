@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
 
         // 8. Call AI (Using centralized reliable helper)
         try {
-            const jsonResponse = await reliableGeminiCall(prompt);
+            const jsonResponse = await reliableGeminiCall(prompt, { jsonMode: true });
             return NextResponse.json(jsonResponse);
         } catch (genError: any) {
             console.error("Concierge AI Failed:", genError);
