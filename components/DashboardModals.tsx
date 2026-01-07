@@ -270,11 +270,13 @@ export function DashboardModals({
                 onConfirm={modalProps?.onConfirm}
             />
 
-            <TrialExpiredModal
-                hasPaid={hasPaid}
-                isTrialExpired={coupleCreatedAt ? (Math.ceil(Math.abs(new Date().getTime() - new Date(coupleCreatedAt).getTime()) / (1000 * 60 * 60 * 24)) > 14) : false}
-                isPremiumCandidate={isPremium}
-            />
+            {!isPremium && !hasPaid && (
+                <TrialExpiredModal
+                    hasPaid={hasPaid}
+                    isTrialExpired={coupleCreatedAt ? (Math.ceil(Math.abs(new Date().getTime() - new Date(coupleCreatedAt).getTime()) / (1000 * 60 * 60 * 24)) > 14) : false}
+                    isPremiumCandidate={isPremium}
+                />
+            )}
 
             {userData?.activeJarId && (
                 <CommunityAdminModal
