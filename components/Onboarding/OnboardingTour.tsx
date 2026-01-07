@@ -237,7 +237,7 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm pointer-events-auto"
+                    className="absolute inset-0 bg-slate-950/40 pointer-events-auto"
                     onClick={handleSkip}
                 />
 
@@ -267,15 +267,12 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                     className="fixed pointer-events-auto"
                     style={{
                         ...getTooltipPosition(),
-                        // Ensure tooltip never goes off-screen
-                        left: currentStep.position === 'center' ? '50%' : undefined,
+                        // Width constraints - use maxWidth to ensure it never exceeds viewport
+                        width: '448px',
                         maxWidth: 'calc(100vw - 2rem)',
-                        width: currentStep.position === 'center' ? 'calc(100vw - 2rem)' : 'auto',
-                        maxHeight: 'calc(100vh - 2rem)',
-                        // Add constraints for non-centered tooltips
+                        boxSizing: 'border-box',
                         ...(currentStep.position !== 'center' && {
-                            minWidth: '280px',
-                            width: 'min(calc(100vw - 2rem), 448px)'
+                            minWidth: '280px'
                         })
                     }}
                 >
@@ -309,7 +306,7 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
                             </div>
 
                             {/* Content */}
-                            <h3 className="text-2xl font-black text-white mb-3 pr-8">
+                            <h3 className="text-2xl font-black text-white mb-3 pr-8 break-words">
                                 {currentStep.title}
                             </h3>
                             <p className="text-slate-300 text-sm leading-relaxed mb-6">
