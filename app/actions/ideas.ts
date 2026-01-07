@@ -27,7 +27,7 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
     // Priority: 1. activeJarId, 2. First membership, 3. Legacy coupleId
     const currentJarId = user.activeJarId ||
         (user.memberships?.[0]?.jarId) ||
-        user.coupleId;
+        user.legacyJarId;
 
     if (!currentJarId) {
         return { success: false, error: 'No active jar', status: 400 };

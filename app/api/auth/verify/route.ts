@@ -31,7 +31,7 @@ export async function GET(request: Request) {
                         id: user.id,
                         email: user.email,
                         name: user.name,
-                        jarId: user.activeJarId || user.coupleId,
+                        jarId: user.activeJarId || user.legacyJarId,
                         activeJarId: user.activeJarId
                     });
                     return NextResponse.redirect(new URL('/dashboard', request.url));
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
             id: updatedUser.id,
             email: updatedUser.email,
             name: updatedUser.name,
-            jarId: updatedUser.activeJarId || updatedUser.coupleId,
+            jarId: updatedUser.activeJarId || updatedUser.legacyJarId,
             activeJarId: updatedUser.activeJarId
         });
 

@@ -45,7 +45,7 @@ export async function POST(request: Request) {
             id: user.id,
             email: user.email,
             name: user.name,
-            jarId: user.activeJarId || user.coupleId, // Fallback to legacy coupleId if activeJarId is null
+            jarId: user.activeJarId || user.legacyJarId, // Fallback to legacy coupleId if activeJarId is null
             activeJarId: user.activeJarId
         });
 

@@ -16,7 +16,7 @@ export async function PUT(request: Request) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const currentJarId = user.activeJarId || user.coupleId;
+    const currentJarId = user.activeJarId || user.legacyJarId;
 
     if (!currentJarId) {
         return NextResponse.json({ error: 'No active jar' }, { status: 400 });

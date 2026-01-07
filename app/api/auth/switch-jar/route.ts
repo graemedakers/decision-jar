@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         // Ideally we should rely on membership since migration script ran. 
         // But let's check legacy just in case if membership fails but user.coupleId matches.
         const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-        const isLegacyCouple = user?.coupleId === jarId;
+        const isLegacyCouple = user?.legacyJarId === jarId;
 
         if (!membership && !isLegacyCouple) {
             return NextResponse.json({ error: "You are not a member of this jar." }, { status: 403 });

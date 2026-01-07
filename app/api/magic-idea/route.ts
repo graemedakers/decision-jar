@@ -15,7 +15,7 @@ export async function POST(request: Request) {
             where: { id: session.user.id },
             include: {
                 memberships: { include: { jar: true } },
-                couple: true
+                legacyJar: true
             },
         });
 
@@ -23,8 +23,8 @@ export async function POST(request: Request) {
         if (user) {
             if (user.activeJarId) {
                 activeJar = user.memberships.find(m => m.jarId === user.activeJarId)?.jar;
-            } else if (user.coupleId) {
-                activeJar = user.couple;
+            } else if (user.legacyJarId) {
+                activeJar = user.legacyJar;
             } else if (user.memberships.length > 0) {
                 activeJar = user.memberships[0].jar;
             }
