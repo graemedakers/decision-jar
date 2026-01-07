@@ -99,3 +99,10 @@ Test these critical paths:
     - Updated `lib/gemini.ts` to support `jsonMode: true`.
     - Resolved API conflict by disabling Google Search tool when strict JSON mode is requested.
   - **Status:** **Verified & Fixed** (User confirmed functionality).
+- [x] **Fix Concierge UI Bugs**
+  - **Issue:** User location not populating; Modal closing unexpectedly on action.
+  - **Fix:** 
+    - Fixed `GenericConciergeModal` state reset logic.
+    - Added real-time location sync from Settings.
+    - Fixed race condition in `useConciergeActions` that was closing the modal before `DateReveal` could open.
+  - **Status:** **Verified & Fixed**.
