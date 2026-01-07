@@ -100,3 +100,61 @@ const AddIdeaModal = dynamic(() => import('@/components/AddIdeaModal'), { ssr: f
 ### Phase 3: Modernization
 1. **Zustand Integration**: Replace `useUser` and `useIdeas` prop drilling with a global store.
 2. **Auth Standardization**: Migrate fully to NextAuth v5.
+
+---
+
+## 6. Quick Tools Accessibility Review
+
+### 6.1. Feature Status
+**Finding**: The Quick Tools feature (Coin Flip & Dice Roll) is **FULLY IMPLEMENTED** but **NOT ACCESSIBLE** to users.
+
+**Evidence**:
+- ✅ `QuickDecisionsModal.tsx`: Complete implementation with animations, gamification tracking
+- ✅ `HelpModal.tsx`: Documentation exists explaining the feature (line 591-612)
+- ✅ Modal is registered in `ModalProvider.tsx` and `DashboardModals.tsx`
+- ❌ **NO TRIGGER**: Zero instances of `openModal('QUICK_TOOLS')` found in codebase
+- ❌ **DOCUMENTATION MISMATCH**: Help text says "Click the dice icon in the top right" but no such button exists
+
+### 6.2. User Value Assessment
+
+**Benefits of Making This Accessible**:
+1. **Low Cognitive Load**: Simple binary decisions (coin flip) or small range decisions (dice) don't require the overhead of creating jar ideas
+2. **Instant Gratification**: ~50% of user sessions may need quick decisions (who pays, who chooses, etc.)
+3. **Engagement Hook**: Quick tools can drive daily active usage even when users don't want to "spin the jar"
+4. **Gamification Synergy**: Already integrated with achievement system (`recordAction('QUICK_TOOL_USED')`)
+5. **Feature Parity**: Similar apps (decision apps, group activity apps) commonly include these as baseline utilities
+
+**Risk of NOT Including**:
+- Users may leave for competitor apps when needing simple yes/no decisions
+- Missed gamification opportunities (achievements like "Flip 10 coins", "Lucky roller")
+- Documentation already promises this feature to users
+
+### 6.3. Implementation Recommendation
+
+**Priority**: **MEDIUM-HIGH** (Feature is 99% complete, minimal effort required)
+
+**Solution**: Add a header button to trigger the Quick Tools modal
+
+**Proposed Location Options**:
+1. **Header Utility Icons** (Recommended): Add dice icon next to Settings/Help icons in `DashboardHeader.tsx`
+2. **Bottom Navigation**: Add as 5th tab on mobile (may clutter)
+3. **Long-press Spin Button**: Alternative gesture (less discoverable)
+
+**Estimated Effort**: 15 minutes (single button + one line to call `openModal`)
+
+**Code Change Required**:
+```typescript
+// In DashboardHeader.tsx or similar
+<button onClick={() => openModal('QUICK_TOOLS')}>
+  <Dices className="w-5 h-5" />
+</button>
+```
+
+### 6.4. Recommendation
+**SHIP IT**: The Quick Tools feature is polished, documented, and ready. Adding the trigger button will:
+- Increase user engagement
+- Fulfill documentation promises
+- Leverage existing gamification hooks
+- Require minimal development time
+
+**Alternative**: If not shipping immediately, **remove the documentation** from `HelpModal.tsx` to prevent user confusion.

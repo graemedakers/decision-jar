@@ -45,9 +45,9 @@ export function QuickDecisionsModal({ isOpen, onClose }: QuickDecisionsModalProp
 
         // Randomize outcome
         const outcome = Math.random() > 0.5 ? "HEADS" : "TAILS";
-        const totalRotation = 1800 + (outcome === "HEADS" ? 0 : 180); // 5 full spins + outcome
+        const targetRotation = (rotation - (rotation % 360)) + 1800 + (outcome === "HEADS" ? 0 : 180);
 
-        setRotation(prev => prev + totalRotation);
+        setRotation(targetRotation);
 
         setTimeout(() => {
             setResult(outcome);
@@ -108,10 +108,9 @@ export function QuickDecisionsModal({ isOpen, onClose }: QuickDecisionsModalProp
                                 {activeTool === "COIN" && (
                                     <div className="perspective-1000 w-full flex flex-col items-center gap-8">
                                         <motion.div
-                                            animate={{ rotateY: isAnimating ? rotation : 0 }}
+                                            animate={{ rotateY: rotation }}
                                             transition={{ duration: 1.5, ease: "circOut" }}
-                                            style={{ transformStyle: "preserve-3d" }}
-                                            className="w-32 h-32 relative"
+                                            className="w-32 h-32 relative preserve-3d"
                                         >
                                             {/* Front (Heads) */}
                                             <div className="absolute inset-0 w-full h-full rounded-full bg-yellow-400 border-4 border-yellow-500 shadow-xl flex items-center justify-center backface-hidden">

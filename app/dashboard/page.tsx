@@ -146,7 +146,7 @@ function DashboardContent() {
     };
 
     return (
-        <main className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8 pb-32 relative overflow-hidden w-full transition-colors duration-500">
+        <main className="page-with-nav min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8 relative overflow-hidden w-full transition-colors duration-500">
             {/* Ambient Background Elements */}
             <div className="fixed inset-0 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full animate-pulse-slow" />
@@ -156,7 +156,7 @@ function DashboardContent() {
 
             <div className="max-w-7xl mx-auto relative z-10">
                 {/* HEADER */}
-                <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 md:mt-4">
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-3">
                             <div className="relative">
@@ -242,6 +242,7 @@ function DashboardContent() {
                             size="icon"
                             onClick={() => openModal('HELP')}
                             className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                            title="Help Center"
                         >
                             <HelpCircle className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                         </Button>
@@ -249,8 +250,19 @@ function DashboardContent() {
                         <Button
                             variant="outline"
                             size="icon"
+                            onClick={() => openModal('QUICK_TOOLS')}
+                            className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                            title="Quick Decisions"
+                        >
+                            <Dices className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            size="icon"
                             onClick={() => openModal('SETTINGS')}
                             className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                            title="Settings"
                         >
                             <Settings className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                         </Button>
