@@ -109,5 +109,5 @@ export const SELECTION_MODES = {
 } as const;
 
 export type ActionResponse<T = void> =
-    | ({ success: true } & T)
+    | (T extends void ? { success: true } : { success: true } & T)
     | { success: false; error: string; status?: number };

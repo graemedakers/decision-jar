@@ -63,7 +63,8 @@ As an administrator, you can click the **"Members"** button next to a jar to:
 The Dashboard is your command center.
 - **The Jar:** A visual representation that fills up as you add more ideas.
 - **Level Banner:** Shows your rank, XP progress, and earned Trophies.
-- **Jar Tools:** Quick access to "Spin Jar", "Add Idea", and all Concierge/Planner tools.
+- **Jar Tools:** Quick access to "Spin Jar" and "Add Idea".
+- **Explore Tab:** Your destination for all Concierge Services and Planners.
 - **Ideas List:** Quick view of what's currently "In the Jar".
 - **Memories/Vault:** A history of your completed activities.
 

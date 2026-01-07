@@ -4,10 +4,12 @@ Decision Jar is a powerful, interactive tool designed to end indecision. Whether
 
 ## 🚀 Key Features
 
+- **Clean Dashboard**: Focused interface for your jar and ideas, with instant access to spin, add, and favorites.
+- **Explore Tab**: Dedicated discovery space for all AI planners and concierge services.
 - **Classic Spin**: Randomly select an idea from your jar based on budget, time, and energy filters.
 - **Task Allocation**: Distribute chores or responsibilities fairly and privately among group members.
-- **AI Planners**: Generate comprehensive itineraries for weekends and nights out.
-- **Concierge Services**: AI-powered scouts for dining, nightlife, and local events.
+- **AI Planners**: Generate comprehensive itineraries for weekends, nights out, and catering events.
+- **Concierge Services**: AI-powered scouts for dining, nightlife, movies, hotels, and local events.
 - **Gamification**: Earn XP and level up as you make decisions and complete activities.
 
 ## 🛠️ Getting Started

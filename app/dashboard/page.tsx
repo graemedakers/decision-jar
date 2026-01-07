@@ -434,10 +434,10 @@ function DashboardContent() {
                                                     <div className="flex-1 min-w-0">
                                                         <h3 className="font-semibold text-slate-900 dark:text-white truncate pr-6">{idea.title || idea.description}</h3>
 
-                                                        {idea.details && typeof idea.details === 'object' && idea.details.location && (
+                                                        {idea.details && typeof idea.details === 'object' && (idea.details as any).location && (
                                                             <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mt-1">
                                                                 <div className="w-1 h-1 rounded-full bg-slate-300" />
-                                                                {idea.details.location}
+                                                                {(idea.details as any).location}
                                                             </div>
                                                         )}
 

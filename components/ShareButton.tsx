@@ -95,7 +95,7 @@ export function ShareButton({ title, description, url, className = '', source = 
                     <span>Copy Link Only</span>
                 </DropdownMenuItem>
 
-                {typeof navigator !== 'undefined' && navigator.share && (
+                {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
                     <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
