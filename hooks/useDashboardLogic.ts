@@ -130,6 +130,21 @@ export function useDashboardLogic() {
         }
     }, [refreshUser]);
 
+    // Deep Linking: Open Idea
+    useEffect(() => {
+        const ideaId = searchParams?.get('ideaId');
+        if (ideaId && !isLoadingIdeas && ideas.length > 0) {
+            const targetIdea = ideas.find((i: any) => i.id === ideaId);
+            if (targetIdea) {
+                openModal('DATE_REVEAL', { idea: targetIdea, isViewOnly: true });
+                // Clean URL
+                const newParams = new URLSearchParams(searchParams.toString());
+                newParams.delete('ideaId');
+                window.history.replaceState({}, '', `${window.location.pathname}?${newParams.toString()}`);
+            }
+        }
+    }, [searchParams, isLoadingIdeas, ideas, openModal]);
+
     // 5. Handlers
     const handleLogout = async () => {
         await signOut({ redirect: false });

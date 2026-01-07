@@ -37,9 +37,9 @@
 *   **Solution**: precise `ErrorBoundaries` around the Dashboard and Modal implementation.
 *   **Benefit**: Users can recover (e.g., "Reload Jar") instead of refreshing the browser.
 
-### 2.3 Deep Linking
+### 2.3 Deep Linking (COMPLETED)
 *   **Opportunity**: Allow users to share specific ideas or stats.
-*   **Implementation**: Routes like `/jar/[id]/idea/[ideaId]` that open the modal on load.
+*   **Implementation**: Routes like `/jar/[id]/idea/[ideaId]` (Simulated via `?ideaId=xyz` query param handling).
 *   **Benefit**: Improves shareability and external engagement.
 
 ---
