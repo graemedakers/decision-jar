@@ -213,12 +213,16 @@ function DashboardContent() {
                     <div className="flex md:hidden items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
                         <Button
                             variant="outline"
-                            size="sm"
+                            size="icon"
                             onClick={() => openModal('FAVORITES')}
-                            className="bg-white dark:bg-slate-900 flex items-center gap-2 h-10 px-4 rounded-xl border-slate-200 dark:border-white/10 shrink-0"
+                            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0 relative"
                         >
                             <Heart className={`w-4 h-4 ${favoritesCount > 0 ? "text-red-500 fill-red-500" : "text-slate-400"}`} />
-                            <span className="text-xs font-bold">{favoritesCount} Favorites</span>
+                            {favoritesCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full border-2 border-white dark:border-slate-900">
+                                    {favoritesCount}
+                                </span>
+                            )}
                         </Button>
 
                         <Link href="/memories" className="shrink-0">
