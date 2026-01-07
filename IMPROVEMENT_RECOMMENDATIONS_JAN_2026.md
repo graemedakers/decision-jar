@@ -4,21 +4,21 @@
 
 ## 1. Architecture & Code Quality
 
-### 1.1 Unify AI Concierge Endpoints (High Priority)
+### 1.1 Unify AI Concierge Endpoints (COMPLETED)
 *   **Current State**: 12+ separate API routes (`dining-concierge`, `movie-concierge`, etc.) with 90% duplicated logic.
 *   **Recommendation**: Create a single `api/concierge/generate` endpoint.
 *   **Implementation**: Pass `mode` or `configId` in the request body. Start using the `ConciergeConfig` object to dynamically select system prompts.
 *   **Benefit**: Reduces maintenance burden by 90%. Fix a bug in one agent, fix it in all.
 
-### 1.2 Refactor `useDashboardLogic` (Medium Priority)
+### 1.2 Refactor `useDashboardLogic` (COMPLETED)
 *   **Current State**: A monolithic hook managing Modals, Data Fetching, PWA Shortcuts, Auth Redirects, and Confetti.
 *   **Recommendation**: Split into specialized hooks:
-    *   `useDashboardData()`: Pure data fetching.
-    *   `useJarActions()`: Spin, Add, Delete handlers.
+    *   `useDashboardData()`: Pure data fetching (Replaced by React Query hooks).
+    *   `useJarActions()`: Spin, Add, Delete handlers (Implemented as Feature hooks).
     *   `useAppEffects()`: PWA, Onboarding, Invite Code checks.
 *   **Benefit**: Improves readability and makes unit testing possible.
 
-### 1.3 Implement TanStack Query (React Query) (High Priority)
+### 1.3 Implement TanStack Query (React Query) (COMPLETED)
 *   **Current State**: Manual `useEffect` + `fetch` + local state variables. Manual re-fetching via `refreshUser()`.
 *   **Recommendation**: Adopt `useQuery` for reads and `useMutation` for server actions.
 *   **Benefit**: Automatic caching, background refetching, deduping requests, and simpler code (deletes hundreds of lines of boilerplate).
@@ -27,7 +27,7 @@
 
 ## 2. User Experience (UX)
 
-### 2.1 Optimistic UI Updates
+### 2.1 Optimistic UI Updates (COMPLETED)
 *   **Problem**: When adding an idea, the user waits for the server roundtrip before seeing it in the list.
 *   **Solution**: Immediately append the idea to the local list state upon submission. Revert if the server returns an error.
 *   **Benefit**: App feels "instant" and "native".
