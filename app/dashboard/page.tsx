@@ -19,7 +19,8 @@ import { getThemeForTopic } from "@/lib/categories";
 import { VotingManager } from "@/components/VotingManager";
 import { DashboardOnboarding } from "@/components/DashboardOnboarding";
 import { resetConciergeTrial } from "@/lib/demo-storage";
-import { EmptyJarMessage } from "@/components/EmptyJarMessage";
+import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
+import { PreferenceQuizModal } from "@/components/PreferenceQuizModal";
 import { trackEvent } from "@/lib/analytics";
 import { SmartToolsGrid } from "@/components/SmartToolsGrid";
 import { DashboardModals } from "@/components/DashboardModals";
@@ -107,6 +108,7 @@ function DashboardContent() {
     const [inviteCode, setInviteCode] = useState<string | null>(null);
     const [showConfetti, setShowConfetti] = useState(false);
     const [showOnboarding, setShowOnboarding] = useState(false);
+    const [showQuiz, setShowQuiz] = useState(false);
 
     // Check if user should see onboarding on first visit
     useEffect(() => {
@@ -305,6 +307,33 @@ function DashboardContent() {
 
     const handleAddIdeaClick = () => {
         openModal('ADD_IDEA');
+    };
+
+    const handleQuizComplete = async (preferences: any) => {
+        try {
+            const response = await fetch('/api/ideas/bulk-generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    preferences,
+                    jarId: userData?.activeJarId
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setShowQuiz(false);
+                await fetchIdeas();
+                await refreshUser();
+                alert(`🎉 ${data.count} ideas generated successfully!`);
+            } else {
+                alert('Failed to generate ideas. Please try again.');
+            }
+        } catch (error) {
+            console.error('Quiz completion error:', error);
+            alert('An error occurred while generating ideas.');
+        }
     };
 
     const availableIdeasCount = ideas.filter(i => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
@@ -540,10 +569,11 @@ function DashboardContent() {
                             <>
                                 {/* Show empty state message when no ideas */}
                                 {!isLoadingIdeas && availableIdeasCount === 0 ? (
-                                    <EmptyJarMessage
-                                        onOpenTemplates={() => openModal('TEMPLATE_BROWSER')}
+                                    <EnhancedEmptyState
                                         onAddIdea={() => openModal('ADD_IDEA')}
-                                        isCommunityJar={!!userData?.isCommunityJar}
+                                        onSurpriseMe={() => openModal('ADD_IDEA', { initialMode: 'magic' })}
+                                        onBrowseTemplates={() => openModal('TEMPLATE_BROWSER')}
+                                        onTakeQuiz={() => setShowQuiz(true)}
                                     />
                                 ) : (
                                     <>
@@ -774,6 +804,13 @@ function DashboardContent() {
                     handleSkipOnboarding();
                 }}
                 onComplete={handleCompleteOnboarding}
+            />
+
+            {/* Preference Quiz Modal */}
+            <PreferenceQuizModal
+                isOpen={showQuiz}
+                onClose={() => setShowQuiz(false)}
+                onComplete={handleQuizComplete}
             />
         </main>
     );
