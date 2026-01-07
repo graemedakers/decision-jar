@@ -21,10 +21,10 @@ export function AchievementToast({ achievement, onClose }: AchievementToastProps
         <AnimatePresence>
             {achievement && (
                 <motion.div
-                    initial={{ opacity: 0, y: 50, scale: 0.8 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 20, scale: 0.8 }}
-                    className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm"
+                    initial={{ opacity: 0, y: 50, x: "-50%", scale: 0.8 }}
+                    animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+                    exit={{ opacity: 0, y: 20, x: "-50%", scale: 0.8 }}
+                    className="fixed bottom-24 left-1/2 z-[100] w-[92%] max-w-sm"
                 >
                     <div className="glass-card bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/50 p-4 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-4 relative overflow-hidden">
 
@@ -44,8 +44,8 @@ export function AchievementToast({ achievement, onClose }: AchievementToastProps
                             +{achievement.xp} XP
                         </div>
 
-                        <button onClick={onClose} className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                            <X className="w-3 h-3" />
+                        <button onClick={onClose} className="absolute top-2 right-2 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
                 </motion.div>
