@@ -138,7 +138,7 @@ export async function GET(request: Request) {
 
     const currentJarId = user.activeJarId ||
         (user.memberships?.[0]?.jarId) ||
-        user.coupleId;
+        user.legacyJarId;
 
     if (!currentJarId) {
         return NextResponse.json([]); // No jar, no ideas

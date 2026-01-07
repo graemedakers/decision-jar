@@ -17,14 +17,14 @@ export async function POST(request: Request) {
             where: { id: session.user.id },
             include: {
                 memberships: { include: { jar: true } },
-                couple: true
+                legacyJar: true
             },
         });
 
         // Determine the Active Jar
         const activeJar = (user?.activeJarId ? user.memberships.find(m => m.jarId === user.activeJarId)?.jar : null) ||
             user?.memberships?.[0]?.jar ||
-            user?.couple;
+            user?.legacyJar;
 
         if (!user || !activeJar) {
             return NextResponse.json({ error: 'No active jar' }, { status: 400 });

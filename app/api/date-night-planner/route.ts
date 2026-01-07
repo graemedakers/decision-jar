@@ -17,7 +17,7 @@ export async function POST(request: Request) {
             where: { id: session.user.id },
             include: {
                 memberships: { include: { jar: true } },
-                couple: true
+                legacyJar: true
             },
         });
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         // Priority: 1. activeJarId, 2. First membership, 3. Legacy couple
         const activeJar = (user?.activeJarId ? user.memberships.find(m => m.jarId === user.activeJarId)?.jar : null) ||
             user?.memberships?.[0]?.jar ||
-            user?.couple;
+            user?.legacyJar;
 
 
         if (!user || !activeJar) {
