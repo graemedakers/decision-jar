@@ -1,122 +1,113 @@
 
-import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { isCouplePremium, isUserPro } from '@/lib/premium';
-import { reliableGeminiCall } from '@/lib/gemini';
-import { getExcludedNames } from '@/lib/concierge';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import { streamText } from 'ai';
+import { google } from '@ai-sdk/google';
 import { CONCIERGE_CONFIGS } from '@/lib/concierge-configs';
 import { getConciergePromptAndMock } from '@/lib/concierge-prompts';
+import { checkSubscriptionAccess } from '@/lib/premium';
 
-export async function POST(request: Request) {
+// Initialize rate limiter if Redis is available
+let ratelimit: Ratelimit | undefined;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    ratelimit = new Ratelimit({
+        redis: Redis.fromEnv(),
+        limiter: Ratelimit.slidingWindow(5, "1 m"), // 5 requests per minute
+        analytics: true,
+    });
+}
+
+// Allow streaming responses up to 60 seconds
+export const maxDuration = 60;
+
+export async function POST(req: NextRequest) {
     try {
-        const isDemoMode = request.headers.get('x-demo-mode') === 'true';
-
-        let activeJar: any = null;
-        let user: any = null;
-
-        if (!isDemoMode) {
-            const session = await getSession();
-            if (!session?.user?.id) {
-                return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-            }
-
-            // Check premium status
-            user = await prisma.user.findUnique({
-                where: { id: session.user.id },
-                include: {
-                    memberships: { include: { jar: true } },
-                    couple: true
-                },
-            });
-
-            // Determine the Active Jar
-            activeJar = (user?.activeJarId ? user.memberships.find((m: any) => m.jarId === user.activeJarId)?.jar : null) ||
-                user?.memberships?.[0]?.jar ||
-                user?.couple;
-
-
-            if (!user) {
-                return NextResponse.json({ error: 'User not found' }, { status: 400 });
-            }
-
-            // Check premium status
-            if (!activeJar || (!isCouplePremium(activeJar) && !isUserPro(user))) {
-                if (!isUserPro(user)) {
-                    return NextResponse.json({ error: 'Premium required' }, { status: 403 });
-                }
-            }
-
-            const rateLimit = await checkRateLimit(user);
-            if (!rateLimit.allowed) {
-                return NextResponse.json({ error: 'Rate limit exceeded', details: rateLimit.error }, { status: 429 });
-            }
+        // 1. Auth & Subscription Check
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.email) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const body = await request.json().catch(() => ({}));
-        const { location, toolId } = body;
+        // 2. Parse Request Body
+        const { configId, inputs, location: cachedLocation, useMockData } = await req.json();
 
-        // Identify the tool key (e.g. 'DINING') from the toolId (e.g. 'dining_concierge')
-        // We assume the frontend sends 'toolId'.
-        const toolKey = Object.keys(CONCIERGE_CONFIGS).find(k => CONCIERGE_CONFIGS[k].id === toolId);
+        // 3. Find Tool Config
+        // We search by ID first (e.g., 'dining_concierge') or Key (e.g., 'DINING')
+        const toolKey = Object.keys(CONCIERGE_CONFIGS).find(
+            key => CONCIERGE_CONFIGS[key].id === configId || key === configId
+        );
 
         if (!toolKey) {
-            return NextResponse.json({ error: 'Invalid tool ID' }, { status: 400 });
+            return NextResponse.json({ error: `Invalid config ID: ${configId}` }, { status: 400 });
         }
 
-        const coupleLocation = activeJar?.location;
-        const userInterests = user ? (user as any).interests : null;
-
-        let targetLocation = location;
-        if (!targetLocation || targetLocation.trim() === "") {
-            targetLocation = coupleLocation || "your local area";
-        }
-
-        // --- Build Instructions ---
-        let extraInstructions = "";
-
-        // Only add strict location logic if the tool is location-based
         const config = CONCIERGE_CONFIGS[toolKey];
-        if (config.hasLocation) {
-            extraInstructions += `The user is asking about "${targetLocation}". 
-            - Use this location as the primary search area.
-            - If "${targetLocation}" is detailed (e.g. "Paris"), search there.
-            - If generic (e.g. "Local"), assume the user's current city.
-            - CRITICAL: If the input contains a specific address, prioritize venues within walking distance.\n`;
+
+        // 4. Rate Limiting
+        if (ratelimit) {
+            const identifier = session.user.id;
+            const { success } = await ratelimit.limit(identifier);
+            if (!success) {
+                return NextResponse.json({ error: 'Rate limit exceeded. Please try again later.' }, { status: 429 });
+            }
         }
 
-        if (userInterests) {
-            extraInstructions += `The user is interested in: ${userInterests}. Consider this for context.\n`;
+        // 5. Subscription Check
+        const access = await checkSubscriptionAccess(session.user.id, config.id);
+        if (!access.allowed) {
+            return NextResponse.json({ error: access.reason || 'Premium required' }, { status: 403 });
         }
 
-        const excludeNames = activeJar ? await getExcludedNames(activeJar.id) : [];
-        if (excludeNames.length > 0) {
-            extraInstructions += `\nEXCLUSION LIST: The user is already aware of these places. Do NOT match: ${excludeNames.join(', ')}. Find NEW alternatives.\n`;
+        // 6. Location Context
+        let targetLocation = "your area";
+        if (config.hasLocation && cachedLocation) {
+            targetLocation = `${cachedLocation.city}, ${cachedLocation.region}, ${cachedLocation.country}`;
         }
 
-        // --- Generate Prompt ---
-        const { prompt, mockResponse } = getConciergePromptAndMock(toolKey, body, targetLocation, extraInstructions);
+        const extraInstructions = inputs.extraInstructions
+            ? `Additional User Instructions: "${inputs.extraInstructions}"`
+            : "";
 
-        // --- Call AI ---
-        const apiKey = process.env.GEMINI_API_KEY?.trim();
+        // 7. Prompt Generation
+        const { prompt, mockResponse } = getConciergePromptAndMock(
+            toolKey,
+            inputs,
+            targetLocation,
+            extraInstructions
+        );
 
-        if (!apiKey) {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            return NextResponse.json(mockResponse);
+        if (useMockData) {
+            // Simulate stream for mock data
+            const stream = new ReadableStream({
+                start(controller) {
+                    controller.enqueue(JSON.stringify(mockResponse));
+                    controller.close();
+                }
+            });
+            return new Response(stream, {
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
-        try {
-            const result = await reliableGeminiCall(prompt);
-            return NextResponse.json(result);
-        } catch (error) {
-            console.error('Unified Concierge AI error:', error);
-            // Fallback to mock on AI failure
-            return NextResponse.json(mockResponse);
-        }
+        // 8. Call AI
+        // Using streamText from 'ai' library which is standard across the app
+        const result = await streamText({
+            model: google('gemini-1.5-flash'),
+            system: "You are a helpful, expert lifestyle concierge. You MUST return valid JSON only. No markdown formatting.",
+            prompt: prompt,
+            // We can add tools here later for real Google Maps search if needed
+        });
+
+        return result.toDataStreamResponse();
 
     } catch (error: any) {
-        console.error('Unified Concierge error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Unified Concierge Error:', error);
+        return NextResponse.json(
+            { error: error.message || 'Failed to generate recommendations' },
+            { status: 500 }
+        );
     }
 }

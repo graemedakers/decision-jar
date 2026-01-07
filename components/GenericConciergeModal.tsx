@@ -322,13 +322,14 @@ export function GenericConciergeModal({
             }
 
             const body = {
-                toolId: config.id,
-                ...selectionMap,
+                configId: config.id, // Now sending configId instead of implicit endpoint logic
+                inputs: selectionMap,
                 location: config.hasLocation ? location : undefined,
-                price: config.hasPrice ? price : undefined
+                price: config.hasPrice ? price : undefined,
+                extraInstructions: customInputs['extraInstructions'] // Support for extra instructions if added later
             };
 
-            const res = await fetch(config.endpoint, {
+            const res = await fetch('/api/concierge', { // New Unified Endpoint
                 method: 'POST',
                 headers,
                 body: JSON.stringify(body),

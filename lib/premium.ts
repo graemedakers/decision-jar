@@ -97,3 +97,31 @@ export function getLimits(user: User | null | undefined) {
         googlePhotos: isPro,
     };
 }
+
+/**
+ * Checks if a user has access to a specific premium feature.
+ * Used by the unified Concierge endpoint.
+ */
+import { prisma } from "@/lib/prisma";
+
+export async function checkSubscriptionAccess(userId: string, toolId: string): Promise<{ allowed: boolean, reason?: string }> {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            isLifetimePro: true,
+            subscriptionStatus: true,
+            createdAt: true
+        }
+    });
+
+    if (!user) return { allowed: false, reason: 'User not found' };
+
+    // 1. Check Pro Status
+    if (isUserPro(user as any)) {
+        return { allowed: true };
+    }
+
+    // 2. Check Demo/Free Limits (Optional - Implementing later)
+    // For now, these tools are pro-only
+    return { allowed: false, reason: 'Premium subscription required' };
+}
