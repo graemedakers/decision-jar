@@ -67,6 +67,7 @@ interface GenericConciergeModalProps {
     onIdeaAdded?: () => void;
     onGoTonight?: (idea: any) => void;
     onFavoriteUpdated?: () => void;
+    onUpdateUserLocation?: (newLocation: string) => void;
 }
 
 // --- Theme Helper ---
@@ -183,7 +184,8 @@ export function GenericConciergeModal({
     userLocation,
     onIdeaAdded,
     onGoTonight,
-    onFavoriteUpdated
+    onFavoriteUpdated,
+    onUpdateUserLocation
 }: GenericConciergeModalProps) {
     const demoConcierge = useDemoConcierge();
     const [showTrialUsedPrompt, setShowTrialUsedPrompt] = useState(false);
@@ -275,7 +277,21 @@ export function GenericConciergeModal({
 
         setIsLoading(true);
 
-        // Flatten selections for Analytics & API
+        // Auto-save location preference if it has changed/is set
+        if ((config.hasLocation || (config.locationCondition && (selections[config.locationCondition.sectionId] || []).some(v => config.locationCondition?.values.includes(v)))) && location && location !== userLocation) {
+            // 1. Persist to DB
+            fetch('/api/user/settings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ location })
+            }).catch(err => console.error("Failed to save location preference:", err));
+
+            // 2. Update Parent State (if callback provided)
+            if (onUpdateUserLocation) {
+                onUpdateUserLocation(location);
+            }
+        }
+
         // Flatten selections for Analytics & API
         const selectionMap: Record<string, string> = {};
 

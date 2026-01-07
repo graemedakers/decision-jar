@@ -1,8 +1,14 @@
-'use client';
-
 import { useState } from 'react';
-import { Share2, Copy, Check } from 'lucide-react';
+import { Share2, Copy, Check, Link as LinkIcon, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuLabel
+} from '@/components/ui/DropdownMenu';
 import { trackShareClicked } from '@/lib/analytics';
 
 interface ShareButtonProps {
@@ -15,80 +21,91 @@ interface ShareButtonProps {
 }
 
 export function ShareButton({ title, description, url, className = '', source = 'unknown', contentType = 'recommendation' }: ShareButtonProps) {
-    const [copied, setCopied] = useState(false);
-    const [sharing, setSharing] = useState(false);
+    const [copiedText, setCopiedText] = useState(false);
+    const [copiedLink, setCopiedLink] = useState(false);
 
-    const shareUrl = url || typeof window !== 'undefined' ? window.location.origin : 'https://spinthejar.com';
-
-    // Generate share URL with tracking
+    const shareUrl = url || (typeof window !== 'undefined' ? window.location.origin : 'https://spinthejar.com');
     const trackingUrl = `${shareUrl}?utm_source=share&utm_medium=social&utm_campaign=ai_concierge`;
-
     const shareText = `${title}\n\n${description}\n\nFound via Spin the Jar ✨\n${trackingUrl}`;
 
-    const handleShare = async () => {
-        setSharing(true);
-
-        // Track the share action
-        trackShareClicked(source, contentType);
-
+    const handleCopyText = async () => {
         try {
-            // Check if Web Share API is available
-            if (navigator.share) {
-                // Use combined format for best compatibility across all platforms
-                // This works well for WhatsApp (both mobile and web), Instagram, 
-                // Twitter, Messages, and most other sharing destinations
-                await navigator.share({
-                    text: shareText,
-                });
-            } else {
-                // Fallback: Copy to clipboard
-                await navigator.clipboard.writeText(shareText);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-            }
-        } catch (error) {
-            // User cancelled or error occurred
-            if (error instanceof Error && error.name !== 'AbortError') {
-                console.error('Error sharing:', error);
-                // Fallback to copy
-                try {
-                    await navigator.clipboard.writeText(shareText);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                } catch (clipboardError) {
-                    console.error('Could not copy to clipboard:', clipboardError);
-                }
-            }
-        } finally {
-            setSharing(false);
+            await navigator.clipboard.writeText(shareText);
+            setCopiedText(true);
+            setTimeout(() => setCopiedText(false), 2000);
+            trackShareClicked(source, `${contentType}_copy_text`);
+        } catch (err) {
+            console.error('Failed to copy text', err);
         }
     };
 
-    const hasNativeShare = typeof window !== 'undefined' && 'share' in navigator;
+    const handleCopyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(trackingUrl);
+            setCopiedLink(true);
+            setTimeout(() => setCopiedLink(false), 2000);
+            trackShareClicked(source, `${contentType}_copy_link`);
+        } catch (err) {
+            console.error('Failed to copy link', err);
+        }
+    };
+
+    const handleNativeShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: title,
+                    text: shareText,
+                    url: trackingUrl
+                });
+                trackShareClicked(source, `${contentType}_native`);
+            } catch (err) {
+                console.error('Error sharing:', err);
+            }
+        }
+    };
+
+    // On mobile, native share is usually best. On desktop, dropdown is better.
+    // However, to be consistent and solve the user's "minimal options" complaint on desktop,
+    // (and since we can't perfectly feature-detect "good" native share),
+    // we will ALWAYS show the dropdown, but "Share via App..." will trigger the native sheet.
 
     return (
-        <Button
-            onClick={handleShare}
-            disabled={sharing}
-            variant="outline"
-            className={`flex items-center gap-2 ${className}`}
-        >
-            {copied ? (
-                <>
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span>Copied!</span>
-                </>
-            ) : (
-                <>
-                    {hasNativeShare ? (
-                        <Share2 className="w-4 h-4" />
-                    ) : (
-                        <Copy className="w-4 h-4" />
-                    )}
-                    <span>{sharing ? 'Sharing...' : 'Share'}</span>
-                </>
-            )}
-        </Button>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 ${className}`}
+                >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Share Options</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={handleCopyText} className="cursor-pointer">
+                    {copiedText ? <Check className="w-4 h-4 mr-2 text-green-500" /> : <Copy className="w-4 h-4 mr-2" />}
+                    <span>Copy Full Details</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer">
+                    {copiedLink ? <Check className="w-4 h-4 mr-2 text-green-500" /> : <LinkIcon className="w-4 h-4 mr-2" />}
+                    <span>Copy Link Only</span>
+                </DropdownMenuItem>
+
+                {typeof navigator !== 'undefined' && navigator.share && (
+                    <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+                            <Smartphone className="w-4 h-4 mr-2" />
+                            <span>Share via App...</span>
+                        </DropdownMenuItem>
+                    </>
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 

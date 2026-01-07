@@ -212,6 +212,7 @@ export function DashboardModals({
                                 // I will assume it opens DateReveal to show the idea details clearly.
                             }}
                             onFavoriteUpdated={fetchFavorites}
+                            onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
                         />
                     )}
 
