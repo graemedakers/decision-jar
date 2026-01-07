@@ -326,6 +326,8 @@ model AnalyticsEvent {
   type      String   // 'page_view', 'click', 'spin', 'vote', etc.
   name      String   // 'view_dashboard', 'spin_jar', etc.
   value     Float?   // Optional numeric value (e.g., duration, count)
+  path      String?
+  sessionId String?
   metadata  Json?    // Flexible JSON for event details
   
   userId    String?
