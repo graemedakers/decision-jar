@@ -161,18 +161,18 @@ export async function GET(request: Request) {
         });
         const isAdmin = membership?.role === 'ADMIN';
 
-        // Fetch all ideas for the couple (jar) and include jar type
+        // Fetch all ideas for the jar and include jar type
         const allIdeas: any[] = await prisma.$queryRaw`
             SELECT i.*, 
                    i."isPrivate",
                    json_build_object('id', u.id, 'name', u.name) as "createdBy",
-                   c.type as "jarType",
-                   c."selectionMode" as "selectionMode",
-                   c."isCommunityJar" as "isCommunityJar"
+                   j.type as "jarType",
+                   j."selectionMode" as "selectionMode",
+                   j."isCommunityJar" as "isCommunityJar"
             FROM "Idea" i
             LEFT JOIN "User" u ON i."createdById" = u.id
-            LEFT JOIN "Couple" c ON i."coupleId" = c.id
-            WHERE i."coupleId" = ${currentJarId} 
+            LEFT JOIN "Jar" j ON i."jarId" = j.id
+            WHERE i."jarId" = ${currentJarId} 
               AND (i."status" = 'APPROVED' OR i."createdById" = ${session.user.id} OR (${isAdmin} = true))
             ORDER BY i."createdAt" DESC
         `;

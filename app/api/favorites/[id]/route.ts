@@ -16,7 +16,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         // Using raw SQL to bypass valid Prisma Client generation issues
         // We verify ownership by including coupleId in the DELETE condition
         const count = await prisma.$executeRaw`
-            DELETE FROM "FavoriteVenue" WHERE "id" = ${id} AND "coupleId" = ${currentJarId}
+            DELETE FROM "FavoriteVenue" WHERE "id" = ${id} AND "jarId" = ${currentJarId}
         `;
 
         // count is explicitly typed as number in newer prisma versions, or BigInt in some. 

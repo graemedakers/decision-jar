@@ -29,9 +29,8 @@ export async function POST(request: Request) {
         const id = crypto.randomUUID();
 
         // Using raw SQL to bypass valid Prisma Client generation issues
-        // Column is 'coupleId' in DB (mapped from jarId in schema)
         await prisma.$executeRaw`
-            INSERT INTO "FavoriteVenue" ("id", "coupleId", "userId", "name", "address", "description", "websiteUrl", "googleRating", "type", "createdAt")
+            INSERT INTO "FavoriteVenue" ("id", "jarId", "userId", "name", "address", "description", "websiteUrl", "googleRating", "type", "createdAt")
             VALUES (${id}, ${currentJarId}, ${session.user.id}, ${name}, ${address}, ${description}, ${websiteUrl}, ${googleRating}, ${type || 'VENUE'}, NOW())
         `;
 
@@ -65,7 +64,7 @@ export async function DELETE(request: Request) {
 
         // Using raw SQL to bypass valid Prisma Client generation issues
         await prisma.$executeRaw`
-            DELETE FROM "FavoriteVenue" WHERE "coupleId" = ${currentJarId} AND "name" = ${name}
+            DELETE FROM "FavoriteVenue" WHERE "jarId" = ${currentJarId} AND "name" = ${name}
         `;
 
         return NextResponse.json({ success: true });
@@ -107,7 +106,7 @@ export async function GET(request: Request) {
                 WHERE 
                     "userId" = ${session.user.id} 
                     OR 
-                    ("coupleId" IN (${Prisma.join(myJarIds)}) AND "isShared" = true)
+                    ("jarId" IN (${Prisma.join(myJarIds)}) AND "isShared" = true)
                 ORDER BY "createdAt" DESC
             `;
         } else {
