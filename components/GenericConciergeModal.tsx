@@ -34,7 +34,6 @@ export interface ConciergeToolConfig {
     subtitle: string;
     icon: LucideIcon;
     colorTheme: 'blue' | 'purple' | 'orange' | 'green' | 'rose' | 'amber' | 'emerald' | 'indigo' | 'pink' | 'red';
-    endpoint: string;
 
     // Features
     hasLocation: boolean; // formatting as always-on if true
