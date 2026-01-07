@@ -64,7 +64,7 @@
 *   **Concept**: Live spin synchronization where multiple users see the same spin result at the same time.
 *   **Tech**: Implemented using Supabase Realtime Broadcast channels.
 
-### 4.2 Calendar Integration
+### 4.2 Calendar Integration (COMPLETED)
 *   **Concept**: "Push to Google Calendar" button on the Dates (Memories) page.
-*   **Tech**: Simple `.ics` file generation client-side.
+*   **Tech**: Generate `.ics` file client-side.
 

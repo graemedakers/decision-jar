@@ -9,6 +9,7 @@ import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { ViewMemoryModal } from "@/components/ViewMemoryModal";
+import { CalendarButton } from "@/components/CalendarButton";
 import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -212,6 +213,7 @@ export default function MemoriesPage() {
                                 >
                                     <Copy className="w-5 h-5" />
                                 </button>
+                                <CalendarButton idea={idea} />
                                 {idea.canEdit && (
                                     <button
                                         onClick={() => setEditingMemory(idea)}
