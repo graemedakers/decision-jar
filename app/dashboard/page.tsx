@@ -47,21 +47,23 @@ function InviteCodeDisplay({ mobile, code }: { mobile?: boolean; code: string | 
 
     if (mobile) {
         return (
-            <div className="w-full bg-primary/5 dark:bg-primary/10 rounded-xl p-4 flex flex-col items-center text-center gap-2 border border-primary/20 mt-4">
-                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary" />
-                    Invite Partner
-                </div>
-                <div className="flex items-center gap-2 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg border border-dashed border-slate-300 dark:border-white/20">
-                    <code className="text-lg font-mono font-bold text-primary">{code}</code>
+            <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <Users className="w-5 h-5" />
+                    </div>
+                    <div className="text-left">
+                        <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Invite Partner</span>
+                        <code className="text-lg font-mono font-black text-primary tracking-widest">{code}</code>
+                    </div>
                 </div>
                 <Button
                     size="sm"
-                    variant="ghost"
+                    variant="outline"
                     onClick={handleInvite}
-                    className="h-8 text-xs w-full mt-1"
+                    className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 px-4 h-10"
                 >
-                    {copied ? <><Check className="w-3 h-3 mr-1" /> Copied!</> : <><Copy className="w-3 h-3 mr-1" /> Copy Link</>}
+                    {copied ? <><Check className="w-4 h-4 mr-2" /> Copied</> : <><Copy className="w-4 h-4 mr-2" /> Copy Link</>}
                 </Button>
             </div>
         );
@@ -156,133 +158,135 @@ function DashboardContent() {
 
             <div className="max-w-7xl mx-auto relative z-10">
                 {/* HEADER */}
-                <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 md:mt-4">
+                <header className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-8 gap-4 md:mt-4">
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-3">
-                            <div className="relative">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform">
-                                    <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                            <div className="relative shrink-0">
+                                <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform">
+                                    <Sparkles className="w-6 h-6 text-white" />
                                 </div>
                                 {isPremium && (
-                                    <div className="absolute -top-1 -right-1 bg-amber-400 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white dark:border-slate-900 shadow-sm flex items-center gap-0.5">
-                                        <Crown className="w-2.5 h-2.5" /> PRO
+                                    <div className="absolute -top-1 -right-1 bg-amber-400 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-900 shadow-sm flex items-center gap-0.5">
+                                        <Crown className="w-2.5 h-2.5" />
                                     </div>
                                 )}
                             </div>
-                            <div>
+                            <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                    {/* Use UserData cast because JarSwitcher types might be strict */}
                                     {userData && <JarSwitcher user={userData as any} variant="title" />}
-                                    {!userData && <h1 className="text-3xl font-black text-slate-800 dark:text-white">Date Jar</h1>}
+                                    {!userData && <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white">Decision Jar</h1>}
                                 </div>
-                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 hidden sm:flex items-center gap-1">
                                     make moments happen
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 justify-end flex-wrap">
-                        {/* Gamification Trophy Case */}
-                        <CollapsibleTrophyCase
-                            xp={xp || 0}
-                            level={level}
-                            unlockedIds={achievements || []}
-                        />
+                    <div className="flex items-center gap-2 md:gap-3 justify-between md:justify-end w-full md:w-auto">
+                        {/* Gamification Trophy Case - Hidden on mobile, moved to a badge below if needed, or kept but styled */}
+                        <div className="flex-1 md:flex-initial">
+                            <CollapsibleTrophyCase
+                                xp={xp || 0}
+                                level={level}
+                                unlockedIds={achievements || []}
+                            />
+                        </div>
 
-                        {/* Invite Code (Desktop) */}
-                        <InviteCodeDisplay code={inviteCode} />
+                        {/* Desktop Only Displays */}
+                        <div className="hidden lg:flex">
+                            <InviteCodeDisplay code={inviteCode} />
+                        </div>
 
+                        {/* Mobile Logout - Separate to keep main row clean */}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleLogout}
+                            className="w-10 h-10 rounded-full text-slate-400 hover:text-red-50 hover:bg-red-50 dark:hover:bg-red-500/10 md:hidden"
+                        >
+                            <LogOut className="w-5 h-5" />
+                        </Button>
+                    </div>
 
-                        {/* Favorites */}
-                        {/* Favorites - Explicitly labeled as requested */}
+                    {/* Mobile Action Bar - Horizontal Scroll on Small Screens */}
+                    <div className="flex md:hidden items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => openModal('FAVORITES')}
-                            className="hidden md:flex gap-2 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors relative px-3"
-                            title="Favorites"
+                            className="bg-white dark:bg-slate-900 flex items-center gap-2 h-10 px-4 rounded-xl border-slate-200 dark:border-white/10 shrink-0"
                         >
-                            <Heart className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Favorites</span>
-                            {favoritesCount > 0 && (
-                                <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full flex items-center justify-center shadow-sm">
-                                    {favoritesCount}
-                                </span>
-                            )}
-                        </Button>
-                        <Button // Mobile Icon Only
-                            variant="outline"
-                            size="icon"
-                            onClick={() => openModal('FAVORITES')}
-                            className="flex md:hidden w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors relative"
-                            title="Favorites"
-                        >
-                            <Heart className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                            {favoritesCount > 0 && (
-                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
-                                    {favoritesCount}
-                                </span>
-                            )}
+                            <Heart className={`w-4 h-4 ${favoritesCount > 0 ? "text-red-500 fill-red-500" : "text-slate-400"}`} />
+                            <span className="text-xs font-bold">{favoritesCount} Favorites</span>
                         </Button>
 
-                        <Link href="/memories">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                                title="Memories Vault"
-                            >
-                                <ImageIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                        <Link href="/memories" className="shrink-0">
+                            <Button variant="outline" size="icon" className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
+                                <ImageIcon className="w-4 h-4 text-slate-500" />
                             </Button>
                         </Link>
 
                         <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => openModal('HELP')}
-                            className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                            title="Help Center"
+                            onClick={() => openModal('QUICK_TOOLS')}
+                            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0"
                         >
-                            <HelpCircle className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                            <Dices className="w-4 h-4 text-slate-500" />
                         </Button>
 
                         <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => openModal('QUICK_TOOLS')}
-                            className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                            title="Quick Decisions"
+                            onClick={() => openModal('HELP')}
+                            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0"
                         >
-                            <Dices className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                            <HelpCircle className="w-4 h-4 text-slate-500" />
                         </Button>
 
                         <Button
                             variant="outline"
                             size="icon"
                             onClick={() => openModal('SETTINGS')}
-                            className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                            title="Settings"
+                            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0"
                         >
-                            <Settings className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                            <Settings className="w-4 h-4 text-slate-500" />
+                        </Button>
+                    </div>
+
+                    {/* Desktop Utility Group */}
+                    <div className="hidden md:flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openModal('FAVORITES')}
+                            className="gap-2 rounded-full border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors relative px-3 h-10"
+                        >
+                            <Heart className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Favorites</span>
+                            {favoritesCount > 0 && (
+                                <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">
+                                    {favoritesCount}
+                                </span>
+                            )}
                         </Button>
 
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleLogout}
-                            className="w-10 h-10 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-                        >
-                            <LogOut className="w-5 h-5" />
-                        </Button>
+                        <Link href="/memories">
+                            <Button variant="outline" size="icon" className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10"><ImageIcon className="w-5 h-5" /></Button>
+                        </Link>
+                        <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10"><HelpCircle className="w-5 h-5" /></Button>
+                        <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10"><Dices className="w-5 h-5" /></Button>
+                        <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-10 h-10 rounded-full border-slate-200 dark:border-white/10"><Settings className="w-5 h-5" /></Button>
+                        <Button variant="ghost" size="icon" onClick={handleLogout} className="w-10 h-10 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500"><LogOut className="w-5 h-5" /></Button>
                     </div>
                 </header>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+                {/* MAIN CONTENT GRID */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
 
                     {/* LEFT COLUMN: Controls & Jar */}
-                    <div className="lg:col-span-4 space-y-6 flex flex-col h-full">
+                    <div className="lg:col-span-4 space-y-4 md:space-y-6 flex flex-col h-full">
 
                         {/* Premium Banner (Mobile) */}
                         {!isPremium && !isLoadingUser && !hasPaid && (
@@ -324,7 +328,7 @@ function DashboardContent() {
                         )}
 
                         {/* JAR VISUALIZATION & CONTROLS */}
-                        <div className="relative z-10 flex-1 min-h-[400px] flex flex-col items-center">
+                        <div className="relative z-10 flex-1 min-h-[320px] md:min-h-[400px] flex flex-col items-center justify-center">
 
                             {/* Jar Image with Spin Animation */}
                             <motion.div
