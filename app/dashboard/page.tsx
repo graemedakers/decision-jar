@@ -17,7 +17,7 @@ import { CollapsibleTrophyCase } from "@/components/Gamification/CollapsibleTrop
 import { JarSwitcher } from "@/components/JarSwitcher";
 import { getThemeForTopic } from "@/lib/categories";
 import { VotingManager } from "@/components/VotingManager";
-import { DashboardOnboarding } from "@/components/DashboardOnboarding";
+import { OnboardingWizard } from "@/components/Onboarding/OnboardingWizard";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { SmartToolsGrid } from "@/components/SmartToolsGrid";
 import { DashboardModals } from "@/components/DashboardModals";
@@ -298,7 +298,7 @@ function DashboardContent() {
                             {showStatusSection && (
                                 <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                     {showNoJars && (
-                                        <DashboardOnboarding onJarCreated={handleContentUpdate} isPro={isPremium} topic={jarTopic} />
+                                        <OnboardingWizard onComplete={handleContentUpdate} userName={userData?.name} />
                                     )}
                                     {showEmptyState && (
                                         <EnhancedEmptyState
