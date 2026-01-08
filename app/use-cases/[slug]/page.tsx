@@ -3,11 +3,33 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Sparkles, UserPlus, PlusCircle, Dices } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Metadata } from "next";
 
 export function generateStaticParams() {
     return USE_CASES.map((uc) => ({
         slug: uc.slug,
     }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const useCase = USE_CASES.find((uc) => uc.slug === slug);
+
+    if (!useCase) {
+        return {
+            title: "Use Case Not Found",
+        };
+    }
+
+    return {
+        title: `${useCase.title} Decision Jar - How it Works`,
+        description: useCase.description,
+        openGraph: {
+            title: `How to create a ${useCase.title} Decision Jar`,
+            description: useCase.description,
+            type: 'article',
+        }
+    };
 }
 
 export default async function UseCasePage({ params }: { params: Promise<{ slug: string }> }) {
