@@ -46,7 +46,6 @@ export function useDashboardLogic() {
 
     // 2. Local State
     const [userLocation, setUserLocation] = useState<string | null>(null);
-    const [inviteCode, setInviteCode] = useState<string | null>(null);
     const [showConfetti, setShowConfetti] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
 
@@ -96,12 +95,9 @@ export function useDashboardLogic() {
         onJarSwitched: handleContentUpdate
     });
 
-    // 4. Remaining Effects
-    // Data Sync
     useEffect(() => {
-        if (userData) {
-            if (userData.location) setUserLocation(userData.location);
-            if (userData.coupleReferenceCode) setInviteCode(userData.coupleReferenceCode);
+        if (userData?.location) {
+            setUserLocation(userData.location);
         }
     }, [userData]);
 
@@ -307,7 +303,7 @@ export function useDashboardLogic() {
         userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
         ideas, isLoadingIdeas,
         favoritesCount,
-        isSpinning, userLocation, inviteCode, showConfetti, showOnboarding, showQuiz,
+        isSpinning, userLocation, inviteCode: userData?.coupleReferenceCode || userData?.referenceCode || userData?.jarReferenceCode || null, showConfetti, showOnboarding, showQuiz,
 
         // State Setters
         setShowConfetti, setShowOnboarding, setShowQuiz, setUserLocation,

@@ -41,6 +41,17 @@ export async function GET() {
             if (user.activeJarId) {
                 const membership = user.memberships.find(m => m.jarId === user.activeJarId);
                 activeJar = membership?.jar;
+
+                // Fallback: If for some reason membership find fails, fetch jar directly
+                if (!activeJar) {
+                    activeJar = await prisma.jar.findUnique({
+                        where: { id: user.activeJarId },
+                        include: {
+                            members: { include: { user: { select: { id: true, name: true } } } },
+                            achievements: true
+                        }
+                    });
+                }
             } else if (user.memberships.length > 0) {
                 // Fallback to first jar
                 activeJar = user.memberships[0].jar;
@@ -100,6 +111,7 @@ export async function GET() {
                 ...user,
                 // Map Jar fields to legacy Couple fields for frontend compatibility
                 coupleReferenceCode: activeJar.referenceCode,
+                referenceCode: activeJar.referenceCode,
                 location: user.homeTown, // Use user's personal location, not jar location
                 isPremium: effectivePremium,
                 hasPaid: effectiveHasPaid,
