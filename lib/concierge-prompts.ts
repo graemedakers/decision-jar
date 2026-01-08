@@ -120,19 +120,19 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a movie critic and curator.
-                Recommend 5 distinct movies based on:
+                Recommend 5 distinct movies based on the following:
                 - Watch Mode: ${inputs.watchMode}
+                ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in cinemas in ${targetLocation}. Do not recommend movies that are only available on streaming or not currently in theaters.` : ''}
                 - Genre: ${inputs.genre || "Any"}
                 - Mood: ${inputs.mood || "Any"}
                 - Era: ${inputs.era || "Any"}
-                ${isCinema ? `- Location: ${targetLocation}` : ''}
                 ${!isCinema && inputs.streamingServices ? `- Streaming on: ${inputs.streamingServices}` : ''}
                 
                 ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name (Title), description (Plot summary), year, rating (IMDb/Rotten Tomatoes score as string), genre, director, cast
-                ${isCinema ? 'Also include: cinema_name, showtimes (approx)' : 'Also include: streaming_service'}
+                ${isCinema ? 'Also include: cinema_name, showtimes (approximate for today/tomorrow)' : 'Also include: streaming_service'}
                 `,
                 mockResponse: {
                     recommendations: [

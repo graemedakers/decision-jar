@@ -306,9 +306,12 @@ export function GenericConciergeModal({
             }
         });
 
+        const isLocationRelevant = config.hasLocation || (config.locationCondition &&
+            (selections[config.locationCondition.sectionId] || []).some(v => config.locationCondition?.values.includes(v)));
+
         trackAIToolUsed(config.id, {
             ...selectionMap,
-            location: config.hasLocation ? location : undefined,
+            location: isLocationRelevant ? location : undefined,
             price: config.hasPrice ? price : undefined
         });
 
@@ -321,7 +324,7 @@ export function GenericConciergeModal({
             const body = {
                 configId: config.id, // Now sending configId instead of implicit endpoint logic
                 inputs: selectionMap,
-                location: config.hasLocation ? location : undefined,
+                location: isLocationRelevant ? location : undefined,
                 price: config.hasPrice ? price : undefined,
                 extraInstructions: customInputs['extraInstructions'] // Support for extra instructions if added later
             };

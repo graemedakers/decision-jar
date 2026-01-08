@@ -61,7 +61,10 @@ export async function POST(req: NextRequest) {
 
         // 6. Location Context
         let targetLocation = "your area";
-        if (config.hasLocation && cachedLocation) {
+        const needsLocation = config.hasLocation || (config.locationCondition &&
+            (inputs[config.locationCondition.sectionId] || "").split(", ").some((v: string) => config.locationCondition?.values.includes(v)));
+
+        if (needsLocation && cachedLocation) {
             if (typeof cachedLocation === 'string') {
                 targetLocation = cachedLocation;
             } else if (typeof cachedLocation === 'object') {
