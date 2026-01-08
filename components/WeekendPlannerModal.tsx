@@ -180,12 +180,12 @@ export function WeekendPlannerModal({ isOpen, onClose, userLocation, onIdeaAdded
         if (suggestions.length === 0) return;
 
         // Build shareable text
-        const header = `🎉 My Weekend Plan near ${customLocation || "my area"}!\\n\\n`;
+        const header = `🎉 My Weekend Plan near ${customLocation || "my area"}!\n\n`;
         const items = suggestions.map((item, idx) =>
-            `${idx + 1}. ${item.title} (${item.day})\\n   ${item.description}\\n   💰 ${item.cost}${item.url ? `\\n   🔗 ${item.url}` : ''}`
-        ).join('\\n\\n');
+            `${idx + 1}. ${item.title} (${item.day})\n   ${item.description}\n   💰 ${item.cost}${item.url ? `\n   🔗 ${item.url}` : ''}`
+        ).join('\n\n');
 
-        const footer = `\\n\\n✨ Planned with Spin the Jar\\n${window.location.origin}`;
+        const footer = `\n\n✨ Planned with Spin the Jar\n${window.location.origin}`;
         const shareText = header + items + footer;
 
         // Check if native share is available

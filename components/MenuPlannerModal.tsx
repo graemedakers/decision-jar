@@ -190,12 +190,12 @@ export function MenuPlannerModal({ isOpen, onClose, onIdeaAdded }: MenuPlannerMo
     const handleSharePlan = async () => {
         if (mealPlans.length === 0) return;
 
-        const header = `🍽️ My ${numDays}-Day Meal Plan\\n\\n`;
+        const header = `🍽️ My ${numDays}-Day Meal Plan\n\n`;
         const meals = mealPlans.map((meal, idx) =>
-            `${idx + 1}. ${meal.day}: ${meal.meal}\\n   ${meal.description}\\n   ⏱️ ${meal.prep_time} | ${meal.difficulty}`
-        ).join('\\n\\n');
+            `${idx + 1}. ${meal.day}: ${meal.meal}\n   ${meal.description}\n   ⏱️ ${meal.prep_time} | ${meal.difficulty}`
+        ).join('\n\n');
 
-        const footer = `\\n\\n✨ Planned with Spin the Jar\\n${window.location.origin}`;
+        const footer = `\n\n✨ Planned with Spin the Jar\n${window.location.origin}`;
         const shareText = header + meals + footer;
 
         trackEvent('menu_plan_shared', {
