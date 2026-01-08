@@ -23,29 +23,29 @@ export function JarQuickStartModal({ isOpen, onClose, jarId, jarName, jarTopic }
         const topicLower = jarTopic.toLowerCase();
 
         if (topicLower.includes('date') || topicLower.includes('romantic')) {
-            return { id: 'dining_concierge', name: 'Dining Concierge', description: 'Find romantic restaurants nearby' };
+            return { id: 'DINING', name: 'Dining Concierge', description: 'Find romantic restaurants nearby' };
         }
         if (topicLower.includes('food') || topicLower.includes('restaurant')) {
-            return { id: 'dining_concierge', name: 'Dining Concierge', description: 'Discover great places to eat' };
+            return { id: 'DINING', name: 'Dining Concierge', description: 'Discover great places to eat' };
         }
         if (topicLower.includes('drink') || topicLower.includes('bar')) {
-            return { id: 'bar_scout', name: 'Bar Scout', description: 'Find bars and lounges nearby' };
+            return { id: 'BAR', name: 'Bar Scout', description: 'Find bars and lounges nearby' };
         }
         if (topicLower.includes('movie') || topicLower.includes('film')) {
-            return { id: 'movie_scout', name: 'Movie Scout', description: 'Browse current films and streaming picks' };
+            return { id: 'MOVIE', name: 'Movie Scout', description: 'Browse current films and streaming picks' };
         }
         if (topicLower.includes('book')) {
-            return { id: 'book_scout', name: 'Book Scout', description: 'Get reading recommendations' };
+            return { id: 'BOOK', name: 'Book Scout', description: 'Get reading recommendations' };
         }
         if (topicLower.includes('game')) {
-            return { id: 'game_scout', name: 'Game Scout', description: 'Find games for your group' };
+            return { id: 'GAME', name: 'Game Scout', description: 'Find games for your group' };
         }
         if (topicLower.includes('activity') || topicLower.includes('adventure')) {
-            return { id: 'escape_room_scout', name: 'Activity Scout', description: 'Discover fun activities nearby' };
+            return { id: 'ESCAPE_ROOM', name: 'Activity Scout', description: 'Discover fun activities nearby' };
         }
 
         // Default fallback
-        return { id: 'dining_concierge', name: 'AI Concierge', description: 'Get AI-powered suggestions' };
+        return { id: 'DINING', name: 'AI Concierge', description: 'Get AI-powered suggestions' };
     };
 
     const suggestedConcierge = getSuggestedConcierge();
