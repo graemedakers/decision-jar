@@ -90,13 +90,14 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
 
             if (res.ok) {
                 setShowDatePicker(false);
-                // Ideally show a small success toast here
+                // Success!
             } else {
-                alert("Failed to update date");
+                const errorData = await res.json().catch(() => ({}));
+                alert(`Failed to update date: ${errorData.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
-            alert("Error updating date");
+            alert("Error updating date. Please check your connection.");
         } finally {
             setIsUpdatingDate(false);
         }

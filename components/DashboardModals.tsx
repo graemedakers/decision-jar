@@ -277,7 +277,7 @@ export function DashboardModals({
                     closeModal();
                     handleContentUpdate();
                 }}
-                idea={modalProps?.idea}
+                idea={activeModal === 'RATE_DATE' ? modalProps?.idea : null}
                 isPro={isPremium}
             />
 

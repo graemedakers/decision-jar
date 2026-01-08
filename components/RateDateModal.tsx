@@ -34,7 +34,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rat
     }, [isOpen, initialMode]);
 
     useEffect(() => {
-        if (idea) {
+        if (idea && isOpen) {
             setRating(idea.rating || 0);
             setNotes(idea.notes || "");
 
@@ -50,17 +50,19 @@ export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rat
 
             fetch(`/api/ideas/${idea.id}/rate`)
                 .then(res => res.json())
-                .then((data: any[]) => {
+                .then((data) => {
                     console.log("Fetched ratings:", data);
-                    const myRating = data.find(r => r.isMe);
-                    if (myRating) {
-                        setRating(myRating.value);
-                        setNotes(myRating.comment || "");
+                    if (Array.isArray(data)) {
+                        const myRating = data.find((r: any) => r.isMe);
+                        if (myRating) {
+                            setRating(myRating.value);
+                            setNotes(myRating.comment || "");
+                        }
                     }
                 })
                 .catch(err => console.error(err));
         }
-    }, [idea]);
+    }, [idea, isOpen]);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

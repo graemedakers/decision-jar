@@ -10,14 +10,17 @@ export async function PATCH(
 ) {
     try {
         const session = await getSession();
-        if (!session?.user?.id || (!session.user.activeJarId && !session.user.coupleId)) {
+        if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        const currentJarId = session.user.activeJarId || session.user.coupleId;
 
         const resolvedParams = await params;
         const id = resolvedParams.id;
         const { date } = await request.json();
+
+        if (!id) {
+            return NextResponse.json({ error: 'Idea ID is required' }, { status: 400 });
+        }
 
         if (!date) {
             return NextResponse.json({ error: 'Date is required' }, { status: 400 });
@@ -38,8 +41,18 @@ export async function PATCH(
             return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
         }
 
-        if (idea.jarId !== currentJarId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        // Check if user has access to this jar
+        const membership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: {
+                    userId: session.user.id,
+                    jarId: idea.jarId
+                }
+            }
+        });
+
+        if (!membership) {
+            return NextResponse.json({ error: 'Unauthorized. You do not have access to this jar.' }, { status: 403 });
         }
 
         const updatedIdea = await prisma.idea.update({
@@ -50,8 +63,8 @@ export async function PATCH(
         });
 
         // Gamification: Award 20 XP for committing to a date!
-        await awardXp(currentJarId, 20);
-        await checkAndUnlockAchievements(currentJarId);
+        await awardXp(idea.jarId, 20);
+        await checkAndUnlockAchievements(idea.jarId);
 
         return NextResponse.json(updatedIdea);
 
