@@ -33,16 +33,15 @@ export async function POST(request: Request) {
         const shouldCreateJar = !inviteCode && (topic || type);
 
         // Helper to infer jar type from topic
+        // Note: Type no longer affects functionality - it's just metadata
         function inferTypeFromTopic(topic: string): string {
             const romanticTopics = ['Dates', 'Romantic', 'date', 'romantic'];
-            const soloTopics = ['Solo', 'Personal', 'Self', 'solo', 'personal'];
 
             if (romanticTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
                 return 'ROMANTIC';
             }
-            if (soloTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
-                return 'GENERIC';
-            }
+
+            // Default to SOCIAL (works for both solo and group use)
             return 'SOCIAL';
         }
 

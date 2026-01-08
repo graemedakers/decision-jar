@@ -18,17 +18,18 @@ interface CreateJarModalProps {
 }
 
 // Helper to infer jar type from topic for backward compatibility
+// Note: Type no longer affects functionality - it's just metadata
+// SOCIAL is the most flexible default (works for both solo and group use)
 function inferTypeFromTopic(topic: string): string {
     const romanticTopics = ['Dates', 'Romantic', 'date', 'romantic'];
-    const soloTopics = ['Solo', 'Personal', 'Self', 'solo', 'personal'];
 
     if (romanticTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
         return 'ROMANTIC';
     }
-    if (soloTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
-        return 'GENERIC';
-    }
-    return 'SOCIAL'; // Default for everything else
+
+    // Default to SOCIAL for all other jars (works for solo or group)
+    // The jar type no longer restricts functionality
+    return 'SOCIAL';
 }
 
 export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, currentJarCount }: CreateJarModalProps) {
