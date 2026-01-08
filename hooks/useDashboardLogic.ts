@@ -130,6 +130,57 @@ export function useDashboardLogic() {
         }
     }, [refreshUser]);
 
+    // Handle Invite Codes on Dashboard (Direct Landing or Social Redirect)
+    useEffect(() => {
+        if (isLoadingUser || !userData) return;
+
+        const code = searchParams?.get('code');
+        const premiumToken = searchParams?.get('pt');
+
+        if (code) {
+            const handleJoin = async () => {
+                try {
+                    const res = await fetch('/api/jar/join', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code, premiumToken }),
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        if (data.premiumGifted) {
+                            showSuccess("Welcome! You've joined the jar and upgraded to Premium!");
+                        } else if (data.message !== "Already a member, switched to jar.") {
+                            showSuccess("Successfully joined the jar!");
+                        }
+
+                        // Clean URL
+                        const newParams = new URLSearchParams(searchParams.toString());
+                        newParams.delete('code');
+                        newParams.delete('pt');
+                        window.history.replaceState({}, '', `${window.location.pathname}?${newParams.toString()}`);
+
+                        // Refresh data
+                        handleContentUpdate();
+                    } else {
+                        // Only show error if it's not a session issue (which shouldn't happen here as we check userData)
+                        showError(data.error || "Failed to join jar");
+
+                        // Clean URL even on failure to prevent repeated attempts
+                        const newParams = new URLSearchParams(searchParams.toString());
+                        newParams.delete('code');
+                        newParams.delete('pt');
+                        window.history.replaceState({}, '', `${window.location.pathname}?${newParams.toString()}`);
+                    }
+                } catch (error) {
+                    console.error("Join from dashboard error:", error);
+                }
+            };
+            handleJoin();
+        }
+    }, [searchParams, userData, isLoadingUser]);
+
     // Unified Deep Link Action Router
     useEffect(() => {
         if (isLoadingUser || isLoadingIdeas) return;

@@ -75,7 +75,8 @@ export function SignupForm() {
         await trackSignup(provider, utmSource, utmMedium, utmCampaign);
 
         try {
-            await signIn(provider, { callbackUrl: "/dashboard" });
+            const callbackUrl = inviteCode ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : "/dashboard";
+            await signIn(provider, { callbackUrl });
         } catch (error) {
             console.error(`${provider} login error:`, error);
             setIsSocialLoading(null);

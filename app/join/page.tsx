@@ -1,20 +1,67 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 
 function JoinRedirect() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [status, setStatus] = useState("Preparing your invitation...");
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
+        const code = searchParams.get("code");
+        const premiumToken = searchParams.get("pt");
         const params = searchParams.toString();
-        // Artificial delay for smooth transition and branding impression
-        const timer = setTimeout(() => {
-            router.replace(`/signup${params ? `?${params}` : ""}`);
-        }, 1500);
-        return () => clearTimeout(timer);
+
+        const handleJoinFlow = async () => {
+            setIsProcessing(true);
+            try {
+                // 1. Check if user is already logged in
+                const meRes = await fetch('/api/auth/me');
+                const meData = await meRes.json();
+
+                if (meData.user) {
+                    // User is logged in!
+                    if (code) {
+                        setStatus("Joining the jar...");
+                        const joinRes = await fetch('/api/jar/join', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code, premiumToken })
+                        });
+
+                        if (joinRes.ok) {
+                            setStatus("Redirecting to your dashboard...");
+                            // Brief delay for success state
+                            setTimeout(() => {
+                                router.replace('/dashboard');
+                            }, 800);
+                            return;
+                        } else {
+                            // If joining failed (e.g. jar full), redirect to signup to show the error state or dashboard
+                            router.replace(`/signup?${params}`);
+                            return;
+                        }
+                    } else {
+                        router.replace('/dashboard');
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error("Join redirect check error:", err);
+            }
+
+            // 2. If not logged in, or check failed, proceed to signup after branding delay
+            const timer = setTimeout(() => {
+                router.replace(`/signup${params ? `?${params}` : ""}`);
+            }, 1500);
+
+            return () => clearTimeout(timer);
+        };
+
+        handleJoinFlow();
     }, [router, searchParams]);
 
     return (
@@ -28,18 +75,14 @@ function JoinRedirect() {
                     <div className="w-24 h-24 bg-gradient-to-br from-primary to-accent rounded-[2rem] flex items-center justify-center shadow-2xl transform rotate-6 animate-bounce-subtle">
                         <Sparkles className="w-12 h-12 text-white" />
                     </div>
-                    <div className="absolute -top-4 -right-4 w-8 h-8 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                        <div className="w-3 h-3 bg-primary rounded-full" />
-                    </div>
                 </div>
 
                 <div className="space-y-3">
                     <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
                         You're Invited!
                     </h1>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 font-medium max-w-sm mx-auto leading-relaxed">
-                        Preparing your Decision Jar experience. <br className="hidden md:block" />
-                        We're getting things ready for you...
+                    <p className="text-lg text-slate-600 dark:text-slate-400 font-medium max-w-sm mx-auto leading-relaxed h-8">
+                        {status}
                     </p>
                 </div>
 
