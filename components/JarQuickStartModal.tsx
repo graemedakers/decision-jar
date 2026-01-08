@@ -36,6 +36,18 @@ export function JarQuickStartModal({ isOpen, onClose, jarId, jarName, jarTopic }
         if (combined.includes('movie') || combined.includes('film') || combined.includes('cinema') || combined.includes('netflix') || combined.includes('watch') || combined.includes('tv')) {
             return { id: 'MOVIE', name: 'Movie Scout', description: 'Browse current films and streaming picks' };
         }
+        if (combined.includes('nightclub') || combined.includes('nightlife') || combined.includes('party') || combined.includes('clubbing')) {
+            return { id: 'NIGHTCLUB', name: 'Nightlife Navigator', description: 'Find the best clubs and parties' };
+        }
+        if (combined.includes('wellness') || combined.includes('spa') || combined.includes('relax') || combined.includes('massage')) {
+            return { id: 'WELLNESS', name: 'Wellness & Spa', description: 'Relax and recharge with local treatments' };
+        }
+        if (combined.includes('fitness') || combined.includes('gym') || combined.includes('workout') || combined.includes('sport') || combined.includes('exercise')) {
+            return { id: 'FITNESS', name: 'Fitness Finder', description: 'Find a workout or sporting activity' };
+        }
+        if (combined.includes('travel') || combined.includes('trip') || combined.includes('hotel') || combined.includes('getaway') || combined.includes('staycation')) {
+            return { id: 'HOTEL', name: 'Staycation Finder', description: 'Find the perfect hotel for a getaway' };
+        }
         if (combined.includes('book') || combined.includes('read') || combined.includes('novel') || combined.includes('library')) {
             return { id: 'BOOK', name: 'Book Scout', description: 'Get curated reading recommendations' };
         }
@@ -44,6 +56,9 @@ export function JarQuickStartModal({ isOpen, onClose, jarId, jarName, jarTopic }
         }
         if (combined.includes('activity') || combined.includes('adventure') || combined.includes('escape') || combined.includes('mystery') || combined.includes('fun')) {
             return { id: 'ESCAPE_ROOM', name: 'Activity Scout', description: 'Discover fun local activities and adventures' };
+        }
+        if (combined.includes('theatre') || combined.includes('show') || combined.includes('concert') || combined.includes('art')) {
+            return { id: 'THEATRE', name: 'Theatre & Arts', description: 'Discover shows and exhibitions' };
         }
         if (combined.includes('gym') || combined.includes('workout') || combined.includes('fitness') || combined.includes('sport') || combined.includes('exercise')) {
             return { id: 'FITNESS', name: 'Fitness Finder', description: 'Find a workout or sporting activity' };
