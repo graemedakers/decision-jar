@@ -8,7 +8,7 @@ import Link from "next/link";
 import {
     Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar,
     Activity, Utensils, Check, Star, ArrowRight, History, Layers,
-    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon
+    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2
 } from "lucide-react";
 
 import { Jar3D } from "@/components/Jar3D";
@@ -85,7 +85,7 @@ function DashboardContent() {
     const {
         // State
         userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
-        ideas, isLoadingIdeas, favoritesCount,
+        ideas, isLoadingIdeas, isFetchingIdeas, favoritesCount,
         isSpinning, userLocation, inviteCode, showConfetti, showOnboarding, showQuiz,
 
         // State Setters (explicitly destructured for usage)
@@ -114,7 +114,7 @@ function DashboardContent() {
     const isAdminPickMode = jarSelectionMode === 'ADMIN_PICK';
 
     const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
-    const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas;
+    const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas && !isFetchingIdeas;
     const showAdminStatus = isAdminPickMode;
     const showStatusSection = showNoJars || showAdminStatus || showEmptyState;
 
@@ -140,6 +140,23 @@ function DashboardContent() {
     const handleCloseLevelUp = () => {
         localStorage.setItem('datejar_user_level', level.toString());
     };
+
+    const isLoading = isLoadingUser || isLoadingIdeas || (isFetchingIdeas && ideas.length === 0);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-8 transition-colors duration-500">
+                <div className="relative mb-8">
+                    <div className="w-20 h-20 bg-primary/20 rounded-3xl animate-pulse" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                    </div>
+                </div>
+                <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-widest text-center">Finding your jar...</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">Getting the good times ready</p>
+            </div>
+        );
+    }
 
     return (
         <main className="page-with-nav min-h-screen bg-slate-50 dark:bg-slate-950 px-4 md:px-8 relative overflow-hidden w-full transition-colors duration-500">

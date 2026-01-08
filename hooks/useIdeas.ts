@@ -27,6 +27,7 @@ export function useIdeas() {
     return {
         ideas: query.data || [],
         isLoading: query.isLoading,
+        isFetching: query.isFetching,
         fetchIdeas,
         error: query.error
     };

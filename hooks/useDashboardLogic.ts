@@ -40,7 +40,7 @@ export function useDashboardLogic() {
         onLevelUp: (newLevel) => openModal('LEVEL_UP', { level: newLevel })
     });
 
-    const { ideas, isLoading: isLoadingIdeas, fetchIdeas } = useIdeas();
+    const { ideas, isLoading: isLoadingIdeas, isFetching: isFetchingIdeas, fetchIdeas } = useIdeas();
     const { favoritesCount, fetchFavorites } = useFavorites();
     const { deleteIdea } = useIdeaMutations();
 
@@ -301,7 +301,7 @@ export function useDashboardLogic() {
     return {
         // State
         userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
-        ideas, isLoadingIdeas,
+        ideas, isLoadingIdeas, isFetchingIdeas,
         favoritesCount,
         isSpinning, userLocation, inviteCode: userData?.coupleReferenceCode || userData?.referenceCode || userData?.jarReferenceCode || null, showConfetti, showOnboarding, showQuiz,
 

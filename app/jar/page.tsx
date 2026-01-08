@@ -18,7 +18,7 @@ export default function JarPage() {
 
     // Custom Hooks
     const { userData, isPremium, refreshUser, isLoading: isLoadingUser, level, hasPaid, coupleCreatedAt, isTrialEligible } = useUser();
-    const { ideas, isLoading: isIdeasLoading, fetchIdeas } = useIdeas();
+    const { ideas, isLoading: isIdeasLoading, isFetching, fetchIdeas } = useIdeas();
     const { favoritesCount, fetchFavorites } = useFavorites();
     const { openModal, closeModal, activeModal } = useModalSystem();
 
@@ -129,7 +129,7 @@ export default function JarPage() {
     const isAdminPickMode = userData?.jarSelectionMode === 'ADMIN_PICK';
     const isAdmin = !!userData?.isCreator;
     const hasPartner = !!userData?.partnerName;
-    const isLoading = isIdeasLoading || isLoadingUser;
+    const isLoading = isIdeasLoading || isLoadingUser || (isFetching && ideas.length === 0);
 
     return (
         <main className="page-with-nav min-h-screen bg-slate-50 dark:bg-slate-950 px-4 md:px-8 relative overflow-hidden w-full max-w-5xl mx-auto transition-colors duration-500">
