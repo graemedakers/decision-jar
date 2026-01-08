@@ -1,6 +1,6 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma, SelectionMode } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { awardXp } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Priority: 1. activeJarId, 2. First membership, 3. Legacy coupleId
     const currentJarId = user.activeJarId ||
         (user.memberships?.[0]?.jarId) ||
-        user.legacyJarId;
+        (user as any).legacyJarId;
 
     if (!currentJarId) {
         return NextResponse.json({ error: 'No active jar' }, { status: 400 });
@@ -138,7 +138,7 @@ export async function GET(request: Request) {
 
     const currentJarId = user.activeJarId ||
         (user.memberships?.[0]?.jarId) ||
-        user.legacyJarId;
+        (user as any).legacyJarId;
 
     if (!currentJarId) {
         return NextResponse.json([]); // No jar, no ideas
@@ -186,7 +186,7 @@ export async function GET(request: Request) {
             const isPrivate = idea.isPrivate;
             const isGroupJar = idea.jar.type === 'SOCIAL';
             const isCommunityJar = idea.jar.isCommunityJar;
-            const isVotingJar = idea.jar.selectionMode === 'VOTING';
+            const isVotingJar = idea.jar.selectionMode === SelectionMode.VOTE;
 
             let processedIdea: any = {
                 ...idea,

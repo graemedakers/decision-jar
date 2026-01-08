@@ -76,13 +76,15 @@ export function trackPWAEvent(
     });
 }
 
+import { logger } from "@/lib/logger";
+
 /**
  * Internal tracking function - sends to your analytics provider
  */
 function trackEvent(eventName: string, properties?: Record<string, any>) {
     // Console logging for development
     if (process.env.NODE_ENV === 'development') {
-        console.log('📊 PWA Analytics:', eventName, properties);
+        logger.info('📊 PWA Analytics:', { eventName, properties });
     }
 
     // Google Analytics (if available)

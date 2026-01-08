@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { isCouplePremium, isUserPro } from '@/lib/premium';
 import { reliableGeminiCall } from '@/lib/gemini';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
     try {
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
         if (!apiKey) {
-            console.warn("No API key found, returning mock data");
+            logger.warn("No API key found, returning mock data");
             return NextResponse.json({
                 meals: getMockMealPlan(numDays)
             });
@@ -60,12 +61,12 @@ export async function POST(request: Request) {
             `;
 
             if (cached.length > 0) {
-                console.log("Serving from cache:", cacheKey);
+                logger.info("Serving from cache:", { cacheKey });
                 const meals = JSON.parse(cached[0].value);
                 return NextResponse.json({ meals, cached: true });
             }
-        } catch (e) {
-            console.warn("Cache check failed:", e);
+        } catch (e: any) {
+            logger.warn("Cache check failed:", { error: e?.message || e });
         }
 
         const dietaryNote = dietaryPreference !== 'None' ? `All meals MUST be ${dietaryPreference}.` : '';
@@ -139,17 +140,17 @@ export async function POST(request: Request) {
                     "expiresAt" = ${expiresAt}
                 `;
             } catch (e) {
-                console.warn("Failed to write to cache:", e);
+                logger.warn("Failed to write to cache:", e);
             }
 
             return NextResponse.json({ meals });
         } catch (error: any) {
-            console.error("Gemini failed, falling back to mock", error);
+            logger.error("Gemini failed, falling back to mock", error);
             errors.push(error.message);
         }
 
         // Fallback to mock data
-        console.warn("AI models failed, returning mock data. Errors:", errors);
+        logger.warn("AI models failed, returning mock data. Errors:", { errors });
 
         return NextResponse.json({
             meals: getMockMealPlan(numDays),
@@ -157,7 +158,7 @@ export async function POST(request: Request) {
         });
 
     } catch (error: any) {
-        console.error('Menu Planner error:', error);
+        logger.error('Menu Planner error:', error);
         return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
     }
 }

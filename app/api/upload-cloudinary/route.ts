@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
+
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     try {
-        console.log("Starting upload request...");
+        logger.info("Starting upload request...");
 
         // Check for environment variables immediately
         if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
             !process.env.CLOUDINARY_API_KEY ||
             !process.env.CLOUDINARY_API_SECRET) {
-            console.error("Missing Cloudinary environment variables");
+            logger.error("Missing Cloudinary environment variables");
             return NextResponse.json({ error: "Server configuration error: Missing Cloudinary credentials" }, { status: 500 });
         }
 
@@ -86,7 +88,7 @@ export async function POST(request: Request) {
         });
 
     } catch (error: any) {
-        console.error("Upload handler failed:", error);
+        logger.error("Upload handler failed:", error);
         // Ensure we return a JSON response even for unexpected errors
         return NextResponse.json({ error: `Upload failed: ${error.message || "Unknown error"}` }, { status: 500 });
     }

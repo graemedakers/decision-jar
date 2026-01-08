@@ -104,7 +104,7 @@ function DashboardContent() {
     // --- View Logic / Layout Calculations ---
     const jarTopic = userData?.jarTopic;
     const jarSelectionMode = userData?.jarSelectionMode;
-    const isVotingMode = jarSelectionMode === 'VOTING';
+    const isVotingMode = jarSelectionMode === 'VOTE';
     const isAllocationMode = jarSelectionMode === 'ALLOCATION';
     // const theme = getThemeForTopic(jarTopic); // Theme usage removed from Jar3D as it accepts no props
 

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { isCouplePremium, isUserPro } from '@/lib/premium';
 import { reliableGeminiCall } from '@/lib/gemini';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from "@/lib/logger";
 
 
 export async function POST(request: Request) {
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
 
         const apiKey = process.env.GEMINI_API_KEY?.trim();
         if (!apiKey) {
-            console.warn("No API key found, returning mock data");
+            logger.warn("No API key found, returning mock data");
             return NextResponse.json({
                 suggestions: [
                     { title: "Mock: Local Farmers Market", description: "Visit the local market for fresh produce.", day: "Saturday", cost: "Free", url: "https://www.google.com/search?q=local+farmers+market" },
@@ -106,12 +107,12 @@ export async function POST(request: Request) {
             `;
 
             if (cached.length > 0) {
-                console.log("Serving from cache:", cacheKey);
+                logger.info("Serving from cache:", { cacheKey });
                 const suggestions = JSON.parse(cached[0].value);
                 return NextResponse.json({ suggestions, cached: true });
             }
-        } catch (e) {
-            console.warn("Cache check failed:", e);
+        } catch (e: any) {
+            logger.warn("Cache check failed:", { error: e?.message || e });
         }
         // -------------------
 
@@ -161,20 +162,20 @@ export async function POST(request: Request) {
                     value = ${JSON.stringify(suggestions)},
                     "expiresAt" = ${expiresAt}
                 `;
-            } catch (e) {
-                console.warn("Failed to write to cache:", e);
+            } catch (e: any) {
+                logger.warn("Failed to write to cache:", { error: e?.message || e });
             }
             // ---------------------
 
             return NextResponse.json({ suggestions });
         } catch (error: any) {
-            console.error("Gemini failed, falling back to mock", error);
+            logger.error("Gemini failed, falling back to mock", error);
             errors.push(error.message);
             // Fallthrough to mock
         }
 
         // Fallback to mock data if AI fails
-        console.warn("All AI models failed, returning mock data. Errors:", errors);
+        logger.warn("All AI models failed, returning mock data. Errors:", { errors });
 
         return NextResponse.json({
             suggestions: [
@@ -188,7 +189,7 @@ export async function POST(request: Request) {
         });
 
     } catch (error: any) {
-        console.error('Weekend Planner error:', error);
+        logger.error('Weekend Planner error:', error);
         return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
     }
 }

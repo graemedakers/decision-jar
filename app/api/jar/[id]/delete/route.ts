@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 const prisma = new PrismaClient();
 
@@ -21,11 +22,11 @@ export async function DELETE(req: NextRequest, props: Context) {
     const jarId = params.id;
 
     if (!jarId) {
-        console.error("Delete Error: JAR ID Missing");
+        logger.error("Delete Error: JAR ID Missing");
         return NextResponse.json({ error: "Jar ID missing" }, { status: 400 });
     }
 
-    console.log(`[DELETE JAR] Processing request for Jar ID: ${jarId} by User: ${session.user.id}`);
+    logger.info(`[DELETE JAR] Processing request for Jar ID: ${jarId} by User: ${session.user.id}`);
 
     try {
         // Verify Admin Role
@@ -42,7 +43,7 @@ export async function DELETE(req: NextRequest, props: Context) {
 
         // Clean up all related records in a transaction to satisfy Foreign Keys
         await prisma.$transaction(async (tx) => {
-            console.log(`[DELETE JAR] Starting cleanup for ${jarId}...`);
+            logger.info(`[DELETE JAR] Starting cleanup for ${jarId}...`);
 
             // 1. Remove Legacy User links
             await tx.user.updateMany({
@@ -86,15 +87,15 @@ export async function DELETE(req: NextRequest, props: Context) {
             await tx.jarMember.deleteMany({ where: { jarId } });
 
             // 9. Finally, Delete the Jar
-            console.log(`[DELETE JAR] Deleting Main Jar Record: ${jarId}`);
+            logger.info(`[DELETE JAR] Deleting Main Jar Record: ${jarId}`);
             // Explicitly assert jarId type if needed, but it should be string
             await tx.jar.delete({ where: { id: jarId } });
         });
 
-        console.log(`[DELETE JAR] Success.`);
+        logger.info(`[DELETE JAR] Success.`);
         return NextResponse.json({ success: true });
     } catch (error: any) {
-        console.error("Delete Error:", error);
+        logger.error("Delete Error:", error);
         // Return detailed error message for debugging
         return NextResponse.json({
             error: `Failed to delete jar: ${error.message || "Unknown error"}`

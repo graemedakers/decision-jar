@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -17,10 +18,10 @@ export async function POST(req: Request) {
             process.env.STRIPE_WEBHOOK_SECRET!
         );
         // Log successful signature verification
-        console.log(`[STRIPE_WEBHOOK] ✅ Verified: ${event.type} (${event.id})`);
+        logger.info(`[STRIPE_WEBHOOK] ✅ Verified: ${event.type} (${event.id})`);
     } catch (error: any) {
         // Log signature verification failures
-        console.error(`[STRIPE_WEBHOOK] ❌ Verification failed:`, error.message);
+        logger.error(`[STRIPE_WEBHOOK] ❌ Verification failed:`, error);
         return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
     }
 
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
         if (metadata?.type === 'SUBSCRIPTION_UPGRADE') {
             const userId = metadata.userId;
             if (userId) {
-                console.log(`[STRIPE_WEBHOOK] Processing subscription upgrade for user ${userId}`);
+                logger.info(`[STRIPE_WEBHOOK] Processing subscription upgrade for user ${userId}`);
                 await prisma.user.update({
                     where: { id: userId },
                     data: {
@@ -41,14 +42,14 @@ export async function POST(req: Request) {
                         subscriptionStatus: 'active' // Or fetch status from subscription? Default active for simplified flow
                     }
                 });
-                console.log(`[STRIPE_WEBHOOK] ✅ Subscription upgrade completed for user ${userId}`);
+                logger.info(`[STRIPE_WEBHOOK] ✅ Subscription upgrade completed for user ${userId}`);
             } else {
-                console.warn(`[STRIPE_WEBHOOK] ⚠️ SUBSCRIPTION_UPGRADE missing userId in metadata`);
+                logger.warn(`[STRIPE_WEBHOOK] ⚠️ SUBSCRIPTION_UPGRADE missing userId in metadata`);
             }
         } else if (metadata?.type === 'LIFETIME_CB') {
             const userId = metadata.userId;
             if (userId) {
-                console.log(`[STRIPE_WEBHOOK] Processing lifetime pro upgrade for user ${userId}`);
+                logger.info(`[STRIPE_WEBHOOK] Processing lifetime pro upgrade for user ${userId}`);
                 await prisma.user.update({
                     where: { id: userId },
                     data: {
@@ -57,19 +58,19 @@ export async function POST(req: Request) {
                         stripeCustomerId: session.customer as string,
                     }
                 });
-                console.log(`[STRIPE_WEBHOOK] ✅ Lifetime pro granted to user ${userId}`);
+                logger.info(`[STRIPE_WEBHOOK] ✅ Lifetime pro granted to user ${userId}`);
             } else {
-                console.warn(`[STRIPE_WEBHOOK] ⚠️ LIFETIME_CB missing userId in metadata`);
+                logger.warn(`[STRIPE_WEBHOOK] ⚠️ LIFETIME_CB missing userId in metadata`);
             }
         } else if (metadata?.type === 'NEW_COUPLE_SIGNUP') {
             const { name, email, passwordHash, location } = metadata;
 
             if (!name || !email || !passwordHash) {
-                console.error(`[STRIPE_WEBHOOK] ❌ NEW_COUPLE_SIGNUP missing required metadata`);
+                logger.error(`[STRIPE_WEBHOOK] ❌ NEW_COUPLE_SIGNUP missing required metadata`);
                 return new NextResponse('Webhook Error: Missing user details in metadata', { status: 400 });
             }
 
-            console.log(`[STRIPE_WEBHOOK] Processing new couple signup for ${email}`);
+            logger.info(`[STRIPE_WEBHOOK] Processing new couple signup for ${email}`);
 
             // Create Jar (formerly Couple)
             const referenceCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -106,12 +107,12 @@ export async function POST(req: Request) {
                     }
                 });
 
-                console.log(`[STRIPE_WEBHOOK] ✅ Created new user and jar for ${email} (${user.id})`);
+                logger.info(`[STRIPE_WEBHOOK] ✅ Created new user and jar for ${email} (${user.id})`);
             });
         } else if (metadata?.type === 'COMMUNITY_JAR_CREATION') {
             const jarId = metadata.jarId;
             if (jarId) {
-                console.log(`[STRIPE_WEBHOOK] Activating Community Jar ${jarId}`);
+                logger.info(`[STRIPE_WEBHOOK] Activating Community Jar ${jarId}`);
                 await prisma.jar.update({
                     where: { id: jarId },
                     data: {
@@ -120,12 +121,12 @@ export async function POST(req: Request) {
                         stripeSubscriptionId: session.subscription as string,
                     }
                 });
-                console.log(`[STRIPE_WEBHOOK] ✅ Community Jar ${jarId} activated`);
+                logger.info(`[STRIPE_WEBHOOK] ✅ Community Jar ${jarId} activated`);
             }
         }
     } else if (event.type === 'customer.subscription.updated') {
         const subscription = event.data.object as Stripe.Subscription;
-        console.log(`[STRIPE_WEBHOOK] Processing subscription.updated for ${subscription.id}: ${subscription.status}`);
+        logger.info(`[STRIPE_WEBHOOK] Processing subscription.updated for ${subscription.id}: ${subscription.status}`);
 
         // Find USER by stripeSubscriptionId and update status
         const result = await prisma.user.updateMany({
@@ -134,7 +135,7 @@ export async function POST(req: Request) {
                 subscriptionStatus: subscription.status
             }
         });
-        console.log(`[STRIPE_WEBHOOK] ✅ Updated ${result.count} user(s) to status: ${subscription.status}`);
+        logger.info(`[STRIPE_WEBHOOK] ✅ Updated ${result.count} user(s) to status: ${subscription.status}`);
 
         // Also update JAR status (for communities)
         const jarResult = await prisma.jar.updateMany({
@@ -143,7 +144,7 @@ export async function POST(req: Request) {
                 subscriptionStatus: subscription.status
             }
         });
-        console.log(`[STRIPE_WEBHOOK] ✅ Updated ${jarResult.count} jar(s) to status: ${subscription.status}`);
+        logger.info(`[STRIPE_WEBHOOK] ✅ Updated ${jarResult.count} jar(s) to status: ${subscription.status}`);
 
         if (subscription.status === 'past_due') {
             // Find user to get email logic (updateMany doesn't return the record)
@@ -154,15 +155,15 @@ export async function POST(req: Request) {
 
             if (user) {
                 // TODO: Implement sendPaymentDueEmail(user.email, user.name);
-                console.log(`[PAYMENT_DUE] Sending email to ${user.email} (Status: past_due)`);
+                logger.info(`[PAYMENT_DUE] Sending email to ${user.email} (Status: past_due)`);
                 // Example: await sendEmail(user.email, "Action Required: Payment Failed", "Please update your payment method to keep access.");
             } else {
-                console.warn(`[STRIPE_WEBHOOK] ⚠️ Could not find user for subscription ${subscription.id}`);
+                logger.warn(`[STRIPE_WEBHOOK] ⚠️ Could not find user for subscription ${subscription.id}`);
             }
         }
     } else if (event.type === 'customer.subscription.deleted') {
         const subscription = event.data.object as Stripe.Subscription;
-        console.log(`[STRIPE_WEBHOOK] Processing subscription.deleted for ${subscription.id}`);
+        logger.info(`[STRIPE_WEBHOOK] Processing subscription.deleted for ${subscription.id}`);
 
         const result = await prisma.user.updateMany({
             where: { stripeSubscriptionId: subscription.id },
@@ -171,7 +172,7 @@ export async function POST(req: Request) {
                 subscriptionEndsAt: new Date((subscription as any).current_period_end * 1000)
             }
         });
-        console.log(`[STRIPE_WEBHOOK] ✅ Canceled ${result.count} user subscription(s)`);
+        logger.info(`[STRIPE_WEBHOOK] ✅ Canceled ${result.count} user subscription(s)`);
 
         // Also update JAR status (for communities)
         const jarResult = await prisma.jar.updateMany({
@@ -181,9 +182,9 @@ export async function POST(req: Request) {
                 subscriptionRenewsAt: null // No longer renews
             }
         });
-        console.log(`[STRIPE_WEBHOOK] ✅ Canceled ${jarResult.count} jar subscription(s)`);
+        logger.info(`[STRIPE_WEBHOOK] ✅ Canceled ${jarResult.count} jar subscription(s)`);
     }
 
-    console.log(`[STRIPE_WEBHOOK] ✅ Successfully processed ${event.type}`);
+    logger.info(`[STRIPE_WEBHOOK] ✅ Successfully processed ${event.type}`);
     return new NextResponse(null, { status: 200 });
 }

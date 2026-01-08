@@ -1,8 +1,9 @@
 import { prisma } from './prisma';
 import { sendEmail } from './email';
+import { logger } from './logger';
 
 export async function checkAndPromoteWaitlist(jarId: string) {
-    console.log(`Checking waitlist for jar ${jarId}...`);
+    logger.info(`Checking waitlist for jar ${jarId}...`);
 
     try {
         const jar = await prisma.jar.findUnique({
@@ -28,7 +29,7 @@ export async function checkAndPromoteWaitlist(jarId: string) {
             });
 
             for (const member of waitlistedMembers) {
-                console.log(`Promoting ${member.user.email} from waitlist...`);
+                logger.info(`Promoting ${member.user.email} from waitlist...`);
 
                 await prisma.jarMember.update({
                     where: { id: member.id },
@@ -50,6 +51,6 @@ export async function checkAndPromoteWaitlist(jarId: string) {
             }
         }
     } catch (error) {
-        console.error("Failed to promote from waitlist", error);
+        logger.error("Failed to promote from waitlist", error);
     }
 }

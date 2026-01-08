@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { stripe } from '@/lib/stripe';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
         });
 
-        console.log("[STRIPE_CHECKOUT_SESSION_CREATED]", {
+        logger.info("[STRIPE_CHECKOUT_SESSION_CREATED]", {
             sessionId: checkoutSession.id,
             userId: session.user.id,
             priceId: targetPriceId,
@@ -67,7 +68,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ url: checkoutSession.url }, { headers: corsHeaders });
     } catch (error: any) {
-        console.error("[STRIPE_CHECKOUT_ERROR]", error);
+        logger.error("[STRIPE_CHECKOUT_ERROR]", error);
         return NextResponse.json({
             error: error?.message || "Internal Server Error",
             details: error?.toString()

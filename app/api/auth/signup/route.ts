@@ -41,7 +41,10 @@ export async function POST(request: Request) {
                 jarName = `${name}'s ${selectedTopic} Jar`;
             }
 
-            const validSelectionMode = (selectionMode === 'VOTING' || selectionMode === 'ALLOCATION') ? selectionMode : 'RANDOM';
+            const modeInput = selectionMode as string;
+            const validSelectionMode = (modeInput === 'VOTING' || modeInput === 'VOTE' || modeInput === 'ALLOCATION')
+                ? (modeInput === 'VOTING' ? 'VOTE' : modeInput)
+                : 'RANDOM';
 
             // Create new Jar
             const jar = await (prisma.jar as any).create({

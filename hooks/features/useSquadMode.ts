@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { logger } from "@/lib/logger";
 
 export function useSquadMode(jarId?: string, onExternalSpinStart?: () => void, onExternalSpinResult?: (idea: any) => void) {
     const [isConnected, setIsConnected] = useState(false);
@@ -10,11 +11,11 @@ export function useSquadMode(jarId?: string, onExternalSpinStart?: () => void, o
 
         const channel = supabase.channel(`jar:${jarId}`)
             .on('broadcast', { event: 'spin-start' }, () => {
-                console.log('Squad: Received spin-start');
+                logger.info('Squad: Received spin-start');
                 onExternalSpinStart?.();
             })
             .on('broadcast', { event: 'spin-result' }, (payload) => {
-                console.log('Squad: Received spin-result', payload);
+                logger.info('Squad: Received spin-result', payload);
                 onExternalSpinResult?.(payload.payload.idea);
             })
             .subscribe((status) => {

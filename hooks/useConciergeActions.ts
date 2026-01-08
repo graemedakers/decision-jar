@@ -4,6 +4,7 @@ import { useState } from "react";
 import { isDemoMode, addDemoIdea } from "@/lib/demo-storage";
 import { trackEvent } from "@/lib/analytics";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
+import { logger } from "@/lib/logger";
 
 interface ConciergeActionProps {
     onIdeaAdded?: () => void;
@@ -25,7 +26,7 @@ export function useConciergeActions({
     const handleAddToJar = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
         // FIX 1: Prevent duplicate clicks
         if (isAddingToJar) {
-            console.log('Already adding idea, please wait...');
+            logger.info('Already adding idea, please wait...');
             return;
         }
 
@@ -53,7 +54,7 @@ export function useConciergeActions({
                     alert("✅ Added to your Jar!\n\n(Demo Mode: This idea will appear in your jar and can be spun!)");
                     return;
                 } catch (error) {
-                    console.error(error);
+                    logger.error("Failed to add demo idea:", error);
                     alert("Failed to add to jar.");
                     return;
                 }
@@ -151,8 +152,8 @@ export function useConciergeActions({
                                 // Fall through to create new jar if user chose Cancel
                             }
                         }
-                    } catch (jarsError) {
-                        console.warn('Failed to check existing jars:', jarsError);
+                    } catch (jarsError: any) {
+                        logger.warn('Failed to check existing jars:', { error: jarsError });
                         // Fall through to normal creation flow
                     }
 
@@ -228,7 +229,7 @@ export function useConciergeActions({
                                 }
 
                                 // Other jar creation errors
-                                console.error('Jar creation failed:', errorData);
+                                logger.error('Jar creation failed:', errorData);
                                 const errorMsg = errorData.details
                                     ? `${errorData.error}: ${errorData.details}${errorData.type ? ` (${errorData.type})` : ''}`
                                     : errorData.error || 'Failed to create jar';
@@ -271,12 +272,12 @@ export function useConciergeActions({
                             } else {
                                 document.getElementById('jar-creation-loading')?.remove();
                                 const addError = await addRes.json();
-                                console.error('Failed to add idea:', addError);
+                                logger.error('Failed to add idea:', addError);
                                 alert(`Jar created, but failed to add idea:\n${addError.error || 'Unknown error'}`);
                             }
                         } catch (error: any) {
                             document.getElementById('jar-creation-loading')?.remove();
-                            console.error('Failed to auto-create jar:', error);
+                            logger.error('Failed to auto-create jar:', error);
                             alert(`Failed to create jar automatically:\n${error.message || error}\n\nPlease check console for details.`);
                             window.location.href = '/dashboard';
                         }
@@ -294,7 +295,7 @@ export function useConciergeActions({
                 showError(`Failed to add: ${err.error || 'Server error'}`);
             }
         } catch (error) {
-            console.error(error);
+            logger.error("Failed to add to jar:", error);
             showError("Failed to add to jar.");
         } finally {
             // FIX 1: Always reset loading state
@@ -349,7 +350,7 @@ export function useConciergeActions({
             }
 
         } catch (error) {
-            console.error("Failed to save idea", error);
+            logger.error("Failed to save idea", error);
             if (onGoTonight) {
                 onGoTonight({
                     ...ideaData,
@@ -403,7 +404,7 @@ export function useConciergeActions({
                 }
             }
         } catch (error) {
-            console.error(error);
+            logger.error('Error updating favorite', error);
             showError("Error updating favorite.");
         }
     };
