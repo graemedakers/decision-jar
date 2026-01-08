@@ -125,9 +125,12 @@ export const getConciergePromptAndMock = (
                 - Watch Mode: ${inputs.watchMode}
                 ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in physical cinemas near ${targetLocation}. 
                 1. Identify real cinemas currently operating within the same suburb or within 10km of ${targetLocation}. 
-                2. BRAND VERIFICATION: You MUST use the correct brand. For example, in Rouse Hill (NSW), the ONLY major cinema is 'Reading Cinemas' at Rouse Hill Town Centre. Do NOT recommend 'Hoyts' or 'Event Cinemas' if they do not exist in that specific suburb.
-                3. ZERO HALLUCINATION POLICY: Do NOT guess the chain. If the user is in Rouse Hill, the ticket URL must lead to ReadingCinemas.com.au, NOT Hoyts.com.au.
-                4. Double-check the exact theater branch name (e.g., 'Reading Cinemas Rouse Hill').
+                2. BRAND VERIFICATION: You MUST use the correct brand. 
+                   - ROUSE HILL (NSW): The ONLY major cinema is 'Reading Cinemas' at Rouse Hill Town Centre. Do NOT use Hoyts.
+                   - EPPING (VIC): The cinema at Pacific Epping is 'Reading Cinemas'. It is NOT a Hoyts.
+                   - Do NOT recommend 'Hoyts' or 'Event Cinemas' unless you have verified that specific brand exists in that specific suburb.
+                3. ZERO HALLUCINATION POLICY: Do NOT guess the chain. If the user is in Rouse Hill or Epping, the ticket URL must lead to ReadingCinemas.com.au, NOT Hoyts.com.au.
+                4. Double-check the exact theater branch name (e.g., 'Reading Cinemas Epping', 'Reading Cinemas Rouse Hill').
                 5. Find movies currently playing at these specific locations today or tomorrow.
                 6. You MUST provide the specific CINEMA NAME (including the branch name), its FULL PHYSICAL ADDRESS, and the OFFICIAL TICKET URL for that specific cinema.` : ''}
                 - Genre: ${inputs.genre || "Any"}
