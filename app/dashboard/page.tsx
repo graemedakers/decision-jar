@@ -127,12 +127,12 @@ function DashboardContent() {
                     openModal('JAR_QUICKSTART', {
                         jarId: userData.activeJarId,
                         jarName: userData.jarName || 'Your Jar',
-                        jarTopic: userData.topic || 'General'
+                        jarTopic: userData.jarTopic || 'General'
                     });
                 }
             } catch (e) { }
         }
-    }, [showEmptyState, userData?.activeJarId, openModal]);
+    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, openModal]);
 
     const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
     const combinedLocation = userLocation || "";
@@ -318,7 +318,8 @@ function DashboardContent() {
                                     )}
                                     {showEmptyState && (
                                         <EnhancedEmptyState
-                                            jarTopic={jarTopic || 'General'}
+                                            jarTopic={userData?.jarTopic || 'General'}
+                                            jarName={userData?.jarName || 'Your Jar'}
                                             jarId={userData?.activeJarId || ''}
                                             onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
                                             onAddIdeaClick={() => openModal('ADD_IDEA')}
@@ -424,7 +425,7 @@ function DashboardContent() {
                 userLocation={userLocation}
                 setUserLocation={setUserLocation}
                 combinedLocation={combinedLocation}
-                jarTopic={jarTopic || 'Date'}
+                jarTopic={jarTopic || 'General'}
                 level={level}
                 favoritesCount={favoritesCount}
                 hasPaid={hasPaid}

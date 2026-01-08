@@ -47,14 +47,14 @@ export default function JarPage() {
                     openModal('JAR_QUICKSTART', {
                         jarId: userData.activeJarId,
                         jarName: userData.jarName || 'Your Jar',
-                        jarTopic: userData.topic || 'General'
+                        jarTopic: userData.jarTopic || 'General'
                     });
                 }
             } catch (e) {
                 // localStorage not available
             }
         }
-    }, [ideas.length, isIdeasLoading, userData?.activeJarId]);
+    }, [ideas.length, isIdeasLoading, userData?.activeJarId, userData?.jarTopic]);
 
     // Fetch available jars logic (kept local as it's specific for moving functionality)
     useEffect(() => {
@@ -217,7 +217,8 @@ export default function JarPage() {
                     </div>
                 ) : activeIdeas.length === 0 ? (
                     <EnhancedEmptyState
-                        jarTopic={userData?.topic || 'General'}
+                        jarTopic={userData?.jarTopic || 'General'}
+                        jarName={userData?.jarName || 'Your Jar'}
                         jarId={userData?.activeJarId || ''}
                         onTemplateClick={() => setIsTemplateBrowserOpen(true)}
                         onAddIdeaClick={() => setIsModalOpen(true)}

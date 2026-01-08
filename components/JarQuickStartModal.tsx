@@ -18,34 +18,39 @@ export function JarQuickStartModal({ isOpen, onClose, jarId, jarName, jarTopic }
     const router = useRouter();
     const { openModal } = useModalSystem();
 
-    // Determine which concierge to suggest based on topic
+    // Determine which concierge to suggest based on topic and name
     const getSuggestedConcierge = () => {
-        const topicLower = jarTopic.toLowerCase();
+        const topicLower = (jarTopic || "").toLowerCase();
+        const nameLower = (jarName || "").toLowerCase();
+        const combined = `${topicLower} ${nameLower}`.trim();
 
-        if (topicLower.includes('date') || topicLower.includes('romantic')) {
-            return { id: 'DINING', name: 'Dining Concierge', description: 'Find romantic restaurants nearby' };
+        if (combined.includes('date') || combined.includes('romantic') || combined.includes('couple') || combined.includes('anniversary')) {
+            return { id: 'DINING', name: 'Dining Concierge', description: 'Find romantic restaurants and spots near you' };
         }
-        if (topicLower.includes('food') || topicLower.includes('restaurant')) {
-            return { id: 'DINING', name: 'Dining Concierge', description: 'Discover great places to eat' };
+        if (combined.includes('food') || combined.includes('restaurant') || combined.includes('eat') || combined.includes('dinner') || combined.includes('lunch') || combined.includes('cuisine')) {
+            return { id: 'DINING', name: 'Dining Concierge', description: 'Find the best places to eat nearby' };
         }
-        if (topicLower.includes('drink') || topicLower.includes('bar')) {
-            return { id: 'BAR', name: 'Bar Scout', description: 'Find bars and lounges nearby' };
+        if (combined.includes('drink') || combined.includes('bar') || combined.includes('pub') || combined.includes('wine') || combined.includes('cocktail') || combined.includes('brewery')) {
+            return { id: 'BAR', name: 'Bar Scout', description: 'Find bars, pubs, and lounges nearby' };
         }
-        if (topicLower.includes('movie') || topicLower.includes('film')) {
+        if (combined.includes('movie') || combined.includes('film') || combined.includes('cinema') || combined.includes('netflix') || combined.includes('watch') || combined.includes('tv')) {
             return { id: 'MOVIE', name: 'Movie Scout', description: 'Browse current films and streaming picks' };
         }
-        if (topicLower.includes('book')) {
-            return { id: 'BOOK', name: 'Book Scout', description: 'Get reading recommendations' };
+        if (combined.includes('book') || combined.includes('read') || combined.includes('novel') || combined.includes('library')) {
+            return { id: 'BOOK', name: 'Book Scout', description: 'Get curated reading recommendations' };
         }
-        if (topicLower.includes('game')) {
-            return { id: 'GAME', name: 'Game Scout', description: 'Find games for your group' };
+        if (combined.includes('game') || combined.includes('play') || combined.includes('boardgame') || combined.includes('party') || combined.includes('gaming')) {
+            return { id: 'GAME', name: 'Game Scout', description: 'Find games for your group or solo play' };
         }
-        if (topicLower.includes('activity') || topicLower.includes('adventure')) {
-            return { id: 'ESCAPE_ROOM', name: 'Activity Scout', description: 'Discover fun activities nearby' };
+        if (combined.includes('activity') || combined.includes('adventure') || combined.includes('escape') || combined.includes('mystery') || combined.includes('fun')) {
+            return { id: 'ESCAPE_ROOM', name: 'Activity Scout', description: 'Discover fun local activities and adventures' };
+        }
+        if (combined.includes('gym') || combined.includes('workout') || combined.includes('fitness') || combined.includes('sport') || combined.includes('exercise')) {
+            return { id: 'FITNESS', name: 'Fitness Finder', description: 'Find a workout or sporting activity' };
         }
 
         // Default fallback
-        return { id: 'DINING', name: 'AI Concierge', description: 'Get AI-powered suggestions' };
+        return { id: 'DINING', name: 'AI Concierge', description: 'Get AI-powered suggestions for your jar' };
     };
 
     const suggestedConcierge = getSuggestedConcierge();
