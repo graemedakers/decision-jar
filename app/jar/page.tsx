@@ -220,6 +220,7 @@ export default function JarPage() {
                         jarTopic={userData?.jarTopic || 'General'}
                         jarName={userData?.jarName || 'Your Jar'}
                         jarId={userData?.activeJarId || ''}
+                        inviteCode={userData?.coupleReferenceCode || userData?.referenceCode}
                         onTemplateClick={() => setIsTemplateBrowserOpen(true)}
                         onAddIdeaClick={() => setIsModalOpen(true)}
                     />
