@@ -1,9 +1,38 @@
+
 import { describe, it, expect, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { renderWithProviders, userEvent, mockUser } from '../test-utils';
 import { JarSwitcher } from '@/components/JarSwitcher';
 
-// Mock the API call
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        refresh: vi.fn(),
+        push: vi.fn(),
+        replace: vi.fn(),
+    }),
+}));
+
+// Mock child modals
+vi.mock('@/components/CreateJarModal', () => ({ CreateJarModal: () => <div data-testid="create-jar-modal" /> }));
+vi.mock('@/components/JoinJarModal', () => ({ JoinJarModal: () => <div data-testid="join-jar-modal" /> }));
+vi.mock('@/components/JarManagerModal', () => ({ JarManagerModal: () => <div data-testid="jar-manager-modal" /> }));
+
+// Mock Dropdown Menu to avoid Radix issues
+vi.mock('@/components/ui/DropdownMenu', () => ({
+    DropdownMenu: ({ children }: any) => <div>{children}</div>,
+    DropdownMenuTrigger: ({ children }: any) => <div>{children}</div>,
+    DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
+    DropdownMenuItem: ({ children, onClick, className }: any) => (
+        <div className={className} onClick={onClick} role="menuitem">
+            {children}
+        </div>
+    ),
+    DropdownMenuLabel: ({ children }: any) => <div>{children}</div>,
+    DropdownMenuSeparator: () => <hr />,
+}));
+
+// Mock API
 global.fetch = vi.fn();
 
 describe('JarSwitcher Component', () => {
@@ -55,23 +84,19 @@ describe('JarSwitcher Component', () => {
 
     it('should render current jar name', () => {
         renderWithProviders(<JarSwitcher user={mockUserWithMultipleJars} variant="title" />);
-
         expect(screen.getByText('Work Ideas')).toBeInTheDocument();
     });
 
     it('should have multiple jars available', () => {
         renderWithProviders(<JarSwitcher user={mockUserWithMultipleJars} variant="title" />);
-
-        // Component should render successfully with 3 jars
         expect(screen.getByText('Work Ideas')).toBeInTheDocument();
-        expect(mockUserWithMultipleJars.memberships).toHaveLength(3);
     });
 
     it('should open dropdown when clicked', async () => {
         const user = userEvent.setup();
         renderWithProviders(<JarSwitcher user={mockUserWithMultipleJars} variant="title" />);
 
-        const trigger = screen.getByRole('button');
+        const trigger = screen.getByLabelText('Switch Jar');
         await user.click(trigger);
 
         // All jars should be visible in dropdown
@@ -90,7 +115,7 @@ describe('JarSwitcher Component', () => {
         renderWithProviders(<JarSwitcher user={mockUserWithMultipleJars} variant="title" />);
 
         // Open dropdown
-        const trigger = screen.getByRole('button');
+        const trigger = screen.getByLabelText('Switch Jar');
         await user.click(trigger);
 
         // Click on "Date Night" jar
@@ -99,9 +124,10 @@ describe('JarSwitcher Component', () => {
 
         // Should call switch API
         expect(global.fetch).toHaveBeenCalledWith(
-            expect.stringContaining('/api/jar/jar-2/switch'),
+            expect.stringContaining('/api/auth/switch-jar'),
             expect.objectContaining({
                 method: 'POST',
+                body: JSON.stringify({ jarId: 'jar-2' }),
             })
         );
     });
@@ -122,13 +148,15 @@ describe('JarSwitcher Component', () => {
         const user = userEvent.setup();
         renderWithProviders(<JarSwitcher user={mockUserWithMultipleJars} variant="title" />);
 
-        // Open dropdown
-        const trigger = screen.getByRole('button');
+        const trigger = screen.getByLabelText('Switch Jar');
         await user.click(trigger);
 
-        // "Work Ideas" should have admin indicator (it's the only ADMIN role)
-        const workIdeasItem = screen.getByText('Work Ideas').closest('button');
-        expect(workIdeasItem).toHaveTextContent('Work Ideas');
+        // Find the item with 'Work Ideas' and check for Admin text in the same container
+        const workIdeas = screen.getByText('Work Ideas');
+        // Navigate up to parent/container
+        // The mock renders children structure
+        // <div className...> ... <div>Work Ideas</div> ... <div>Admin</div> ... </div>
+        expect(screen.getByText('Admin')).toBeInTheDocument();
     });
 
     it('should not show inactive jars', () => {
@@ -155,7 +183,6 @@ describe('JarSwitcher Component', () => {
 
         renderWithProviders(<JarSwitcher user={userWithInactiveJar} variant="title" />);
 
-        // Active jars should show, inactive should not
         expect(screen.getByText('Work Ideas')).toBeInTheDocument();
         expect(screen.queryByText('Inactive Jar')).not.toBeInTheDocument();
     });

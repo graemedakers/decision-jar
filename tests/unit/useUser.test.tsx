@@ -16,8 +16,8 @@ function createWrapper() {
         },
     });
     return ({ children }: { children: ReactNode }) => (
-        <QueryClientProvider client= { queryClient } > { children } </QueryClientProvider>
-  );
+        <QueryClientProvider client={queryClient} > {children} </QueryClientProvider>
+    );
 }
 
 describe('useUser Hook', () => {
@@ -153,7 +153,9 @@ describe('useUser Hook', () => {
         });
 
         // Level up callback should be called
-        expect(onLevelUp).toHaveBeenCalledWith(2);
+        await waitFor(() => {
+            expect(onLevelUp).toHaveBeenCalledWith(2);
+        });
     });
 
     it('should correctly calculate premium status', async () => {

@@ -83,7 +83,8 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
 
     const copyInviteCode = () => {
         if (!inviteCode) return;
-        navigator.clipboard.writeText(inviteCode);
+        const url = `${window.location.origin}/join?code=${inviteCode}`;
+        navigator.clipboard.writeText(url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -173,7 +174,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                                     aria-label="Copy invite code"
                                 >
                                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                                    <span>{copied ? 'Copied!' : 'Copy'}</span>
+                                    <span>{copied ? 'Copied!' : 'Copy Link'}</span>
                                 </button>
                             </div>
                         </div>

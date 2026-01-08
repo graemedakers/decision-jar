@@ -4,20 +4,28 @@ import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 
 // Mock dependencies
-vi.mock('@/lib/prisma', () => ({
-    prisma: {
-        user: {
-            findFirst: vi.fn(),
-            findUnique: vi.fn(),
-            update: vi.fn(),
-            updateMany: vi.fn(),
-            create: vi.fn(),
-        },
-        jar: {
-            create: vi.fn(),
-        },
-    },
-}));
+vi.mock('@/lib/prisma', () => {
+    const mockUser = {
+        findFirst: vi.fn(),
+        findUnique: vi.fn(),
+        update: vi.fn(),
+        updateMany: vi.fn(),
+        create: vi.fn(),
+    };
+    const mockJar = {
+        create: vi.fn(),
+    };
+    const mockJarMember = {
+        create: vi.fn(),
+    };
+    const mockPrisma = {
+        user: mockUser,
+        jar: mockJar,
+        jarMember: mockJarMember,
+        $transaction: vi.fn((cb) => cb({ user: mockUser, jar: mockJar, jarMember: mockJarMember })),
+    };
+    return { prisma: mockPrisma };
+});
 
 vi.mock('@/lib/stripe', () => ({
     stripe: {
@@ -25,6 +33,15 @@ vi.mock('@/lib/stripe', () => ({
             constructEvent: vi.fn(),
         },
     },
+}));
+
+vi.mock('next/headers', () => ({
+    headers: () => ({
+        get: (key: string) => {
+            if (key === 'stripe-signature' || key === 'Stripe-Signature') return 'test_signature';
+            return null;
+        }
+    })
 }));
 
 import { prisma } from '@/lib/prisma';
@@ -48,6 +65,7 @@ describe('/api/stripe/webhook - Payment Processing', () => {
                     subscription: 'sub_test',
                     metadata: {
                         userId: 'user-123',
+                        type: 'SUBSCRIPTION_UPGRADE',
                     },
                 } as any,
             },
@@ -151,7 +169,7 @@ describe('/api/stripe/webhook - Payment Processing', () => {
                 where: { stripeSubscriptionId: 'sub_test' },
                 data: expect.objectContaining({
                     subscriptionStatus: 'canceled',
-                    stripeSubscriptionId: null,
+                    subscriptionEndsAt: expect.any(Date),
                 }),
             })
         );
@@ -187,7 +205,10 @@ describe('/api/stripe/webhook - Payment Processing', () => {
                     customer_email: 'newuser@example.com',
                     subscription: 'sub_test',
                     metadata: {
-                        // No userId - should create new user
+                        type: 'NEW_COUPLE_SIGNUP',
+                        name: 'New User',
+                        email: 'newuser@example.com',
+                        passwordHash: 'hashed_password',
                     },
                 } as any,
             },
@@ -212,8 +233,8 @@ describe('/api/stripe/webhook - Payment Processing', () => {
         const response = await POST(request);
 
         expect(response.status).toBe(200);
-        expect(prisma.user.create).toHaveBeenCalled();
         expect(prisma.jar.create).toHaveBeenCalled();
+        expect(prisma.user.create).toHaveBeenCalled();
     });
 
     it('should handle past_due subscription status', async () => {

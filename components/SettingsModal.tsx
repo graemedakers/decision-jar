@@ -485,7 +485,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
-                                                                    navigator.clipboard.writeText(`${window.location.origin}/signup?code=${inviteCode || ""}`);
+                                                                    navigator.clipboard.writeText(`${window.location.origin}/join?code=${inviteCode || ""}`);
                                                                     showSuccess("Copied!");
                                                                 }}
                                                                 className="text-xs bg-white dark:bg-white/10 px-2.5 py-1.5 rounded font-bold shadow-sm"
@@ -520,7 +520,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                                 const params = new URLSearchParams();
                                                                 if (inviteCode) params.set('code', inviteCode);
                                                                 if (includePremiumToken && premiumInviteToken) params.set('pt', premiumInviteToken);
-                                                                navigator.clipboard.writeText(`${window.location.origin}/signup?${params.toString()}`);
+                                                                navigator.clipboard.writeText(`${window.location.origin}/join?${params.toString()}`);
                                                                 showSuccess("Admin Link Copied");
                                                             }}
                                                             className="mt-2 w-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 py-2 rounded font-mono"
