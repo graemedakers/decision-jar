@@ -4,22 +4,42 @@ import { Sparkles, Plus, BookOpen, Users } from "lucide-react";
 import { useModalSystem } from "./ModalProvider";
 
 import { getSuggestedConcierge } from "@/lib/concierge-logic";
+import { showSuccess, showError } from "@/lib/toast";
 
 interface EnhancedEmptyStateProps {
     jarTopic: string;
     jarName: string;
     jarId: string;
+    inviteCode?: string | null;
     onTemplateClick: () => void;
     onAddIdeaClick: () => void;
 }
 
-export function EnhancedEmptyState({ jarTopic, jarName, jarId, onTemplateClick, onAddIdeaClick }: EnhancedEmptyStateProps) {
+export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, onTemplateClick, onAddIdeaClick }: EnhancedEmptyStateProps) {
     const { openModal } = useModalSystem();
 
     const suggestedConcierge = getSuggestedConcierge(jarTopic, jarName);
 
     const handleUseAI = () => {
         openModal('CONCIERGE', { toolId: suggestedConcierge.id });
+    };
+
+    const handleInvite = async () => {
+        if (!inviteCode) {
+            // Fallback if no code available (shouldn't happen often)
+            openModal('SETTINGS');
+            return;
+        }
+
+        try {
+            const url = `${window.location.origin}/join?code=${inviteCode}`;
+            await navigator.clipboard.writeText(url);
+            showSuccess("Invite link copied to clipboard!");
+        } catch (err) {
+            showError("Failed to copy link");
+            // Fallback
+            openModal('SETTINGS');
+        }
     };
 
     return (
@@ -100,7 +120,7 @@ export function EnhancedEmptyState({ jarTopic, jarName, jarId, onTemplateClick, 
 
                     {/* Invite Others */}
                     <button
-                        onClick={() => openModal('SETTINGS')}
+                        onClick={handleInvite}
                         className="p-6 rounded-2xl border-2 border-amber-200 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-amber-500/10"
                     >
                         <div className="flex items-start gap-4">
