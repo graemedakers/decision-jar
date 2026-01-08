@@ -7,6 +7,7 @@ import { Button } from "./ui/Button";
 import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
 import { RichDetailsModal } from "./RichDetailsModal";
+import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
 import { useDemoConcierge } from "@/lib/use-demo-concierge";
 import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
 import { trackAIToolUsed } from "@/lib/analytics";
@@ -203,6 +204,7 @@ export function GenericConciergeModal({
     const [prevOpen, setPrevOpen] = useState(false);
     const resultsRef = useRef<HTMLDivElement>(null);
     const [viewingItem, setViewingItem] = useState<any | null>(null);
+    const [expandedRecIndex, setExpandedRecIndex] = useState<number | null>(null);
 
     const theme = getThemeClasses(config.colorTheme);
 
@@ -555,24 +557,40 @@ export function GenericConciergeModal({
                                         </button>
                                     </div>
                                     <div className="grid grid-cols-1 gap-4">
-                                        {recommendations.map((rec, index) => (
-                                            <ConciergeResultCard
-                                                key={index}
-                                                rec={rec}
-                                                categoryType={config.categoryType}
-                                                mainIcon={config.resultCard.mainIcon}
-                                                subtext={config.resultCard.subtextKey ? rec[config.resultCard.subtextKey] : undefined}
-                                                secondIcon={config.resultCard.secondIcon}
-                                                secondSubtext={config.resultCard.secondSubtextKey ? rec[config.resultCard.secondSubtextKey] : undefined}
-                                                isPrivate={isPrivate}
-                                                onFavorite={handleFavorite}
-                                                onAddToJar={handleAddToJar}
-                                                onGoAction={() => onGoAction(rec)}
-                                                goActionLabel={config.resultCard.goActionLabel || "Go Tonight"}
-                                                // Default style for now, can extract to config if needed
-                                                ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
-                                            />
-                                        ))}
+                                        {recommendations.map((rec, index) => {
+                                            const isHoliday = config.id === 'holiday_concierge';
+                                            const isExpanded = expandedRecIndex === index;
+
+                                            return (
+                                                <ConciergeResultCard
+                                                    key={index}
+                                                    rec={rec}
+                                                    categoryType={config.categoryType}
+                                                    mainIcon={config.resultCard.mainIcon}
+                                                    subtext={config.resultCard.subtextKey ? rec[config.resultCard.subtextKey] : undefined}
+                                                    secondIcon={config.resultCard.secondIcon}
+                                                    secondSubtext={config.resultCard.secondSubtextKey ? rec[config.resultCard.secondSubtextKey] : undefined}
+                                                    isPrivate={isPrivate}
+                                                    onFavorite={handleFavorite}
+                                                    onAddToJar={handleAddToJar}
+                                                    onGoAction={() => onGoAction(rec)}
+                                                    goActionLabel={config.resultCard.goActionLabel || "Go Tonight"}
+                                                    ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
+
+                                                    // Inline Expansion for Holidays
+                                                    expandable={isHoliday}
+                                                    isExpanded={isExpanded}
+                                                    onToggleExpand={() => setExpandedRecIndex(isExpanded ? null : index)}
+                                                    renderExpandedContent={isHoliday ? (
+                                                        <ItineraryMarkdownRenderer
+                                                            markdown={rec.details}
+                                                            configId={config.id}
+                                                            theme={getThemeClasses(config.colorTheme)}
+                                                        />
+                                                    ) : undefined}
+                                                />
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
