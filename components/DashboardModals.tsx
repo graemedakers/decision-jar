@@ -32,6 +32,7 @@ const WeekendPlannerModal = dynamic(() => import("@/components/WeekendPlannerMod
 const CommunityAdminModal = dynamic(() => import("@/components/CommunityAdminModal").then(m => m.CommunityAdminModal), { ssr: false });
 const JarMembersModal = dynamic(() => import("@/components/JarMembersModal").then(m => m.JarMembersModal), { ssr: false });
 const JarQuickStartModal = dynamic(() => import("@/components/JarQuickStartModal").then(m => m.JarQuickStartModal), { ssr: false });
+const MoveIdeaModal = dynamic(() => import("@/components/MoveIdeaModal").then(m => m.MoveIdeaModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
@@ -49,6 +50,7 @@ interface DashboardModalsProps {
     hasPaid: boolean;
     coupleCreatedAt: string;
     isTrialEligible: boolean;
+    availableJars?: any[];
 
     // Callbacks
     handleContentUpdate: () => void;
@@ -66,7 +68,7 @@ interface DashboardModalsProps {
 
 export function DashboardModals({
     isPremium, userData, ideas, userLocation, setUserLocation, combinedLocation,
-    jarTopic, level, favoritesCount, hasPaid, coupleCreatedAt, isTrialEligible,
+    jarTopic, level, favoritesCount, hasPaid, coupleCreatedAt, isTrialEligible, availableJars = [],
     handleContentUpdate, fetchFavorites, fetchIdeas, refreshUser, handleSpinJar,
     showConfetti, setShowConfetti, onRestartTour, onCloseLevelUp
 }: DashboardModalsProps) {
@@ -349,6 +351,16 @@ export function DashboardModals({
                     jarId={modalProps?.jarId || ''}
                     jarName={modalProps?.jarName || ''}
                     jarTopic={modalProps?.jarTopic || 'General'}
+                />
+            )}
+
+            {activeModal === 'MOVE_IDEA' && (
+                <MoveIdeaModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    idea={modalProps?.idea}
+                    availableJars={availableJars}
+                    onMoveComplete={handleContentUpdate}
                 />
             )}
 

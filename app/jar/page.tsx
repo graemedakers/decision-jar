@@ -1,40 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { AddIdeaModal } from "@/components/AddIdeaModal";
-import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
-import { PremiumModal } from "@/components/PremiumModal";
-import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
-import { MoveIdeaModal } from "@/components/MoveIdeaModal";
-import { CommunityAdminModal } from "@/components/CommunityAdminModal";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
 import { useModalSystem } from "@/components/ModalProvider";
+import { useFavorites } from "@/hooks/useFavorites";
+import React from "react";
 
 export default function JarPage() {
     const router = useRouter();
 
     // Custom Hooks
-    const { userData, isPremium, refreshUser, isLoading: isLoadingUser } = useUser();
+    const { userData, isPremium, refreshUser, isLoading: isLoadingUser, level, hasPaid, coupleCreatedAt, isTrialEligible } = useUser();
     const { ideas, isLoading: isIdeasLoading, fetchIdeas } = useIdeas();
+    const { favoritesCount, fetchFavorites } = useFavorites();
+    const { openModal, closeModal, activeModal } = useModalSystem();
 
     // Local State
-    const [editingIdea, setEditingIdea] = useState<any>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [ideaToDelete, setIdeaToDelete] = useState<string | null>(null);
-    const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-    const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
-    const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
-    const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-    const [ideaToMove, setIdeaToMove] = useState<any>(null);
+    const [userLocation, setUserLocation] = useState<string | null>(null);
+    const [showConfetti, setShowConfetti] = useState(false);
     const [availableJars, setAvailableJars] = useState<any[]>([]);
-    const [shouldShowQuickStart, setShouldShowQuickStart] = useState(false);
-    const { openModal } = useModalSystem();
+
+    // Sync location from userData
+    useEffect(() => {
+        if (userData?.location) {
+            setUserLocation(userData.location);
+        }
+    }, [userData]);
 
     // Check if we should show QuickStart modal for empty jar
     useEffect(() => {
@@ -42,28 +40,23 @@ export default function JarPage() {
             try {
                 const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
                 if (!dismissed) {
-                    // Show QuickStart modal on first visit to empty jar
-                    setShouldShowQuickStart(true);
                     openModal('JAR_QUICKSTART', {
                         jarId: userData.activeJarId,
                         jarName: userData.jarName || 'Your Jar',
                         jarTopic: userData.jarTopic || 'General'
                     });
                 }
-            } catch (e) {
-                // localStorage not available
-            }
+            } catch (e) { }
         }
-    }, [ideas.length, isIdeasLoading, userData?.activeJarId, userData?.jarTopic]);
+    }, [ideas.length, isIdeasLoading, userData?.activeJarId, userData?.jarTopic, openModal]);
 
-    // Fetch available jars logic (kept local as it's specific for moving functionality)
     useEffect(() => {
         const fetchAvailableJars = async () => {
             try {
                 const res = await fetch('/api/jar/list');
                 if (res.ok) {
                     const data = await res.json();
-                    setAvailableJars(data.jars || []);
+                    setAvailableJars(data || []);
                 }
             } catch (error) {
                 console.error('Failed to fetch jars', error);
@@ -72,31 +65,9 @@ export default function JarPage() {
         fetchAvailableJars();
     }, []);
 
-    // Handlers
-    const handleDeleteClick = (id: string) => {
-        setIdeaToDelete(id);
-    };
-
-    const confirmDelete = async () => {
-        if (!ideaToDelete) return;
-
-        try {
-            const res = await fetch(`/api/ideas/${ideaToDelete}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-
-            if (res.ok) {
-                fetchIdeas();
-            } else {
-                const data = await res.json();
-                alert(`Failed to delete idea: ${data.error || "Unknown error"}`);
-            }
-        } catch (error: any) {
-            alert(`Error deleting idea: ${error.message}`);
-        } finally {
-            setIdeaToDelete(null);
-        }
+    const handleContentUpdate = () => {
+        fetchIdeas();
+        refreshUser();
     };
 
     const handleGoTonight = async (e: React.MouseEvent, idea: any) => {
@@ -113,7 +84,6 @@ export default function JarPage() {
             });
 
             if (res.ok) {
-                // Navigate to dashboard implies selecting it.
                 await fetchIdeas();
                 router.push('/dashboard');
             } else {
@@ -187,16 +157,16 @@ export default function JarPage() {
 
                 <div className="flex items-center gap-2">
                     <Button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => openModal('ADD_IDEA')}
                         className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-6 h-11 shadow-lg shadow-primary/20 flex items-center gap-2"
                     >
                         <Plus className="w-4 h-4" />
                         <span>Add Idea</span>
                     </Button>
 
-                    {userData?.isCommunityJar && isAdmin && (
+                    {userData?.activeJarId && isAdmin && (
                         <Button
-                            onClick={() => setIsAdminModalOpen(true)}
+                            onClick={() => openModal('JAR_MEMBERS')}
                             variant="outline"
                             className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 flex items-center gap-2"
                         >
@@ -207,9 +177,7 @@ export default function JarPage() {
                 </div>
             </div>
 
-
             {
-
                 isLoading ? (
                     <div className="flex flex-col items-center justify-center min-h-[400px]">
                         <Loader2 className="w-8 h-8 text-white animate-spin mb-4" />
@@ -221,8 +189,8 @@ export default function JarPage() {
                         jarName={userData?.jarName || 'Your Jar'}
                         jarId={userData?.activeJarId || ''}
                         inviteCode={userData?.coupleReferenceCode || userData?.referenceCode}
-                        onTemplateClick={() => setIsTemplateBrowserOpen(true)}
-                        onAddIdeaClick={() => setIsModalOpen(true)}
+                        onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
+                        onAddIdeaClick={() => openModal('ADD_IDEA')}
                     />
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -232,7 +200,7 @@ export default function JarPage() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 key={idea.id}
-                                onClick={() => idea.canEdit && !idea.isMasked && setEditingIdea(idea)}
+                                onClick={() => idea.canEdit && !idea.isMasked && openModal('ADD_IDEA', { initialData: idea })}
                                 className={`glass-card p-5 relative group cursor-pointer hover:border-slate-300 dark:hover:border-white/20 transition-all ${idea.isMasked ? 'opacity-75 bg-slate-100 dark:bg-slate-900/50' : 'hover:-translate-y-1 bg-white dark:bg-slate-900/40'} ${idea.status === 'PENDING' ? 'ring-2 ring-yellow-500/20 bg-yellow-500/5' : ''}`}
                             >
                                 {idea.status === 'PENDING' && (
@@ -247,8 +215,7 @@ export default function JarPage() {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setIdeaToMove(idea);
-                                                setIsMoveModalOpen(true);
+                                                openModal('MOVE_IDEA', { idea });
                                             }}
                                             className="p-2 rounded-full bg-slate-100 dark:bg-black/40 text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-black/60 transition-colors shadow-sm"
                                             title="Move to another jar"
@@ -260,7 +227,26 @@ export default function JarPage() {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleDeleteClick(idea.id);
+                                                openModal('DELETE_CONFIRM', {
+                                                    onConfirm: async () => {
+                                                        try {
+                                                            const res = await fetch(`/api/ideas/${idea.id}`, {
+                                                                method: 'DELETE',
+                                                                credentials: 'include',
+                                                            });
+
+                                                            if (res.ok) {
+                                                                fetchIdeas();
+                                                                closeModal();
+                                                            } else {
+                                                                const data = await res.json();
+                                                                alert(`Failed to delete idea: ${data.error || "Unknown error"}`);
+                                                            }
+                                                        } catch (error: any) {
+                                                            alert(`Error deleting idea: ${error.message}`);
+                                                        }
+                                                    }
+                                                });
                                             }}
                                             className="p-2 rounded-full bg-slate-100 dark:bg-black/40 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-black/60 transition-colors shadow-sm"
                                             title="Delete Idea"
@@ -361,69 +347,30 @@ export default function JarPage() {
                 )
             }
 
-            <AddIdeaModal
-                isOpen={isModalOpen || !!editingIdea}
-                onClose={() => {
-                    setIsModalOpen(false);
-                    setEditingIdea(null);
-                    fetchIdeas();
-                }}
-                initialData={editingIdea}
+            <DashboardModals
                 isPremium={isPremium}
-                onUpgrade={() => {
-                    setIsModalOpen(false);
-                    setIsPremiumModalOpen(true);
-                }}
-                currentUser={userData}
-                jarTopic={userData?.jarTopic}
-                customCategories={userData?.customCategories}
-            />
-
-            <DeleteConfirmModal
-                isOpen={!!ideaToDelete}
-                onClose={() => setIdeaToDelete(null)}
-                onConfirm={confirmDelete}
-            />
-
-            <PremiumModal
-                isOpen={isPremiumModalOpen}
-                onClose={() => setIsPremiumModalOpen(false)}
-            />
-
-            <TemplateBrowserModal
-                isOpen={isTemplateBrowserOpen}
-                onClose={() => {
-                    setIsTemplateBrowserOpen(false);
-                    fetchIdeas(); // Refresh ideas after template is applied
-                }}
-                currentJarId={userData?.activeJarId}
-                currentJarName={userData?.jarName}
-                hasJars={!!userData?.activeJarId}
-            />
-
-            <MoveIdeaModal
-                isOpen={isMoveModalOpen}
-                onClose={() => {
-                    setIsMoveModalOpen(false);
-                    setIdeaToMove(null);
-                }}
-                idea={ideaToMove}
+                userData={userData}
+                ideas={ideas}
+                userLocation={userLocation}
+                setUserLocation={setUserLocation}
+                combinedLocation={userLocation || ''}
+                jarTopic={userData?.jarTopic || 'General'}
+                level={level || 1}
+                favoritesCount={favoritesCount}
+                hasPaid={hasPaid || false}
+                coupleCreatedAt={coupleCreatedAt || ''}
+                isTrialEligible={isTrialEligible !== false}
+                handleContentUpdate={handleContentUpdate}
+                fetchFavorites={fetchFavorites}
+                fetchIdeas={fetchIdeas}
+                refreshUser={refreshUser}
+                handleSpinJar={() => { }} // Not used on this page but required by prop
+                showConfetti={showConfetti}
+                setShowConfetti={setShowConfetti}
                 availableJars={availableJars}
-                onMoveComplete={() => {
-                    fetchIdeas();
-                    // fetchAvailableJars(); // Re-fetch logic not available here unless extracted
-                    // But deleting from current jar only requires fetchIdeas()
-                }}
             />
-
-            {userData?.activeJarId && (
-                <CommunityAdminModal
-                    isOpen={isAdminModalOpen}
-                    onClose={() => setIsAdminModalOpen(false)}
-                    jarId={userData.activeJarId}
-                    jarName={userData.jarName || "Community Jar"}
-                />
-            )}
         </main >
     );
 }
+
+const DashboardModals = dynamic(() => import("@/components/DashboardModals").then(m => m.DashboardModals), { ssr: false });
