@@ -35,7 +35,7 @@ export default function GuideIntroduction() {
                     <div>
                         <h3 className="font-bold text-lg mb-1">1. Create or Join a Jar</h3>
                         <p className="text-slate-600 dark:text-slate-400">
-                            Build your own jar for a specific theme (like "Friday Date Nights") and invite your partner or friends using a unique invite code.
+                            Build your own jar for a specific theme (like "Date Nights", "Friend Hangouts", or "Solo Adventures") and invite others using a unique invite code.
                         </p>
                     </div>
                 </div>

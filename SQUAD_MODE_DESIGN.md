@@ -30,12 +30,17 @@ We move to a Many-to-Many relationship.
     *   **Identity**: Your "Interests" profile might need to be global, but your "Availability" might be per-jar.
 
 ### Jar Limits & Constraints
-- **Romantic Jar**: 
-    - **Limit:** A user can only belong to **ONE** Romantic Jar at a time.
-    - **Members:** Strictly limited to 2 members.
-- **Social Jar**: 
-    - **Limit:** Users can join unlimited Social Jars.
-    - **Members:** Soft limit of ~20 members (to keep decision-making manageable).
+**Updated 2026-01-08:** Romantic jar restrictions have been removed for flexibility.
+
+- **All Jar Types**: 
+    - **Limit:** Users can create and join multiple jars of any type
+    - **Members:** Consistent limits across all types (based on subscription tier)
+    - Romantic, Social, and Generic jars now function identically
+    
+**Note:** The legacy "one romantic jar" limit was deprecated to support:
+- Multiple romantic relationships (polyamory, dating)
+- Themed romantic jars ("Date Nights", "Anniversaries", "Weekend Getaways")
+- Greater organizational flexibility
 
 ---
 
@@ -44,7 +49,7 @@ How "Danger Zone" actions adapt to multiple jars:
 
 | Action | Role | Effect |
 | :--- | :--- | :--- |
-| **Leave Jar** | Member | Removes user from the jar. If it's a Romantic Jar, the jar remains (single user). |
+| **Leave Jar** | Member | Removes user from the jar. Jar remains intact with remaining members. |
 | **Delete Jar** | Owner/Admin | **Irreversible.** Deletes the jar and all containing ideas/memories. |
 | **Kick Member** | Owner/Admin | Removes a specific user from the jar. (Replaces "Delete Partner"). |
 | **Empty Jar** | Owner/Admin | Deletes all *Ideas* in the jar, but keeps Memories and Members. |
@@ -57,11 +62,11 @@ How "Danger Zone" actions adapt to multiple jars:
 
 ## 3. Monetization Strategy
 
-How do we charge for this? The current model is "One payment per couple".
+How do we charge for this? The current model is "One payment per user".
 
 ### Option A: The "Premium Subscriber" (Spotify Model)
 **User-centric pricing.**
-- **Free User:** Can join any number of Jars. Can create 1 Romantic Jar + 1 Social Jar.
+- **Free User:** Can create and join up to 3 jars total.
 - **Premium User ($5/mo):**
     - Create unlimited Social Jars.
     - Unlock "Voting Mode" (Polls) for any Jar they own.

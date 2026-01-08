@@ -32,11 +32,10 @@ Decision Jar allows you to create shared collections of activity ideas with your
 3.  Enter your name and email.
 4.  **Location:** Enter your city (e.g., "New York, NY"). This helps our Concierge tools suggest relevant venues nearby.
 5.  **Create Jar:**
-    - Choose a **Name** and **Topic** (e.g., "Food", "Movies", "Cooking & Recipes").
-    - Select a **Type** (Romantic, Community, or Social).
+    - Choose a **Name** and **Topic** (e.g., "Dates", "Movies", "Food", "Activities").
     - Select a **Selection Mode** (Random spin, Voting Session, or Task Allocation).
 
-**Note:** You can create and join up to 3 jars for free! Switch between them easily using the header menu. Pro users can manage up to 50 jars.
+**Note:** You can create and join up to 3 jars for free! Create separate jars for different contexts—romantic dates, friend activities, solo hobbies, or family outings. Switch between them easily using the header menu. Pro users can manage up to 50 jars.
 
 ---
 
