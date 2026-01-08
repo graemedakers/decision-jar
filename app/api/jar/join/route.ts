@@ -66,35 +66,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: true, message: "Already a member, switched to jar." });
         }
 
-        // Constraint Checks
-        if (jar.type === 'ROMANTIC') {
-            // 1. One Romantic Jar per User
-            const userRomanticMembership = await prisma.jarMember.findFirst({
-                where: {
-                    userId: session.user.id,
-                    jar: { type: 'ROMANTIC' }
-                }
-            });
-
-            if (userRomanticMembership) {
-                return NextResponse.json({
-                    error: "You are already in a Romantic Jar. You can only be in one couple jar at a time."
-                }, { status: 400 });
-            }
-
-            // 2. Max 2 members for Romantic Jar
-            if (jar.members.length >= 2) {
-                return NextResponse.json({
-                    error: "This jar is full (max 2 partners for Romantic jars)."
-                }, { status: 400 });
-            }
-        } else if (jar.type === 'SOCIAL') {
-            // 3. Max members for Social Jar
-            if (jar.members.length >= limits.maxMembersPerJar) {
-                return NextResponse.json({
-                    error: `This jar is full (max ${limits.maxMembersPerJar} members for Social jars). Upgrade to Pro for more.`
-                }, { status: 403 });
-            }
+        // Check member limits (consistent across all jar types)
+        if (jar.members.length >= limits.maxMembersPerJar) {
+            return NextResponse.json({
+                error: `This jar is full (max ${limits.maxMembersPerJar} members). Upgrade to Pro for more.`
+            }, { status: 403 });
         }
 
         // Check Premium Token from invite

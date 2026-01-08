@@ -128,7 +128,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <div className="bg-pink-50 dark:bg-pink-500/10 p-4 rounded-xl border border-pink-100 dark:border-pink-500/20">
                                 <h4 className="font-bold text-pink-700 dark:text-pink-300 mb-2">❤️ Romantic Jar</h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-300">
-                                    Keep the spark alive. Use this for <strong>Date Nights</strong>, <strong>Movies</strong>, or intimate weekend getaways. Share it only with your partner.
+                                    Keep the spark alive. Use this for <strong>Date Nights</strong>, <strong>Movies</strong>, or intimate weekend getaways. Share it with your romantic partner(s).
                                 </p>
                             </div>
                             <div className="bg-purple-50 dark:bg-purple-500/10 p-4 rounded-xl border border-purple-100 dark:border-purple-500/20">
@@ -171,7 +171,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                     <Sparkles className="w-5 h-5" /> Random Selection
                                 </h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
-                                    <strong>Best for:</strong> Date nights, personal jars, couples
+                                    <strong>Best for:</strong> Date nights, personal jars, small groups
                                 </p>
                                 <p className="text-sm text-slate-600 dark:text-slate-300">
                                     Click <strong>"Spin the Jar"</strong> to randomly pick an idea. Apply filters (cost, duration, energy) to narrow options. Perfect when you want fate to decide!

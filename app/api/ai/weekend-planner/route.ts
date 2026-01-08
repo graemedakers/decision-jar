@@ -122,7 +122,7 @@ export async function POST(request: Request) {
         // -------------------
 
         const prompt = `
-        I need 5 distinct date ideas for a couple in ${location} for ${context} (${targetDateStr}).
+        I need 5 distinct activity ideas for ${location} for ${context} (${targetDateStr}).
         ${userInterests}
         
         CRITICAL INSTRUCTION:

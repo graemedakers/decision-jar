@@ -189,14 +189,14 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-3">
-                            <Label>Relationship</Label>
+                            <Label>Jar Type</Label>
                             <select
                                 value={type}
                                 onChange={(e) => setType(e.target.value)}
                                 className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                                aria-label="Select Relationship Type"
+                                aria-label="Select Jar Type"
                             >
-                                <option value="ROMANTIC">Couple</option>
+                                <option value="ROMANTIC">Romantic</option>
                                 <option value="SOCIAL">Social/Friends</option>
                                 <option value="GENERIC">Solo</option>
                             </select>

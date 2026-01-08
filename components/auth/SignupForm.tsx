@@ -463,7 +463,7 @@ export function SignupForm() {
                                         className="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent appearance-none text-sm"
                                         defaultValue="SOCIAL"
                                     >
-                                        <option value="ROMANTIC">Couple (Romantic)</option>
+                                        <option value="ROMANTIC">Romantic</option>
                                         <option value="SOCIAL">Friends & Family (Social)</option>
                                         <option value="GENERIC">Solo (Personal)</option>
                                     </select>

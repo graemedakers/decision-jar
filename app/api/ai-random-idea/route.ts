@@ -103,7 +103,7 @@ export async function POST(request: Request) {
         }
 
         const prompt = `
-        Generate a random, creative, and fun date idea for a couple.
+        Generate a random, creative, and fun activity or date idea.
         
         CONTEXT:
         - Location: ${location || "Unknown"}

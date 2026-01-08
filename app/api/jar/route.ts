@@ -45,23 +45,7 @@ export async function POST(request: Request) {
             }, { status: 403 });
         }
 
-        // ONE ROMANTIC JAR POLICY
-        if (type === 'ROMANTIC') {
-            const existingRomanticMembership = await prisma.jarMember.findFirst({
-                where: {
-                    userId: session.user.id,
-                    jar: {
-                        type: 'ROMANTIC'
-                    }
-                }
-            });
-
-            if (existingRomanticMembership) {
-                return NextResponse.json({
-                    error: "You already have a Romantic Jar. You can only be part of one couple jar at a time."
-                }, { status: 400 });
-            }
-        }
+        // Romantic jars are now unlimited - users can create themed or context-specific jars
 
         // Generate unique code
         let code = generateCode();
