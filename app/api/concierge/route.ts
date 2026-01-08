@@ -62,7 +62,13 @@ export async function POST(req: NextRequest) {
         // 6. Location Context
         let targetLocation = "your area";
         if (config.hasLocation && cachedLocation) {
-            targetLocation = `${cachedLocation.city}, ${cachedLocation.region}, ${cachedLocation.country}`;
+            if (typeof cachedLocation === 'string') {
+                targetLocation = cachedLocation;
+            } else if (typeof cachedLocation === 'object') {
+                targetLocation = [cachedLocation.city, cachedLocation.region, cachedLocation.country]
+                    .filter(Boolean)
+                    .join(', ') || "your area";
+            }
         }
 
         const extraInstructions = inputs.extraInstructions
