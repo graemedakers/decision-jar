@@ -23,6 +23,19 @@ export function useConciergeActions({
 }: ConciergeActionProps) {
     const [isAddingToJar, setIsAddingToJar] = useState(false);
 
+    const formatDetails = (rec: any) => {
+        if (rec.details) return rec.details;
+        let parts = [rec.description];
+        if (rec.cinema_name) parts.push(`Cinema: ${rec.cinema_name}`);
+        if (rec.showtimes) parts.push(`Showtimes: ${rec.showtimes}`);
+        if (rec.address) parts.push(`Address: ${rec.address}`);
+        if (rec.price) parts.push(`Price: ${rec.price}`);
+        if (rec.website) parts.push(`Website: ${rec.website}`);
+        if (rec.opening_hours) parts.push(`Hours: ${rec.opening_hours}`);
+        if (rec.google_rating) parts.push(`Rating: ${rec.google_rating}`);
+        return parts.filter(Boolean).join('\n\n');
+    };
+
     const handleAddToJar = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
         // FIX 1: Prevent duplicate clicks
         if (isAddingToJar) {
@@ -39,7 +52,7 @@ export function useConciergeActions({
                     // Use demo storage
                     const demoIdea = {
                         description: rec.name,
-                        details: rec.details || `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
+                        details: formatDetails(rec),
                         indoor: true,
                         duration: "2.0",
                         activityLevel: "LOW",
@@ -66,7 +79,7 @@ export function useConciergeActions({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     description: rec.name,
-                    details: rec.details || `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
+                    details: formatDetails(rec),
                     indoor: true,
                     duration: "2.0",
                     activityLevel: "LOW",
@@ -128,7 +141,7 @@ export function useConciergeActions({
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
                                             description: rec.name,
-                                            details: rec.details || `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
+                                            details: formatDetails(rec),
                                             indoor: true,
                                             duration: "2.0",
                                             activityLevel: "LOW",
@@ -244,7 +257,7 @@ export function useConciergeActions({
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     description: rec.name,
-                                    details: rec.details || `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}`,
+                                    details: formatDetails(rec),
                                     indoor: true,
                                     duration: "2.0",
                                     activityLevel: "LOW",
@@ -306,7 +319,7 @@ export function useConciergeActions({
     const handleGoTonight = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
         const ideaData = {
             description: rec.name,
-            details: `${rec.description}\n\nAddress: ${rec.address || 'N/A'}\nPrice: ${rec.price || 'N/A'}\nWebsite: ${rec.website || 'N/A'}\nHours: ${rec.opening_hours || 'N/A'}\nRating: ${rec.google_rating || 'N/A'}`,
+            details: formatDetails(rec),
             indoor: true,
             duration: 2.0,
             activityLevel: "LOW",

@@ -119,10 +119,14 @@ export const getConciergePromptAndMock = (
             const isCinema = inputs.watchMode === 'Cinema';
             return {
                 prompt: `
-                Act as a movie critic and curator.
+                Act as a movie critic and local cinema expert.
                 Recommend 5 distinct movies based on the following:
                 - Watch Mode: ${inputs.watchMode}
-                ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in cinemas in ${targetLocation}. Do not recommend movies that are only available on streaming or not currently in theaters.` : ''}
+                ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in physical cinemas in ${targetLocation}. 
+                1. Identify real cinemas in ${targetLocation}. Double check which theater brands actually operate there (e.g., Reading Cinemas, Hoyts, Event Cinemas, Village Cinemas, Dendy, or local independents). 
+                2. Do NOT hallucinate - if ${targetLocation} has a Reading Cinema but no Hoyts, do not recommend Hoyts.
+                3. Find movies currently playing at these specific locations today or tomorrow.
+                4. You MUST provide the specific CINEMA NAME and its PHYSICAL ADDRESS for the Map link to work.` : ''}
                 - Genre: ${inputs.genre || "Any"}
                 - Mood: ${inputs.mood || "Any"}
                 - Era: ${inputs.era || "Any"}
@@ -132,12 +136,12 @@ export const getConciergePromptAndMock = (
                 
                 Return JSON with "recommendations" array.
                 Fields: name (Title), description (Plot summary), year, rating (IMDb/Rotten Tomatoes score as string), genre, director, cast
-                ${isCinema ? 'Also include: cinema_name, showtimes (approximate for today/tomorrow)' : 'Also include: streaming_service'}
+                ${isCinema ? 'Also include: cinema_name, address (Physical address of the cinema), website (Official cinema or ticket link), showtimes (approximate for today/tomorrow)' : 'Also include: streaming_service, website (Link to watch)'}
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Mockingbird Lane", description: "A gripping thriller.", year: "2024", rating: "92%", genre: "Thriller", streaming_service: "Netflix" },
-                        { name: "Laugh Track", description: "Hilarious comedy.", year: "2023", rating: "88%", genre: "Comedy", streaming_service: "Hulu" }
+                        { name: "Mockingbird Lane", description: "A gripping thriller.", year: "2024", rating: "92%", genre: "Thriller", streaming_service: "Netflix", website: "https://netflix.com" },
+                        { name: "Laugh Track", description: "Hilarious comedy.", year: "2023", rating: "88%", genre: "Comedy", streaming_service: "Hulu", website: "https://hulu.com" }
                     ]
                 }
             };

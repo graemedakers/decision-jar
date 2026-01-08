@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { ExternalLink, Heart, Info, MapPin, Plus, Star, Zap, Share2 } from "lucide-react";
+import { ExternalLink, Heart, Info, MapPin, Plus, Star, Zap, Share2, Clock } from "lucide-react";
 import React from "react";
 import { ShareButton } from "@/components/ShareButton";
 
@@ -86,7 +86,12 @@ export function ConciergeResultCard({
                     )}
                     {rec.address && (
                         <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" /> {rec.address}
+                            <MapPin className="w-3 h-3" /> {rec.cinema_name ? `${rec.cinema_name} - ${rec.address}` : rec.address}
+                        </span>
+                    )}
+                    {rec.showtimes && (
+                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                            <Clock className="w-3 h-3" /> {rec.showtimes}
                         </span>
                     )}
                     {rec.google_rating && (
@@ -111,7 +116,10 @@ export function ConciergeResultCard({
                         size="sm"
                         variant="ghost"
                         className="text-xs text-slate-600 dark:text-slate-300"
-                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(rec.name + " " + (rec.address || ""))}`, '_blank')}
+                        onClick={() => {
+                            const query = rec.cinema_name ? `${rec.cinema_name} ${rec.address}` : `${rec.name} ${rec.address}`;
+                            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+                        }}
                     >
                         <ExternalLink className="w-4 h-4 mr-1" /> Map
                     </Button>
@@ -124,7 +132,7 @@ export function ConciergeResultCard({
                         className="text-xs text-slate-600 dark:text-slate-300"
                         onClick={() => window.open(rec.website, '_blank')}
                     >
-                        <ExternalLink className="w-4 h-4 mr-1" /> Web
+                        <ExternalLink className="w-4 h-4 mr-1" /> {rec.showtimes ? 'Tickets' : 'Web'}
                     </Button>
                 )}
 
