@@ -1,7 +1,7 @@
 import {
     Utensils, Wine, Music, Bed, Clapperboard, BookOpen,
     Leaf, Dumbbell, Ticket, Gamepad2, Key, Trophy, ChefHat,
-    Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase
+    Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase, Sparkles
 } from "lucide-react";
 import { ConciergeToolConfig } from "@/components/GenericConciergeModal";
 
@@ -477,6 +477,42 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             mainIcon: ChefHat,
             subtextKey: 'occasion',
             goActionLabel: 'View Menu'
+        }
+    },
+    CONCIERGE: {
+        id: 'generic_concierge',
+        title: 'AI Concierge',
+        subtitle: 'Get tailored ideas for any occasion',
+        icon: Sparkles,
+        colorTheme: 'purple',
+        categoryType: 'ACTIVITY',
+        hasLocation: true,
+        hasPrice: true,
+        sections: [
+            {
+                id: 'mood',
+                label: 'What are you in the mood for?',
+                type: 'multi-select',
+                allowCustom: true,
+                options: ["Something Fun", "Relaxing", "Adventurous", "Educational", "Social", "Private / Intimate", "Outdoors", "Indoors"]
+            },
+            {
+                id: 'company',
+                label: 'Who are you with?',
+                type: 'single-select',
+                options: ["Just Me", "My Partner", "Small Group (Friends)", "Family / Kids", "Large Party"]
+            },
+            {
+                id: 'duration',
+                label: 'How much time do you have?',
+                type: 'single-select',
+                options: ["Quick (< 1 hour)", "Few Hours", "Half Day", "Full Day", "Weekend"]
+            }
+        ],
+        resultCard: {
+            mainIcon: Sparkles,
+            subtextKey: 'mood',
+            goActionLabel: 'See Ideas'
         }
     }
 };
