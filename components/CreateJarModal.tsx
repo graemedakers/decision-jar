@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -41,11 +41,24 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
 
     // Custom Topic State
     const [customTopicName, setCustomTopicName] = useState("");
-    const [customCategories, setCustomCategories] = useState<string[]>(["", "", ""]);
+    const [customCategories, setCustomCategories] = useState(["", "", ""]);
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+
+    // Reset state when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setSuccess(false);
+            setIsLoading(false);
+            setError(null);
+            setName("");
+            setCustomTopicName("");
+            setCustomCategories(["", "", ""]);
+        }
+    }, [isOpen]);
+
     const router = useRouter();
     const { openModal } = useModalSystem();
 
