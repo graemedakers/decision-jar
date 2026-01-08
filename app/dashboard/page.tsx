@@ -332,7 +332,6 @@ function DashboardContent() {
                                             jarTopic={userData?.jarTopic || 'General'}
                                             jarName={userData?.jarName || 'Your Jar'}
                                             jarId={userData?.activeJarId || ''}
-                                            inviteCode={inviteCode}
                                             onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
                                             onAddIdeaClick={() => openModal('ADD_IDEA')}
                                         />

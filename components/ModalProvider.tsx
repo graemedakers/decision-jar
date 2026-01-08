@@ -30,6 +30,7 @@ export type ModalType =
     | 'PREMIUM_WELCOME_TIP'
     | 'LEVEL_UP'
     | 'JAR_QUICKSTART'
+    | 'JAR_MEMBERS'
     | null;
 
 interface ModalContextType {

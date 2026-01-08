@@ -30,6 +30,7 @@ const SettingsModal = dynamic(() => import("@/components/SettingsModal").then(m 
 const QuickDecisionsModal = dynamic(() => import("@/components/QuickDecisionsModal").then(m => m.QuickDecisionsModal), { ssr: false });
 const WeekendPlannerModal = dynamic(() => import("@/components/WeekendPlannerModal").then(m => m.WeekendPlannerModal), { ssr: false });
 const CommunityAdminModal = dynamic(() => import("@/components/CommunityAdminModal").then(m => m.CommunityAdminModal), { ssr: false });
+const JarMembersModal = dynamic(() => import("@/components/JarMembersModal").then(m => m.JarMembersModal), { ssr: false });
 const JarQuickStartModal = dynamic(() => import("@/components/JarQuickStartModal").then(m => m.JarQuickStartModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
@@ -329,6 +330,17 @@ export function DashboardModals({
                 show={modalProps?.showPremiumTip || false}
                 onClose={closeModal}
             />
+
+            {userData?.activeJarId && (
+                <JarMembersModal
+                    isOpen={activeModal === 'JAR_MEMBERS'}
+                    onClose={closeModal}
+                    jarId={userData.activeJarId}
+                    jarName={userData.jarName || "Your Jar"}
+                    currentUserRole={userData.isCreator ? 'ADMIN' : 'MEMBER'}
+                    onRoleUpdated={refreshUser}
+                />
+            )}
 
             {activeModal === 'JAR_QUICKSTART' && (
                 <JarQuickStartModal

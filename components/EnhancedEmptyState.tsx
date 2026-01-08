@@ -10,12 +10,11 @@ interface EnhancedEmptyStateProps {
     jarTopic: string;
     jarName: string;
     jarId: string;
-    inviteCode?: string | null;
     onTemplateClick: () => void;
     onAddIdeaClick: () => void;
 }
 
-export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, onTemplateClick, onAddIdeaClick }: EnhancedEmptyStateProps) {
+export function EnhancedEmptyState({ jarTopic, jarName, jarId, onTemplateClick, onAddIdeaClick }: EnhancedEmptyStateProps) {
     const { openModal } = useModalSystem();
 
     const suggestedConcierge = getSuggestedConcierge(jarTopic, jarName);
@@ -24,22 +23,8 @@ export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, onTem
         openModal('CONCIERGE', { toolId: suggestedConcierge.id });
     };
 
-    const handleInvite = async () => {
-        if (!inviteCode) {
-            // Fallback if no code available (shouldn't happen often)
-            openModal('SETTINGS');
-            return;
-        }
-
-        try {
-            const url = `${window.location.origin}/join?code=${inviteCode}`;
-            await navigator.clipboard.writeText(url);
-            showSuccess("Invite link copied to clipboard!");
-        } catch (err) {
-            showError("Failed to copy link");
-            // Fallback
-            openModal('SETTINGS');
-        }
+    const handleInvite = () => {
+        openModal('JAR_MEMBERS');
     };
 
     return (
