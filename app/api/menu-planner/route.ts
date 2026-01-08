@@ -139,8 +139,8 @@ export async function POST(request: Request) {
                     value = ${JSON.stringify(meals)},
                     "expiresAt" = ${expiresAt}
                 `;
-            } catch (e) {
-                logger.warn("Failed to write to cache:", e);
+            } catch (e: any) {
+                logger.warn("Failed to write to cache:", { error: e?.message || e });
             }
 
             return NextResponse.json({ meals });
