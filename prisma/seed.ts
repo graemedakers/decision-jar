@@ -28,7 +28,6 @@ async function main() {
             name: 'Demo User',
             passwordHash,
             activeJarId: jar.id,
-            legacyJarId: jar.id,
             mustChangePassword: false,
         }
     })

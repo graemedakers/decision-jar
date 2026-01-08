@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         // Fetch user for context (location, interests)
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
-            include: { legacyJar: true },
+            include: { memberships: { include: { jar: true } } },
         });
 
         if (!user) {
@@ -50,10 +50,17 @@ export async function POST(request: Request) {
             });
         }
 
-        const coupleLocation = (user.legacyJar as any)?.location;
+        let activeJar = null;
+        if (user.activeJarId) {
+            activeJar = user.memberships.find(m => m.jarId === user.activeJarId)?.jar;
+        } else if (user.memberships.length > 0) {
+            activeJar = user.memberships[0].jar;
+        }
+
+        const coupleLocation = activeJar?.location;
 
         // Determine which location to use
-        const location = coupleLocation || "Unknown";
+        const location = coupleLocation || user.homeTown || "Unknown";
 
         const userInterests = user.interests ? `User Interests: ${user.interests}` : "";
 

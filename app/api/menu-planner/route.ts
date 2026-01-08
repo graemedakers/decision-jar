@@ -14,12 +14,17 @@ export async function POST(request: Request) {
         }
 
         // Check premium status
+        // Check premium status
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
-            include: { legacyJar: true },
+            include: { memberships: { include: { jar: true } } },
         });
 
-        if (!user || (!isCouplePremium(user.legacyJar) && !isUserPro(user))) {
+        const activeJar = user && (user.activeJarId
+            ? user.memberships.find(m => m.jarId === user.activeJarId)?.jar
+            : user.memberships[0]?.jar);
+
+        if (!user || (!isCouplePremium(activeJar) && !isUserPro(user))) {
             return NextResponse.json({ error: 'Premium required' }, { status: 403 });
         }
 

@@ -16,15 +16,14 @@ export async function POST(request: Request) {
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
             include: {
-                memberships: { include: { jar: true } },
-                legacyJar: true
+                memberships: { include: { jar: true } }
             },
         });
 
         // Determine the Active Jar
-        const activeJar = (user?.activeJarId ? user.memberships.find(m => m.jarId === user.activeJarId)?.jar : null) ||
-            user?.memberships?.[0]?.jar ||
-            user?.legacyJar;
+        const activeJar = user && (user.activeJarId
+            ? user.memberships.find(m => m.jarId === user.activeJarId)?.jar
+            : user.memberships[0]?.jar);
 
         if (!user || !activeJar) {
             return NextResponse.json({ error: 'No active jar' }, { status: 400 });
