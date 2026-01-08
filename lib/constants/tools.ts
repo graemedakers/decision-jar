@@ -2,7 +2,7 @@
 import {
     Calendar, Utensils, Wine, Footprints, Moon, Clapperboard,
     Leaf, Dumbbell, Ticket, ChefHat, Gamepad2, Key, Trophy,
-    Book, Disc, Bed, Users
+    Book, Disc, Bed, Users, Plane
 } from "lucide-react";
 
 export type ToolColor = 'purple' | 'blue' | 'orange' | 'pink' | 'rose' | 'indigo' | 'violet' | 'red' | 'cyan' | 'emerald' | 'amber' | 'teal' | 'green';
@@ -59,6 +59,18 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         requiresPremium: true,
         actionType: 'modal',
         modalId: 'weekend_planner',
+        showInDashboard: true,
+        showInExplore: true
+    },
+    {
+        id: 'holiday_planner',
+        title: 'Holiday Planner',
+        description: 'Create a perfect travel itinerary with day-by-day plans.',
+        icon: Plane,
+        color: 'blue',
+        requiresPremium: true,
+        actionType: 'concierge',
+        conciergeId: 'HOLIDAY',
         showInDashboard: true,
         showInExplore: true
     },

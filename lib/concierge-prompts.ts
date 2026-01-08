@@ -354,6 +354,59 @@ export const getConciergePromptAndMock = (
                 }
             };
 
+        case 'HOLIDAY':
+            return {
+                prompt: `
+                Act as a master travel agent and local expert.
+                Create 3 DISTINCT, detailed holiday itineraries for a trip to ${targetLocation}.
+                
+                TRIP DETAILS:
+                - Dates: ${inputs.dates_start || "Unspecified"} to ${inputs.dates_end || "Unspecified"}
+                - Travel Party: ${inputs.party || "Any"}
+                - Transport Mode: ${inputs.transport || "Any"}
+                - Max Travel Distance/Time: ${inputs.maxDistance || "Any"}
+                - Dining Preferences: ${inputs.dining || "Any"}
+                - Interests/Vibe: ${inputs.interests || "Any"}
+                - Budget: ${inputs.price || "Any"}
+
+                ${extraInstructions}
+
+                INSTRUCTIONS:
+                1. Maximize the time available.
+                2. Consider TYPICAL WEATHER for this location during these specific dates.
+                3. Include real local events, markets, or festivals that occur around these dates if known.
+                4. Ensure logistics make sense (e.g. if using public transport, group varying locations logically).
+                5. Each recommendation must be a UNIQUE approach (e.g. "Relaxed & Foodie", "Adventure & Nature", "Culture & History").
+
+                Return JSON with "recommendations" array (size 3).
+                Each item represents a FULL ITINERARY VARIATION.
+                
+                Fields:
+                - name: Creative Title (e.g. "Paris: The Culinary Journey")
+                - description: Brief summary of the vibe (1-2 sentences).
+                - duration_label: The duration (e.g. "3 Days, 2 Nights").
+                - price: Budget level ($, $$, $$$).
+                - details: A formatted string containing the FULL Day-by-Day Itinerary. 
+                  **IMPORTANT FORMATTING FOR 'details':**
+                  Use Markdown.
+                  Format each day as:
+                  ### Day 1: [Date] - [Theme]
+                  **Morning:** [Activity Title] - [Description] (Map: [Link])
+                  **Lunch:** [Restaurant] - [Cuisine] (Map: [Link])
+                  **Afternoon:** ...
+                  **Dinner:** ...
+                  
+                  *Include accurate Google Maps links for every specific venue.*
+                `,
+                mockResponse: {
+                    recommendations: [
+                        { name: "The Cultural Explorer", description: "A deep dive into history and museums.", duration_label: "3 Days", price: "$$", details: "### Day 1...\n..." },
+                        { name: "The Foodie Escape", description: "Tasting the best local flavors.", duration_label: "3 Days", price: "$$$", details: "### Day 1...\n..." },
+                        { name: "Nature & Chill", description: "Hiking trails and spa evenings.", duration_label: "3 Days", price: "$", details: "### Day 1...\n..." }
+                    ]
+                }
+            };
+
         default:
             throw new Error(`Unknown tool key: ${toolKey}`);
     }

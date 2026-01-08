@@ -19,7 +19,7 @@ export interface ConciergeSection {
     id: string;
     label: string;
     icon?: LucideIcon;
-    type: 'multi-select' | 'single-select' | 'text';
+    type: 'multi-select' | 'single-select' | 'text' | 'date-range';
     options?: string[];
     allowCustom?: boolean; // New: Allow user to type a custom value
     condition?: {
@@ -194,6 +194,7 @@ export function GenericConciergeModal({
     // State Store for all dynamic inputs
     const [selections, setSelections] = useState<Record<string, string[]>>({});
     const [customInputs, setCustomInputs] = useState<Record<string, string>>({}); // New: Store custom text inputs
+    const [dateRanges, setDateRanges] = useState<Record<string, { start: string, end: string }>>({}); // New: Store dates
 
     const [location, setLocation] = useState(userLocation || "");
     const [price, setPrice] = useState("any");
@@ -235,7 +236,7 @@ export function GenericConciergeModal({
     });
 
     const onGoAction = (rec: any) => {
-        if (config.id === 'chef_concierge') {
+        if (config.id === 'chef_concierge' || config.id === 'holiday_concierge') {
             setViewingItem(rec);
         } else {
             handleGoTonightFromHook(rec, config.categoryType, isPrivate);
@@ -299,6 +300,16 @@ export function GenericConciergeModal({
             // Append custom input if exists for this section
             if (customInputs[key] && customInputs[key].trim()) {
                 selectedValues.push(customInputs[key].trim());
+            }
+
+            // Append date range if exists
+            if (section.type === 'date-range' && dateRanges[key]) {
+                const { start, end } = dateRanges[key];
+                if (start || end) {
+                    selectedValues.push(`From: ${start || 'Any'} To: ${end || 'Any'}`);
+                    selectionMap[key + '_start'] = start;
+                    selectionMap[key + '_end'] = end;
+                }
             }
 
             if (selectedValues.length > 0) {
@@ -436,24 +447,46 @@ export function GenericConciergeModal({
                                                 {section.icon && <section.icon className={`w-4 h-4 ${theme.text}`} />}
                                                 {section.label}
                                             </label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {(section.options || []).map((option) => {
-                                                    const isActive = (selections[section.id] || []).includes(option);
-                                                    return (
-                                                        <button
-                                                            key={option}
-                                                            onClick={() => toggleSelection(option, section.id, section.type as 'multi-select' | 'single-select')}
-                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isActive
-                                                                ? theme.selected
-                                                                : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
-                                                                }`}
-                                                        >
-                                                            {option}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                            {section.allowCustom && (
+
+                                            {section.type === 'date-range' ? (
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="date"
+                                                        value={dateRanges[section.id]?.start || ''}
+                                                        onChange={(e) => setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], start: e.target.value } }))}
+                                                        className={`flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white`}
+                                                        placeholder="Check In"
+                                                    />
+                                                    <span className="text-slate-400">to</span>
+                                                    <input
+                                                        type="date"
+                                                        value={dateRanges[section.id]?.end || ''}
+                                                        onChange={(e) => setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], end: e.target.value } }))}
+                                                        className={`flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white`}
+                                                        placeholder="Check Out"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {(section.options || []).map((option) => {
+                                                        const isActive = (selections[section.id] || []).includes(option);
+                                                        return (
+                                                            <button
+                                                                key={option}
+                                                                onClick={() => toggleSelection(option, section.id, section.type as 'multi-select' | 'single-select')}
+                                                                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isActive
+                                                                    ? theme.selected
+                                                                    : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
+                                                                    }`}
+                                                            >
+                                                                {option}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+
+                                            {section.allowCustom && section.type !== 'date-range' && (
                                                 <div className="mt-2">
                                                     <input
                                                         type="text"
@@ -561,6 +594,7 @@ export function GenericConciergeModal({
                 isOpen={!!viewingItem}
                 onClose={() => setViewingItem(null)}
                 data={viewingItem}
+                configId={config.id}
                 onAddToJar={() => {
                     if (viewingItem) handleAddToJar(viewingItem, config.categoryType, isPrivate);
                     setViewingItem(null);

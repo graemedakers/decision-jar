@@ -1,7 +1,7 @@
 import {
     Utensils, Wine, Music, Bed, Clapperboard, BookOpen,
     Leaf, Dumbbell, Ticket, Gamepad2, Key, Trophy, ChefHat,
-    Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase, Sparkles
+    Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase, Sparkles, Plane, Calendar
 } from "lucide-react";
 import { ConciergeToolConfig } from "@/components/GenericConciergeModal";
 
@@ -513,6 +513,60 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             mainIcon: Sparkles,
             subtextKey: 'mood',
             goActionLabel: 'See Ideas'
+        }
+    },
+    HOLIDAY: {
+        id: 'holiday_concierge',
+        title: 'Holiday Planner',
+        subtitle: 'Create a perfect travel itinerary',
+        icon: Plane,
+        colorTheme: 'blue',
+        categoryType: 'ITINERARY',
+        hasLocation: true, // Destination
+        hasPrice: true, // Budget
+        sections: [
+            {
+                id: 'dates',
+                label: 'Travel Dates',
+                type: 'date-range', // New Type
+                options: [] // Managed by date picker
+            },
+            {
+                id: 'transport',
+                label: 'Transport Available',
+                type: 'multi-select',
+                options: ["Walking / Foot", "Car / Rental", "Public Transport (Train/Bus/Tram)", "Bicycle / Scooter", "Taxi / Uber"]
+            },
+            {
+                id: 'maxDistance',
+                label: 'Max Travel Distance',
+                type: 'single-select',
+                options: ["Walkable Only (< 1km)", "Short Drive/Ride (< 15 mins)", "Medium Trip (30-60 mins)", "Day Trip (1-2 hours)"]
+            },
+            {
+                id: 'dining',
+                label: 'Dining Preferences',
+                type: 'multi-select',
+                options: ["Eat Out (Lunch)", "Eat Out (Dinner)", "Cook at Accommodation", "Street Food / Casual", "Fine Dining"]
+            },
+            {
+                id: 'interests',
+                label: 'Trip Vibe & Interests',
+                type: 'multi-select',
+                allowCustom: true,
+                options: ["Relaxing / Chill", "Adventure / Active", "Sightseeing / History", "Foodie Tour", "Family Fun", "Nightlife", "Shopping", "Nature / Outdoors"]
+            },
+            {
+                id: 'party',
+                label: 'Who is travelling?',
+                type: 'single-select',
+                options: ["Solo", "Couple", "Family with Kids", "Group of Friends"]
+            }
+        ],
+        resultCard: {
+            mainIcon: Calendar,
+            subtextKey: 'duration_label',
+            goActionLabel: 'View Plan'
         }
     }
 };
