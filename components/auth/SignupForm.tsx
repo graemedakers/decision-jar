@@ -23,6 +23,7 @@ export function SignupForm() {
     const [showMore, setShowMore] = useState(false);
 
     const [isVerificationSent, setIsVerificationSent] = useState(false);
+    const [accountExistsError, setAccountExistsError] = useState(false);
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
     useEffect(() => {
@@ -153,8 +154,12 @@ export function SignupForm() {
                     router.push("/dashboard");
                 }
             } else {
-                const errorMessage = data.details ? `${data.error}: ${data.details}` : (data.error || "Signup failed");
-                alert(errorMessage);
+                if (data.error === "User already exists") {
+                    setAccountExistsError(true);
+                } else {
+                    const errorMessage = data.details ? `${data.error}: ${data.details}` : (data.error || "Signup failed");
+                    alert(errorMessage);
+                }
             }
         } catch (error: any) {
             console.error("Signup Fetch Error:", error);
@@ -188,6 +193,40 @@ export function SignupForm() {
                     <p className="text-slate-400 mb-8">
                         We've sent a verification link to your email address. Please click the link to activate your account.
                     </p>
+                </div>
+            </motion.div>
+        );
+    }
+
+    if (accountExistsError) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-full max-w-md"
+            >
+                <div className="glass-card p-8 text-center bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-white/10">
+                    <div className="w-16 h-16 mx-auto bg-primary/20 rounded-full flex items-center justify-center mb-6">
+                        <User className="w-8 h-8 text-primary" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Account Already Exists</h2>
+                    <p className="text-slate-600 dark:text-slate-400 mb-8">
+                        It looks like you already have an account with this email. Would you like to sign in to join this jar instead?
+                    </p>
+                    <div className="space-y-4">
+                        <Button
+                            onClick={() => router.push(`/login${inviteCode ? `?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : ''}`)}
+                            className="w-full h-12 text-lg font-bold shadow-lg shadow-primary/20"
+                        >
+                            Log In & Join Jar <ArrowRight className="w-5 h-5 ml-2" />
+                        </Button>
+                        <button
+                            onClick={() => setAccountExistsError(false)}
+                            className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-medium transition-colors"
+                        >
+                            Use a different email
+                        </button>
+                    </div>
                 </div>
             </motion.div>
         );

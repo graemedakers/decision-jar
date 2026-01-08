@@ -108,6 +108,20 @@ export async function POST(req: Request) {
 
                 console.log(`[STRIPE_WEBHOOK] ✅ Created new user and jar for ${email} (${user.id})`);
             });
+        } else if (metadata?.type === 'COMMUNITY_JAR_CREATION') {
+            const jarId = metadata.jarId;
+            if (jarId) {
+                console.log(`[STRIPE_WEBHOOK] Activating Community Jar ${jarId}`);
+                await prisma.jar.update({
+                    where: { id: jarId },
+                    data: {
+                        subscriptionStatus: 'active',
+                        stripeCustomerId: session.customer as string,
+                        stripeSubscriptionId: session.subscription as string,
+                    }
+                });
+                console.log(`[STRIPE_WEBHOOK] ✅ Community Jar ${jarId} activated`);
+            }
         }
     } else if (event.type === 'customer.subscription.updated') {
         const subscription = event.data.object as Stripe.Subscription;
@@ -121,6 +135,15 @@ export async function POST(req: Request) {
             }
         });
         console.log(`[STRIPE_WEBHOOK] ✅ Updated ${result.count} user(s) to status: ${subscription.status}`);
+
+        // Also update JAR status (for communities)
+        const jarResult = await prisma.jar.updateMany({
+            where: { stripeSubscriptionId: subscription.id },
+            data: {
+                subscriptionStatus: subscription.status
+            }
+        });
+        console.log(`[STRIPE_WEBHOOK] ✅ Updated ${jarResult.count} jar(s) to status: ${subscription.status}`);
 
         if (subscription.status === 'past_due') {
             // Find user to get email logic (updateMany doesn't return the record)
@@ -148,7 +171,17 @@ export async function POST(req: Request) {
                 subscriptionEndsAt: new Date((subscription as any).current_period_end * 1000)
             }
         });
-        console.log(`[STRIPE_WEBHOOK] ✅ Canceled ${result.count} subscription(s)`);
+        console.log(`[STRIPE_WEBHOOK] ✅ Canceled ${result.count} user subscription(s)`);
+
+        // Also update JAR status (for communities)
+        const jarResult = await prisma.jar.updateMany({
+            where: { stripeSubscriptionId: subscription.id },
+            data: {
+                subscriptionStatus: 'canceled',
+                subscriptionRenewsAt: null // No longer renews
+            }
+        });
+        console.log(`[STRIPE_WEBHOOK] ✅ Canceled ${jarResult.count} jar subscription(s)`);
     }
 
     console.log(`[STRIPE_WEBHOOK] ✅ Successfully processed ${event.type}`);
