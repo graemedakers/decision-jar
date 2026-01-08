@@ -332,6 +332,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
             <JarManagerModal
                 isOpen={isManagerOpen}
                 onClose={() => setIsManagerOpen(false)}
+                onRefresh={onSwitch}
             />
         </div>
     );

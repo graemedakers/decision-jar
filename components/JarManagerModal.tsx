@@ -24,9 +24,10 @@ interface JarSummary {
 interface JarManagerModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onRefresh?: () => void;
 }
 
-export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
+export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalProps) {
     const [jars, setJars] = useState<JarSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
@@ -78,6 +79,7 @@ export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
             });
             if (res.ok) {
                 setJars(prev => prev.filter(j => j.id !== jarId));
+                if (onRefresh) onRefresh();
                 router.refresh();
             }
         } catch (e) {
@@ -102,6 +104,7 @@ export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
             if (res.ok) {
                 setJars(prev => prev.filter(j => j.id !== jarId));
                 showSuccess("✅ Jar deleted successfully");
+                if (onRefresh) onRefresh();
                 router.refresh();
             } else {
                 const data = await res.json();
