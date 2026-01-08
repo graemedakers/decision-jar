@@ -78,7 +78,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                     }
                 });
         }
-    }, [isOpen, currentLocation, jarTopic]);
+    }, [isOpen, currentLocation]);
 
     const labels = getJarLabels(jarTopic);
 
