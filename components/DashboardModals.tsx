@@ -30,6 +30,7 @@ const SettingsModal = dynamic(() => import("@/components/SettingsModal").then(m 
 const QuickDecisionsModal = dynamic(() => import("@/components/QuickDecisionsModal").then(m => m.QuickDecisionsModal), { ssr: false });
 const WeekendPlannerModal = dynamic(() => import("@/components/WeekendPlannerModal").then(m => m.WeekendPlannerModal), { ssr: false });
 const CommunityAdminModal = dynamic(() => import("@/components/CommunityAdminModal").then(m => m.CommunityAdminModal), { ssr: false });
+const JarQuickStartModal = dynamic(() => import("@/components/JarQuickStartModal").then(m => m.JarQuickStartModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
@@ -328,6 +329,16 @@ export function DashboardModals({
                 show={modalProps?.showPremiumTip || false}
                 onClose={closeModal}
             />
+
+            {activeModal === 'JAR_QUICKSTART' && (
+                <JarQuickStartModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    jarId={modalProps?.jarId || ''}
+                    jarName={modalProps?.jarName || ''}
+                    jarTopic={modalProps?.jarTopic || 'General'}
+                />
+            )}
 
             {showConfetti && (
                 <Confetti

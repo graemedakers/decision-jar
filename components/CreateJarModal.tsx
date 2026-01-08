@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/Label";
 import { Loader2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
+import { useModalSystem } from "@/components/ModalProvider";
 
 interface CreateJarModalProps {
     isOpen: boolean;
@@ -45,6 +46,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const router = useRouter();
+    const { openModal } = useModalSystem();
 
     const maxJars = isPro ? 50 : 1;
     const isLimitReached = currentJarCount >= maxJars;
@@ -100,12 +102,18 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             });
 
             if (res.ok) {
+                const data = await res.json();
                 setSuccess(true);
-                // Delay reload to show success message
+
+                // Close create modal and open quick-start modal
                 setTimeout(() => {
                     onClose();
-                    window.location.reload();
-                }, 1500);
+                    openModal('JAR_QUICKSTART', {
+                        jarId: data.jar.id,
+                        jarName: name,
+                        jarTopic: finalTopic
+                    });
+                }, 500);
             } else {
                 const data = await res.json();
                 setError(data.error || "Failed to create jar");

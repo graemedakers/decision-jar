@@ -29,6 +29,7 @@ export type ModalType =
     | 'CONCIERGE'
     | 'PREMIUM_WELCOME_TIP'
     | 'LEVEL_UP'
+    | 'JAR_QUICKSTART'
     | null;
 
 interface ModalContextType {
