@@ -454,21 +454,6 @@ export function SignupForm() {
                             animate={{ opacity: 1, height: "auto" }}
                             className="space-y-4 pt-2"
                         >
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wider">Jar Type</label>
-                                <div className="relative">
-                                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                    <select
-                                        name="type"
-                                        className="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent appearance-none text-sm"
-                                        defaultValue="SOCIAL"
-                                    >
-                                        <option value="ROMANTIC">Romantic</option>
-                                        <option value="SOCIAL">Friends & Family (Social)</option>
-                                        <option value="GENERIC">Solo (Personal)</option>
-                                    </select>
-                                </div>
-                            </div>
 
                             <div className="space-y-2">
                                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wider">Jar Topic</label>

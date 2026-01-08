@@ -17,10 +17,23 @@ interface CreateJarModalProps {
     currentJarCount: number;
 }
 
+// Helper to infer jar type from topic for backward compatibility
+function inferTypeFromTopic(topic: string): string {
+    const romanticTopics = ['Dates', 'Romantic', 'date', 'romantic'];
+    const soloTopics = ['Solo', 'Personal', 'Self', 'solo', 'personal'];
+
+    if (romanticTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
+        return 'ROMANTIC';
+    }
+    if (soloTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
+        return 'GENERIC';
+    }
+    return 'SOCIAL'; // Default for everything else
+}
+
 export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, currentJarCount }: CreateJarModalProps) {
     const [name, setName] = useState("");
     const [topic, setTopic] = useState("Activities");
-    const [type, setType] = useState<string>("SOCIAL");
     const [selectionMode, setSelectionMode] = useState<string>("RANDOM");
 
     // Custom Topic State
@@ -75,11 +88,14 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             }));
         }
 
+        // Auto-infer type from topic
+        const inferredType = inferTypeFromTopic(finalTopic);
+
         try {
             const res = await fetch('/api/jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, type, topic: finalTopic, customCategories: finalCustomCategories, selectionMode }),
+                body: JSON.stringify({ name, type: inferredType, topic: finalTopic, customCategories: finalCustomCategories, selectionMode }),
             });
 
             if (res.ok) {
@@ -188,19 +204,6 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-3">
-                            <Label>Jar Type</Label>
-                            <select
-                                value={type}
-                                onChange={(e) => setType(e.target.value)}
-                                className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                                aria-label="Select Jar Type"
-                            >
-                                <option value="ROMANTIC">Romantic</option>
-                                <option value="SOCIAL">Social/Friends</option>
-                                <option value="GENERIC">Solo</option>
-                            </select>
-                        </div>
                         <div className="space-y-3">
                             <Label>Mode</Label>
                             <select

@@ -32,6 +32,20 @@ export async function POST(request: Request) {
 
         const shouldCreateJar = !inviteCode && (topic || type);
 
+        // Helper to infer jar type from topic
+        function inferTypeFromTopic(topic: string): string {
+            const romanticTopics = ['Dates', 'Romantic', 'date', 'romantic'];
+            const soloTopics = ['Solo', 'Personal', 'Self', 'solo', 'personal'];
+
+            if (romanticTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
+                return 'ROMANTIC';
+            }
+            if (soloTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
+                return 'GENERIC';
+            }
+            return 'SOCIAL';
+        }
+
         if (shouldCreateJar) {
             // Determine Name
             let jarName = `${name}'s Jar`;
@@ -46,6 +60,9 @@ export async function POST(request: Request) {
                 ? (modeInput === 'VOTING' ? 'VOTE' : modeInput)
                 : 'RANDOM';
 
+            // Auto-infer type from topic
+            const inferredType = inferTypeFromTopic(selectedTopic);
+
             // Create new Jar
             const jar = await (prisma.jar as any).create({
                 data: {
@@ -53,7 +70,7 @@ export async function POST(request: Request) {
                     location: location || 'Unknown',
                     isPremium: false,
                     name: jarName,
-                    type: (type === 'ROMANTIC' || type === 'SOCIAL' || type === 'GENERIC') ? type : 'SOCIAL',
+                    type: inferredType,
                     topic: selectedTopic,
                     selectionMode: validSelectionMode
                 },
