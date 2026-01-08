@@ -244,25 +244,31 @@ export function DashboardModals({
                 onSuccess={handleContentUpdate}
             />
 
-            <DateNightPlannerModal
-                isOpen={activeModal === 'DATE_NIGHT_PLANNER'}
-                onClose={closeModal}
-                userLocation={undefined}
-                onIdeaAdded={() => setShowConfetti(true)}
-                jarTopic=""
-            />
+            {activeModal === 'DATE_NIGHT_PLANNER' && (
+                <DateNightPlannerModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    userLocation={combinedLocation || undefined}
+                    onIdeaAdded={() => setShowConfetti(true)}
+                    jarTopic={jarTopic || "General"}
+                />
+            )}
 
-            <CateringPlannerModal
-                isOpen={activeModal === 'CATERING_PLANNER'}
-                onClose={closeModal}
-                onIdeaAdded={() => setShowConfetti(true)}
-            />
+            {activeModal === 'CATERING_PLANNER' && (
+                <CateringPlannerModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    onIdeaAdded={() => setShowConfetti(true)}
+                />
+            )}
 
-            <MenuPlannerModal
-                isOpen={activeModal === 'MENU_PLANNER'}
-                onClose={closeModal}
-                onIdeaAdded={handleContentUpdate}
-            />
+            {activeModal === 'MENU_PLANNER' && (
+                <MenuPlannerModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    onIdeaAdded={handleContentUpdate}
+                />
+            )}
 
             <RateDateModal
                 isOpen={activeModal === 'RATE_DATE'}
