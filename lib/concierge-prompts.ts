@@ -120,15 +120,16 @@ export const getConciergePromptAndMock = (
             const isCinema = inputs.watchMode === 'Cinema';
             return {
                 prompt: `
-                Act as a movie critic and local cinema expert.
+                Act as a movie critic and high-precision local cinema scout.
                 Recommend 5 distinct movies based on the following:
                 - Watch Mode: ${inputs.watchMode}
                 ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in physical cinemas near ${targetLocation}. 
                 1. Identify real cinemas currently operating within the same suburb or within 10km of ${targetLocation}. 
-                2. Double-check the exact theater branch and brand (e.g., Reading Cinemas, Hoyts, Event Cinemas, Village Cinemas, Dendy, or local independents) to ensure they actually exist in this specific area. 
-                3. Do NOT hallucinate - ensure the branch and its address are precisely correct for ${targetLocation}.
-                4. Find movies currently playing at these specific locations today or tomorrow.
-                5. You MUST provide the specific CINEMA NAME (including the branch name) and its FULL PHYSICAL ADDRESS for the Map link to work.` : ''}
+                2. BRAND VERIFICATION: You MUST use the correct brand. For example, in Rouse Hill (NSW), the ONLY major cinema is 'Reading Cinemas' at Rouse Hill Town Centre. Do NOT recommend 'Hoyts' or 'Event Cinemas' if they do not exist in that specific suburb.
+                3. ZERO HALLUCINATION POLICY: Do NOT guess the chain. If the user is in Rouse Hill, the ticket URL must lead to ReadingCinemas.com.au, NOT Hoyts.com.au.
+                4. Double-check the exact theater branch name (e.g., 'Reading Cinemas Rouse Hill').
+                5. Find movies currently playing at these specific locations today or tomorrow.
+                6. You MUST provide the specific CINEMA NAME (including the branch name), its FULL PHYSICAL ADDRESS, and the OFFICIAL TICKET URL for that specific cinema.` : ''}
                 - Genre: ${inputs.genre || "Any"}
                 - Mood: ${inputs.mood || "Any"}
                 - Era: ${inputs.era || "Any"}
@@ -138,7 +139,7 @@ export const getConciergePromptAndMock = (
                 
                 Return JSON with "recommendations" array.
                 Fields: name (Title), description (Plot summary), year, rating (IMDb/Rotten Tomatoes score as string), genre, director, cast
-                ${isCinema ? 'Also include: cinema_name, address (Physical address of the cinema), website (Official cinema or ticket link), showtimes (approximate for today/tomorrow)' : 'Also include: streaming_service, website (Link to watch)'}
+                ${isCinema ? 'Also include: cinema_name, address (Physical address), website (Specific ticket/booking link for this cinema), showtimes (today/tomorrow)' : 'Also include: streaming_service, website (Link to watch)'}
                 `,
                 mockResponse: {
                     recommendations: [
