@@ -22,14 +22,14 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         title: '💡 Add Your First Idea',
         description: 'Start by adding date ideas to your jar. Click here to add anything from simple coffee dates to epic adventures!',
         targetElement: '[data-tour="add-idea-button"]',
-        position: 'bottom'
+        position: 'top'
     },
     {
         id: 'surprise-me',
         title: '✨ AI-Powered Ideas',
-        description: 'Don\'t have ideas? Let our AI surprise you with personalized suggestions based on your preferences!',
+        description: 'Stuck for ideas? Click this Sparkles button to let our AI surprise you with personalized suggestions based on your preferences!',
         targetElement: '[data-tour="surprise-me-button"]',
-        position: 'bottom'
+        position: 'top'
     },
     {
         id: 'jar-visual',
@@ -49,15 +49,22 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         id: 'open-jar',
         title: '📂 Browse All Ideas',
         description: 'View, edit, or delete all your ideas. You can also mark favorites and see idea details.',
-        targetElement: '[data-tour="open-jar-button"]',
-        position: 'right'
+        targetElement: '[data-tour="list-tab"], [data-tour="list-tab-mobile"]',
+        position: 'bottom'
+    },
+    {
+        id: 'explore-menu',
+        title: '🧭 Explore AI Tools',
+        description: 'Discover specialized AI concierges and finders to help you plan the perfect experience.',
+        targetElement: '[data-tour="explore-tab"], [data-tour="explore-tab-mobile"]',
+        position: 'bottom'
     },
     {
         id: 'vault',
         title: '🏆 Your Vault',
         description: 'After completing a date, ideas move here. Rate your experiences and build your memory collection!',
-        targetElement: '[data-tour="vault-button"]',
-        position: 'top'
+        targetElement: '[data-tour="vault-tab"], [data-tour="vault-tab-mobile"], [data-tour="vault-button"]',
+        position: 'bottom'
     },
     {
         id: 'gamification',

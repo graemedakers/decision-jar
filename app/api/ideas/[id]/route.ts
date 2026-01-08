@@ -38,17 +38,23 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        // Verify user is still a member of the jar
+        const membership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: { userId: session.user.id, jarId: currentJarId }
+            }
+        });
+
+        if (!membership) {
+            return NextResponse.json({ error: 'Forbidden: You are not a member of this jar' }, { status: 403 });
+        }
+
         // Allow deletion if:
         // 1. User is the author
         // 2. User is an admin in the jar
         if (idea.createdById !== session.user.id) {
-            const membership = await prisma.jarMember.findUnique({
-                where: {
-                    userId_jarId: { userId: session.user.id, jarId: currentJarId }
-                }
-            });
-
-            if (membership?.role !== 'ADMIN') {
+            // Already fetched membership above
+            if (membership.role !== 'ADMIN') {
                 return NextResponse.json({ error: 'Forbidden: You do not have permission to delete this idea' }, { status: 403 });
             }
         }
@@ -112,17 +118,22 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        // Verify user is still a member of the jar
+        const membership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: { userId: session.user.id, jarId: currentJarId }
+            }
+        });
+
+        if (!membership) {
+            return NextResponse.json({ error: 'Forbidden: You are not a member of this jar' }, { status: 403 });
+        }
+
         // Allow modification if:
         // 1. User is the author
         // 2. User is an admin in the jar
         if (idea.createdById !== session.user.id) {
-            const membership = await prisma.jarMember.findUnique({
-                where: {
-                    userId_jarId: { userId: session.user.id, jarId: currentJarId }
-                }
-            });
-
-            if (membership?.role !== 'ADMIN') {
+            if (membership.role !== 'ADMIN') {
                 return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this idea. Only the creator or an admin can edit ideas.' }, { status: 403 });
             }
         }
@@ -197,18 +208,23 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        // Verify user is still a member of the jar
+        const membership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: { userId: session.user.id, jarId: currentJarId }
+            }
+        });
+
+        if (!membership) {
+            return NextResponse.json({ error: 'Forbidden: You are not a member of this jar' }, { status: 403 });
+        }
+
         // Allow modification if:
         // 1. User is the author
         // 2. It is a memory (selected) and the user is in the same jar
         // 3. User is an admin in the jar
         if (idea.createdById !== session.user.id && !idea.selectedAt) {
-            const membership = await prisma.jarMember.findUnique({
-                where: {
-                    userId_jarId: { userId: session.user.id, jarId: currentJarId }
-                }
-            });
-
-            if (membership?.role !== 'ADMIN') {
+            if (membership.role !== 'ADMIN') {
                 return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this idea' }, { status: 403 });
             }
         }

@@ -13,9 +13,12 @@ export function InstallPrompt() {
     useEffect(() => {
         // Check if already installed
         const isStandalone = isPWAMode();
-        const hasPromptedBefore = localStorage.getItem('pwa-install-prompted');
+        // Relaxed Logic: Prompt every 7 days, not permanently dismissed
+        const lastPrompt = localStorage.getItem('pwa-last-prompted');
+        const now = Date.now();
+        const COOLDOWN = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-        if (isStandalone || hasPromptedBefore) {
+        if (isStandalone || (lastPrompt && now - parseInt(lastPrompt) < COOLDOWN)) {
             return;
         }
 
@@ -29,17 +32,17 @@ export function InstallPrompt() {
             e.preventDefault();
             setDeferredPrompt(e);
 
-            // Show prompt after 15 seconds of usage (reduced from 30)
+            // Show prompt after 5 seconds of usage (reduced from 15)
             setTimeout(() => {
                 setShowPrompt(true);
-            }, 15000);
+            }, 5000);
         };
 
         // Logic for iOS (does NOT support beforeinstallprompt)
         if (ios) {
             setTimeout(() => {
                 setShowPrompt(true);
-            }, 20000); // Wait 20s for iOS to show custom guide
+            }, 8000); // 8s for iOS
         }
 
         window.addEventListener('beforeinstallprompt', handler);
@@ -56,7 +59,6 @@ export function InstallPrompt() {
         const { outcome } = await deferredPrompt.userChoice;
 
         if (outcome === 'accepted') {
-            console.log('User accepted the install prompt');
             trackPWAEvent('pwa_install_accepted');
         } else {
             trackPWAEvent('pwa_install_rejected');
@@ -64,20 +66,20 @@ export function InstallPrompt() {
 
         setDeferredPrompt(null);
         setShowPrompt(false);
-        localStorage.setItem('pwa-install-prompted', 'true');
+        localStorage.setItem('pwa-last-prompted', Date.now().toString());
     };
 
     const handleDismiss = () => {
         trackPWAEvent('pwa_install_dismissed');
         setShowPrompt(false);
-        localStorage.setItem('pwa-install-prompted', 'true');
+        localStorage.setItem('pwa-last-prompted', Date.now().toString());
     };
 
     if (!showPrompt) return null;
 
     return (
-        <div className="fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-slide-up">
-            <div className="glass-card bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-5 rounded-[2.5rem] shadow-2xl border border-white/20 relative overflow-hidden">
+        <div className="fixed bottom-6 inset-x-4 z-[60] md:bottom-8 md:right-8 md:left-auto md:w-[400px] animate-in slide-in-from-bottom-10 fade-in duration-700">
+            <div className="glass-card bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-xl border border-white/10 p-5 rounded-[1.5rem] shadow-2xl relative overflow-hidden ring-1 ring-white/20">
                 {/* Background Sparkles */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
 

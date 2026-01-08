@@ -26,6 +26,7 @@ import { ONBOARDING_STEPS } from "@/lib/onboarding-steps";
 import { getJarLabels } from "@/lib/labels";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import React from "react";
+import { SmartInputBar } from "@/components/SmartInputBar";
 
 // Lazy Loading
 const PreferenceQuizModal = dynamic(() => import("@/components/PreferenceQuizModal").then(m => m.PreferenceQuizModal), { ssr: false });
@@ -205,7 +206,7 @@ function DashboardContent() {
                         </div>
 
                         {/* Center: Trophy Case - Desktop Only (Wide) */}
-                        <div className="hidden lg:flex justify-center flex-1 px-4 lg:px-8">
+                        <div className="hidden lg:flex justify-center flex-1 px-4 lg:px-8" data-tour="trophy-case">
                             <CollapsibleTrophyCase
                                 xp={xp || 0}
                                 level={level}
@@ -230,7 +231,7 @@ function DashboardContent() {
                                 )}
                             </Button>
 
-                            <Link href="/memories" className="hidden md:block" aria-label="View Memories">
+                            <Link href="/memories" className="hidden md:block" aria-label="View Memories" data-tour="vault-button">
                                 <Button variant="outline" size="icon" className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-primary transition-colors hover:border-primary/30">
                                     <ImageIcon className="w-5 h-5" />
                                 </Button>
@@ -380,6 +381,7 @@ function DashboardContent() {
                                     }
                                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                     className="relative mb-8 md:mb-12"
+                                    data-tour="jar-visual"
                                 >
                                     <div className="scale-110 md:scale-[1.35] transform transition-transform duration-700 ease-out">
                                         <Jar3D />
@@ -406,6 +408,7 @@ function DashboardContent() {
                                             className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
                                             onClick={() => handleSpinJar()}
                                             disabled={ideas.length === 0 || isSpinning}
+                                            data-tour="spin-button-desktop"
                                         >
                                             {isSpinning ? (
                                                 <div className="flex items-center gap-3">
@@ -425,6 +428,20 @@ function DashboardContent() {
                                         >
                                             <Filter className="w-6 h-6 md:w-7 md:h-7" />
                                         </Button>
+                                    </div>
+                                )}
+
+                                {!isVotingMode && !isAdminPickMode && (
+                                    <div className="mt-8 w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col items-center gap-4">
+                                        <SmartInputBar />
+
+                                        <button
+                                            onClick={() => openModal('TOOLS')}
+                                            className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 py-2"
+                                        >
+                                            <Dices className="w-3.5 h-3.5" />
+                                            Browse specialized tools & finders
+                                        </button>
                                     </div>
                                 )}
 
@@ -472,6 +489,7 @@ function DashboardContent() {
                 showConfetti={showConfetti}
                 setShowConfetti={setShowConfetti}
                 onCloseLevelUp={handleCloseLevelUp}
+                onRestartTour={() => setShowOnboarding(true)}
             />
 
             {/* Preference Quiz (Lazy) */}

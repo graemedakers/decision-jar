@@ -5,11 +5,11 @@ import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
 import { PremiumModal } from "@/components/PremiumModal";
 import { useRouter } from "next/navigation";
-import { WeekendPlannerModal } from "@/components/WeekendPlannerModal";
 
-import { BarCrawlPlannerModal } from "@/components/BarCrawlPlannerModal";
-import { DateNightPlannerModal } from "@/components/DateNightPlannerModal";
-import { CateringPlannerModal } from "@/components/CateringPlannerModal";
+
+
+
+
 import { getApiUrl } from "@/lib/utils";
 import { GenericConciergeModal } from "@/components/GenericConciergeModal";
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";

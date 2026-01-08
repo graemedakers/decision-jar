@@ -98,7 +98,7 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
 
         setProcessingId(jarId);
         try {
-            const res = await fetch(getApiUrl(`/api/jar/${jarId}/delete`), {
+            const res = await fetch(getApiUrl(`/api/jars/${jarId}`), {
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -122,8 +122,8 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
         if (!editName.trim()) return;
         setProcessingId(jarId);
         try {
-            const res = await fetch(getApiUrl(`/api/jar/${jarId}`), {
-                method: 'PATCH',
+            const res = await fetch(getApiUrl(`/api/jars/${jarId}`), {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: editName.trim() }),
             });

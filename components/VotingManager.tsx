@@ -37,7 +37,7 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
 
     const fetchStatus = async () => {
         try {
-            const res = await fetch(`/api/jar/${jarId}/vote`);
+            const res = await fetch(`/api/jars/${jarId}/vote`);
             if (res.ok) {
                 const data = await res.json();
                 setStatus(data);

@@ -89,7 +89,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
 
         setIsLoading(true);
         try {
-            const res = await fetch('/api/auth/switch-jar', {
+            const res = await fetch('/api/users/switch-jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ jarId }),

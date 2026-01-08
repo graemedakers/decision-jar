@@ -20,6 +20,7 @@ interface IdeaFormData {
     isPrivate: boolean;
     weather: string;
     requiresTravel: boolean;
+    photoUrls: string[];
 }
 
 interface IdeaWizardProps {
@@ -87,8 +88,8 @@ export function IdeaWizard({ formData, setFormData, categories, onSubmit, onCanc
                 {steps.map((step, idx) => (
                     <div key={step.id} className="flex flex-col items-center flex-1 relative">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${idx <= currentStep
-                                ? "bg-primary text-white shadow-lg"
-                                : "bg-slate-200 dark:bg-slate-800 text-slate-400"
+                            ? "bg-primary text-white shadow-lg"
+                            : "bg-slate-200 dark:bg-slate-800 text-slate-400"
                             }`}>
                             {idx < currentStep ? <Check className="w-4 h-4" /> : idx + 1}
                         </div>
@@ -127,8 +128,8 @@ export function IdeaWizard({ formData, setFormData, categories, onSubmit, onCanc
                                                 key={cat.id}
                                                 onClick={() => setFormData({ ...formData, category: cat.id })}
                                                 className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${formData.category === cat.id
-                                                        ? "bg-primary/10 border-primary text-primary dark:text-white"
-                                                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary/50"
+                                                    ? "bg-primary/10 border-primary text-primary dark:text-white"
+                                                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary/50"
                                                     }`}
                                             >
                                                 <cat.icon className="w-6 h-6 mb-2" />

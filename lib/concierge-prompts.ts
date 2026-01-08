@@ -47,6 +47,36 @@ export const getConciergePromptAndMock = (
                 }
             };
 
+        case 'CONCIERGE':
+            return {
+                prompt: `
+                Act as a versatile local lifestyle concierge.
+                Respond to the user's request with 5 distinct recommendations near ${targetLocation}.
+                
+                USER REQUEST/CONTEXT: "${extraInstructions}"
+                
+                Preferences:
+                - Mood: ${inputs.mood || "Any"}
+                - Company: ${inputs.company || "Any"}
+                - Duration: ${inputs.duration || "Any"}
+                - Budget: ${inputs.price || "Any"}
+                
+                INSTRUCTIONS:
+                1. Interpret the "USER REQUEST" intelligently. If they ask for "fun things to do", suggest activities. If they ask for "Italian food", suggest restaurants.
+                2. If the request is vague, provide a diverse mix of high-quality local options (e.g. 1 dining, 1 activity, 1 event, 1 hidden gem).
+                3. Ensure all recommendations are real, open businesses or locations.
+                
+                Return JSON with "recommendations" array.
+                Fields: name, description, category (e.g. "Dining", "Activity"), price, address, website, google_rating
+                `,
+                mockResponse: {
+                    recommendations: [
+                        { name: "Hidden Garden Cafe", description: "A beautiful secret garden spot.", category: "Dining", price: "$$", address: "Green Lane", google_rating: 4.8 },
+                        { name: "City Rock Climbing", description: "Indoor climbing gym.", category: "Activity", price: "$$", address: "Sport St", google_rating: 4.7 }
+                    ]
+                }
+            };
+
         case 'BAR':
             return {
                 prompt: `
@@ -67,6 +97,49 @@ export const getConciergePromptAndMock = (
                         { name: "The Mockingbird", description: "Lively atmosphere.", speciality: "Cocktails", price: "$$$", address: "Oak Ave", google_rating: 4.7 },
                         { name: "Hops & Dreams", description: "Local brews.", speciality: "Beer", price: "$", address: "Main St", google_rating: 4.5 },
                         { name: "Vino Valley", description: "Elegant wine bar.", speciality: "Wine", price: "$$$", address: "River Walk", google_rating: 4.8 }
+                    ]
+                }
+            };
+
+        case 'BAR_CRAWL':
+            return {
+                prompt: `
+            Act as a nightlife guide and route planner.
+            Create 3 DISTINCT Bar Crawl Routes near ${targetLocation}.
+            
+            Preferences:
+            - Theme: ${inputs.theme || "Any"}
+            - Stops: ${inputs.stops || "4"}
+            - Vibe: ${inputs.vibe || "Any"}
+            - Budget: ${inputs.price || "Any"}
+            
+            ${extraInstructions}
+            
+            INSTRUCTIONS:
+            1. Create a logical walking or short-drive route between venues.
+            2. Use REAL, popular bars that fit the theme.
+            3. Ensure the order makes sense (e.g. Start at a lighter place, end at a club/late night spot).
+            
+            Return JSON with "recommendations" array (size 3).
+            Fields:
+            - name: Creative Route Name (e.g. "The Downtown Dive Tour")
+            - description: Brief vibe summary
+            - duration_label: Est. Duration / Stops
+            - price: Budget ($, $$, $$$)
+            - google_rating: Avg Rating (Number)
+            - details: Markdown timeline.
+              **FORMAT:**
+              ### The Route
+              **Stop 1:** [Bar Name] - [Why this spot?]
+              **Stop 2:** [Bar Name] - [Speciality Drink?]
+              ...
+              
+              *Walking time: approx 10 mins between stops.*
+            `,
+                mockResponse: {
+                    recommendations: [
+                        { name: "Downtown Classics", description: "Best cocktails in the city.", duration_label: "4 Stops", price: "$$$", google_rating: 4.6, details: "### The Route\n**Stop 1:** The Library..." },
+                        { name: "Dive Bar Hero", description: "Cheap drinks and good vibes.", duration_label: "5 Stops", price: "$", google_rating: 4.2, details: "### The Route\n**Stop 1:** Moe's..." }
                     ]
                 }
             };
@@ -333,7 +406,9 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a professional chef planning a menu.
-                Recommend 5 distinct menu concepts:
+                Create 3 DISTINCT, complete menu concepts.
+                
+                Preference:
                 - Occasion: ${inputs.occasion || "Any"}
                 - Guests: ${inputs.guests || "Any"}
                 - Cuisine: ${inputs.cuisine || "Any"}
@@ -343,13 +418,113 @@ export const getConciergePromptAndMock = (
                 
                 ${extraInstructions}
                 
-                Return JSON with "recommendations" array.
-                Fields: name (Menu Title), description (Theme overview), occasion, effort_level, cuisine, courses_summary (e.g. "Entree: ..., Main: ...")
+                INSTRUCTIONS:
+                1. Provide a cohesive menu with courses that complement each other.
+                2. Include a brief shopping list summary or key ingredients.
+                3. Outline a basic timing strategy for the cook.
+                
+                Return JSON with "recommendations" array (size 3).
+                Fields:
+                - name: Menu Title
+                - description: Brief theme overview
+                - price: Estimated Cost Level ($, $$, $$$)
+                - google_rating: Complexity Rating (1-5, keep as number)
+                - details: A formatted string containing the Menu & Guide.
+                  **IMPORTANT FORMATTING FOR 'details':**
+                  Use Markdown.
+                  Format as:
+                  ### The Menu
+                  **Entree:** [Dish Name] - [Description]
+                  **Main:** [Dish Name] - [Description]
+                  **Dessert:** [Dish Name] - [Description]
+                  
+                  ### Key Ingredients
+                  - [List key complex items...]
+                  
+                  ### Chef's Strategy
+                  - [Step 1: Prep ahead...]
+                  - [Step 2: Cooking order...]
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Italian Romance", description: "A classic 3-course Italian dinner.", occasion: "Date Night", effort_level: "Medium", cuisine: "Italian", courses_summary: "Caprese Salad, Risotto, Tiramisu" },
-                        { name: "Taco Fiesta", description: "Fun and easy DIY tacos.", occasion: "Casual", effort_level: "Easy", cuisine: "Mexican", courses_summary: "Guacamole, Tacos, Churros" }
+                        { name: "Italian Romance", description: "A classic 3-course Italian dinner.", price: "$$", google_rating: 3, details: "### The Menu\n**Entree:** Caprese Salad\n**Main:** Risotto\n..." },
+                        { name: "Taco Fiesta", description: "Fun and easy DIY tacos.", price: "$", google_rating: 1, details: "### The Menu\n**Main:** Tacos..." }
+                    ]
+                }
+            };
+
+
+
+
+        case 'DATE_NIGHT':
+            return {
+                prompt: `
+                Act as a romantic concierge and event planner.
+                Create 3 DISTINCT, complete date night plans near ${targetLocation}.
+                
+                User Preferences:
+                - Vibe: ${inputs.vibe || "Any"}
+                - Structure: ${inputs.structure || "Any"}
+                - Cuisine: ${inputs.cuisine || "Any"}
+                - Budget: ${inputs.price || "Any"}
+                
+                ${extraInstructions}
+                
+                INSTRUCTIONS:
+                1. Each plan must be a logical sequence of events (e.g. Pre-dinner drink -> Dinner -> Dessert/Activity).
+                2. Use REAL venues that are open in the evening.
+                3. Ensure the venues are within walking distance or a short drive of each other.
+                
+                Return JSON with "recommendations" array (size 3).
+                Fields:
+                - name: Creative Title (e.g. "Classic Romance in SoHo")
+                - description: Brief summary (1 sentence).
+                - duration_label: Est. Duration (e.g. "3-4 Hours").
+                - price: Overall Budget ($, $$, $$$).
+                - details: A formatted string containing the Timeline.
+                  **IMPORTANT FORMATTING FOR 'details':**
+                  Use Markdown.
+                  Format as a timeline:
+                  **6:00 PM:** [Venue Name] - [Activity/Description] (Approx $)
+                  **7:30 PM:** [Venue Name] - [Activity/Description] (Approx $)
+                  ...
+                  
+                  *Include a tip for transport or parking if relevant.*
+                `,
+                mockResponse: {
+                    recommendations: [
+                        { name: "Classic Dinner & Movie", description: "A timeless date night combo.", duration_label: "4 Hours", price: "$$", details: "**6:00 PM:** The Local Italian - Dinner... \n**8:00 PM:** Cinema 6 - Movie..." },
+                        { name: "Active Evening", description: "Bowling and Burgers.", duration_label: "3 Hours", price: "$", details: "**6:00 PM:** Strike Bowling... \n**7:30 PM:** Burger Joint..." }
+                    ]
+                }
+            };
+
+        case 'WEEKEND_EVENTS':
+            return {
+                prompt: `
+                Act as a local events coordinator.
+                Recommend 5 distinct events or activities happening THIS WEEKEND near ${targetLocation}.
+                
+                Preferences:
+                - Vibe: ${inputs.mood || "Any"}
+                - Company: ${inputs.company || "Any"}
+                - Specific Day: ${inputs.day || "Any"}
+                - Budget: ${inputs.price || "Any"}
+                
+                ${extraInstructions}
+                
+                INSTRUCTIONS:
+                1. Prioritize TIMELY events (markets, festivals, shows) happening this weekend.
+                2. If no specific temporary events are found, suggest high-quality evergreen activities that fit the vibe.
+                3. Ensure venues are open on the requested days.
+                
+                Return JSON with "recommendations" array.
+                Fields: name, description, day (e.g. "Saturday 2pm"), price, address, website, google_rating
+                `,
+                mockResponse: {
+                    recommendations: [
+                        { name: "Saturday Farmers Market", description: "Fresh produce and live music.", day: "Saturday Morning", price: "Free", address: "Town Square", google_rating: 4.8 },
+                        { name: "Jazz in the Park", description: "Smooth jazz and picnics.", day: "Sunday 3pm", price: "Free", address: "Central Park", google_rating: 4.7 }
                     ]
                 }
             };

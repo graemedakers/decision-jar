@@ -35,6 +35,43 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             goActionLabel: 'Go Tonight'
         }
     },
+    CONCIERGE: {
+        id: 'generic_concierge',
+        title: 'AI Concierge',
+        subtitle: 'Ask for anything, get personalized ideas',
+        icon: Sparkles,
+        colorTheme: 'indigo',
+        categoryType: 'ACTIVITY',
+        hasLocation: true,
+        hasPrice: true,
+        sections: [
+            {
+                id: 'mood',
+                label: 'Current Mood',
+                type: 'multi-select',
+                options: ["Relaxed", "Adventurous", "Romantic", "Fun", "Educational", "Active", "Chill"]
+            },
+            {
+                id: 'company',
+                label: 'Who are you with?',
+                type: 'single-select',
+                options: ["Solo", "Partner", "Friends", "Family", "Kids", "Co-workers"]
+            },
+            {
+                id: 'duration',
+                label: 'Approx Duration',
+                type: 'single-select',
+                options: ["1-2 Hours", "Half Day", "Full Day", "Night Out", "Quick Stop"]
+            }
+        ],
+        resultCard: {
+            mainIcon: Sparkles,
+            subtextKey: 'category', // Custom field to show Activity Type?
+            secondIcon: Clock,
+            secondSubtextKey: 'duration_label',
+            goActionLabel: 'View Idea'
+        }
+    },
     BAR: {
         id: 'bar_concierge',
         title: 'Bar Scout',
@@ -62,6 +99,41 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             mainIcon: Wine,
             subtextKey: 'speciality',
             goActionLabel: 'Go Tonight'
+        }
+    },
+    BAR_CRAWL: {
+        id: 'bar_crawl_planner',
+        title: 'Bar Crawl Planner',
+        subtitle: 'Plan a route of best bars',
+        icon: Wine,
+        colorTheme: 'purple',
+        categoryType: 'ITINERARY',
+        hasLocation: true,
+        hasPrice: true,
+        sections: [
+            {
+                id: 'theme',
+                label: 'Crawl Theme',
+                type: 'multi-select',
+                options: ["Dive Bars", "Cocktail Lounges", "Rooftops", "Craft Beer", "Pub Crawl", "Classy / Dress Up", "Hidden Gems"]
+            },
+            {
+                id: 'stops',
+                label: 'Number of Stops',
+                type: 'single-select',
+                options: ["Quick (3 Stops)", "Standard (4-5 Stops)", "Epic (6+ Stops)"]
+            },
+            {
+                id: 'vibe',
+                label: 'Vibe',
+                type: 'single-select',
+                options: ["Chill", "Party", "Romantic", "Exploratory"]
+            }
+        ],
+        resultCard: {
+            mainIcon: Wine,
+            subtextKey: 'duration_label',
+            goActionLabel: 'View Route'
         }
     },
     NIGHTCLUB: {
@@ -479,40 +551,77 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             goActionLabel: 'View Menu'
         }
     },
-    CONCIERGE: {
-        id: 'generic_concierge',
-        title: 'AI Concierge',
-        subtitle: 'Get tailored ideas for any occasion',
+
+    DATE_NIGHT: {
+        id: 'date_night_planner',
+        title: 'Date Night Planner',
+        subtitle: 'Plan a complete evening out',
         icon: Sparkles,
-        colorTheme: 'purple',
+        colorTheme: 'rose',
+        categoryType: 'ITINERARY',
+        hasLocation: true,
+        hasPrice: true,
+        sections: [
+            {
+                id: 'vibe',
+                label: 'Evening Vibe',
+                type: 'multi-select',
+                options: ["Romantic", "Casual / Fun", "First Date", "Anniversary / Special", "Active / Adventurous", "Cozy / Intimate"]
+            },
+            {
+                id: 'structure',
+                label: 'Plan Structure',
+                type: 'single-select',
+                options: ["Dinner & Drinks", "Dinner & A Movie", "Activity & Dinner", "Just Drinks & Apps", "Surprise Me"]
+            },
+            {
+                id: 'cuisine',
+                label: 'Food Preference',
+                type: 'multi-select',
+                allowCustom: true,
+                options: ["Italian", "Japanese", "Modern American", "Mexican", "French", "Thai", "Tapas", "No Preference"]
+            }
+        ],
+        resultCard: {
+            mainIcon: Sparkles,
+            subtextKey: 'duration_label',
+            goActionLabel: 'View Plan'
+        }
+    },
+    WEEKEND_EVENTS: {
+        id: 'weekend_planner',
+        title: 'Weekend Planner',
+        subtitle: 'Find events and activities for this weekend',
+        icon: Calendar,
+        colorTheme: 'orange',
         categoryType: 'ACTIVITY',
         hasLocation: true,
         hasPrice: true,
         sections: [
             {
                 id: 'mood',
-                label: 'What are you in the mood for?',
+                label: 'What\'s the vibe?',
                 type: 'multi-select',
                 allowCustom: true,
-                options: ["Something Fun", "Relaxing", "Adventurous", "Educational", "Social", "Private / Intimate", "Outdoors", "Indoors"]
+                options: ["Relaxing", "Active / Outdoors", "Social / Party", "Cultural / Arts", "Foodie", "Family Friendly", "Romantic"]
             },
             {
                 id: 'company',
                 label: 'Who are you with?',
                 type: 'single-select',
-                options: ["Just Me", "My Partner", "Small Group (Friends)", "Family / Kids", "Large Party"]
+                options: ["Just Me", "My Partner", "Friends", "Family"]
             },
             {
-                id: 'duration',
-                label: 'How much time do you have?',
-                type: 'single-select',
-                options: ["Quick (< 1 hour)", "Few Hours", "Half Day", "Full Day", "Weekend"]
+                id: 'day',
+                label: 'Preferred Day',
+                type: 'multi-select',
+                options: ["Friday Night", "Saturday", "Sunday", "Any / All Weekend"]
             }
         ],
         resultCard: {
-            mainIcon: Sparkles,
-            subtextKey: 'mood',
-            goActionLabel: 'See Ideas'
+            mainIcon: Calendar,
+            subtextKey: 'day',
+            goActionLabel: 'View Event'
         }
     },
     HOLIDAY: {

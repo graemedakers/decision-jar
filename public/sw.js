@@ -135,3 +135,58 @@ self.addEventListener('unhandledrejection', (event) => {
 });
 
 console.log('[SW] Service worker loaded');
+
+// --- Push Notification Handling ---
+
+self.addEventListener('push', function (event) {
+    if (!event.data) {
+        console.log('[SW] Push event but no data');
+        return;
+    }
+
+    try {
+        const payload = event.data.json();
+        const { title, body, icon, url, tag } = payload;
+
+        const options = {
+            body: body,
+            icon: icon || '/icon-192.png',
+            badge: '/icon-96.png', // Android specific (small icon)
+            vibrate: [100, 50, 100],
+            data: {
+                url: url
+            },
+            tag: tag || 'general-notification'
+        };
+
+        event.waitUntil(
+            self.registration.showNotification(title, options)
+        );
+    } catch (e) {
+        console.error('[SW] Error parsing push data', e);
+    }
+});
+
+self.addEventListener('notificationclick', function (event) {
+    event.notification.close();
+
+    const urlToOpen = event.notification.data?.url || '/dashboard';
+
+    event.waitUntil(
+        clients.matchAll({
+            type: 'window',
+            includeUncontrolled: true
+        }).then(function (clientList) {
+            // Check if window is already open
+            for (let i = 0; i < clientList.length; i++) {
+                const client = clientList[i];
+                if (client.url.includes(urlToOpen) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
+    );
+});

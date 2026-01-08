@@ -1,6 +1,7 @@
 import { getItinerary, getCateringPlan, getApiUrl, generateCalendarLinks } from "@/lib/utils";
 import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
+import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar, Clock, Sparkles, Loader2, MapPin, ExternalLink, Star, Utensils, Check, Popcorn, Download } from "lucide-react";
 import { Button } from "./ui/Button";
@@ -297,17 +298,27 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                                     <Sparkles className="w-4 h-4 text-secondary" />
                                                     The Plan
                                                 </h4>
-                                                <p className="text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap break-words">
-                                                    {idea.details ? (
-                                                        idea.details.split(/(https?:\/\/[^\s]+)/g).map((part, i) => (
-                                                            part.match(/https?:\/\/[^\s]+/) ? (
-                                                                <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline break-all inline-block">
-                                                                    {part}
-                                                                </a>
-                                                            ) : part
-                                                        ))
-                                                    ) : "No specific details provided. Be spontaneous!"}
-                                                </p>
+                                                <div className="text-slate-700 dark:text-slate-200 leading-relaxed break-words">
+                                                    {idea.details && (idea.details.includes('###') || idea.details.includes('**')) ? (
+                                                        <ItineraryMarkdownRenderer
+                                                            markdown={idea.details}
+                                                            variant={idea.details.includes('### Day') ? 'accordion' : 'sections'}
+                                                            theme={{ sectionHeaderColor: 'text-secondary' }}
+                                                        />
+                                                    ) : (
+                                                        <p className="whitespace-pre-wrap">
+                                                            {idea.details ? (
+                                                                idea.details.split(/(https?:\/\/[^\s]+)/g).map((part, i) => (
+                                                                    part.match(/https?:\/\/[^\s]+/) ? (
+                                                                        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline break-all inline-block">
+                                                                            {part}
+                                                                        </a>
+                                                                    ) : part
+                                                                ))
+                                                            ) : "No specific details provided. Be spontaneous!"}
+                                                        </p>
+                                                    )}
+                                                </div>
                                                 <div className="mt-4 flex flex-wrap gap-2">
                                                     <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
                                                         {Number(idea.duration || 0) * 60} mins

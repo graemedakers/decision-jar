@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -16,33 +16,47 @@ interface OnboardingTourProps {
 export function OnboardingTour({ steps, isOpen, onClose, onComplete }: OnboardingTourProps) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [highlightedElement, setHighlightedElement] = useState<HTMLElement | null>(null);
+    const [tooltipSize, setTooltipSize] = useState({ width: 0, height: 400 });
+    const tooltipRef = useRef<HTMLDivElement>(null);
 
     const currentStep = steps[currentStepIndex];
     const isFirstStep = currentStepIndex === 0;
     const isLastStep = currentStepIndex === steps.length - 1;
 
-    // Reset to first step whenever the tour is opened
+    // Reset tour on open
     useEffect(() => {
-        if (isOpen) {
-            setCurrentStepIndex(0);
-        }
+        if (isOpen) setCurrentStepIndex(0);
     }, [isOpen]);
 
+    // Monitor tooltip size changes dynamically
+    useEffect(() => {
+        if (!isOpen || !tooltipRef.current) return;
+
+        const observer = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                setTooltipSize({
+                    width: entry.contentRect.width,
+                    height: entry.contentRect.height
+                });
+            }
+        });
+
+        observer.observe(tooltipRef.current);
+        return () => observer.disconnect();
+    }, [isOpen, currentStepIndex]);
+
+    // Element selection and scroll
     useEffect(() => {
         if (!isOpen || !currentStep.targetElement) {
             setHighlightedElement(null);
             return;
         }
 
-        // Try to find the element - handle multiple selectors for responsive elements
+        const selectors = currentStep.targetElement.split(',').map((s: string) => s.trim());
         let element: HTMLElement | null = null;
-
-        // Split by comma to support multiple selectors
-        const selectors = currentStep.targetElement.split(',').map(s => s.trim());
 
         for (const selector of selectors) {
             const el = document.querySelector(selector) as HTMLElement;
-            // Check if element exists and is visible
             if (el && el.offsetParent !== null) {
                 element = el;
                 break;
@@ -51,183 +65,99 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
 
         if (element) {
             setHighlightedElement(element);
-            // Scroll element into view smoothly
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Smaller timeout to ensure layout is settled
+            setTimeout(() => {
+                element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         } else {
-            // If no element found, clear highlight but keep tooltip centered
             setHighlightedElement(null);
         }
     }, [currentStepIndex, isOpen, currentStep]);
 
-    const handleNext = () => {
-        if (isLastStep) {
-            handleComplete();
-        } else {
-            setCurrentStepIndex(prev => prev + 1);
+    // Track scroll/resize to keep highlight in sync
+    const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
+    useEffect(() => {
+        if (!highlightedElement) {
+            setHighlightRect(null);
+            return;
         }
-    };
 
-    const handlePrevious = () => {
-        if (!isFirstStep) {
-            setCurrentStepIndex(prev => prev - 1);
-        }
-    };
+        const updateRect = () => {
+            setHighlightRect(highlightedElement.getBoundingClientRect());
+        };
 
-    const handleComplete = () => {
-        onComplete();
-        onClose();
-        setCurrentStepIndex(0);
-    };
+        updateRect();
+        window.addEventListener('scroll', updateRect, true);
+        window.addEventListener('resize', updateRect);
 
-    const handleSkip = () => {
-        onClose();
-        setCurrentStepIndex(0);
-    };
+        return () => {
+            window.removeEventListener('scroll', updateRect, true);
+            window.removeEventListener('resize', updateRect);
+        };
+    }, [highlightedElement, currentStepIndex]);
+
+    const handleNext = () => isLastStep ? handleComplete() : setCurrentStepIndex(prev => prev + 1);
+    const handlePrevious = () => !isFirstStep && setCurrentStepIndex(prev => prev - 1);
+    const handleComplete = () => { onComplete(); onClose(); setCurrentStepIndex(0); };
+    const handleSkip = () => { onClose(); setCurrentStepIndex(0); };
 
     const getTooltipPosition = () => {
-        // For center-positioned tooltips (like welcome), use CSS positioning
+        if (!isOpen) return {};
+
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const pad = 24;
+        const spacing = 12;
+        const isMobile = vw < 768;
+
+        // Determine dimensions - use measured size or conservative defaults
+        const boxW = tooltipSize.width > 0 ? tooltipSize.width : (isMobile ? (vw - pad * 2) : 400);
+        const boxH = tooltipSize.height > 0 ? tooltipSize.height : 300;
+
+        // Center position for Welcome/Complete
         if (!highlightedElement || currentStep.position === 'center') {
             return {
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                right: 'auto',
-                bottom: 'auto'
+                width: `${boxW}px`,
+                top: `${vh / 2 - boxH / 2}px`,
+                left: `${vw / 2 - boxW / 2}px`,
+                zIndex: 400
             };
         }
 
         const rect = highlightedElement.getBoundingClientRect();
-        const tooltipOffset = 20;
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const padding = 16; // 1rem in pixels
 
-        // Calculate actual tooltip width based on viewport
-        const tooltipWidth = Math.min(448, viewportWidth - (padding * 2)); // max-w-md is 448px
-        const tooltipHeight = 300; // Approximate height
+        // 1. Calculate Horizontal (Simple Pixel Center + Clamping)
+        let left = rect.left + rect.width / 2 - boxW / 2;
+        left = Math.max(pad, Math.min(vw - boxW - pad, left));
 
-        let position: any = {
-            transform: 'translate(0, 0)',
-            width: '448px'
-        };
+        // 2. Calculate Vertical
+        let top: number;
+        const elementMidY = rect.top + rect.height / 2;
+        const screenMidY = vh / 2;
+        const preferSide = currentStep.position || (elementMidY > screenMidY ? 'top' : 'bottom');
 
-        // For mobile screens, prefer top/bottom positioning and center horizontally
-        const isMobile = viewportWidth < 640; // sm breakpoint
-
-        if (isMobile) {
-            // Mobile: Snap to top or bottom based on element position
-            // Use left/right: 0 + margin: auto for robust centering without transforms
-            const elementCenterY = rect.top + rect.height / 2;
-            const screenCenterY = viewportHeight / 2;
-
-            position.left = '16px';
-            position.right = '16px';
-            position.margin = '0 auto';
-            position.width = 'auto';
-            // Clear transform to avoid conflicts with Framer Motion
-            delete position.transform;
-
-            // If element is in top half, put tooltip at bottom. Otherwise top.
-            if (elementCenterY < screenCenterY) {
-                // Element is up top -> Tooltip goes to bottom
-                position.bottom = '24px';
-                position.top = 'auto'; // Clear top
-            } else {
-                // Element is down low -> Tooltip goes to top
-                position.top = '24px';
-                position.bottom = 'auto'; // Clear bottom
+        if (preferSide === 'top') {
+            top = rect.top - boxH - spacing;
+            // Flip to bottom if it literally can't fit at the top
+            if (top < pad) {
+                top = rect.bottom + spacing;
             }
         } else {
-            // Desktop positioning logic
-            switch (currentStep.position) {
-                case 'top':
-                    if (rect.top - tooltipHeight - tooltipOffset >= padding) {
-                        position.top = `${rect.top - tooltipOffset}px`;
-                        position.left = `${rect.left + rect.width / 2}px`;
-                        position.transform = 'translate(-50%, -100%)';
-                    } else {
-                        position.top = `${rect.bottom + tooltipOffset}px`;
-                        position.left = `${rect.left + rect.width / 2}px`;
-                        position.transform = 'translate(-50%, 0)';
-                    }
-                    break;
-                case 'bottom':
-                    if (rect.bottom + tooltipHeight + tooltipOffset <= viewportHeight - padding) {
-                        position.top = `${rect.bottom + tooltipOffset}px`;
-                        position.left = `${rect.left + rect.width / 2}px`;
-                        position.transform = 'translate(-50%, 0)';
-                    } else {
-                        position.top = `${rect.top - tooltipOffset}px`;
-                        position.left = `${rect.left + rect.width / 2}px`;
-                        position.transform = 'translate(-50%, -100%)';
-                    }
-                    break;
-                case 'left':
-                    if (rect.left - tooltipWidth - tooltipOffset >= padding) {
-                        position.top = `${rect.top + rect.height / 2}px`;
-                        position.left = `${rect.left - tooltipOffset}px`;
-                        position.transform = 'translate(-100%, -50%)';
-                    } else {
-                        position.top = `${rect.top + rect.height / 2}px`;
-                        position.left = `${rect.right + tooltipOffset}px`;
-                        position.transform = 'translate(0, -50%)';
-                    }
-                    break;
-                case 'right':
-                    if (rect.right + tooltipWidth + tooltipOffset <= viewportWidth - padding) {
-                        position.top = `${rect.top + rect.height / 2}px`;
-                        position.left = `${rect.right + tooltipOffset}px`;
-                        position.transform = 'translate(0, -50%)';
-                    } else {
-                        position.top = `${rect.top + rect.height / 2}px`;
-                        position.left = `${rect.left - tooltipOffset}px`;
-                        position.transform = 'translate(-100%, -50%)';
-                    }
-                    break;
-                default:
-                    position.top = '50%';
-                    position.left = '50%';
-                    position.transform = 'translate(-50%, -50%)';
-            }
-
-            // Ensure horizontal position stays within viewport (desktop only)
-            if (position.left && position.transform.includes('-50%')) {
-                const leftValue = parseInt(position.left);
-                const minLeft = padding + tooltipWidth / 2;
-                const maxLeft = viewportWidth - padding - tooltipWidth / 2;
-                const adjustedLeft = Math.max(minLeft, Math.min(maxLeft, leftValue));
-                position.left = `${adjustedLeft}px`;
+            top = rect.bottom + spacing;
+            // Flip to top if it doesn't fit at the bottom
+            if (top + boxH > vh - pad) {
+                top = rect.top - boxH - spacing;
             }
         }
 
-        // Clamp all positions to stay within viewport bounds
-        if (position.left && !position.left.includes('%') && position.transform) {
-            const leftPx = parseFloat(position.left);
-            const clampedLeft = Math.max(16, Math.min(viewportWidth - 16, leftPx));
-            position.left = `${clampedLeft}px`;
-        }
-
-        if (position.top && !position.top.includes('%') && position.transform) {
-            const topPx = parseFloat(position.top);
-            const clampedTop = Math.max(16, Math.min(viewportHeight - 16, topPx));
-            position.top = `${clampedTop}px`;
-        }
-
-        return position;
-    };
-
-    const getSpotlightStyle = () => {
-        if (!highlightedElement) return {};
-
-        const rect = highlightedElement.getBoundingClientRect();
-        const padding = 8;
+        // Final screen bounding check
+        top = Math.max(pad, Math.min(vh - boxH - pad, top));
 
         return {
-            top: `${rect.top - padding}px`,
-            left: `${rect.left - padding}px`,
-            width: `${rect.width + padding * 2}px`,
-            height: `${rect.height + padding * 2}px`,
-            borderRadius: '1rem'
+            width: `${boxW}px`,
+            top: `${top}px`,
+            left: `${left}px`,
+            zIndex: 400
         };
     };
 
@@ -235,132 +165,63 @@ export function OnboardingTour({ steps, isOpen, onClose, onComplete }: Onboardin
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[200] pointer-events-none">
-                {/* Backdrop Overlay - Lighter to see highlighted elements */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-slate-950/40 pointer-events-auto"
-                    onClick={handleSkip}
-                />
+            <div className="fixed inset-0 z-[350] pointer-events-none">
+                <div className="absolute inset-0 bg-slate-950/50 pointer-events-auto" onClick={handleSkip} />
 
-                {/* Spotlight on highlighted element */}
-                {highlightedElement && (
+                {highlightRect && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
                         className="absolute pointer-events-none"
+                        animate={{
+                            top: highlightRect.top - 4,
+                            left: highlightRect.left - 4,
+                            width: highlightRect.width + 8,
+                            height: highlightRect.height + 8,
+                        }}
                         style={{
-                            ...getSpotlightStyle(),
-                            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 80px 15px rgba(236, 72, 153, 0.8), inset 0 0 20px 5px rgba(236, 72, 153, 0.5)',
-                            border: '4px solid rgba(236, 72, 153, 0.9)',
-                            zIndex: 201
+                            borderRadius: '12px',
+                            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.7), 0 0 40px rgba(236, 72, 153, 0.4)',
+                            border: '2px solid rgba(236, 72, 153, 0.5)',
+                            zIndex: 351
                         }}
                     />
                 )}
 
-                {/* Tooltip */}
                 <motion.div
+                    ref={tooltipRef}
                     key={currentStepIndex}
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     className="fixed pointer-events-auto"
-                    style={{
-                        ...getTooltipPosition(),
-                        // Width constraints - use maxWidth to ensure it never exceeds viewport
-                        maxWidth: 'calc(100vw - 2rem)',
-                        boxSizing: 'border-box',
-                        ...(currentStep.position !== 'center' && {
-                            minWidth: '280px'
-                        })
-                    }}
+                    style={getTooltipPosition()}
                 >
-                    <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-pink-500/30 rounded-3xl shadow-2xl shadow-pink-500/20 overflow-hidden">
-                        {/* Decorative accents */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl" />
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
+                    <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-6 relative max-h-[85vh] overflow-y-auto scrollbar-hide">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl -z-10" />
 
-                        <div className="relative z-10 p-6">
-                            {/* Close button */}
-                            <button
-                                onClick={handleSkip}
-                                className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-                                aria-label="Close Tour"
-                            >
-                                <X className="w-4 h-4 text-slate-400" />
+                        <div className="relative z-10">
+                            <button onClick={handleSkip} className="absolute -top-1 -right-1 p-2 rounded-full hover:bg-white/10 transition-colors">
+                                <X className="w-4 h-4 text-slate-500" />
                             </button>
 
-                            {/* Progress indicator */}
-                            <div className="flex items-center gap-1 mb-4">
-                                {steps.map((_, index) => (
-                                    <div
-                                        key={index}
-                                        className={`h-1 rounded-full transition-all ${index === currentStepIndex
-                                            ? 'w-8 bg-pink-500'
-                                            : index < currentStepIndex
-                                                ? 'w-4 bg-pink-500/50'
-                                                : 'w-4 bg-slate-700'
-                                            }`}
-                                    />
+                            <div className="flex gap-1 mb-4">
+                                {steps.map((_, i) => (
+                                    <div key={i} className={`h-1 rounded-full transition-all ${i === currentStepIndex ? 'w-8 bg-pink-500' : i < currentStepIndex ? 'w-4 bg-pink-500/40' : 'w-4 bg-slate-800'}`} />
                                 ))}
                             </div>
 
-                            {/* Content */}
-                            <h3 className="text-2xl font-black text-white mb-3 pr-8 break-words">
-                                {currentStep.title}
-                            </h3>
-                            <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                                {currentStep.description}
-                            </p>
+                            <h3 className="text-xl md:text-2xl font-bold text-white mb-2 pr-6 leading-tight">{currentStep.title}</h3>
+                            <p className="text-slate-300 text-sm md:text-base mb-6 leading-relaxed">{currentStep.description}</p>
 
-                            {/* Navigation */}
-                            <div className="flex items-center justify-between gap-3">
+                            <div className="flex justify-between items-center pt-2">
                                 <div className="flex gap-2">
                                     {!isFirstStep && (
-                                        <Button
-                                            onClick={handlePrevious}
-                                            variant="outline"
-                                            className="border-slate-700 hover:bg-slate-800"
-                                            aria-label="Previous Step"
-                                        >
-                                            <ChevronLeft className="w-4 h-4" />
+                                        <Button onClick={handlePrevious} variant="ghost" className="text-slate-400 hover:text-white h-9 px-3">
+                                            <ChevronLeft className="w-4 h-4 mr-1" /> Back
                                         </Button>
                                     )}
                                 </div>
-
-                                <div className="flex gap-2">
-                                    {!isLastStep && (
-                                        <Button
-                                            onClick={handleSkip}
-                                            variant="outline"
-                                            className="border-slate-700 hover:bg-slate-800 text-slate-400"
-                                            aria-label="Skip Tour"
-                                        >
-                                            Skip Tour
-                                        </Button>
-                                    )}
-                                    <Button
-                                        onClick={handleNext}
-                                        className="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 border-none shadow-lg shadow-pink-500/20"
-                                        aria-label={isLastStep ? "Finish Tour" : "Next Step"}
-                                    >
-                                        {isLastStep ? (
-                                            <>
-                                                <Sparkles className="w-4 h-4 mr-2" />
-                                                Get Started
-                                            </>
-                                        ) : (
-                                            <>
-                                                Next
-                                                <ChevronRight className="w-4 h-4 ml-2" />
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
+                                <Button onClick={handleNext} className="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 h-10 px-6 font-bold text-white shadow-lg">
+                                    {isLastStep ? <><Sparkles className="w-4 h-4 mr-2" /> Finish</> : <>Next <ChevronRight className="w-4 h-4 ml-2" /></>}
+                                </Button>
                             </div>
                         </div>
                     </div>

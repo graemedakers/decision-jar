@@ -64,6 +64,7 @@ interface GenericConciergeModalProps {
     onClose: () => void;
     config: ConciergeToolConfig;
     userLocation?: string;
+    initialPrompt?: string; // New: Support for Smart Input Bar
     onIdeaAdded?: () => void;
     onGoTonight?: (idea: any) => void;
     onFavoriteUpdated?: () => void;
@@ -182,6 +183,7 @@ export function GenericConciergeModal({
     onClose,
     config,
     userLocation,
+    initialPrompt,
     onIdeaAdded,
     onGoTonight,
     onFavoriteUpdated,
@@ -212,7 +214,8 @@ export function GenericConciergeModal({
     if (isOpen && !prevOpen) {
         setLocation(userLocation || "");
         setSelections({});
-        setCustomInputs({});
+        // Handle Initial Prompt if provided
+        setCustomInputs({ extraInstructions: initialPrompt || "" });
         setRecommendations([]);
         setPrice("any");
         setPrevOpen(true);
@@ -525,6 +528,19 @@ export function GenericConciergeModal({
                                         </div>
                                     </div>
                                 )}
+
+
+
+                                {/* EXTRA INSTRUCTIONS (Unified Support) */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Additional Details / Requests</label>
+                                    <textarea
+                                        value={customInputs['extraInstructions'] || ''}
+                                        onChange={(e) => setCustomInputs(prev => ({ ...prev, extraInstructions: e.target.value }))}
+                                        placeholder="e.g. Make it kid frendly, or 'We love spicy food'..."
+                                        className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 min-h-[80px] resize-none`}
+                                    />
+                                </div>
                             </div>
 
                             <div className="py-2">
@@ -604,9 +620,12 @@ export function GenericConciergeModal({
                                 </div>
                             )}
                         </div>
+
                     </motion.div >
                 </div >
-            )}
+            )
+            }
+
 
             <RichDetailsModal
                 isOpen={!!viewingItem}

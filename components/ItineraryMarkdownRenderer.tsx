@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface ItineraryMarkdownRendererProps {
     markdown: string;
-    configId: string;
+    configId?: string;
     theme?: any;
+    variant?: 'accordion' | 'sections';
 }
 
-export function ItineraryMarkdownRenderer({ markdown, configId, theme }: ItineraryMarkdownRendererProps) {
+export function ItineraryMarkdownRenderer({ markdown, configId, theme, variant }: ItineraryMarkdownRendererProps) {
     const [openCards, setOpenCards] = useState<Record<number, boolean>>({ 0: true });
 
     const toggleCard = (idx: number) => {
@@ -16,7 +17,7 @@ export function ItineraryMarkdownRenderer({ markdown, configId, theme }: Itinera
     };
 
     // Special handling for Itineraries (Day 1, Day 2...) to create cards
-    const isItinerary = configId === 'holiday_concierge';
+    const isItinerary = variant === 'accordion' || configId === 'holiday_concierge';
 
     // Split by H3 (###) which we use for Day headers in prompts
     const sections = markdown.split(/^### /gm);

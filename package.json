@@ -50,7 +50,8 @@
     "resend": "^4.0.1",
     "sonner": "^1.7.2",
     "stripe": "^18.4.1",
-    "tailwind-merge": "^2.5.5"
+    "tailwind-merge": "^2.5.5",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
@@ -67,6 +68,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.23",
     "eslint": "^9",

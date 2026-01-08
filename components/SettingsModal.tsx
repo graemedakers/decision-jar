@@ -12,6 +12,7 @@ import { BASE_DOMAIN } from "@/lib/config";
 import { LocationInput } from "./LocationInput";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { getJarLabels } from "@/lib/labels";
+import { NotificationToggle } from "./NotificationToggle";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -60,6 +61,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         setLocation(data.user.homeTown || data.user.location || "");
                         setInterests(data.user.interests || "");
                         setIsCreator(!!data.user.isCreator);
+                        setActiveJarId(data.user.activeJarId);
 
                         // Role-based Check
                         const activeMembership = data.user.memberships?.find((m: any) => m.jarId === data.user.activeJarId);
@@ -128,12 +130,14 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
         }
     };
 
+    const [activeJarId, setActiveJarId] = useState("");
+
     const handleEmptyJar = async () => {
         if (!confirm(`Are you sure you want to ${labels.emptyJarAction.toLowerCase()}? This will delete ALL ideas, including your history of past sessions. This action cannot be undone.`)) return;
 
         setIsLoading(true);
         try {
-            const res = await fetch(getApiUrl('/api/couple/reset-jar'), {
+            const res = await fetch(getApiUrl(`/api/jars/${activeJarId}/reset`), {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -161,7 +165,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
 
         setIsLoading(true);
         try {
-            const res = await fetch(getApiUrl('/api/couple/regenerate-code'), {
+            const res = await fetch(getApiUrl(`/api/jars/${activeJarId}/regenerate-code`), {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -235,7 +239,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
 
         setIsLoading(true);
         try {
-            const res = await fetch(getApiUrl('/api/couple/delete-partner'), {
+            const res = await fetch(getApiUrl(`/api/jars/${activeJarId}/remove-partner`), {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -378,6 +382,12 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                 >
                                                     <History className="w-4 h-4 mr-2" /> View History
                                                 </Button>
+
+                                                {/* Push Notifications */}
+                                                <div className="py-2">
+                                                    <NotificationToggle />
+                                                </div>
+
 
                                                 {hasPaid ? (
                                                     isNative ? (

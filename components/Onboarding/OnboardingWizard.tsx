@@ -35,7 +35,7 @@ export function OnboardingWizard({ onComplete, userName }: OnboardingWizardProps
 
         try {
             // 1. Create the Jar
-            const createRes = await fetch('/api/jar', {
+            const createRes = await fetch('/api/jars', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -46,7 +46,11 @@ export function OnboardingWizard({ onComplete, userName }: OnboardingWizardProps
                 })
             });
 
-            if (!createRes.ok) throw new Error("Failed to create jar");
+            if (!createRes.ok) {
+                const errorText = await createRes.text();
+                console.error("Create Jar Failed:", createRes.status, errorText);
+                throw new Error("Failed to create jar: " + errorText);
+            }
             const newJar = await createRes.json();
 
             // 2. Add Starter Ideas (Parallel)

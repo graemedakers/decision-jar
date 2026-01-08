@@ -16,6 +16,7 @@ export const DEFAULT_FORM_DATA = {
     isPrivate: false,
     weather: "ANY",
     requiresTravel: false,
+    photoUrls: [] as string[],
 };
 
 interface UseIdeaFormProps {
@@ -42,10 +43,11 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 cost: initialData.cost,
                 timeOfDay: initialData.timeOfDay || "ANY",
                 category: initialData.category || "ACTIVITY",
-                suggestedBy: "", // Don't carry over suggestedBy for edits usually, or maybe we should? Original code didn't.
+                suggestedBy: "",
                 isPrivate: initialData.isPrivate || false,
                 weather: initialData.weather || "ANY",
                 requiresTravel: initialData.requiresTravel || false,
+                photoUrls: initialData.photoUrls || [],
             });
         } else {
             setFormData(DEFAULT_FORM_DATA); // Reset for new idea
@@ -62,12 +64,11 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 setFormData(prev => ({ ...prev, category: categories[0].id }));
             }
         }
-    }, [jarTopic, categories]); // Removed isOpen dependency as hook doesn't know about it, managing lifecycle via mount/unmount or props
+    }, [jarTopic, categories]);
 
     const isCommunitySubmission = currentUser?.isCommunityJar && !currentUser?.isCreator && !initialData?.id;
 
     const { addIdea, updateIdea, deleteIdea } = useIdeaMutations();
-    // Combine loading states
     const isLoading = addIdea.isPending || updateIdea.isPending || deleteIdea.isPending;
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +93,8 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 category: formData.category,
                 isPrivate: formData.isPrivate,
                 weather: formData.weather,
-                requiresTravel: formData.requiresTravel
+                requiresTravel: formData.requiresTravel,
+                photoUrls: formData.photoUrls
             };
 
             if (isEditing) {
@@ -112,7 +114,6 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
 
         } catch (error) {
             console.error(error);
-            // Error toast handled by mutation hook
         }
     };
 

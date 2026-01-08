@@ -63,8 +63,12 @@ export async function DELETE(request: Request) {
         }
 
         // Using raw SQL to bypass valid Prisma Client generation issues
+        // SECURITY FIX: Enforce ownership by checking userId
         await prisma.$executeRaw`
-            DELETE FROM "FavoriteVenue" WHERE "jarId" = ${currentJarId} AND "name" = ${name}
+            DELETE FROM "FavoriteVenue" 
+            WHERE "jarId" = ${currentJarId} 
+            AND "name" = ${name}
+            AND "userId" = ${session.user.id}
         `;
 
         return NextResponse.json({ success: true });

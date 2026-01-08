@@ -109,7 +109,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
         const inferredType = inferTypeFromTopic(finalTopic);
 
         try {
-            const res = await fetch('/api/jar', {
+            const res = await fetch('/api/jars', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, type: inferredType, topic: finalTopic, customCategories: finalCustomCategories, selectionMode }),

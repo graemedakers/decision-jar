@@ -14,11 +14,11 @@ import dynamic from "next/dynamic";
 
 // Lazy Load Heavy Modals
 const GenericConciergeModal = dynamic(() => import("@/components/GenericConciergeModal").then(m => m.GenericConciergeModal), { ssr: false });
-const BarCrawlPlannerModal = dynamic(() => import("@/components/BarCrawlPlannerModal").then(m => m.BarCrawlPlannerModal), { ssr: false });
+
 const AdminControlsModal = dynamic(() => import("@/components/AdminControlsModal").then(m => m.AdminControlsModal), { ssr: false });
 const TemplateBrowserModal = dynamic(() => import("@/components/TemplateBrowserModal").then(m => m.TemplateBrowserModal), { ssr: false });
-const DateNightPlannerModal = dynamic(() => import("@/components/DateNightPlannerModal").then(m => m.DateNightPlannerModal), { ssr: false });
-const CateringPlannerModal = dynamic(() => import("@/components/CateringPlannerModal").then(m => m.CateringPlannerModal), { ssr: false });
+
+
 const MenuPlannerModal = dynamic(() => import("@/components/MenuPlannerModal").then(m => m.MenuPlannerModal), { ssr: false });
 const RateDateModal = dynamic(() => import("@/components/RateDateModal").then(m => m.RateDateModal), { ssr: false });
 const DateReveal = dynamic(() => import("@/components/DateReveal").then(m => m.DateReveal), { ssr: false });
@@ -28,11 +28,12 @@ const SurpriseMeModal = dynamic(() => import("@/components/SurpriseMeModal").the
 const SpinFiltersModal = dynamic(() => import("@/components/SpinFiltersModal").then(m => m.SpinFiltersModal), { ssr: false });
 const SettingsModal = dynamic(() => import("@/components/SettingsModal").then(m => m.SettingsModal), { ssr: false });
 const QuickDecisionsModal = dynamic(() => import("@/components/QuickDecisionsModal").then(m => m.QuickDecisionsModal), { ssr: false });
-const WeekendPlannerModal = dynamic(() => import("@/components/WeekendPlannerModal").then(m => m.WeekendPlannerModal), { ssr: false });
+
 const CommunityAdminModal = dynamic(() => import("@/components/CommunityAdminModal").then(m => m.CommunityAdminModal), { ssr: false });
 const JarMembersModal = dynamic(() => import("@/components/JarMembersModal").then(m => m.JarMembersModal), { ssr: false });
 const JarQuickStartModal = dynamic(() => import("@/components/JarQuickStartModal").then(m => m.JarQuickStartModal), { ssr: false });
 const MoveIdeaModal = dynamic(() => import("@/components/MoveIdeaModal").then(m => m.MoveIdeaModal), { ssr: false });
+const ToolsModal = dynamic(() => import("@/components/ToolsModal").then(m => m.ToolsModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
@@ -181,13 +182,19 @@ export function DashboardModals({
                 />
             )}
 
-            {!isCommunityJar && (
-                <WeekendPlannerModal
-                    isOpen={activeModal === 'WEEKEND_PLANNER'}
+            {!isCommunityJar && activeModal === 'WEEKEND_PLANNER' && (
+                <GenericConciergeModal
+                    isOpen={true}
                     onClose={closeModal}
-                    userLocation={combinedLocation || undefined}
+                    config={CONCIERGE_CONFIGS.WEEKEND_EVENTS}
+                    userLocation={userLocation || undefined}
                     onIdeaAdded={handleContentUpdate}
+                    onGoTonight={(idea) => {
+                        closeModal();
+                        openModal('DATE_REVEAL', { idea });
+                    }}
                     onFavoriteUpdated={fetchFavorites}
+                    onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
                 />
             )}
 
@@ -200,6 +207,7 @@ export function DashboardModals({
                             onClose={closeModal}
                             config={CONCIERGE_CONFIGS[modalProps.toolId]}
                             userLocation={userLocation || undefined}
+                            initialPrompt={modalProps?.initialPrompt} // Pass Initial Prompt
                             onIdeaAdded={() => {
                                 fetchIdeas();
                                 refreshUser();
@@ -222,13 +230,21 @@ export function DashboardModals({
                         />
                     )}
 
-                    <BarCrawlPlannerModal
-                        isOpen={activeModal === 'BAR_CRAWL_PLANNER'}
-                        onClose={closeModal}
-                        userLocation={combinedLocation || undefined}
-                        onIdeaAdded={handleContentUpdate}
-                        onFavoriteUpdated={fetchFavorites}
-                    />
+                    {activeModal === 'BAR_CRAWL_PLANNER' && (
+                        <GenericConciergeModal
+                            isOpen={true}
+                            onClose={closeModal}
+                            config={CONCIERGE_CONFIGS.BAR_CRAWL}
+                            userLocation={userLocation || undefined}
+                            onIdeaAdded={handleContentUpdate}
+                            onGoTonight={(idea) => {
+                                closeModal();
+                                openModal('DATE_REVEAL', { idea });
+                            }}
+                            onFavoriteUpdated={fetchFavorites}
+                            onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
+                        />
+                    )}
                 </>
             )}
 
@@ -249,20 +265,33 @@ export function DashboardModals({
             />
 
             {activeModal === 'DATE_NIGHT_PLANNER' && (
-                <DateNightPlannerModal
+                <GenericConciergeModal
                     isOpen={true}
                     onClose={closeModal}
-                    userLocation={combinedLocation || undefined}
-                    onIdeaAdded={() => setShowConfetti(true)}
-                    jarTopic={jarTopic || "General"}
+                    config={CONCIERGE_CONFIGS.DATE_NIGHT}
+                    userLocation={userLocation || undefined}
+                    onIdeaAdded={handleContentUpdate}
+                    onGoTonight={(idea) => {
+                        closeModal();
+                        openModal('DATE_REVEAL', { idea });
+                    }}
+                    onFavoriteUpdated={fetchFavorites}
+                    onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
                 />
             )}
 
             {activeModal === 'CATERING_PLANNER' && (
-                <CateringPlannerModal
+                <GenericConciergeModal
                     isOpen={true}
                     onClose={closeModal}
-                    onIdeaAdded={() => setShowConfetti(true)}
+                    config={CONCIERGE_CONFIGS.CHEF}
+                    userLocation={undefined}
+                    onIdeaAdded={handleContentUpdate}
+                    onGoTonight={(idea) => {
+                        closeModal();
+                        openModal('DATE_REVEAL', { idea });
+                    }}
+                    onFavoriteUpdated={fetchFavorites}
                 />
             )}
 
@@ -361,6 +390,16 @@ export function DashboardModals({
                     idea={modalProps?.idea}
                     availableJars={availableJars}
                     onMoveComplete={handleContentUpdate}
+                />
+            )}
+
+            {activeModal === 'TOOLS' && (
+                <ToolsModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    isPremium={isPremium}
+                    jarTopic={jarTopic}
+                    activityPlannerTitle={jarTopic === 'Cooking & Recipes' ? 'Catering Planner' : 'Night Out Planner'}
                 />
             )}
 

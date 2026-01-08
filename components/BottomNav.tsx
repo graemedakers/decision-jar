@@ -29,9 +29,10 @@ export function BottomNav() {
                                 <Link
                                     key={tab.name}
                                     href={tab.href}
+                                    data-tour={`${tab.name.toLowerCase()}-tab`}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isActive
-                                            ? "text-pink-400 bg-pink-400/10"
-                                            : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                                        ? "text-pink-400 bg-pink-400/10"
+                                        : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
                                         }`}
                                 >
                                     <tab.icon className={`w-5 h-5 ${isActive ? "fill-pink-400/20" : ""}`} />
@@ -52,6 +53,7 @@ export function BottomNav() {
                             <Link
                                 key={tab.name}
                                 href={tab.href}
+                                data-tour={`${tab.name.toLowerCase()}-tab-mobile`}
                                 className={`flex flex-col items-center gap-1 min-w-[64px] transition-colors ${isActive ? "text-pink-400" : "text-slate-500 hover:text-slate-300"
                                     }`}
                             >

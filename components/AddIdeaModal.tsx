@@ -2,6 +2,7 @@
 import { getItinerary, getCateringPlan } from "@/lib/utils";
 import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
+import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -87,6 +88,8 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
     const itinerary = getItinerary(formData.details);
     const cateringPlan = getCateringPlan(formData.details);
+    const hasMarkdown = formData.details && (formData.details.includes("###") || formData.details.includes("**"));
+    const showPreviewToggle = itinerary || cateringPlan || hasMarkdown;
 
     return (
         <AnimatePresence>
@@ -108,9 +111,9 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
                         <div className="px-4 md:px-6 pt-6 pb-4 flex flex-col gap-2">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                {viewMode === 'PREVIEW' && (itinerary || cateringPlan) ? (itinerary ? "Itinerary Preview" : "Catering Plan") :
+                                {viewMode === 'PREVIEW' && showPreviewToggle ? (itinerary ? "Itinerary Preview" : cateringPlan ? "Catering Plan" : "Plan Preview") :
                                     (initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea")}
-                                {(!initialData || !initialData.id) && !itinerary && !cateringPlan && (
+                                {(!initialData || !initialData.id) && !showPreviewToggle && (
                                     <button
                                         type="button"
                                         onClick={randomize}
@@ -124,7 +127,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                 )}
                             </h2>
 
-                            {(itinerary || cateringPlan) && (
+                            {showPreviewToggle && (
                                 <div className="flex justify-between items-center w-full">
                                     <div className="flex bg-slate-100 dark:bg-black/40 p-1 rounded-lg w-fit">
                                         <button
@@ -157,7 +160,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                             )}
 
                             {/* Wizard Toggle for New Ideas */}
-                            {!initialData?.id && !(itinerary || cateringPlan) && (
+                            {!initialData?.id && !showPreviewToggle && (
                                 <div className="flex bg-slate-100 dark:bg-black/40 p-1 rounded-lg w-fit">
                                     <button
                                         onClick={() => setIsWizardMode(true)}
@@ -178,12 +181,18 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                         </div>
 
                         <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-24 md:pb-8 custom-scrollbar">
-                            {(itinerary || cateringPlan) && viewMode === 'PREVIEW' ? (
+                            {showPreviewToggle && viewMode === 'PREVIEW' ? (
                                 <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl"> {/* Wrap for capture */}
                                     {itinerary ? (
                                         <ItineraryPreview itinerary={itinerary} />
-                                    ) : (
+                                    ) : cateringPlan ? (
                                         <CateringPreview plan={cateringPlan} />
+                                    ) : (
+                                        <ItineraryMarkdownRenderer
+                                            markdown={formData.details}
+                                            variant={formData.details.includes('### Day') ? 'accordion' : 'sections'}
+                                            theme={{ sectionHeaderColor: 'text-secondary' }}
+                                        />
                                     )}
                                 </div>
                             ) : isWizardMode && !initialData?.id ? (
@@ -235,6 +244,16 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         </div>
 
                                         <div className="space-y-2 min-w-0">
+                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Photo URL (Optional)</label>
+                                            <Input
+                                                value={formData.photoUrls?.[0] || ""}
+                                                onChange={(e) => setFormData({ ...formData, photoUrls: e.target.value ? [e.target.value] : [] })}
+                                                placeholder="https://example.com/image.jpg"
+                                                className="w-full font-mono text-xs"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2 min-w-0">
                                             <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Suggested By (Optional)</label>
                                             <Input
                                                 value={formData.suggestedBy}
@@ -281,17 +300,12 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                     }
                                                 })()
                                             }
-                                            className={`glass-input w-full min-h-[80px] py-2 px-3 resize-none text-slate-800 dark:text-white placeholder:text-slate-400 disabled:opacity-80 ${getItinerary(formData.details) ? 'font-mono text-xs opacity-70' : ''}`}
+                                            className={`glass-input w-full min-h-[80px] py-2 px-3 resize-none text-slate-800 dark:text-white placeholder:text-slate-400 disabled:opacity-80 ${showPreviewToggle ? 'font-mono text-xs opacity-70' : ''}`}
                                             aria-label="Details"
                                         />
-                                        {getItinerary(formData.details) && (
+                                        {showPreviewToggle && (
                                             <p className="text-[10px] text-slate-400 text-right">
-                                                This contains a structured structured itinerary (Night Out Plan). Switch to Preview to view nicely.
-                                            </p>
-                                        )}
-                                        {getCateringPlan(formData.details) && (
-                                            <p className="text-[10px] text-slate-400 text-right">
-                                                This contains a structured Catering Plan. Switch to Preview to view nicely.
+                                                This contains structured details. Switch to "Formatted View" above to see the plan clearly.
                                             </p>
                                         )}
                                     </div>

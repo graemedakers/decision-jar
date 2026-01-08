@@ -48,7 +48,21 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    return NextResponse.next();
+    // Generate response
+    const response = NextResponse.next();
+
+    // Security Headers
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+    // Content Security Policy
+    // Allowing 'unsafe-inline' and 'unsafe-eval' for Next.js hydration and external scripts (Stripe, PostHog)
+    // In strict mode, we would use nonces.
+    const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https:; frame-src 'self' https:;";
+    response.headers.set('Content-Security-Policy', csp);
+
+    return response;
 }
 
 export const config = {

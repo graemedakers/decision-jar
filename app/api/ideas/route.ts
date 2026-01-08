@@ -59,13 +59,18 @@ export async function POST(request: Request) {
         const requestedCategory = category || 'ACTIVITY';
         const finalCategory = getBestCategoryFit(requestedCategory, jar.topic, (jar as any).customCategories as any[]);
 
-        // Community Submission Queue Logic
+        // Verify Membership and Role
         const membership = await prisma.jarMember.findUnique({
             where: {
                 userId_jarId: { userId: session.user.id, jarId: currentJarId }
             }
         });
-        const isAdmin = membership?.role === 'ADMIN';
+
+        if (!membership) {
+            return NextResponse.json({ error: 'You are not a member of this jar' }, { status: 403 });
+        }
+
+        const isAdmin = membership.role === 'ADMIN';
 
         // NEW: Status logic
         // If it's a community jar and the contributor isn't an admin, it's PENDING.
@@ -148,7 +153,12 @@ export async function GET(request: Request) {
                 userId_jarId: { userId: session.user.id, jarId: currentJarId }
             }
         });
-        const isAdmin = membership?.role === 'ADMIN';
+
+        if (!membership) {
+            return NextResponse.json({ error: 'You are not a member of this jar' }, { status: 403 });
+        }
+
+        const isAdmin = membership.role === 'ADMIN';
 
         // Use standard Prisma findMany with relations
         const ideas = await prisma.idea.findMany({

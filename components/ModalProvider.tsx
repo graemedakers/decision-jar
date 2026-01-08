@@ -32,6 +32,7 @@ export type ModalType =
     | 'JAR_QUICKSTART'
     | 'JAR_MEMBERS'
     | 'MOVE_IDEA'
+    | 'TOOLS'
     | null;
 
 interface ModalContextType {
