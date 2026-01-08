@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 import { motion } from "framer-motion";
@@ -117,6 +117,22 @@ function DashboardContent() {
     const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas;
     const showAdminStatus = isAdminPickMode;
     const showStatusSection = showNoJars || showAdminStatus || showEmptyState;
+
+    // Check if we should show QuickStart modal for empty jar on dashboard
+    useEffect(() => {
+        if (showEmptyState && userData?.activeJarId) {
+            try {
+                const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
+                if (!dismissed) {
+                    openModal('JAR_QUICKSTART', {
+                        jarId: userData.activeJarId,
+                        jarName: userData.jarName || 'Your Jar',
+                        jarTopic: userData.topic || 'General'
+                    });
+                }
+            } catch (e) { }
+        }
+    }, [showEmptyState, userData?.activeJarId, openModal]);
 
     const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
     const combinedLocation = userLocation || "";
@@ -302,10 +318,10 @@ function DashboardContent() {
                                     )}
                                     {showEmptyState && (
                                         <EnhancedEmptyState
-                                            onAddIdea={() => openModal('ADD_IDEA')}
-                                            onSurpriseMe={() => openModal('SURPRISE_ME')}
-                                            onBrowseTemplates={() => openModal('TEMPLATE_BROWSER')}
-                                            onTakeQuiz={() => setShowQuiz(true)}
+                                            jarTopic={jarTopic || 'General'}
+                                            jarId={userData?.activeJarId || ''}
+                                            onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
+                                            onAddIdeaClick={() => openModal('ADD_IDEA')}
                                         />
                                     )}
                                     {showAdminStatus && (

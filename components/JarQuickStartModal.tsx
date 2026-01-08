@@ -50,28 +50,32 @@ export function JarQuickStartModal({ isOpen, onClose, jarId, jarName, jarTopic }
 
     const suggestedConcierge = getSuggestedConcierge();
 
+    const markDismissed = () => {
+        try {
+            localStorage.setItem(`quickstart_dismissed_${jarId}`, 'true');
+        } catch (e) { }
+    };
+
     const handleUseAI = () => {
+        markDismissed();
         onClose();
         openModal('CONCIERGE', { toolId: suggestedConcierge.id });
     };
 
     const handleBrowseTemplates = () => {
+        markDismissed();
         onClose();
         openModal('TEMPLATE_BROWSER');
     };
 
     const handleAddManually = () => {
+        markDismissed();
         onClose();
         openModal('ADD_IDEA');
     };
 
     const handleSkip = () => {
-        // Mark this jar as having dismissed the quickstart
-        try {
-            localStorage.setItem(`quickstart_dismissed_${jarId}`, 'true');
-        } catch (e) {
-            // localStorage might not be available
-        }
+        markDismissed();
         onClose();
         // Refresh to show the new jar with enhanced empty state
         window.location.reload();

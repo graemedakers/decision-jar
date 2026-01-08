@@ -11,8 +11,10 @@ import { PremiumModal } from "@/components/PremiumModal";
 import { TemplateBrowserModal } from "@/components/TemplateBrowserModal";
 import { MoveIdeaModal } from "@/components/MoveIdeaModal";
 import { CommunityAdminModal } from "@/components/CommunityAdminModal";
+import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
+import { useModalSystem } from "@/components/ModalProvider";
 
 export default function JarPage() {
     const router = useRouter();
@@ -31,6 +33,28 @@ export default function JarPage() {
     const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
     const [ideaToMove, setIdeaToMove] = useState<any>(null);
     const [availableJars, setAvailableJars] = useState<any[]>([]);
+    const [shouldShowQuickStart, setShouldShowQuickStart] = useState(false);
+    const { openModal } = useModalSystem();
+
+    // Check if we should show QuickStart modal for empty jar
+    useEffect(() => {
+        if (!isIdeasLoading && ideas.length === 0 && userData?.activeJarId) {
+            try {
+                const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
+                if (!dismissed) {
+                    // Show QuickStart modal on first visit to empty jar
+                    setShouldShowQuickStart(true);
+                    openModal('JAR_QUICKSTART', {
+                        jarId: userData.activeJarId,
+                        jarName: userData.jarName || 'Your Jar',
+                        jarTopic: userData.topic || 'General'
+                    });
+                }
+            } catch (e) {
+                // localStorage not available
+            }
+        }
+    }, [ideas.length, isIdeasLoading, userData?.activeJarId]);
 
     // Fetch available jars logic (kept local as it's specific for moving functionality)
     useEffect(() => {
@@ -192,35 +216,12 @@ export default function JarPage() {
                         <p className="text-slate-400">Opening your jar...</p>
                     </div>
                 ) : activeIdeas.length === 0 ? (
-                    <div className="max-w-2xl mx-auto">
-                        <div className="glass-card p-8 md:p-12 text-center border-2 border-dashed border-slate-300 dark:border-white/20 flex flex-col items-center justify-center">
-                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 mx-auto flex items-center justify-center mb-6 shadow-lg">
-                                <Plus className="w-10 h-10 text-white" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Your Journey Starts Here!</h3>
-                            <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
-                                Fill your jar with ideas that excite you. Start with a pre-made template or create your own custom ideas from scratch.
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                                <Button
-                                    onClick={() => setIsTemplateBrowserOpen(true)}
-                                    className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white border-none shadow-lg shadow-pink-500/25 h-12 px-6"
-                                >
-                                    <Layers className="w-5 h-5 mr-2" />
-                                    Browse Templates
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="h-12 px-6 border-2"
-                                >
-                                    <Plus className="w-5 h-5 mr-2" />
-                                    Add Custom Idea
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                    <EnhancedEmptyState
+                        jarTopic={userData?.topic || 'General'}
+                        jarId={userData?.activeJarId || ''}
+                        onTemplateClick={() => setIsTemplateBrowserOpen(true)}
+                        onAddIdeaClick={() => setIsModalOpen(true)}
+                    />
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {activeIdeas.map((idea) => (
