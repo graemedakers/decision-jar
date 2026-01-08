@@ -18,6 +18,7 @@ interface JarSummary {
     createdAt: string;
     isCommunityJar: boolean;
     topic?: string;
+    referenceCode?: string;
 }
 
 interface JarManagerModalProps {
@@ -52,6 +53,17 @@ export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
             console.error(error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleCopyInvite = async (code: string) => {
+        try {
+            const url = `${window.location.origin}/join?code=${code}`;
+            await navigator.clipboard.writeText(url);
+            showSuccess("Invite link copied to clipboard");
+        } catch (err) {
+            console.error('Failed to copy', err);
+            showError("Failed to copy link");
         }
     };
 
@@ -263,6 +275,17 @@ export function JarManagerModal({ isOpen, onClose }: JarManagerModalProps) {
                                                 </div>
 
                                                 <div className="flex items-center gap-2 sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-slate-200 dark:border-slate-800">
+                                                    {jar.role === 'ADMIN' && jar.referenceCode && (
+                                                        <button
+                                                            onClick={() => handleCopyInvite(jar.referenceCode!)}
+                                                            className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/10 dark:hover:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 transition-colors text-sm font-medium w-full sm:w-auto"
+                                                            aria-label="Invite Members"
+                                                        >
+                                                            <UserPlus className="w-4 h-4" />
+                                                            <span>Invite</span>
+                                                        </button>
+                                                    )}
+
                                                     {jar.role === 'ADMIN' && (
                                                         <button
                                                             onClick={() => setViewingMembersJar({ id: jar.id, name: jar.name, role: jar.role })}

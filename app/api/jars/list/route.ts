@@ -44,7 +44,8 @@ export async function GET(req: NextRequest) {
             ideaCount: j._count.ideas,
             createdAt: j.createdAt.toISOString(),
             isCommunityJar: j.isCommunityJar,
-            topic: j.topic
+            topic: j.topic,
+            referenceCode: j.members[0]?.role === "ADMIN" ? j.referenceCode : undefined
         }));
 
         return NextResponse.json(result);

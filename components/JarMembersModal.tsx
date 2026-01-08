@@ -81,12 +81,18 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
         }
     };
 
-    const copyInviteCode = () => {
+    const copyInviteCode = async () => {
         if (!inviteCode) return;
-        const url = `${window.location.origin}/join?code=${inviteCode}`;
-        navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        try {
+            const url = `${window.location.origin}/join?code=${inviteCode}`;
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            showSuccess("Invite link copied to clipboard");
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy', err);
+            showError("Failed to copy link");
+        }
     };
 
     const handleToggleRole = async (member: Member) => {
