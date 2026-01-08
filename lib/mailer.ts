@@ -1,5 +1,6 @@
 
 import { Resend } from 'resend';
+import { logger } from './logger';
 
 // Helper to get a safe Resend instance
 function getResend() {
@@ -11,7 +12,7 @@ function getResend() {
 export async function sendVerificationEmail(email: string, token: string) {
   if (!process.env.RESEND_API_KEY) {
     console.warn("RESEND_API_KEY is not set. Skipping email verification.");
-    console.log(`Verification Token for ${email}: ${token}`);
+    logger.info(`Verification Token for ${email}: ${token}`);
     return;
   }
 
@@ -34,7 +35,7 @@ export async function sendVerificationEmail(email: string, token: string) {
         </div>
       `
     });
-    console.log(`Verification email sent to ${email}`);
+    logger.info(`Verification email sent to ${email}`);
   } catch (error) {
     console.error('Failed to send verification email:', error);
     // We don't throw here to avoid failing the whole signup process if email fails
@@ -78,7 +79,7 @@ export async function sendDateNotificationEmail(recipients: string[], idea: any)
 export async function sendPasswordResetEmail(email: string, token: string) {
   if (!process.env.RESEND_API_KEY) {
     console.warn("RESEND_API_KEY is not set. Skipping password reset email.");
-    console.log(`Password Reset Token for ${email}: ${token}`);
+    logger.info(`Password Reset Token for ${email}: ${token}`);
     return;
   }
 
@@ -101,7 +102,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
         </div>
       `
     });
-    console.log(`Password reset email sent to ${email}`);
+    logger.info(`Password reset email sent to ${email}`);
   } catch (error) {
     console.error('Failed to send password reset email:', error);
   }

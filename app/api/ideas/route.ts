@@ -145,15 +145,6 @@ export async function GET(request: Request) {
     }
 
     try {
-        // Fetch all ideas for the couple (jar)
-        // Note: The physical column in the DB is "coupleId" (mapped to "jarId" in Prisma schema)
-        // so we must use "coupleId" in the raw query.
-
-        // Wait, actually we WANT to include partner's unselected ideas so we can count them,
-        // but we want to hide their details (description).
-
-        // Let's re-fetch to get ALL unselected ideas for the couple, but we'll mask the ones not created by me.
-        // Use raw query to ensure we get 'isSurprise' even if Prisma Client is stale
         const membership = await prisma.jarMember.findUnique({
             where: {
                 userId_jarId: { userId: session.user.id, jarId: currentJarId }
@@ -161,40 +152,59 @@ export async function GET(request: Request) {
         });
         const isAdmin = membership?.role === 'ADMIN';
 
-        // Fetch all ideas for the jar and include jar type
-        const allIdeas: any[] = await prisma.$queryRaw`
-            SELECT i.*, 
-                   i."isPrivate",
-                   json_build_object('id', u.id, 'name', u.name) as "createdBy",
-                   j.type as "jarType",
-                   j."selectionMode" as "selectionMode",
-                   j."isCommunityJar" as "isCommunityJar"
-            FROM "Idea" i
-            LEFT JOIN "User" u ON i."createdById" = u.id
-            LEFT JOIN "Jar" j ON i."jarId" = j.id
-            WHERE i."jarId" = ${currentJarId} 
-              AND (i."status" = 'APPROVED' OR i."createdById" = ${session.user.id} OR (${isAdmin} = true))
-            ORDER BY i."createdAt" DESC
-        `;
+        // Use standard Prisma findMany with relations
+        const ideas = await prisma.idea.findMany({
+            where: {
+                jarId: currentJarId,
+                OR: [
+                    { status: 'APPROVED' },
+                    { createdById: session.user.id },
+                    ...(isAdmin ? [{}] : []) // Admin sees everything
+                ]
+            },
+            include: {
+                createdBy: {
+                    select: { id: true, name: true }
+                },
+                jar: {
+                    select: {
+                        type: true,
+                        selectionMode: true,
+                        isCommunityJar: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
 
-        const maskedIdeas = allIdeas.map(idea => {
+        const maskedIdeas = ideas.map(idea => {
             const isMyIdea = idea.createdById === session.user.id;
             const isSelected = !!idea.selectedAt;
-            const isSurprise = (idea as any).isSurprise;
-            const isPrivate = (idea as any).isPrivate;
-            const isGroupJar = (idea as any).jarType === 'SOCIAL';
-            const isCommunityJar = (idea as any).isCommunityJar;
-            const isVotingJar = (idea as any).selectionMode === 'VOTING';
+            const isSurprise = idea.isSurprise;
+            const isPrivate = idea.isPrivate;
+            const isGroupJar = idea.jar.type === 'SOCIAL';
+            const isCommunityJar = idea.jar.isCommunityJar;
+            const isVotingJar = idea.jar.selectionMode === 'VOTING';
 
-            let processedIdea = { ...idea };
+            let processedIdea: any = {
+                ...idea,
+                // Flatten relation data for frontend compatibility if needed, though frontend likely handles it.
+                // Keeping flattened structure to match raw query response shape for safety:
+                jarType: idea.jar.type,
+                selectionMode: idea.jar.selectionMode,
+                isCommunityJar: idea.jar.isCommunityJar,
+                createdBy: idea.createdBy // Kept as object
+            };
 
             // Apply Masking Logic (Skip for Community Jars, or Admin in Admin Pick Mode)
-            const isAdminPick = (idea as any).selectionMode === 'ADMIN_PICK';
+            const isAdminPick = idea.jar.selectionMode === 'ADMIN_PICK';
             if (!isSelected && !isMyIdea && !isCommunityJar && !(isAdmin && isAdminPick)) {
                 // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
                 if (isVotingJar && (isSurprise || isPrivate)) {
                     processedIdea = {
-                        ...idea,
+                        ...processedIdea,
                         description: isSurprise ? "Surprise Idea" : "??? (Secret Idea)",
                         details: isSurprise ? "This idea will be revealed when you spin the jar!" : "shhh... it's a secret!",
                         isMasked: true,
@@ -203,7 +213,7 @@ export async function GET(request: Request) {
                 // In Group Jars, everyone sees everything (unless specifically private or a surprise)
                 else if (isGroupJar && (isSurprise || isPrivate)) {
                     processedIdea = {
-                        ...idea,
+                        ...processedIdea,
                         description: isSurprise ? "Surprise Idea" : "??? (Secret Idea)",
                         details: isSurprise ? "This idea will be revealed when you spin the jar!" : "shhh... it's a secret!",
                         isMasked: true,
@@ -212,7 +222,7 @@ export async function GET(request: Request) {
                 // Romantic/Other jars: hide if private or surprise
                 else if (!isVotingJar && !isGroupJar && (isPrivate || isSurprise)) {
                     processedIdea = {
-                        ...idea,
+                        ...processedIdea,
                         description: isSurprise ? "Surprise Idea" : "??? (Secret Idea)",
                         details: isSurprise ? "This idea will be revealed when you spin the jar!" : "shhh... it's a secret!",
                         isMasked: true,
@@ -222,10 +232,10 @@ export async function GET(request: Request) {
 
             // Allocation Mode:
             // If assigned to someone else, hide it or mark as "Assigned to X".
-            const assignedToId = (idea as any).assignedToId;
+            const assignedToId = idea.assignedToId;
             if (assignedToId && assignedToId !== session.user.id && !isAdmin) {
                 processedIdea = {
-                    ...idea,
+                    ...processedIdea,
                     description: "Secret Task",
                     details: "This task is assigned to another member.",
                     isMasked: true,

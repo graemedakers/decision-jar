@@ -133,4 +133,18 @@ describe('Spin Jar Action', () => {
 
         expect(awardXp).toHaveBeenCalledWith('jar-456', 5);
     });
+
+    it('should return error for invalid duration range', async () => {
+        const mockSession = { user: { id: 'user-123' } };
+        const mockUser = { id: 'user-123', activeJarId: 'jar-456' };
+
+        (getSession as any).mockResolvedValue(mockSession);
+        (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+
+        const result = await spinJar({ minDuration: 5, maxDuration: 2 });
+
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('Invalid duration range');
+        expect(result.status).toBe(400);
+    });
 });

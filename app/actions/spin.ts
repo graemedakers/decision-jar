@@ -12,7 +12,10 @@ import { revalidatePath } from 'next/cache';
 export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea }>> {
     try {
         const session = await getSession();
-        const { maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly } = filters;
+        const { minDuration, maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly } = filters;
+        if (minDuration !== undefined && maxDuration !== undefined && minDuration > maxDuration) {
+            return { success: false, error: 'Invalid duration range: maxDuration must be greater than minDuration', status: 400 };
+        }
 
         if (!session?.user?.id) {
             return { success: false, error: 'Unauthorized', status: 401 };
