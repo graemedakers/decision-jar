@@ -45,13 +45,7 @@ export async function DELETE(req: NextRequest, props: Context) {
         await prisma.$transaction(async (tx) => {
             logger.info(`[DELETE JAR] Starting cleanup for ${jarId}...`);
 
-            // 1. Remove Legacy User links
-            await tx.user.updateMany({
-                where: { legacyJarId: jarId },
-                data: { legacyJarId: null }
-            });
-
-            // 2. Clear activeJarId for users who had this jar active
+            // 1. Clear activeJarId for users who had this jar active
             await tx.user.updateMany({
                 where: { activeJarId: jarId },
                 data: { activeJarId: null }

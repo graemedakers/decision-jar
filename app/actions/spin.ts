@@ -29,7 +29,7 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
 
         if (!user) return { success: false, error: 'User not found', status: 404 };
 
-        const currentJarId = user.activeJarId || user.memberships?.[0]?.jarId || user.legacyJarId;
+        const currentJarId = user.activeJarId || user.memberships?.[0]?.jarId;
         if (!currentJarId) return { success: false, error: 'No active jar found', status: 400 };
 
         // 2. Build Prisma-level Filters

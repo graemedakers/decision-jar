@@ -24,10 +24,9 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
         return { success: false, error: 'User not found', status: 404 };
     }
 
-    // Priority: 1. activeJarId, 2. First membership, 3. Legacy coupleId
+    // Priority: 1. activeJarId, 2. First membership
     const currentJarId = user.activeJarId ||
-        (user.memberships?.[0]?.jarId) ||
-        user.legacyJarId;
+        (user.memberships?.[0]?.jarId);
 
     if (!currentJarId) {
         return { success: false, error: 'No active jar', status: 400 };

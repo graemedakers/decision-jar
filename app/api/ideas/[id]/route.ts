@@ -20,7 +20,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const currentJarId = user.activeJarId || user.legacyJarId;
+        const currentJarId = user.activeJarId;
         if (!currentJarId) {
             return NextResponse.json({ error: 'No active jar' }, { status: 400 });
         }
@@ -90,7 +90,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const currentJarId = user.activeJarId || user.legacyJarId;
+        const currentJarId = user.activeJarId;
         if (!currentJarId) {
             return NextResponse.json({ error: 'No active jar' }, { status: 400 });
         }
@@ -176,7 +176,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const currentJarId = user.activeJarId || user.legacyJarId;
+        const currentJarId = user.activeJarId;
         if (!currentJarId) {
             return NextResponse.json({ error: 'No active jar' }, { status: 400 });
         }

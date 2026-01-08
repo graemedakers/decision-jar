@@ -25,13 +25,7 @@ export async function POST(request: Request) {
             }
         });
 
-        // Legacy fallback check: if it's their legacy coupleId, allow it even if membership record is missing (though migration should happen)
-        // Ideally we should rely on membership since migration script ran. 
-        // But let's check legacy just in case if membership fails but user.coupleId matches.
-        const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-        const isLegacyCouple = user?.legacyJarId === jarId;
-
-        if (!membership && !isLegacyCouple) {
+        if (!membership) {
             return NextResponse.json({ error: "You are not a member of this jar." }, { status: 403 });
         }
 

@@ -26,7 +26,7 @@ export async function toggleFavorite(data: {
     });
     if (!user) return { success: false, error: 'User not found' };
 
-    const jarId = user.activeJarId || user.memberships?.[0]?.jarId || user.legacyJarId;
+    const jarId = user.activeJarId || user.memberships?.[0]?.jarId;
     if (!jarId) return { success: false, error: 'No active jar' };
 
     try {
@@ -76,7 +76,7 @@ export async function getFavorites(): Promise<ActionResponse<{ favorites: Favori
         where: { id: session.user.id },
         include: { memberships: true }
     });
-    const jarId = user?.activeJarId || user?.memberships?.[0]?.jarId || user?.legacyJarId;
+    const jarId = user?.activeJarId || user?.memberships?.[0]?.jarId;
 
     if (!jarId) return { success: true, favorites: [] };
 

@@ -27,22 +27,12 @@ export async function GET() {
                             }
                         }
                     }
-                },
-                // Legacy fallback support
-                // Legacy fallback support
-                legacyJar: {
-                    include: {
-                        members: {
-                            include: { user: { select: { id: true } } }
-                        },
-                        achievements: true
-                    }
                 }
             },
         });
 
         // Determine the Active Jar
-        // Priority: 1. activeJarId, 2. First Membership, 3. Legacy Couple
+        // Priority: 1. activeJarId, 2. First Membership
         let activeJar = null;
         let isCreator = false;
         let hasPartner = false;
@@ -54,14 +44,6 @@ export async function GET() {
             } else if (user.memberships.length > 0) {
                 // Fallback to first jar
                 activeJar = user.memberships[0].jar;
-                // Auto-persist the active jar choice for future consistency
-                await prisma.user.update({
-                    where: { id: user.id },
-                    data: { activeJarId: activeJar.id }
-                });
-            } else if (user.legacyJar) {
-                // Legacy Fallback
-                activeJar = user.legacyJar;
                 // Auto-persist the active jar choice for future consistency
                 await prisma.user.update({
                     where: { id: user.id },

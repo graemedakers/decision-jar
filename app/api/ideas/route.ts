@@ -21,10 +21,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Priority: 1. activeJarId, 2. First membership, 3. Legacy coupleId
+    // Priority: 1. activeJarId, 2. First membership
     const currentJarId = user.activeJarId ||
-        (user.memberships?.[0]?.jarId) ||
-        (user as any).legacyJarId;
+        (user.memberships?.[0]?.jarId);
 
     if (!currentJarId) {
         return NextResponse.json({ error: 'No active jar' }, { status: 400 });
@@ -137,8 +136,7 @@ export async function GET(request: Request) {
     }
 
     const currentJarId = user.activeJarId ||
-        (user.memberships?.[0]?.jarId) ||
-        (user as any).legacyJarId;
+        (user.memberships?.[0]?.jarId);
 
     if (!currentJarId) {
         return NextResponse.json([]); // No jar, no ideas

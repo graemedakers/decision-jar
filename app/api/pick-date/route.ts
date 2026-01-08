@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-        const currentJarId = user.activeJarId || user.memberships?.[0]?.jarId || user.legacyJarId;
+        const currentJarId = user.activeJarId || user.memberships?.[0]?.jarId;
         if (!currentJarId) return NextResponse.json({ error: 'No active jar found' }, { status: 400 });
 
         // 2. Build Prisma-level Filters (Performance Optimization)

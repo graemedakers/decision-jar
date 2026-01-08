@@ -19,8 +19,7 @@ model Jar {
   members       JarMember[]
   ideas         Idea[]
   
-  // Legacy access for migration
-  legacyUsers   User[]
+
 
   location      String?  // e.g. "New York, NY" or "London, UK"
   createdAt     DateTime @default(now())
@@ -93,8 +92,7 @@ model User {
   mustChangePassword    Boolean          @default(false)
   
   // Legacy single-jar support (for backward compatibility)
-  legacyJarId           String?          @map("coupleId")
-  legacyJar             Jar?             @relation(fields: [legacyJarId], references: [id])
+
   
   createdAt             DateTime         @default(now())
   homeTown              String?
