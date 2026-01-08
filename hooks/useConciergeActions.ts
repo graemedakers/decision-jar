@@ -30,7 +30,7 @@ export function useConciergeActions({
         if (rec.showtimes) parts.push(`Showtimes: ${rec.showtimes}`);
         if (rec.address) parts.push(`Address: ${rec.address}`);
         if (rec.price) parts.push(`Price: ${rec.price}`);
-        if (rec.website) parts.push(`Website: ${rec.website}`);
+        if (rec.website) parts.push(`${rec.showtimes ? 'Tickets' : 'Website'}: ${rec.website}`);
         if (rec.opening_hours) parts.push(`Hours: ${rec.opening_hours}`);
         if (rec.google_rating) parts.push(`Rating: ${rec.google_rating}`);
         return parts.filter(Boolean).join('\n\n');

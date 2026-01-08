@@ -124,15 +124,32 @@ export const getConciergePromptAndMock = (
                 Recommend 5 distinct movies based on the following:
                 - Watch Mode: ${inputs.watchMode}
                 ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in physical cinemas near ${targetLocation}. 
-                1. Identify real cinemas currently operating within the same suburb or within 10km of ${targetLocation}. 
-                2. BRAND VERIFICATION: You MUST use the correct brand. 
-                   - ROUSE HILL (NSW): The ONLY major cinema is 'Reading Cinemas' at Rouse Hill Town Centre. Do NOT use Hoyts.
-                   - EPPING (VIC): The cinema at Pacific Epping is 'Reading Cinemas'. It is NOT a Hoyts.
-                   - Do NOT recommend 'Hoyts' or 'Event Cinemas' unless you have verified that specific brand exists in that specific suburb.
-                3. ZERO HALLUCINATION POLICY: Do NOT guess the chain. If the user is in Rouse Hill or Epping, the ticket URL must lead to ReadingCinemas.com.au, NOT Hoyts.com.au.
-                4. Double-check the exact theater branch name (e.g., 'Reading Cinemas Epping', 'Reading Cinemas Rouse Hill').
-                5. Find movies currently playing at these specific locations today or tomorrow.
-                6. You MUST provide the specific CINEMA NAME (including the branch name), its FULL PHYSICAL ADDRESS, and the OFFICIAL TICKET URL for that specific cinema.` : ''}
+                
+                1. 📍 IDENTIFY LOCAL CINEMAS:
+                   Find real cinemas currently operating within the same suburb or within 10km of ${targetLocation}.
+                
+                2. 🔍 BRAND VERIFICATION (CRITICAL):
+                   You MUST distinguish between cinema chains correctly. Common hallucinations to avoid:
+                   - ROUSE HILL (NSW) -> 'Reading Cinemas' (Rouse Hill Town Centre). NOT Hoyts.
+                   - EPPING (VIC) -> 'Reading Cinemas' (Pacific Epping). NOT Hoyts.
+                   - GENERIC: Do NOT default to 'Hoyts' or 'Event Cinemas'. Only use them if you have positively verified they operate in the target suburb.
+                
+                3. 🚫 ZERO HALLUCINATION POLICY:
+                   - Do NOT guess the chain. 
+                   - If the user is in Rouse Hill or Epping, the ticket URL must lead to ReadingCinemas.com.au.
+                
+                4. 🔗 URL KNOWLEDGE BASE (STRICT ENFORCEMENT):
+                   Use these EXACT patterns for ticket links. Do NOT invent your own paths like '/sessions/'.
+                   - Village Cinemas: "https://villagecinemas.com.au/cinemas/[SLUG]?tab=sessions" (e.g. .../cinemas/karingal?tab=sessions)
+                   - Reading Cinemas: "https://readingcinemas.com.au/cinemas/[SLUG]" (e.g. .../cinemas/rouse-hill)
+                   - Hoyts: "https://www.hoyts.com.au/cinemas/[SLUG]" (e.g. .../cinemas/broadway)
+                   - Event Cinemas: "https://www.eventcinemas.com.au/Cinema/[SLUG]" (e.g. .../Cinema/George-Street)
+                
+                5. 🎟️ DETAILS:
+                   - Check for movies playing today or tomorrow.
+                   - Provide the specific CINEMA NAME (including branch).
+                   - Provide the FULL PHYSICAL ADDRESS.
+                   - Provide the OFFICIAL TICKET URL using the patterns above.` : ''}
                 - Genre: ${inputs.genre || "Any"}
                 - Mood: ${inputs.mood || "Any"}
                 - Era: ${inputs.era || "Any"}
