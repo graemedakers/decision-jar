@@ -177,6 +177,7 @@ export function LoginForm() {
                                     name="email"
                                     type="email"
                                     placeholder="you@example.com"
+                                    defaultValue={searchParams?.get('email') || ''}
                                     className="pl-12 h-12 bg-slate-50 border-slate-200 text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                     required
                                 />

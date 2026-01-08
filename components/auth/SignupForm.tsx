@@ -24,6 +24,8 @@ export function SignupForm() {
 
     const [isVerificationSent, setIsVerificationSent] = useState(false);
     const [accountExistsError, setAccountExistsError] = useState(false);
+    const [existingEmail, setExistingEmail] = useState("");
+    const [savedPassword, setSavedPassword] = useState("");
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
     useEffect(() => {
@@ -155,6 +157,8 @@ export function SignupForm() {
                 }
             } else {
                 if (data.error === "User already exists") {
+                    setExistingEmail(email);
+                    setSavedPassword(password);
                     setAccountExistsError(true);
                 } else {
                     const errorMessage = data.details ? `${data.error}: ${data.details}` : (data.error || "Signup failed");
@@ -164,6 +168,34 @@ export function SignupForm() {
         } catch (error: any) {
             console.error("Signup Fetch Error:", error);
             alert("An error occurred during signup.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleAutoLogin = async () => {
+        if (!existingEmail || !savedPassword) return;
+        setIsLoading(true);
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: existingEmail, password: savedPassword }),
+                credentials: 'include',
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // If invite code exists, the dashboard will handle the join via the useEffect hook we added
+                window.location.href = `/dashboard?code=${inviteCode || ""}${premiumToken ? `&pt=${premiumToken}` : ""}`;
+            } else {
+                // If login fails (maybe wrong password), fall back to manual login page
+                router.push(`/login?email=${encodeURIComponent(existingEmail)}&code=${inviteCode || ""}${premiumToken ? `&pt=${premiumToken}` : ""}`);
+            }
+        } catch (error) {
+            console.error("Auto-login error:", error);
+            router.push(`/login?email=${encodeURIComponent(existingEmail)}&code=${inviteCode || ""}${premiumToken ? `&pt=${premiumToken}` : ""}`);
         } finally {
             setIsLoading(false);
         }
@@ -215,17 +247,26 @@ export function SignupForm() {
                     </p>
                     <div className="space-y-4">
                         <Button
-                            onClick={() => router.push(`/login${inviteCode ? `?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : ''}`)}
+                            onClick={handleAutoLogin}
+                            isLoading={isLoading}
                             className="w-full h-12 text-lg font-bold shadow-lg shadow-primary/20"
                         >
-                            Log In & Join Jar <ArrowRight className="w-5 h-5 ml-2" />
+                            Sign In & Join Now <ArrowRight className="w-5 h-5 ml-2" />
                         </Button>
-                        <button
-                            onClick={() => setAccountExistsError(false)}
-                            className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-medium transition-colors"
-                        >
-                            Use a different email
-                        </button>
+                        <div className="flex flex-col gap-2">
+                            <button
+                                onClick={() => router.push(`/login${inviteCode ? `?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : ''}${existingEmail ? `&email=${encodeURIComponent(existingEmail)}` : ''}`)}
+                                className="text-sm text-primary hover:text-primary/80 font-bold transition-colors"
+                            >
+                                Use a different password
+                            </button>
+                            <button
+                                onClick={() => setAccountExistsError(false)}
+                                className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-medium transition-colors"
+                            >
+                                Use a different email
+                            </button>
+                        </div>
                     </div>
                 </div>
             </motion.div>
