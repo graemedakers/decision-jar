@@ -66,8 +66,14 @@ export function JarQuickStartModal({ isOpen, onClose, jarId, jarName, jarTopic }
     };
 
     const handleSkip = () => {
+        // Mark this jar as having dismissed the quickstart
+        try {
+            localStorage.setItem(`quickstart_dismissed_${jarId}`, 'true');
+        } catch (e) {
+            // localStorage might not be available
+        }
         onClose();
-        // Refresh to show the new jar
+        // Refresh to show the new jar with enhanced empty state
         window.location.reload();
     };
 
