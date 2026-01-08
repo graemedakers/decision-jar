@@ -16,6 +16,7 @@ interface CreateJarModalProps {
     hasRomanticJar: boolean;
     isPro: boolean;
     currentJarCount: number;
+    onSuccess?: (jarId: string) => void;
 }
 
 // Helper to infer jar type from topic for backward compatibility
@@ -33,7 +34,7 @@ function inferTypeFromTopic(topic: string): string {
     return 'SOCIAL';
 }
 
-export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, currentJarCount }: CreateJarModalProps) {
+export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, currentJarCount, onSuccess }: CreateJarModalProps) {
     const [name, setName] = useState("");
     const [topic, setTopic] = useState("Activities");
     const [selectionMode, setSelectionMode] = useState<string>("RANDOM");
@@ -105,15 +106,13 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                 const data = await res.json();
                 setSuccess(true);
 
-                // Close create modal and open quick-start modal
+                // Wait briefly for the success animation then handoff
                 setTimeout(() => {
                     onClose();
-                    openModal('JAR_QUICKSTART', {
-                        jarId: data.jar.id,
-                        jarName: name,
-                        jarTopic: finalTopic
-                    });
-                }, 500);
+                    if (onSuccess) {
+                        onSuccess(data.jar.id);
+                    }
+                }, 800);
             } else {
                 const data = await res.json();
                 setError(data.error || "Failed to create jar");

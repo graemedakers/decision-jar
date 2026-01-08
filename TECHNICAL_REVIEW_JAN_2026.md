@@ -94,4 +94,5 @@ The application is **Modal-First**. Almost all complex interactions occur in ove
 1.  **Notification System**: Full migration from `alert()` to `toast.success/error`.
 2.  **Loop Prevention**: Fixed "Empty Jar" loop by auto-switching active jar on creation.
 3.  **Scalability**: Jar Switcher now supports search and infinite-lists.
-
+4.  **Standardization**: Centralized Concierge logic in `lib/concierge-logic.ts`.
+5.  **UX Flow**: Implemented seamless Jar creation-to-switch workflow via callbacks, eliminating forced reloads.

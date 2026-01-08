@@ -166,9 +166,20 @@ function DashboardContent() {
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                    {userData && <JarSwitcher user={userData as any} variant="title" />}
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    {userData && (
+                                        <JarSwitcher
+                                            user={userData as any}
+                                            variant="title"
+                                            onSwitch={handleContentUpdate}
+                                        />
+                                    )}
                                     {!userData && <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white">Decision Jar</h1>}
+                                    {isPremium && (
+                                        <div className="hidden md:flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-amber-200 to-yellow-400 text-yellow-900 shadow-sm shrink-0">
+                                            <Crown className="w-3.5 h-3.5 fill-current" />
+                                        </div>
+                                    )}
                                 </div>
                                 <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 hidden sm:flex items-center gap-1">
                                     make moments happen

@@ -321,6 +321,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                 hasRomanticJar={hasRomanticJar}
                 isPro={!!user.isPremium}
                 currentJarCount={user.memberships.length}
+                onSuccess={(newJarId) => handleSwitchJar(newJarId)}
             />
 
             <JoinJarModal
