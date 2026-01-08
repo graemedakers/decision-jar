@@ -66,9 +66,9 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
 
     const isCommunitySubmission = currentUser?.isCommunityJar && !currentUser?.isCreator && !initialData?.id;
 
-    const { addIdea, updateIdea } = useIdeaMutations();
+    const { addIdea, updateIdea, deleteIdea } = useIdeaMutations();
     // Combine loading states
-    const isLoading = addIdea.isPending || updateIdea.isPending;
+    const isLoading = addIdea.isPending || updateIdea.isPending || deleteIdea.isPending;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -116,11 +116,26 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
         }
     };
 
+    const handleDelete = async () => {
+        if (!initialData?.id) return;
+        if (!confirm("Are you sure you want to delete this idea?")) return;
+
+        try {
+            await deleteIdea.mutateAsync(initialData.id);
+            showSuccess("Idea deleted successfully");
+            if (onSuccess) onSuccess();
+            onClose();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return {
         formData,
         setFormData,
         isLoading,
         handleSubmit,
+        handleDelete,
         categories,
         isCommunitySubmission
     };

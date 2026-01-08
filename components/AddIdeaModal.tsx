@@ -5,7 +5,7 @@ import { CateringPreview } from "./CateringPreview";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles } from "lucide-react";
+import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles, Trash2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { COST_LEVELS, ACTIVITY_LEVELS, TIME_OF_DAY, WEATHER_TYPES } from "@/lib/constants";
 import { exportToPdf } from "@/lib/pdf-export";
@@ -35,7 +35,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
 
-    const { formData, setFormData, isLoading, handleSubmit, categories, isCommunitySubmission } = useIdeaForm({
+    const { formData, setFormData, isLoading, handleSubmit, handleDelete, categories, isCommunitySubmission } = useIdeaForm({
         initialData,
         currentUser,
         jarTopic,
@@ -475,28 +475,41 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-3 pt-2">
-                                        <button
-                                            type="submit"
-                                            className="w-full inline-flex items-center justify-center transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none glass-button px-4 py-3 text-sm font-medium"
-                                            disabled={isLoading || (!!initialData?.id && !(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)))}
-                                        >
-                                            {isLoading ? (
-                                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                            ) : null}
-                                            {initialData && initialData.id
-                                                ? (!(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id))
-                                                    ? "View Only (Creator Access Required)"
-                                                    : "Save Changes")
-                                                : (
-                                                    isCommunitySubmission ? (
-                                                        <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Suggest to Jar</span>
-                                                    ) : (
-                                                        <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Add to Jar</span>
+                                    <div className="flex flex-col gap-3 pt-2">
+                                        <div className="flex gap-2 w-full">
+                                            {initialData && initialData.id && (initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleDelete}
+                                                    disabled={isLoading}
+                                                    className="px-4 py-3 rounded-xl border border-red-200 dark:border-red-900/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center justify-center shrink-0"
+                                                    title="Delete Idea"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            )}
+                                            <button
+                                                type="submit"
+                                                className="flex-1 inline-flex items-center justify-center transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none glass-button px-4 py-3 text-sm font-medium"
+                                                disabled={isLoading || (!!initialData?.id && !(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)))}
+                                            >
+                                                {isLoading ? (
+                                                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                                ) : null}
+                                                {initialData && initialData.id
+                                                    ? (!(initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id))
+                                                        ? "View Only (Creator Access Required)"
+                                                        : "Save Changes")
+                                                    : (
+                                                        isCommunitySubmission ? (
+                                                            <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Suggest to Jar</span>
+                                                        ) : (
+                                                            <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Add to Jar</span>
+                                                        )
                                                     )
-                                                )
-                                            }
-                                        </button>
+                                                }
+                                            </button>
+                                        </div>
                                         {isCommunitySubmission && (
                                             <p className="text-[10px] text-center text-slate-400 font-medium">
                                                 This jar is curated. Your idea will be sent to the admin for review.

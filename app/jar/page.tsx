@@ -239,7 +239,7 @@ export default function JarPage() {
                                     </div>
                                 )}
 
-                                <div className="absolute top-4 right-4 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute top-4 right-4 z-10 flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                     {idea.canEdit && !idea.isMasked && availableJars.length > 1 && (
                                         <button
                                             onClick={(e) => {
@@ -247,10 +247,10 @@ export default function JarPage() {
                                                 setIdeaToMove(idea);
                                                 setIsMoveModalOpen(true);
                                             }}
-                                            className="p-1.5 rounded-full bg-slate-200 dark:bg-black/40 text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-black/60 transition-colors"
+                                            className="p-2 rounded-full bg-slate-100 dark:bg-black/40 text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-black/60 transition-colors shadow-sm"
                                             title="Move to another jar"
                                         >
-                                            <Move className="w-3.5 h-3.5" />
+                                            <Move className="w-4 h-4" />
                                         </button>
                                     )}
                                     {idea.canEdit && !idea.isMasked && (
@@ -259,9 +259,10 @@ export default function JarPage() {
                                                 e.stopPropagation();
                                                 handleDeleteClick(idea.id);
                                             }}
-                                            className="p-1.5 rounded-full bg-slate-200 dark:bg-black/40 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-black/60 transition-colors"
+                                            className="p-2 rounded-full bg-slate-100 dark:bg-black/40 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-black/60 transition-colors shadow-sm"
+                                            title="Delete Idea"
                                         >
-                                            <Trash2 className="w-3.5 h-3.5" />
+                                            <Trash2 className="w-4 h-4" />
                                         </button>
                                     )}
                                 </div>
