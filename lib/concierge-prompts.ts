@@ -14,8 +14,9 @@ export const getConciergePromptAndMock = (
         case 'DINING':
             return {
                 prompt: `
-                Act as a local dining concierge for ${targetLocation}.
-                Recommend 5 distinct restaurants based on the following preferences:
+                Act as a local dining concierge.
+                Recommend 5 distinct restaurants located near ${targetLocation}.
+                Focus on venues as close as possible to this area based on the following preferences:
                 - Cuisine: ${inputs.cuisine || "Any good local food"}
                 - Vibe/Atmosphere: ${inputs.vibe || "Any"}
                 - Price Range: ${inputs.price || "Any"}
@@ -49,15 +50,15 @@ export const getConciergePromptAndMock = (
         case 'BAR':
             return {
                 prompt: `
-                Act as a local nightlife concierge for ${targetLocation}.
-                Recommend 5 distinct bars or drink spots:
+                Act as a local nightlife concierge.
+                Recommend 5 distinct bars or drink spots near ${targetLocation}.
                 - Drinks Preference: ${inputs.drinks || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
                 
                 ${extraInstructions}
                 
-                Ensure open business status.
+                Ensure they are real, currently open businesses with accurate physical addresses.
                 Return JSON with "recommendations" array.
                 Fields: name, description, speciality (e.g. Cocktails, Beer), price, address, website, opening_hours, google_rating
                 `,
@@ -122,11 +123,12 @@ export const getConciergePromptAndMock = (
                 Act as a movie critic and local cinema expert.
                 Recommend 5 distinct movies based on the following:
                 - Watch Mode: ${inputs.watchMode}
-                ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in physical cinemas in ${targetLocation}. 
-                1. Identify real cinemas in ${targetLocation}. Double check which theater brands actually operate there (e.g., Reading Cinemas, Hoyts, Event Cinemas, Village Cinemas, Dendy, or local independents). 
-                2. Do NOT hallucinate - if ${targetLocation} has a Reading Cinema but no Hoyts, do not recommend Hoyts.
-                3. Find movies currently playing at these specific locations today or tomorrow.
-                4. You MUST provide the specific CINEMA NAME and its PHYSICAL ADDRESS for the Map link to work.` : ''}
+                ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in physical cinemas near ${targetLocation}. 
+                1. Identify real cinemas currently operating within the same suburb or within 10km of ${targetLocation}. 
+                2. Double-check the exact theater branch and brand (e.g., Reading Cinemas, Hoyts, Event Cinemas, Village Cinemas, Dendy, or local independents) to ensure they actually exist in this specific area. 
+                3. Do NOT hallucinate - ensure the branch and its address are precisely correct for ${targetLocation}.
+                4. Find movies currently playing at these specific locations today or tomorrow.
+                5. You MUST provide the specific CINEMA NAME (including the branch name) and its FULL PHYSICAL ADDRESS for the Map link to work.` : ''}
                 - Genre: ${inputs.genre || "Any"}
                 - Mood: ${inputs.mood || "Any"}
                 - Era: ${inputs.era || "Any"}
@@ -172,8 +174,9 @@ export const getConciergePromptAndMock = (
         case 'WELLNESS':
             return {
                 prompt: `
-                Act as a wellness concierge for ${targetLocation}.
-                Recommend 5 distinct spas/studios:
+                Act as a wellness concierge.
+                Recommend 5 distinct spas/studios near ${targetLocation}.
+                Prioritize venues as close as possible to this area:
                 - Activity: ${inputs.activity || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
@@ -194,8 +197,9 @@ export const getConciergePromptAndMock = (
         case 'FITNESS':
             return {
                 prompt: `
-                Act as a fitness guide for ${targetLocation}.
-                Recommend 5 distinct gyms/activities:
+                Act as a fitness guide.
+                Recommend 5 distinct gyms or fitness activities near ${targetLocation}.
+                Prioritize options within easy reach of this area:
                 - Activity: ${inputs.activity || "Any"}
                 - Level: ${inputs.level || "Any"}
                 - Price: ${inputs.price || "Any"}
@@ -216,8 +220,9 @@ export const getConciergePromptAndMock = (
         case 'THEATRE':
             return {
                 prompt: `
-                Act as a theatre critic for ${targetLocation}.
-                Recommend 5 distinct shows/events:
+                Act as a theatre critic and arts guide.
+                Recommend 5 distinct shows or arts exhibitions near ${targetLocation}.
+                Ensure these are real venues with accurate addresses in this region:
                 - Type: ${inputs.type || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
@@ -261,8 +266,9 @@ export const getConciergePromptAndMock = (
         case 'ESCAPE_ROOM':
             return {
                 prompt: `
-                Act as an escape room enthusiast for ${targetLocation}.
-                Recommend 5 distinct escape rooms:
+                Act as an escape room enthusiast.
+                Recommend 5 distinct escape rooms located near ${targetLocation}.
+                Ensure the addresses are accurate for the specific branches in this area:
                 - Theme: ${inputs.themes || "Any"}
                 - Difficulty: ${inputs.difficulty || "Any"}
                 - Group Size: ${inputs.groupSize || "Any"}
@@ -283,8 +289,8 @@ export const getConciergePromptAndMock = (
         case 'SPORTS':
             return {
                 prompt: `
-                Act as a local sports guide for ${targetLocation}.
-                Recommend 5 distinct venues/events:
+                Act as a local sports guide.
+                Recommend 5 distinct sports venues or events near ${targetLocation}:
                 - Sport: ${inputs.sport || "Any"}
                 - Type: ${inputs.type || "Watch or Play"}
                 - Membership: ${inputs.membership || "Any"}
