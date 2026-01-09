@@ -91,7 +91,7 @@ export async function GET() {
         // Find if user is creator (for now, assume first member or check ownerId if we added it, but schema didn't have ownerId yet on Jar, just implied)
         // Actually, let's say "isCreator" if they are ADMIN role
         const userMemberFunc = user.memberships.find(m => m.jarId === activeJar?.id);
-        isCreator = userMemberFunc?.role === 'ADMIN';
+        isCreator = ['OWNER', 'ADMIN'].includes(userMemberFunc?.role as any);
 
         // For simple couple logic, hasPartner means > 1 member
         hasPartner = members.length > 1;

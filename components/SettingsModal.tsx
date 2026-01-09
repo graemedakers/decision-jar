@@ -65,7 +65,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
 
                         // Role-based Check
                         const activeMembership = data.user.memberships?.find((m: any) => m.jarId === data.user.activeJarId);
-                        setIsAdmin(activeMembership?.role === 'ADMIN' || !!data.user.isCreator);
+                        const isAdminRole = ['OWNER', 'ADMIN'].includes(activeMembership?.role);
+                        setIsAdmin(isAdminRole || !!data.user.isCreator);
 
                         setHasPartner(!!data.user.hasPartner);
                         setInviteCode(data.user.coupleReferenceCode || "");
