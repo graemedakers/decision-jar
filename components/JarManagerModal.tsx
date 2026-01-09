@@ -72,10 +72,8 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
         if (!confirm("Are you sure you want to leave this Jar?")) return;
         setProcessingId(jarId);
         try {
-            const res = await fetch(getApiUrl('/api/jar/leave'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jarId }),
+            const res = await fetch(getApiUrl(`/api/jars/${jarId}/leave`), {
+                method: 'POST'
             });
             if (res.ok) {
                 setJars(prev => prev.filter(j => j.id !== jarId));

@@ -59,7 +59,7 @@ export function LoginForm() {
                 // If invite code exists, try to join the jar
                 if (inviteCode) {
                     try {
-                        const joinRes = await fetch('/api/jar/join', {
+                        const joinRes = await fetch('/api/jars/join', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

@@ -44,7 +44,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
     const fetchMembers = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(getApiUrl(`/api/jar/${jarId}/members`));
+            const res = await fetch(getApiUrl(`/api/jars/${jarId}/members`));
             if (res.ok) {
                 const data = await res.json();
                 setMembers(data.members || []);
@@ -62,7 +62,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
 
         setProcessingId(member.userId);
         try {
-            const res = await fetch(getApiUrl(`/api/jar/${jarId}/members/${member.userId}`), {
+            const res = await fetch(getApiUrl(`/api/jars/${jarId}/members/${member.userId}`), {
                 method: 'DELETE'
             });
 
@@ -108,7 +108,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
 
         setProcessingId(member.userId);
         try {
-            const res = await fetch(getApiUrl(`/api/jar/${jarId}/members/${member.userId}`), {
+            const res = await fetch(getApiUrl(`/api/jars/${jarId}/members/${member.userId}`), {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: newRole }),

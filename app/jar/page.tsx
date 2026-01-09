@@ -53,7 +53,7 @@ export default function JarPage() {
     useEffect(() => {
         const fetchAvailableJars = async () => {
             try {
-                const res = await fetch('/api/jar/list');
+                const res = await fetch('/api/jars/list');
                 if (res.ok) {
                     const data = await res.json();
                     setAvailableJars(data || []);

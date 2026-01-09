@@ -30,9 +30,9 @@ export async function PUT(
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        // Check if user is an admin of this jar
+        // Check if user is an admin or owner of this jar
         const membership = user.memberships.find(m => m.jarId === id);
-        if (!membership || membership.role !== 'ADMIN') {
+        if (!membership || !['OWNER', 'ADMIN'].includes(membership.role)) {
             return NextResponse.json({ error: "Only admins can update jar settings" }, { status: 403 });
         }
 
@@ -89,7 +89,7 @@ export async function DELETE(
             }
         });
 
-        if (!membership || membership.role !== 'ADMIN') {
+        if (!membership || !['OWNER', 'ADMIN'].includes(membership.role)) {
             return NextResponse.json({ error: "Forbidden: Only admins can delete a jar." }, { status: 403 });
         }
 

@@ -103,7 +103,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
 
             // Update Jar settings if admin
             if (isAdmin) {
-                await fetch(getApiUrl('/api/jar/settings'), {
+                await fetch(getApiUrl(`/api/jars/${activeJarId}`), {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

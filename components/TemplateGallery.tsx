@@ -26,7 +26,7 @@ export function TemplateGallery({ isAuthenticated = false }: TemplateGalleryProp
         setCreatingTemplate(templateId);
 
         try {
-            const response = await fetch('/api/jar/from-template', {
+            const response = await fetch('/api/jars/from-template', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ templateId })

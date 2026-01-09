@@ -89,7 +89,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
 
         setIsLoading(true);
         try {
-            const res = await fetch('/api/users/switch-jar', {
+            const res = await fetch('/api/auth/switch-jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ jarId }),
@@ -115,10 +115,10 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
         // First check if user is the last member
         let isLastMember = false;
         try {
-            const checkRes = await fetch(`/api/jar/${jarId}/check-membership`);
+            const checkRes = await fetch(`/api/jars/${jarId}/members`);
             if (checkRes.ok) {
                 const data = await checkRes.json();
-                isLastMember = data.memberCount <= 1;
+                isLastMember = data.length <= 1;
             }
         } catch (e) {
             console.error("Failed to check membership", e);
@@ -132,7 +132,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
 
         setIsLoading(true);
         try {
-            const res = await fetch('/api/jar/leave', {
+            const res = await fetch(`/api/jars/${jarId}/leave`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ jarId }),

@@ -18,33 +18,13 @@ interface PremiumModalProps {
 }
 
 export function PremiumModal({ isOpen, onClose, title, description }: PremiumModalProps) {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading] = useState(false);
     const [isNative, setIsNative] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
         setIsNative(isCapacitor());
     }, []);
-
-    const handleUpgrade = async () => {
-        setIsLoading(true);
-        try {
-            const res = await fetch('/api/stripe/checkout', {
-                method: 'POST',
-            });
-            const data = await res.json();
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                showError("Failed to start checkout");
-            }
-        } catch (error) {
-            console.error(error);
-            showError("Something went wrong");
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     return (
         <AnimatePresence>

@@ -21,25 +21,23 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { priceId } = body;
+        const { priceId, mode: requestedMode } = body;
 
         // Default or specific price logic
         const targetPriceId = priceId || process.env.STRIPE_PRICE_ID;
 
         // Determine Mode
-        // If it matches the lifetime price ID, it's one-time payment. Otherwise subscription.
-        const isLifetime = targetPriceId === process.env.STRIPE_PRICE_LIFETIME;
-        const mode = isLifetime ? 'payment' : 'subscription';
+        // Use requested mode if provided, otherwise fallback to comparison logic
+        let mode = requestedMode;
+        if (!mode) {
+            const isLifetime = targetPriceId === process.env.STRIPE_PRICE_LIFETIME;
+            mode = isLifetime ? 'payment' : 'subscription';
+        }
 
-        // Subscription Data (Trial)
-        // Only apply trial if it's a subscription and User hasn't used one? 
-        // For simplicity, we configure the Trial on the Stripe Price itself in Dashboard, 
-        // OR we pass it here. Let's pass it here if subscription.
-        const subscription_data = mode === 'subscription' ? {
-            trial_period_days: 14
-        } : undefined;
+        const isLifetime = mode === 'payment' || targetPriceId === process.env.STRIPE_PRICE_LIFETIME;
 
-        const checkoutSession = await stripe.checkout.sessions.create({
+        // Create Checkout Session params
+        const checkoutSessionParams: any = {
             mode: mode,
             payment_method_types: ['card'],
             line_items: [
@@ -48,16 +46,24 @@ export async function POST(req: Request) {
                     quantity: 1,
                 },
             ],
-            subscription_data: subscription_data,
-            customer_email: session.user.email, // Pre-fill email
+            customer_email: session.user.email,
             metadata: {
                 userId: session.user.id,
-                jarId: (session.user as any).activeJarId || "", // Optional context
+                jarId: (session.user as any).activeJarId || "",
                 type: isLifetime ? 'LIFETIME_CB' : 'SUBSCRIPTION_UPGRADE'
             },
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
-        });
+        };
+
+        // Subscription Data (Trial)
+        if (mode === 'subscription') {
+            checkoutSessionParams.subscription_data = {
+                trial_period_days: 14
+            };
+        }
+
+        const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionParams);
 
         logger.info("[STRIPE_CHECKOUT_SESSION_CREATED]", {
             sessionId: checkoutSession.id,

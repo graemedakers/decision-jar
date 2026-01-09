@@ -108,7 +108,7 @@ export function useConciergeActions({
 
                     // FIX 2: Check if user has existing jars first
                     try {
-                        const jarsRes = await fetch('/api/jar/list');
+                        const jarsRes = await fetch('/api/jars/list');
                         if (jarsRes.ok) {
                             const { jars } = await jarsRes.json();
 
@@ -130,9 +130,10 @@ export function useConciergeActions({
                                     const firstJar = jars[0];
 
                                     // Set as active using switch endpoint
-                                    await fetch(`/api/jar/${firstJar.id}/switch`, {
+                                    await fetch('/api/auth/switch-jar', {
                                         method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' }
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ jarId: firstJar.id })
                                     });
 
                                     // Retry adding idea
@@ -201,7 +202,7 @@ export function useConciergeActions({
                             }
 
                             // Create jar automatically
-                            const createRes = await fetch('/api/jar', {
+                            const createRes = await fetch('/api/jars', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({

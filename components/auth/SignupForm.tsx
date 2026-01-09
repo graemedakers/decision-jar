@@ -49,7 +49,7 @@ export function SignupForm() {
     useEffect(() => {
         if (inviteCode) {
             setIsValidating(true);
-            fetch('/api/jar/validate-invite', {
+            fetch('/api/jars/validate-invite', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: inviteCode })

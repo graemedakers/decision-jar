@@ -136,7 +136,7 @@ export function useDashboardLogic() {
         if (code) {
             const handleJoin = async () => {
                 try {
-                    const res = await fetch('/api/jar/join', {
+                    const res = await fetch('/api/jars/join', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ code, premiumToken }),

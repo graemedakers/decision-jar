@@ -20,7 +20,10 @@ export default function PremiumPage() {
 
             const res = await fetch('/api/stripe/checkout', {
                 method: 'POST',
-                body: JSON.stringify({ priceId }),
+                body: JSON.stringify({
+                    priceId,
+                    mode: priceType === 'price_lifetime' ? 'payment' : 'subscription'
+                }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
