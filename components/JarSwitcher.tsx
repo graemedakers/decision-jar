@@ -165,7 +165,11 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     {variant === 'title' ? (
-                        <button className="flex items-center gap-1 group outline-none text-left min-w-0 max-w-full" aria-label="Switch Jar">
+                        <button
+                            className="flex items-center gap-1 group outline-none text-left min-w-0 max-w-full"
+                            aria-label="Switch Jar"
+                            data-tour="jar-selector"
+                        >
                             <h1 className="text-lg md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1 min-w-0">
                                 {activeJar ? (
                                     <>
@@ -186,6 +190,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                         <button
                             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 transition-colors border border-slate-200 dark:border-white/5 outline-none"
                             aria-label="Switch Jar"
+                            data-tour="jar-selector"
                         >
                             {activeJar ? (
                                 <>

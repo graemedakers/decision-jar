@@ -74,6 +74,13 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         position: 'bottom'
     },
     {
+        id: 'jar-selector',
+        title: '🏺 Multi-Jar Mastery',
+        description: 'Need separate jars for work, home, or different hobbies? Click the jar name to switch between jars or create a brand new one!',
+        targetElement: '[data-tour="jar-selector"]',
+        position: 'bottom'
+    },
+    {
         id: 'complete',
         title: '🎉 You\'re All Set!',
         description: 'Start adding ideas and spinning your jar! You can always access this tutorial again from the settings menu.',
