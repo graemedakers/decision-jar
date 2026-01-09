@@ -46,7 +46,10 @@ export async function POST(request: Request) {
             email: user.email,
             name: user.name,
             jarId: user.activeJarId,
-            activeJarId: user.activeJarId
+            activeJarId: user.activeJarId,
+            isLifetimePro: user.isLifetimePro,
+            stripeSubscriptionId: user.stripeSubscriptionId,
+            subscriptionStatus: user.subscriptionStatus,
         });
 
         return NextResponse.json({ success: true });

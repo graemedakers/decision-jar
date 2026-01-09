@@ -62,7 +62,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     const router = useRouter();
     const { openModal } = useModalSystem();
 
-    const maxJars = isPro ? 50 : 1;
+    const maxJars = isPro ? 50 : 3;
     const isLimitReached = currentJarCount >= maxJars;
 
     const addCategory = () => setCustomCategories([...customCategories, ""]);

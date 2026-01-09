@@ -31,6 +31,15 @@ export async function POST(req: Request) {
 
         if (!name) return new NextResponse("Name is required", { status: 400 });
 
+        // Fetch the user from the database to get up-to-date premium status
+        const dbUser = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (!dbUser) {
+            return new NextResponse("User not found", { status: 404 });
+        }
+
         // Plan Checks
         // Check how many jars user owns/admins
         const userJarsCount = await prisma.jarMember.count({
@@ -40,14 +49,14 @@ export async function POST(req: Request) {
             }
         });
 
-        // Use 'any' cast for custom user properties if TS complains
-        const user = session.user as any;
-        const isPro = !!user.isLifetimePro || !!user.stripeSubscriptionId; // Simplified check
-        const maxJars = isPro ? 50 : 1;
+        // Use the robust utility for premium check
+        const { isUserPro } = await import('@/lib/premium');
+        const isPro = isUserPro(dbUser);
+        const maxJars = isPro ? 50 : 3; // Match getLimits to allow 3 free jars
 
         if (userJarsCount >= maxJars) {
             return NextResponse.json({
-                error: "Plan limit reached.",
+                error: `Plan limit reached. You can have up to ${maxJars} jars on your current plan.`,
                 code: "LIMIT_REACHED"
             }, { status: 403 });
         }
