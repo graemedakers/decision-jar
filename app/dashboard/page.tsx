@@ -406,6 +406,7 @@ function DashboardContent() {
                                             isCommunityJar={isCommunityJar}
                                             onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
                                             onAddIdeaClick={() => openModal('ADD_IDEA')}
+                                            onCreateJar={() => openModal('CREATE_JAR')}
                                         />
                                     )}
                                     {showAdminStatus && (
