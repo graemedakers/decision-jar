@@ -125,7 +125,8 @@ function DashboardContent() {
 
     // Check if we should show QuickStart modal for empty jar on dashboard
     useEffect(() => {
-        if (showEmptyState && userData?.activeJarId) {
+        // Skip for community jars (like Bug Reports) which are pre-seeded or specific
+        if (showEmptyState && userData?.activeJarId && !(userData as any).isCommunityJar) {
             try {
                 const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
                 if (!dismissed) {
@@ -137,7 +138,7 @@ function DashboardContent() {
                 }
             } catch (e) { }
         }
-    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, openModal]);
+    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, openModal, userData]);
 
     const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
     const combinedLocation = userLocation || "";

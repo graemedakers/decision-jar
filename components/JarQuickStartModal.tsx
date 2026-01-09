@@ -63,7 +63,7 @@ export function JarQuickStartModal({ isOpen, onClose, jarId, jarName, jarTopic }
 
                 <div className="space-y-3 pt-4">
                     <p className="text-center text-slate-600 dark:text-slate-400 mb-6">
-                        How would you like to fill it?
+                        It's looking a bit empty! Let's get some ideas in here to start spinning.
                     </p>
 
                     {/* AI Quick-Fill */}
