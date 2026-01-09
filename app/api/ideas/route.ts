@@ -196,7 +196,7 @@ export async function GET(request: Request) {
             const isPrivate = idea.isPrivate;
             const isGroupJar = idea.jar.type === 'SOCIAL';
             const isCommunityJar = idea.jar.isCommunityJar;
-            const isVotingJar = idea.jar.selectionMode === SelectionMode.VOTING;
+            const isVotingJar = (idea.jar.selectionMode as string) === 'VOTE';
 
             let processedIdea: any = {
                 ...idea,
