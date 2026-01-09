@@ -1,8 +1,10 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiUrl } from "@/lib/utils";
 import { Idea } from "@/lib/types";
+import { useUser } from "./useUser";
+import { CacheKeys, createCacheInvalidator, STALE_TIME } from "@/lib/cache-utils";
 
 // Fetcher Function
 const fetchIdeasApi = async (): Promise<Idea[]> => {
@@ -13,16 +15,20 @@ const fetchIdeasApi = async (): Promise<Idea[]> => {
 };
 
 export function useIdeas() {
+    const { userData } = useUser({ redirectToLogin: false });
+    const jarId = userData?.activeJarId;
     const queryClient = useQueryClient();
 
     const query = useQuery({
-        queryKey: ['ideas'],
+        queryKey: CacheKeys.ideas(jarId),
         queryFn: fetchIdeasApi,
-        staleTime: 1000 * 60, // 1 minute fresh
+        staleTime: STALE_TIME.IDEAS,
+        enabled: !!userData, // Only fetch if we have user data (to know which jar)
     });
 
-    // Wrapper to match previous interface
-    const fetchIdeas = () => queryClient.invalidateQueries({ queryKey: ['ideas'] });
+    // Use centralized cache invalidator
+    const cache = createCacheInvalidator(queryClient);
+    const fetchIdeas = () => cache.invalidateIdeas(jarId);
 
     return {
         ideas: query.data || [],

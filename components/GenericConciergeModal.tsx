@@ -203,27 +203,35 @@ export function GenericConciergeModal({
     const [price, setPrice] = useState("any");
     const [isPrivate, setIsPrivate] = useState(true);
     const [recommendations, setRecommendations] = useState<any[]>([]);
-    const [prevOpen, setPrevOpen] = useState(false);
     const resultsRef = useRef<HTMLDivElement>(null);
     const [viewingItem, setViewingItem] = useState<any | null>(null);
     const [expandedRecIndex, setExpandedRecIndex] = useState<number | null>(null);
 
     const theme = getThemeClasses(config.colorTheme);
 
-    // Reset on Open
-    if (isOpen && !prevOpen) {
-        setLocation(userLocation || "");
-        setSelections({});
-        // Handle Initial Prompt if provided
-        setCustomInputs({ extraInstructions: initialPrompt || "" });
-        setRecommendations([]);
-        setPrice("any");
-        setPrevOpen(true);
-    } else if (!isOpen && prevOpen) {
-        setPrevOpen(false);
-    }
+    // Initialize location and custom inputs on first open
+    // React key pattern ensures this component remounts when tool changes
+    useEffect(() => {
+        if (isOpen) {
+            // Fill location if not already set
+            if (!location && userLocation) {
+                setLocation(userLocation);
+            }
+            // Set initial prompt if provided and selections are empty
+            if (initialPrompt && Object.keys(selections).length === 0) {
+                setCustomInputs({ extraInstructions: initialPrompt });
+            }
+        }
+    }, [isOpen, userLocation, initialPrompt]);
 
-    // Scroll to results
+    // Sync location if it arrives late (after modal already open)
+    useEffect(() => {
+        if (isOpen && userLocation && !location) {
+            setLocation(userLocation);
+        }
+    }, [userLocation, isOpen, location]);
+
+    // Scroll to results when recommendations appear
     useEffect(() => {
         if (recommendations.length > 0 && resultsRef.current) {
             setTimeout(() => {
@@ -232,9 +240,10 @@ export function GenericConciergeModal({
         }
     }, [recommendations]);
 
-    const { handleAddToJar, handleGoTonight: handleGoTonightFromHook, handleFavorite, toggleSelection: toggleSelectionFromHook } = useConciergeActions({
+    // Concierge action handlers
+    const { handleAddToJar, handleGoTonight: handleGoTonightFromHook, handleFavorite } = useConciergeActions({
         onIdeaAdded,
-        onGoTonight, // Pass the prop directly to the hook
+        onGoTonight,
         onFavoriteUpdated,
         onClose,
         setRecommendations
@@ -247,15 +256,6 @@ export function GenericConciergeModal({
             handleGoTonightFromHook(rec, config.categoryType, isPrivate);
         }
     };
-
-
-
-    // Late-load sync: If userLocation arrives after open and input is empty, fill it.
-    useEffect(() => {
-        if (isOpen && userLocation && !location) {
-            setLocation(userLocation);
-        }
-    }, [userLocation, isOpen, location]);
 
     const toggleSelection = (option: string, sectionId: string, type: 'multi-select' | 'single-select') => {
         setSelections(prev => {

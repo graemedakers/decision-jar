@@ -49,10 +49,10 @@ export async function POST(req: Request) {
             }
         });
 
-        // Use the robust utility for premium check
-        const { isUserPro } = await import('@/lib/premium');
-        const isPro = isUserPro(dbUser);
-        const maxJars = isPro ? 50 : 3; // Match getLimits to allow 3 free jars
+        // Use the unified premium utility
+        const { getFeatureLimits } = await import('@/lib/premium-utils');
+        const limits = getFeatureLimits(dbUser);
+        const maxJars = limits.maxJars;
 
         if (userJarsCount >= maxJars) {
             return NextResponse.json({

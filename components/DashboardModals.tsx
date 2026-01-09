@@ -203,6 +203,7 @@ export function DashboardModals({
                     {/* Generic Concierge Modal */}
                     {activeModal === 'CONCIERGE' && modalProps?.toolId && CONCIERGE_CONFIGS[modalProps.toolId] && (
                         <GenericConciergeModal
+                            key={modalProps.toolId}
                             isOpen={true}
                             onClose={closeModal}
                             config={CONCIERGE_CONFIGS[modalProps.toolId]}

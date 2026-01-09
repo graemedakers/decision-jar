@@ -63,8 +63,14 @@ export function useConciergeActions({
                     };
 
                     addDemoIdea(demoIdea);
+
+                    // Mark as added in local state
+                    setRecommendations(prev => prev.map(item =>
+                        (item.name === rec.name) ? { ...item, isAdded: true } : item
+                    ));
+
                     if (onIdeaAdded) onIdeaAdded();
-                    alert("✅ Added to your Jar!\n\n(Demo Mode: This idea will appear in your jar and can be spun!)");
+                    showSuccess("✅ Added to your Jar! (Demo Mode)");
                     return;
                 } catch (error) {
                     logger.error("Failed to add demo idea:", error);
@@ -97,6 +103,11 @@ export function useConciergeActions({
                     is_private: isPrivate,
                     source: 'concierge_tool'
                 });
+
+                // Mark as added in local state to prevent confusion
+                setRecommendations(prev => prev.map(item =>
+                    (item.name === rec.name) ? { ...item, isAdded: true } : item
+                ));
 
                 if (onIdeaAdded) onIdeaAdded();
                 showSuccess("✅ Added to jar!");

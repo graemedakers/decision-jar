@@ -163,7 +163,8 @@ async function deleteUsersByEmail(emails: string[]) {
 // Run the deletion
 const emailsToDelete = [
     'graeme_dakers@hotmail.com',
-    'graeme@letmebefree.com'
+    'graeme@letmebefree.com',
+    'graeme@letmbefree.com'
 ];
 
 deleteUsersByEmail(emailsToDelete)

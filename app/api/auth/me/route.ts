@@ -1,7 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { isCouplePremium, isUserPro, hasActuallyPaid, hasJarActuallyPaid } from '@/lib/premium';
+import { getEffectivePremiumStatus, hasActuallyPaid as checkHasActuallyPaid } from '@/lib/premium-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,21 +63,20 @@ export async function GET() {
             }
         }
 
-        // Calculate user-level premium status FIRST (independent of jar)
-        const userIsPro = isUserPro(user);
-
         if (!user || !activeJar) {
             // If user exists but has no jar, return user only (onboarding state)  
             if (user) {
-                const userActuallyPaid = hasActuallyPaid(user);
+                const effectivePremium = getEffectivePremiumStatus(user);
+                const hasPaid = checkHasActuallyPaid(user);
+
                 return NextResponse.json({
                     user: {
                         ...user,
                         isCreator: false,
                         hasPartner: false,
-                        isPremium: userIsPro, // User can have premium even without a jar
-                        hasPaid: userActuallyPaid,
-                        location: user.homeTown, // Use user's personal location
+                        isPremium: effectivePremium,
+                        hasPaid: hasPaid,
+                        location: user.homeTown,
                         coupleReferenceCode: null,
                         isTrialEligible: true,
                         coupleCreatedAt: user.createdAt,
@@ -87,23 +86,14 @@ export async function GET() {
             return NextResponse.json({ user: null });
         }
 
-        const members = activeJar.members || (activeJar as any).users || []; // Handle legacy vs new structure if mixed
-        // Find if user is creator (for now, assume first member or check ownerId if we added it, but schema didn't have ownerId yet on Jar, just implied)
-        // Actually, let's say "isCreator" if they are ADMIN role
+        const members = activeJar.members || (activeJar as any).users || [];
         const userMemberFunc = user.memberships.find(m => m.jarId === activeJar?.id);
         isCreator = ['OWNER', 'ADMIN'].includes(userMemberFunc?.role as any);
-
-        // For simple couple logic, hasPartner means > 1 member
         hasPartner = members.length > 1;
 
-        // Check jar-level premium and combine with user premium
-        const jarIsPremium = isCouplePremium(activeJar);
-        const effectivePremium = jarIsPremium || userIsPro;
-
-        // Check actual payment status
-        const userActuallyPaid = hasActuallyPaid(user);
-        const jarActuallyPaid = hasJarActuallyPaid(activeJar);
-        const effectiveHasPaid = userActuallyPaid || jarActuallyPaid;
+        // Use unified premium status calculation
+        const effectivePremium = getEffectivePremiumStatus(user, activeJar);
+        const hasPaid = checkHasActuallyPaid(user, activeJar);
 
         // Return user with mapped jar data
         return NextResponse.json({
@@ -112,9 +102,9 @@ export async function GET() {
                 // Map Jar fields to legacy Couple fields for frontend compatibility
                 coupleReferenceCode: activeJar.referenceCode,
                 referenceCode: activeJar.referenceCode,
-                location: user.homeTown, // Use user's personal location, not jar location
+                location: user.homeTown,
                 isPremium: effectivePremium,
-                hasPaid: effectiveHasPaid,
+                hasPaid: hasPaid,
                 isTrialEligible: activeJar.isTrialEligible,
                 coupleCreatedAt: (user.createdAt > activeJar.createdAt) ? user.createdAt : activeJar.createdAt,
                 xp: activeJar.xp || 0,

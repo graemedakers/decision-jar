@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiUrl } from "@/lib/utils";
 import { UserData } from "@/lib/types";
 import { useEffect, useRef } from "react";
+import { CacheKeys, createCacheInvalidator, STALE_TIME } from "@/lib/cache-utils";
 
 interface UseUserOptions {
     onLevelUp?: (newLevel: number) => void;
@@ -12,8 +13,7 @@ interface UseUserOptions {
 
 // Fetcher
 const fetchUserApi = async (redirectToLogin: boolean = true) => {
-    const res = await fetch(`${getApiUrl('/api/auth/me')}?_=${Date.now()}`, {
-        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    const res = await fetch(getApiUrl('/api/auth/me'), {
         credentials: 'include'
     });
 
@@ -45,9 +45,9 @@ export function useUser(options: UseUserOptions = {}) {
     const prevLevelRef = useRef<number | null>(null);
 
     const query = useQuery({
-        queryKey: ['user'],
+        queryKey: CacheKeys.user(),
         queryFn: () => fetchUserApi(redirectToLogin),
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: STALE_TIME.USER,
         retry: false,
     });
 
@@ -72,8 +72,9 @@ export function useUser(options: UseUserOptions = {}) {
         }
     }, [level, onLevelUp]);
 
-    // Wrapper to match previous interface
-    const refreshUser = () => queryClient.invalidateQueries({ queryKey: ['user'] });
+    // Use centralized cache invalidator
+    const cache = createCacheInvalidator(queryClient);
+    const refreshUser = () => cache.invalidateUser();
 
     return {
         userData,

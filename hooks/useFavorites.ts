@@ -1,38 +1,36 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiUrl } from "@/lib/utils";
 import { Idea } from "@/lib/types";
+import { CacheKeys, createCacheInvalidator, STALE_TIME } from "@/lib/cache-utils";
+
+// Fetcher Function
+const fetchFavoritesApi = async (): Promise<Idea[]> => {
+    const res = await fetch(getApiUrl('/api/favorites'), { credentials: 'include' });
+    if (!res.ok) throw new Error("Failed to fetch favorites");
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+};
 
 export function useFavorites() {
-    const [favorites, setFavorites] = useState<Idea[]>([]); // Assuming favorites list returns ideas? Or we just need count?
-    // DashboardPage only uses count. Memories page uses list.
-    // Let's store list, expose count.
+    const queryClient = useQueryClient();
 
-    const [favoritesCount, setFavoritesCount] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
+    const query = useQuery({
+        queryKey: CacheKeys.favorites(),
+        queryFn: fetchFavoritesApi,
+        staleTime: STALE_TIME.FAVORITES,
+    });
 
-    const fetchFavorites = useCallback(async () => {
-        try {
-            const res = await fetch(getApiUrl('/api/favorites'), { credentials: 'include' });
-            if (res.ok) {
-                const data = await res.json();
-                if (Array.isArray(data)) {
-                    setFavorites(data);
-                    setFavoritesCount(data.length);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch favorites', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    // Use centralized cache invalidator
+    const cache = createCacheInvalidator(queryClient);
+    const fetchFavorites = () => cache.invalidateFavorites();
 
-    // Initial fetch
-    useEffect(() => {
-        fetchFavorites();
-    }, [fetchFavorites]);
-
-    return { favorites, favoritesCount, isLoading, fetchFavorites };
+    return {
+        favorites: query.data || [],
+        favoritesCount: query.data?.length || 0,
+        isLoading: query.isLoading,
+        fetchFavorites,
+        error: query.error
+    };
 }

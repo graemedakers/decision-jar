@@ -1,0 +1,108 @@
+import { useMemo } from "react";
+
+/**
+ * Unified Loading State Hook
+ * 
+ * Provides consistent loading state logic across all pages.
+ * Prevents over-aggressive loading screens during background refreshes.
+ * 
+ * @module useLoadingState
+ */
+
+interface UseLoadingStateOptions {
+    /**
+     * Whether user data is currently loading (first fetch)
+     */
+    isLoadingUser: boolean;
+
+    /**
+     * Whether ideas data is currently loading (first fetch)
+     */
+    isLoadingIdeas: boolean;
+
+    /**
+     * Whether ideas are being refetched in background
+     */
+    isFetchingIdeas?: boolean;
+
+    /**
+     * Current user data (null if not loaded)
+     */
+    userData: any;
+
+    /**
+     * Current ideas list
+     */
+    ideas: any[];
+}
+
+/**
+ * Determines when to show a full-page loading state.
+ * 
+ * **Philosophy**:
+ * - Show loading ONLY when we have NO data at all
+ * - Don't show loading during background refreshes (user already has data)
+ * - Prevents UI "flicker" when adding first item, switching jars, etc.
+ * 
+ * **Loading is shown when**:
+ * - User data is loading AND we don't have user data yet
+ * - Ideas are loading (first time) AND we have zero ideas AND it's not a background fetch
+ * 
+ * **Loading is NOT shown when**:
+ * - Background refetch (isFetchingIdeas) while we already have ideas
+ * - User data is being refreshed but we already have userData
+ * 
+ * @param options - Loading state inputs
+ * @returns boolean indicating if loading screen should be shown
+ * 
+ * @example
+ * const isLoading = useLoadingState({
+ *   isLoadingUser,
+ *   isLoadingIdeas,
+ *   isFetchingIdeas,
+ *   userData,
+ *   ideas
+ * });
+ * 
+ * if (isLoading) {
+ *   return <FullPageLoader />;
+ * }
+ */
+export function useLoadingState({
+    isLoadingUser,
+    isLoadingIdeas,
+    isFetchingIdeas = false,
+    userData,
+    ideas
+}: UseLoadingStateOptions): boolean {
+    return useMemo(() => {
+        // If we don't have user data AND it's loading, show loading
+        if (!userData && isLoadingUser) {
+            return true;
+        }
+
+        // If we have no ideas AND they're loading (first time, not refetch), show loading
+        if (ideas.length === 0 && isLoadingIdeas && !isFetchingIdeas) {
+            return true;
+        }
+
+        // All other cases: don't show loading (we have enough data to show UI)
+        return false;
+    }, [isLoadingUser, isLoadingIdeas, isFetchingIdeas, userData, ideas.length]);
+}
+
+/**
+ * Documentation: When to use this hook
+ * 
+ * **Dashboard/Main Pages**: Always use this hook
+ * - Prevents jarring unmounts during background updates
+ * - Maintains UI stability during jar switches
+ * 
+ * **Modal/Small Components**: Don't use this hook
+ * - Use local loading states for modal contents
+ * - Full-page loader not appropriate
+ * 
+ * **Background Operations**: Don't use this hook
+ * - Use subtle loading indicators (spinners, skeleton UI)
+ * - Full-page loader disrupts user flow
+ */

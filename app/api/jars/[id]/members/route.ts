@@ -13,14 +13,14 @@ export async function GET(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Verify Admin Access
+        // Verify Admin Access (OWNER or ADMIN)
         const membership = await prisma.jarMember.findUnique({
             where: {
                 userId_jarId: { userId: session.user.id, jarId }
             }
         });
 
-        if (!membership || membership.role !== 'ADMIN') {
+        if (!membership || !['OWNER', 'ADMIN'].includes(membership.role)) {
             return NextResponse.json({ error: "Admin access required" }, { status: 403 });
         }
 
@@ -38,15 +38,28 @@ export async function GET(
             orderBy: { joinedAt: 'desc' }
         });
 
-        return NextResponse.json(members.map(m => ({
-            id: m.id,
-            userId: m.user.id,
-            name: m.user.name,
-            email: m.user.email,
-            role: m.role,
-            status: m.status,
-            joinedAt: m.joinedAt
-        })));
+        // Fetch jar for reference code
+        const jar = await prisma.jar.findUnique({
+            where: { id: jarId },
+            select: { referenceCode: true }
+        });
+
+        return NextResponse.json({
+            members: members.map(m => ({
+                id: m.id,
+                userId: m.user.id,
+                role: m.role,
+                status: m.status,
+                joinedAt: m.joinedAt,
+                user: {
+                    id: m.user.id,
+                    name: m.user.name,
+                    email: m.user.email,
+                    image: null
+                }
+            })),
+            referenceCode: jar?.referenceCode
+        });
 
     } catch (error) {
         console.error("Fetch members error", error);

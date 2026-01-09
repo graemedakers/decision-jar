@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { Prisma, SelectionMode } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { awardXp } from '@/lib/gamification';
+
+export const dynamic = 'force-dynamic';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { isValidCategoryForTopic, getCategoriesForTopic, getBestCategoryFit } from '@/lib/categories';
 
@@ -43,8 +45,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Cannot add new ideas while a vote is in progress. Please wait for the voting round to finish." }, { status: 403 });
     }
 
-    const { getLimits } = await import('@/lib/premium');
-    const limits = getLimits(user);
+    const { getFeatureLimits } = await import('@/lib/premium-utils');
+    const limits = getFeatureLimits(user);
 
 
 
@@ -194,7 +196,7 @@ export async function GET(request: Request) {
             const isPrivate = idea.isPrivate;
             const isGroupJar = idea.jar.type === 'SOCIAL';
             const isCommunityJar = idea.jar.isCommunityJar;
-            const isVotingJar = idea.jar.selectionMode === SelectionMode.VOTE;
+            const isVotingJar = idea.jar.selectionMode === SelectionMode.VOTING;
 
             let processedIdea: any = {
                 ...idea,

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, ChevronDown, ChevronUp, Check } from "lucide-react";
 import React from "react";
 import { ShareButton } from "@/components/ShareButton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -167,10 +167,17 @@ export function ConciergeResultCard({
 
                     <Button
                         size="sm"
+                        disabled={rec.isAdded}
                         onClick={() => onAddToJar(rec, categoryType, isPrivate)}
-                        className="text-xs bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20 h-8"
+                        className={`text-xs h-8 transition-all ${rec.isAdded
+                            ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                            : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"}`}
                     >
-                        <Plus className="w-3.5 h-3.5 mr-1" /> Jar
+                        {rec.isAdded ? (
+                            <><Check className="w-3.5 h-3.5 mr-1" /> Added</>
+                        ) : (
+                            <><Plus className="w-3.5 h-3.5 mr-1" /> Jar</>
+                        )}
                     </Button>
 
                     <Button

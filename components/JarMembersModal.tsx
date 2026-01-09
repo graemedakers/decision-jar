@@ -9,7 +9,7 @@ import { showError, showSuccess, showWarning } from "@/lib/toast";
 interface Member {
     id: string;
     userId: string;
-    role: "ADMIN" | "MEMBER";
+    role: "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
     joinedAt: string;
     user: {
         id: string;
@@ -24,7 +24,7 @@ interface JarMembersModalProps {
     onClose: () => void;
     jarId: string;
     jarName: string;
-    currentUserRole: "ADMIN" | "MEMBER";
+    currentUserRole: "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
     onRoleUpdated?: () => void;
 }
 
@@ -58,6 +58,21 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
     };
 
     const handleRemoveMember = async (member: Member) => {
+        // Don't allow removing OWNER
+        if (member.role === 'OWNER') {
+            showWarning("⚠️ Cannot remove the jar owner. Transfer ownership first.");
+            return;
+        }
+
+        // Don't allow removing the last admin
+        if (['OWNER', 'ADMIN'].includes(member.role)) {
+            const adminCount = members.filter(m => ['OWNER', 'ADMIN'].includes(m.role)).length;
+            if (adminCount <= 1) {
+                showWarning("⚠️ Cannot remove the last administrator. This would orphan the jar.");
+                return;
+            }
+        }
+
         if (!confirm(`Are you sure you want to remove ${member.user.name} from this Jar?`)) return;
 
         setProcessingId(member.userId);
@@ -96,10 +111,17 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
     };
 
     const handleToggleRole = async (member: Member) => {
+        // Don't allow toggling OWNER role
+        if (member.role === 'OWNER') {
+            showWarning("⚠️ Cannot modify the jar owner's role.");
+            return;
+        }
+
         const newRole = member.role === 'ADMIN' ? 'MEMBER' : 'ADMIN';
 
         if (member.role === 'ADMIN') {
-            const adminCount = members.filter(m => m.role === 'ADMIN').length;
+            // Count both OWNER and ADMIN as administrators
+            const adminCount = members.filter(m => ['OWNER', 'ADMIN'].includes(m.role)).length;
             if (adminCount <= 1) {
                 showWarning("⚠️ Cannot demote the last administrator. Promote someone else first.");
                 return;
@@ -165,7 +187,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                         </button>
                     </div>
 
-                    {currentUserRole === 'ADMIN' && inviteCode && (
+                    {['OWNER', 'ADMIN'].includes(currentUserRole) && inviteCode && (
                         <div className="mb-6 bg-violet-50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-800/30 p-4 rounded-2xl">
                             <h4 className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                                 <UserPlus className="w-3.5 h-3.5" /> Invite Others
@@ -209,43 +231,49 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                                             <div>
                                                 <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
                                                     {member.user.name}
-                                                    {member.role === 'ADMIN' && (
+                                                    {['OWNER', 'ADMIN'].includes(member.role) && (
                                                         <Crown className="w-3.5 h-3.5 text-amber-500" />
+                                                    )}
+                                                    {member.role === 'OWNER' && (
+                                                        <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Owner</span>
                                                     )}
                                                 </div>
                                                 <div className="text-xs text-slate-500">{member.user.email}</div>
                                             </div>
                                         </div>
 
-                                        {currentUserRole === 'ADMIN' && (
+                                        {['OWNER', 'ADMIN'].includes(currentUserRole) && (
                                             <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleToggleRole(member)}
-                                                    disabled={processingId === member.userId}
-                                                    title={member.role === 'ADMIN' ? 'Demote to Member' : 'Promote to Admin'}
-                                                    className={`p-2 rounded-lg transition-all ${member.role === 'ADMIN'
-                                                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/20 dark:text-amber-400'
-                                                        : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-white/10 dark:text-slate-400'
-                                                        }`}
-                                                    aria-label={member.role === 'ADMIN' ? 'Demote to Member' : 'Promote to Admin'}
-                                                >
-                                                    {processingId === member.userId ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                    ) : (
-                                                        <Shield className="w-4 h-4" />
-                                                    )}
-                                                </button>
+                                                {member.role !== 'OWNER' && (
+                                                    <button
+                                                        onClick={() => handleToggleRole(member)}
+                                                        disabled={processingId === member.userId}
+                                                        title={member.role === 'ADMIN' ? 'Demote to Member' : 'Promote to Admin'}
+                                                        className={`p-2 rounded-lg transition-all ${member.role === 'ADMIN'
+                                                                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/20 dark:text-amber-400'
+                                                                : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-white/10 dark:text-slate-400'
+                                                            }`}
+                                                        aria-label={member.role === 'ADMIN' ? 'Demote to Member' : 'Promote to Admin'}
+                                                    >
+                                                        {processingId === member.userId ? (
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                        ) : (
+                                                            <Shield className="w-4 h-4" />
+                                                        )}
+                                                    </button>
+                                                )}
 
-                                                {/* Only show kick button if NOT the current user */}
-                                                <button
-                                                    onClick={() => handleRemoveMember(member)}
-                                                    disabled={processingId === member.userId}
-                                                    title="Remove from Jar"
-                                                    className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 transition-colors"
-                                                    aria-label="Remove from Jar"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                {member.role !== 'OWNER' && (
+                                                    <button
+                                                        onClick={() => handleRemoveMember(member)}
+                                                        disabled={processingId === member.userId}
+                                                        title="Remove from Jar"
+                                                        className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 transition-colors"
+                                                        aria-label="Remove from Jar"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
                                     </div>

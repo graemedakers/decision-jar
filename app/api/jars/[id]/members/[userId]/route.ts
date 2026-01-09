@@ -4,6 +4,158 @@ import { sendEmail } from '@/lib/email';
 import { NextResponse } from 'next/server';
 import { checkAndPromoteWaitlist } from '@/lib/community';
 
+export async function DELETE(
+    req: Request,
+    { params }: { params: Promise<{ id: string, userId: string }> }
+) {
+    try {
+        const { id: jarId, userId: targetUserId } = await params;
+        const session = await getSession();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        // Verify Admin Access (OWNER or ADMIN can delete)
+        const adminMembership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: { userId: session.user.id, jarId }
+            }
+        });
+
+        if (!adminMembership || !['OWNER', 'ADMIN'].includes(adminMembership.role)) {
+            return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+        }
+
+        // Get target member
+        const targetMember = await prisma.jarMember.findUnique({
+            where: { userId_jarId: { userId: targetUserId, jarId } }
+        });
+
+        if (!targetMember) {
+            return NextResponse.json({ error: "Member not found" }, { status: 404 });
+        }
+
+        // Prevent removing OWNER
+        if (targetMember.role === 'OWNER') {
+            return NextResponse.json({
+                error: "Cannot remove the jar owner. Transfer ownership first."
+            }, { status: 403 });
+        }
+
+        // Check if this is the last admin
+        if (['OWNER', 'ADMIN'].includes(targetMember.role)) {
+            const adminCount = await prisma.jarMember.count({
+                where: {
+                    jarId,
+                    role: { in: ['OWNER', 'ADMIN'] }
+                }
+            });
+
+            if (adminCount <= 1) {
+                return NextResponse.json({
+                    error: "Cannot remove the last administrator. This would orphan the jar."
+                }, { status: 403 });
+            }
+        }
+
+        // Delete the member
+        await prisma.jarMember.delete({
+            where: { userId_jarId: { userId: targetUserId, jarId } }
+        });
+
+        // Trigger Waitlist Promotion if applicable
+        await checkAndPromoteWaitlist(jarId);
+
+        return NextResponse.json({ success: true });
+
+    } catch (error) {
+        console.error("Delete member error", error);
+        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    }
+}
+
+export async function PATCH(
+    req: Request,
+    { params }: { params: Promise<{ id: string, userId: string }> }
+) {
+    try {
+        const { id: jarId, userId: targetUserId } = await params;
+        const session = await getSession();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const body = await req.json();
+        const { role } = body;
+
+        if (!role || !['OWNER', 'ADMIN', 'MEMBER', 'VIEWER'].includes(role)) {
+            return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+        }
+
+        // Verify Admin Access (OWNER or ADMIN can change roles)
+        const adminMembership = await prisma.jarMember.findUnique({
+            where: {
+                userId_jarId: { userId: session.user.id, jarId }
+            }
+        });
+
+        if (!adminMembership || !['OWNER', 'ADMIN'].includes(adminMembership.role)) {
+            return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+        }
+
+        // Get target member
+        const targetMember = await prisma.jarMember.findUnique({
+            where: { userId_jarId: { userId: targetUserId, jarId } }
+        });
+
+        if (!targetMember) {
+            return NextResponse.json({ error: "Member not found" }, { status: 404 });
+        }
+
+        // Prevent modifying OWNER role
+        if (targetMember.role === 'OWNER' && role !== 'OWNER') {
+            return NextResponse.json({
+                error: "Cannot demote the jar owner. Transfer ownership first."
+            }, { status: 403 });
+        }
+
+        // Only OWNER can set someone to OWNER
+        if (role === 'OWNER' && adminMembership.role !== 'OWNER') {
+            return NextResponse.json({
+                error: "Only the jar owner can transfer ownership."
+            }, { status: 403 });
+        }
+
+        // If demoting from ADMIN or OWNER to a lower role, check admin count
+        if (['OWNER', 'ADMIN'].includes(targetMember.role) && !['OWNER', 'ADMIN'].includes(role)) {
+            const adminCount = await prisma.jarMember.count({
+                where: {
+                    jarId,
+                    role: { in: ['OWNER', 'ADMIN'] }
+                }
+            });
+
+            if (adminCount <= 1) {
+                return NextResponse.json({
+                    error: "Cannot demote the last administrator. Promote someone else first."
+                }, { status: 403 });
+            }
+        }
+
+        // Update the role
+        await prisma.jarMember.update({
+            where: { userId_jarId: { userId: targetUserId, jarId } },
+            data: { role: role as any }
+        });
+
+        return NextResponse.json({ success: true, role });
+
+    } catch (error) {
+        console.error("Update member role error", error);
+        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    }
+}
+
 export async function PUT(
     req: Request,
     { params }: { params: Promise<{ id: string, userId: string }> }
@@ -32,7 +184,7 @@ export async function PUT(
             }
         });
 
-        if (!adminMembership || adminMembership.role !== 'ADMIN') {
+        if (!adminMembership || !['OWNER', 'ADMIN'].includes(adminMembership.role)) {
             return NextResponse.json({ error: "Admin access required" }, { status: 403 });
         }
 
@@ -101,3 +253,4 @@ export async function PUT(
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
+

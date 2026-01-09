@@ -27,6 +27,7 @@ import { getJarLabels } from "@/lib/labels";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import React from "react";
 import { SmartInputBar } from "@/components/SmartInputBar";
+import { useLoadingState } from "@/hooks/useLoadingState";
 
 // Lazy Loading
 const PreferenceQuizModal = dynamic(() => import("@/components/PreferenceQuizModal").then(m => m.PreferenceQuizModal), { ssr: false });
@@ -142,7 +143,14 @@ function DashboardContent() {
         localStorage.setItem('datejar_user_level', level.toString());
     };
 
-    const isLoading = isLoadingUser || isLoadingIdeas || (isFetchingIdeas && ideas.length === 0);
+    // 7. Loading State
+    const isLoading = useLoadingState({
+        isLoadingUser,
+        isLoadingIdeas,
+        isFetchingIdeas,
+        userData,
+        ideas
+    });
 
     if (isLoading) {
         return (
