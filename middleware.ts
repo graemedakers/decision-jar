@@ -53,7 +53,7 @@ export default auth(async (req) => {
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
     // Content Security Policy
-    const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https:; frame-src 'self' https:;";
+    const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https: wss:; frame-src 'self' https:;";
     response.headers.set('Content-Security-Policy', csp);
 
     return response;
