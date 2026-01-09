@@ -105,7 +105,7 @@ export function OnboardingWizard({ onComplete, userName }: OnboardingWizardProps
                     Welcome{userName ? `, ${userName}` : ''}! 👋
                 </h2>
                 <p className="text-lg text-slate-600 dark:text-slate-400">
-                    Let's get you valid started. What kind of decisions do you want to make?
+                    Let's get you started. What kind of decisions do you want to make?
                 </p>
             </div>
 
