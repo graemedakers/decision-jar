@@ -27,53 +27,6 @@ export function ItineraryMarkdownRenderer({ markdown, configId, theme, variant }
             {sections.map((section, idx) => {
                 if (!section.trim()) return null;
 
-                // If it's the first chunk and doesn't start with a header (intro text)
-                if (idx === 0 && !markdown.startsWith('### ')) {
-                    return (
-                        <div key={idx} className="mb-4 text-slate-600 dark:text-slate-300 italic text-sm">
-                            {section}
-                        </div>
-                    );
-                }
-
-                const [titleLine, ...contentLines] = section.split('\n');
-                const body = contentLines.join('\n').trim();
-
-                const renderBody = (text: string) => {
-                    return text.split('\n').map((line, i) => {
-                        const trimmed = line.trim();
-                        if (!trimmed) return <div key={i} className="h-2" />;
-
-                        if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-                            // Sub-headers like **Morning:**
-                            return <div key={i} className="font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1 text-sm">{trimmed.replace(/\*\*/g, '')}</div>;
-                        }
-                        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-                            // List items - also need to handle URLs within them
-                            const listContent = trimmed.replace(/^[-*] /, '');
-                            return <li key={i} className="ml-4 list-disc pl-1 text-slate-600 dark:text-slate-300 text-sm">{renderTextWithLinks(listContent)}</li>;
-                        }
-
-                        // Link parsing (e.g. Map links)
-                        const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
-                        if (linkMatch) {
-                            const [full, text, url] = linkMatch;
-                            const parts = line.split(full);
-                            return (
-                                <p key={i} className="mb-1 text-sm">
-                                    {renderTextWithLinks(parts[0])}
-                                    <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline font-medium inline-flex items-center gap-0.5">
-                                        {text} <ArrowRight className="w-3 h-3" />
-                                    </a>
-                                    {renderTextWithLinks(parts[1])}
-                                </p>
-                            );
-                        }
-
-                        return <p key={i} className="mb-1 text-sm text-slate-600 dark:text-slate-300">{renderTextWithLinks(line)}</p>;
-                    });
-                };
-
                 // Helper function to detect and render plain URLs as clickable links
                 const renderTextWithLinks = (text: string) => {
                     if (!text) return text;
@@ -114,10 +67,58 @@ export function ItineraryMarkdownRenderer({ markdown, configId, theme, variant }
                     });
                 };
 
+                const renderBody = (text: string) => {
+                    return text.split('\n').map((line, i) => {
+                        const trimmed = line.trim();
+                        if (!trimmed) return <div key={i} className="h-2" />;
+
+                        if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
+                            // Sub-headers like **Morning:**
+                            return <div key={i} className="font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1 text-sm">{trimmed.replace(/\*\*/g, '')}</div>;
+                        }
+                        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                            // List items - also need to handle URLs within them
+                            const listContent = trimmed.replace(/^[-*] /, '');
+                            return <li key={i} className="ml-4 list-disc pl-1 text-slate-600 dark:text-slate-300 text-sm">{renderTextWithLinks(listContent)}</li>;
+                        }
+
+                        // Link parsing (e.g. Map links)
+                        const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
+                        if (linkMatch) {
+                            const [full, text, url] = linkMatch;
+                            const parts = line.split(full);
+                            return (
+                                <p key={i} className="mb-1 text-sm">
+                                    {renderTextWithLinks(parts[0])}
+                                    <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline font-medium inline-flex items-center gap-0.5">
+                                        {text} <ArrowRight className="w-3 h-3" />
+                                    </a>
+                                    {renderTextWithLinks(parts[1])}
+                                </p>
+                            );
+                        }
+
+                        return <p key={i} className="mb-1 text-sm text-slate-600 dark:text-slate-300">{renderTextWithLinks(line)}</p>;
+                    });
+                };
+
+                // If it's the first chunk and doesn't start with a header (intro text)
+                if (idx === 0 && !markdown.startsWith('### ')) {
+                    return (
+                        <div key={idx} className="mb-4 text-slate-600 dark:text-slate-300 italic text-sm">
+                            {renderBody(section)}
+                        </div>
+                    );
+                }
+
+                const [titleLine, ...contentLines] = section.split('\n');
+                const body = contentLines.join('\n').trim();
+
+
                 // Itinerary Card Style with Accordion
                 if (isItinerary) {
                     const isOpen = openCards[idx];
-                    // If no openCards logic yet, default first one open? Logic handled in init state {0:true} 
+                    // If no openCards logic yet, default first one open? Logic handled in init state {0:true}
                     // Note: idx might be messed up if 0 was intro. 
                     // If we have an intro at 0, then real cards start at 1. Initialize logic handled above.
 
