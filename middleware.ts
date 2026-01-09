@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
+import { getToken } from 'next-auth/jwt'
 
 const secretKey = process.env.AUTH_SECRET || "secret-key-change-me-in-prod";
 const key = new TextEncoder().encode(secretKey);
@@ -27,20 +28,25 @@ export async function middleware(request: NextRequest) {
     // --- Authentication Logic (Scoped to specific paths via code check to allow headers on others) ---
     const path = request.nextUrl.pathname;
 
+    // Use getToken to check for NextAuth session (handles chunked cookies and secure prefixes)
+    // Note: secret must match what is used in auth-options.ts
+    const token = await getToken({
+        req: request,
+        secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+    });
+
+    const customSession = request.cookies.get('session')?.value;
+
     // 1. Landing Page Redirect (if logged in)
     if (path === '/') {
-        const session = request.cookies.get('session')?.value;
-        const nextAuthSession = request.cookies.get('next-auth.session-token')?.value ||
-            request.cookies.get('__Secure-next-auth.session-token')?.value;
-
-        if (session || nextAuthSession) {
-            // Basic verification attempt (optional, or just redirect)
-            if (nextAuthSession) {
+        if (token || customSession) {
+            // Priority to NextAuth token
+            if (token) {
                 return NextResponse.redirect(new URL('/dashboard', request.url));
             }
-            if (session) {
+            if (customSession) {
                 try {
-                    await decrypt(session);
+                    await decrypt(customSession);
                     return NextResponse.redirect(new URL('/dashboard', request.url));
                 } catch (e) { /* invalid */ }
             }
@@ -49,11 +55,7 @@ export async function middleware(request: NextRequest) {
 
     // 2. Protected Routes
     if (path.startsWith('/dashboard') || path.startsWith('/jar') || path.startsWith('/memories')) {
-        const session = request.cookies.get('session')?.value;
-        const nextAuthSession = request.cookies.get('next-auth.session-token')?.value ||
-            request.cookies.get('__Secure-next-auth.session-token')?.value;
-
-        if (!session && !nextAuthSession) {
+        if (!token && !customSession) {
             return NextResponse.redirect(new URL('/', request.url));
         }
     }
