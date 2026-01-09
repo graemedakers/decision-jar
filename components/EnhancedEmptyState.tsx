@@ -11,11 +11,12 @@ interface EnhancedEmptyStateProps {
     jarName: string;
     jarId: string;
     inviteCode?: string | null;
+    isCommunityJar?: boolean;
     onTemplateClick: () => void;
     onAddIdeaClick: () => void;
 }
 
-export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, onTemplateClick, onAddIdeaClick }: EnhancedEmptyStateProps) {
+export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, isCommunityJar, onTemplateClick, onAddIdeaClick }: EnhancedEmptyStateProps) {
     const { openModal } = useModalSystem();
 
     const suggestedConcierge = getSuggestedConcierge(jarTopic, jarName);
@@ -116,24 +117,26 @@ export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, onTem
                     </button>
 
                     {/* Invite Others */}
-                    <button
-                        onClick={handleInvite}
-                        className="p-6 rounded-2xl border-2 border-amber-200 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-amber-500/10"
-                    >
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
-                                <Users className="w-6 h-6 text-white" />
+                    {!isCommunityJar && (
+                        <button
+                            onClick={handleInvite}
+                            className="p-6 rounded-2xl border-2 border-amber-200 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-amber-500/10"
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
+                                    <Users className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <h4 className="font-bold text-lg text-amber-900 dark:text-amber-300 mb-1">
+                                        Invite Others
+                                    </h4>
+                                    <p className="text-sm text-amber-700 dark:text-amber-400">
+                                        Share your jar so others can contribute ideas
+                                    </p>
+                                </div>
                             </div>
-                            <div className="flex-1 text-left">
-                                <h4 className="font-bold text-lg text-amber-900 dark:text-amber-300 mb-1">
-                                    Invite Others
-                                </h4>
-                                <p className="text-sm text-amber-700 dark:text-amber-400">
-                                    Share your jar so others can contribute ideas
-                                </p>
-                            </div>
-                        </div>
-                    </button>
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

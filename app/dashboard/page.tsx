@@ -109,6 +109,7 @@ function DashboardContent() {
     // --- View Logic / Layout Calculations ---
     const jarTopic = userData?.jarTopic;
     const jarSelectionMode = userData?.jarSelectionMode;
+    const isCommunityJar = !!(userData as any)?.isCommunityJar;
     const isVotingMode = jarSelectionMode === 'VOTE';
     const isAllocationMode = jarSelectionMode === 'ALLOCATION';
     // const theme = getThemeForTopic(jarTopic); // Theme usage removed from Jar3D as it accepts no props
@@ -126,7 +127,7 @@ function DashboardContent() {
     // Check if we should show QuickStart modal for empty jar on dashboard
     useEffect(() => {
         // Skip for community jars (like Bug Reports) which are pre-seeded or specific
-        if (showEmptyState && userData?.activeJarId && !(userData as any).isCommunityJar) {
+        if (showEmptyState && userData?.activeJarId && !isCommunityJar) {
             try {
                 const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
                 if (!dismissed) {
@@ -138,7 +139,23 @@ function DashboardContent() {
                 }
             } catch (e) { }
         }
-    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, openModal, userData]);
+    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, openModal, isCommunityJar]);
+
+    // NEW USER SETUP: If auto-enrolled in Community Jar but has NO personal jar, prompt creation
+    useEffect(() => {
+        // Wait for user data to be fully loaded
+        if (userData?.activeJarId && isCommunityJar) {
+            // Check if user has ANY owned jars
+            const hasPersonalJars = userData.memberships?.some((m: any) => m.role === 'OWNER');
+            if (!hasPersonalJars) {
+                const hasSeenPrompt = sessionStorage.getItem('create_jar_prompt_shown');
+                if (!hasSeenPrompt) {
+                    openModal('CREATE_JAR');
+                    sessionStorage.setItem('create_jar_prompt_shown', 'true');
+                }
+            }
+        }
+    }, [userData, openModal, isCommunityJar]);
 
     const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
     const combinedLocation = userLocation || "";
@@ -359,7 +376,7 @@ function DashboardContent() {
 
                     {/* Invite Code Banner */}
                     <div className="animate-in fade-in slide-in-from-top-4 duration-700">
-                        <InviteCodeDisplay code={inviteCode} topic={jarTopic} />
+                        {!isCommunityJar && <InviteCodeDisplay code={inviteCode} topic={jarTopic} />}
                     </div>
 
                     {/* JAR VISUALIZATION SECTION */}
@@ -386,6 +403,7 @@ function DashboardContent() {
                                             jarName={userData?.jarName || 'Your Jar'}
                                             jarId={userData?.activeJarId || ''}
                                             inviteCode={inviteCode}
+                                            isCommunityJar={isCommunityJar}
                                             onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
                                             onAddIdeaClick={() => openModal('ADD_IDEA')}
                                         />

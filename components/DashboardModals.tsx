@@ -35,6 +35,8 @@ const JarQuickStartModal = dynamic(() => import("@/components/JarQuickStartModal
 const MoveIdeaModal = dynamic(() => import("@/components/MoveIdeaModal").then(m => m.MoveIdeaModal), { ssr: false });
 const ToolsModal = dynamic(() => import("@/components/ToolsModal").then(m => m.ToolsModal), { ssr: false });
 const AddMemoryModal = dynamic(() => import("@/components/AddMemoryModal").then(m => m.AddMemoryModal), { ssr: false });
+const CreateJarModal = dynamic(() => import("@/components/CreateJarModal").then(m => m.CreateJarModal), { ssr: false });
+const JoinJarModal = dynamic(() => import("@/components/JoinJarModal").then(m => m.JoinJarModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
@@ -412,6 +414,31 @@ export function DashboardModals({
                     initialData={modalProps?.initialData}
                     isPro={isPremium}
                     onSuccess={handleContentUpdate}
+                />
+            )}
+
+            {activeModal === 'CREATE_JAR' && (
+                <CreateJarModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    hasRomanticJar={false}
+                    isPro={isPremium}
+                    currentJarCount={userData?.memberships?.filter((m: any) => m.role === 'OWNER').length || 0}
+                    onSuccess={() => {
+                        closeModal();
+                        refreshUser();
+                    }}
+                />
+            )}
+
+            {activeModal === 'JOIN_JAR' && (
+                <JoinJarModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    onSuccess={() => {
+                        closeModal();
+                        refreshUser();
+                    }}
                 />
             )}
 

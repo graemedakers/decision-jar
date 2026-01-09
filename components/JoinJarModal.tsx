@@ -10,9 +10,10 @@ import { Users, Loader2 } from "lucide-react";
 interface JoinJarModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
 }
 
-export function JoinJarModal({ isOpen, onClose }: JoinJarModalProps) {
+export function JoinJarModal({ isOpen, onClose, onSuccess }: JoinJarModalProps) {
     const [code, setCode] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -32,8 +33,11 @@ export function JoinJarModal({ isOpen, onClose }: JoinJarModalProps) {
             const data = await res.json();
 
             if (res.ok) {
-                // Success, reload page
-                window.location.reload();
+                if (onSuccess) {
+                    onSuccess();
+                } else {
+                    window.location.reload();
+                }
             } else {
                 setError(data.error || "Failed to join jar");
             }
