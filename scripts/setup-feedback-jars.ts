@@ -26,7 +26,7 @@ async function createFeedbackJars() {
         let bugJar = existingBugJar;
         let featureJar = existingFeatureJar;
 
-        // Create Bug Reports Jar if it doesn't exist
+        // Create or Update Bug Reports Jar
         if (!bugJar) {
             console.log('📝 Creating Bug Reports jar...');
             bugJar = await prisma.jar.create({
@@ -36,17 +36,22 @@ async function createFeedbackJars() {
                     topic: 'Bug Reports',
                     type: 'SOCIAL',
                     location: 'Global',
-                    isPremium: true, // Community jar
+                    isPremium: true,
+                    isCommunityJar: true, // Community jar
                     selectionMode: 'RANDOM',
                     isTrialEligible: false
                 }
             });
             console.log(`✅ Bug Reports jar created (ID: ${bugJar.id})`);
         } else {
-            console.log(`ℹ️  Bug Reports jar already exists (ID: ${bugJar.id})`);
+            console.log(`ℹ️  Bug Reports jar exists - Updating flags...`);
+            bugJar = await prisma.jar.update({
+                where: { id: bugJar.id },
+                data: { isCommunityJar: true }
+            });
         }
 
-        // Create Feature Requests Jar if it doesn't exist
+        // Create or Update Feature Requests Jar
         if (!featureJar) {
             console.log('📝 Creating Feature Requests jar...');
             featureJar = await prisma.jar.create({
@@ -56,14 +61,19 @@ async function createFeedbackJars() {
                     topic: 'Feature Requests',
                     type: 'SOCIAL',
                     location: 'Global',
-                    isPremium: true, // Community jar
+                    isPremium: true,
+                    isCommunityJar: true, // Community jar
                     selectionMode: 'RANDOM',
                     isTrialEligible: false
                 }
             });
             console.log(`✅ Feature Requests jar created (ID: ${featureJar.id})`);
         } else {
-            console.log(`ℹ️  Feature Requests jar already exists (ID: ${featureJar.id})`);
+            console.log(`ℹ️  Feature Requests jar exists - Updating flags...`);
+            featureJar = await prisma.jar.update({
+                where: { id: featureJar.id },
+                data: { isCommunityJar: true }
+            });
         }
 
         // Get all users
