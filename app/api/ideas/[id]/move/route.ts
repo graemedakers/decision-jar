@@ -45,12 +45,12 @@ export async function POST(
         }
 
         // Check if user has permission to move this idea
-        // User can move if they are a member of the jar (since they can manage ideas in their jar)
-        const isMemberOfJar = idea.jar.members.some((m: any) => m.userId === user.id);
-        const isAdmin = idea.jar.members.some((m: any) => m.userId === user.id && m.role === 'ADMIN');
+        // ONLY Idea Author or Admin can move it
+        const isAuthor = idea.createdById === user.id;
+        const isAdmin = idea.jar.members.some((m: any) => m.userId === user.id && ['OWNER', 'ADMIN'].includes(m.role));
 
-        if (!isMemberOfJar) {
-            return NextResponse.json({ error: "You don't have permission to move this idea" }, { status: 403 });
+        if (!isAuthor && !isAdmin) {
+            return NextResponse.json({ error: "You don't have permission to move this idea. Only the author or an admin can move it." }, { status: 403 });
         }
 
         // Check if target jar exists and user has access
