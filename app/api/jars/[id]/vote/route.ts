@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { notifyJarMembers } from '@/lib/notifications';
 
 export async function POST(
     request: NextRequest,
@@ -27,7 +28,7 @@ export async function POST(
     try {
         switch (action) {
             case 'START':
-                return handleStartVote(jarId, json, membership.role === 'ADMIN');
+                return handleStartVote(jarId, session.user.id, json, membership.role === 'ADMIN');
             case 'CAST':
                 return handleCastVote(jarId, session.user.id, json);
             case 'CANCEL':
@@ -48,7 +49,7 @@ export async function POST(
     }
 }
 
-async function handleStartVote(jarId: string, data: any, isAdmin: boolean) {
+async function handleStartVote(jarId: string, initiatorId: string, data: any, isAdmin: boolean) {
     if (!isAdmin) return NextResponse.json({ error: "Admin only" }, { status: 403 });
 
     const { tieBreakerMode, timeLimitMinutes, mandatory } = data; // mandatory not fully used in logic yet but stored? Schema doesn't have it.
@@ -77,6 +78,13 @@ async function handleStartVote(jarId: string, data: any, isAdmin: boolean) {
             endTime,
             // round: 1
         }
+    });
+
+    // Notify members
+    await notifyJarMembers(jarId, initiatorId, {
+        title: 'New Vote Started!',
+        body: 'A new voting session has begun. Cast your vote now!',
+        url: `/dashboard?jarId=${jarId}&mode=vote`
     });
 
     return NextResponse.json({ success: true, session });
@@ -217,6 +225,13 @@ async function handleResolveVote(jarId: string) {
             data: { selectedAt: new Date() }
         });
 
+        // Notify winner
+        await notifyJarMembers(jarId, null, { // null = notify everyone including trigger
+            title: 'Vote Complete!',
+            body: 'We have a winner! Tap to see the result.',
+            url: `/dashboard?jarId=${jarId}`
+        });
+
         return NextResponse.json({ success: true, winnerId: winners[0] });
     } else {
         // Tie
@@ -229,6 +244,12 @@ async function handleResolveVote(jarId: string) {
             await prisma.idea.update({
                 where: { id: randomWinner },
                 data: { selectedAt: new Date() }
+            });
+            // Notify tie result
+            await notifyJarMembers(jarId, null, {
+                title: 'Vote Tie!',
+                body: 'The vote ended in a tie. A random winner was picked.',
+                url: `/dashboard?jarId=${jarId}`
             });
             return NextResponse.json({ success: true, winnerId: randomWinner, method: 'RANDOM_TIEBREAK' });
         } else {
@@ -250,6 +271,12 @@ async function handleResolveVote(jarId: string) {
                     round: session.round + 1,
                     eligibleIdeaIds: winners
                 }
+            });
+            // Notify re-vote
+            await notifyJarMembers(jarId, null, {
+                title: 'Vote Tie - Runoff!',
+                body: 'The vote was a tie! A runoff round has started.',
+                url: `/dashboard?jarId=${jarId}&mode=vote`
             });
             return NextResponse.json({ success: true, nextRound: round2 });
         }

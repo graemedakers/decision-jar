@@ -230,6 +230,18 @@ export function useDashboardLogic() {
                 case 'invite':
                     openModal('COMMUNITY_ADMIN'); // Or scroll to invite code
                     break;
+                case 'capture':
+                    if (ideaId) {
+                        const targetIdea = ideas.find((i: any) => i.id === ideaId);
+                        if (targetIdea) {
+                            openModal('ADD_MEMORY', { initialData: targetIdea });
+                            newParams.delete('ideaId');
+                        }
+                    } else {
+                        // If no ID, just open modal for adding new past memory
+                        openModal('ADD_MEMORY');
+                    }
+                    break;
                 case 'onboarding':
                     setShowOnboarding(true);
                     break;

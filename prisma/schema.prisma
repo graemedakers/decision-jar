@@ -194,6 +194,8 @@ model Idea {
   ratings        Rating[]
   wonSessions    VoteSession[] @relation("SessionWinner")
   votes          Vote[]
+  
+  memoryReminderSent Boolean @default(false)
 
   @@index([jarId, selectedAt])  // Speeds up "available ideas" queries
   @@index([createdById])         // Speeds up "user's ideas" lookups

@@ -33,6 +33,7 @@ export type ModalType =
     | 'JAR_MEMBERS'
     | 'MOVE_IDEA'
     | 'TOOLS'
+    | 'ADD_MEMORY'
     | null;
 
 interface ModalContextType {

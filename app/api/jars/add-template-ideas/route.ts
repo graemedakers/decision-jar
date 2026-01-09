@@ -33,7 +33,7 @@ export async function POST(req: Request) {
             }
         });
 
-        if (!membership || !['OWNER', 'ADMIN'].includes(membership.role)) {
+        if (!membership || !['OWNER', 'ADMIN', 'MEMBER'].includes(membership.role)) {
             return NextResponse.json({ error: "You don't have permission to add ideas to this jar" }, { status: 403 });
         }
 
@@ -64,6 +64,6 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error("[ADD_TEMPLATE_IDEAS_ERROR]", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
     }
 }

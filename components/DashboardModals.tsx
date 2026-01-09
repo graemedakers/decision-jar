@@ -34,6 +34,7 @@ const JarMembersModal = dynamic(() => import("@/components/JarMembersModal").the
 const JarQuickStartModal = dynamic(() => import("@/components/JarQuickStartModal").then(m => m.JarQuickStartModal), { ssr: false });
 const MoveIdeaModal = dynamic(() => import("@/components/MoveIdeaModal").then(m => m.MoveIdeaModal), { ssr: false });
 const ToolsModal = dynamic(() => import("@/components/ToolsModal").then(m => m.ToolsModal), { ssr: false });
+const AddMemoryModal = dynamic(() => import("@/components/AddMemoryModal").then(m => m.AddMemoryModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
@@ -401,6 +402,16 @@ export function DashboardModals({
                     isPremium={isPremium}
                     jarTopic={jarTopic}
                     activityPlannerTitle={jarTopic === 'Cooking & Recipes' ? 'Catering Planner' : 'Night Out Planner'}
+                />
+            )}
+
+            {activeModal === 'ADD_MEMORY' && (
+                <AddMemoryModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    initialData={modalProps?.initialData}
+                    isPro={isPremium}
+                    onSuccess={handleContentUpdate}
                 />
             )}
 

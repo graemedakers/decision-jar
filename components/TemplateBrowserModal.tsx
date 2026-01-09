@@ -110,7 +110,10 @@ export function TemplateBrowserModal({
                 body: JSON.stringify({ templateId, jarId: currentJarId })
             });
 
-            if (!response.ok) throw new Error('Failed to add ideas to jar');
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to add ideas to jar');
+            }
 
             const result = await response.json();
 
