@@ -110,6 +110,7 @@ model User {
   
   // Platform-wide Subscription (User level)
   isLifetimePro         Boolean          @default(false) // Manual override / Lifetime purchase
+  isSuperAdmin          Boolean          @default(false) // Platform super admin (founder/admin access)
   stripeCustomerId      String?          @unique
   stripeSubscriptionId  String?          @unique
   subscriptionEndsAt    DateTime?

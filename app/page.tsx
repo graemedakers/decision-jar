@@ -320,7 +320,7 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20 text-sm font-medium text-pink-600 dark:text-pink-400">
               <Sparkles className="w-4 h-4" />
-              <span>Your Personal AI Date Night Concierge</span>
+              <span>Your Personal AI Activity Concierge</span>
             </div>
 
             <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1] break-words">

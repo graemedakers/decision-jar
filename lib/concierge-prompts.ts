@@ -571,7 +571,11 @@ export const getConciergePromptAndMock = (
                   **Afternoon:** ...
                   **Dinner:** ...
                   
-                  *Include accurate Google Maps links for every specific venue.*
+                  
+                  *IMPORTANT: For map links, use FULL Google Maps URLs in this format:*
+                  *https://www.google.com/maps/search/?api=1&query=[Place+Name]+[Address]*
+                  *DO NOT use short URLs (maps.app.goo.gl) as they are deprecated and often expired.*
+                  *Example: https://www.google.com/maps/search/?api=1&query=Eiffel+Tower+Paris*
                 `,
                 mockResponse: {
                     recommendations: [

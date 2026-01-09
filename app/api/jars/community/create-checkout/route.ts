@@ -56,8 +56,13 @@ export async function POST(req: Request) {
             }
         });
 
-        // 2. Check for Specific User Bypass
-        if (session.user.email === 'graemedakers@gmail.com') {
+        // 2. Check for Super Admin Bypass
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { isSuperAdmin: true }
+        });
+
+        if (user?.isSuperAdmin) {
             await prisma.jar.update({
                 where: { id: newJar.id },
                 data: { subscriptionStatus: 'ACTIVE' }

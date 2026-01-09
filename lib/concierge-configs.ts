@@ -675,7 +675,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Calendar,
             subtextKey: 'duration_label',
-            goActionLabel: 'View Plan'
+            goActionLabel: 'Go Now'
         }
     }
 };

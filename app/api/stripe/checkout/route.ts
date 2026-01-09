@@ -2,6 +2,7 @@ import { getSession } from '@/lib/auth';
 import { stripe } from '@/lib/stripe';
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -36,6 +37,12 @@ export async function POST(req: Request) {
 
         const isLifetime = mode === 'payment' || targetPriceId === process.env.STRIPE_PRICE_LIFETIME;
 
+        // Check if user has already used their trial
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { hasUsedTrial: true }
+        });
+
         // Create Checkout Session params
         const checkoutSessionParams: any = {
             mode: mode,
@@ -56,11 +63,18 @@ export async function POST(req: Request) {
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
         };
 
-        // Subscription Data (Trial)
+        // Subscription Data (Trial) - Only grant trial if user hasn't used it yet
         if (mode === 'subscription') {
-            checkoutSessionParams.subscription_data = {
-                trial_period_days: 14
-            };
+            // Only grant trial to users who haven't used their free trial
+            if (!user?.hasUsedTrial) {
+                checkoutSessionParams.subscription_data = {
+                    trial_period_days: 14
+                };
+                logger.info("[STRIPE_TRIAL_GRANTED]", { userId: session.user.id });
+            } else {
+                // No trial for users who already used it - they pay immediately
+                logger.info("[STRIPE_NO_TRIAL]", { userId: session.user.id, reason: "Already used trial" });
+            }
         }
 
         const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionParams);

@@ -96,7 +96,7 @@ export function PremiumBanner({ hasPaid, coupleCreatedAt, isTrialEligible = true
                                         onClick={() => router.push('/premium')}
                                         className="w-full md:w-auto h-12 px-8 bg-gradient-to-r from-yellow-500 to-orange-500 hover:opacity-90 text-white border-none shadow-xl shadow-yellow-500/20 font-bold rounded-2xl transition-all hover:scale-105 active:scale-95"
                                     >
-                                        Unlock Lifetime Access
+                                        Upgrade to Pro
                                     </Button>
                                 )}
                             </div>

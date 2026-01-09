@@ -1,14 +1,18 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Search, Sparkles, BookOpen, Plus, Image as ImageIcon, Link as LinkIcon, ArrowRight } from "lucide-react";
+import { useState, useRef } from "react";
+import { Sparkles, BookOpen, Plus, Image as ImageIcon, Link as LinkIcon, Loader2 } from "lucide-react";
 import { useModalSystem } from "@/components/ModalProvider";
 import { motion, AnimatePresence } from "framer-motion";
+import imageCompression from 'browser-image-compression';
+import { showError, showSuccess } from "@/lib/toast";
 
 export function SmartInputBar() {
     const [inputValue, setInputValue] = useState("");
     const [isFocused, setIsFocused] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
     const { openModal } = useModalSystem();
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const isUrl = (text: string) => {
@@ -17,6 +21,78 @@ export function SmartInputBar() {
             return true;
         } catch {
             return false;
+        }
+    };
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type.toLowerCase())) {
+            showError("Please upload a valid image file (JPG, PNG, GIF, or WebP).");
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            return;
+        }
+
+        // Check file size before compression
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            showError("Image is too large. Please select an image under 10MB.");
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            return;
+        }
+
+        setIsUploadingImage(true);
+
+        try {
+            // Compression options
+            const options = {
+                maxSizeMB: 0.5, // Compress to max 500KB
+                maxWidthOrHeight: 1920, // Max dimension
+                useWebWorker: true,
+                fileType: file.type as any,
+            };
+
+            // Compress the image
+            const compressedFile = await imageCompression(file, options);
+
+            // Convert to Base64
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+
+                // Calculate compression ratio for user feedback
+                const originalSizeKB = (file.size / 1024).toFixed(0);
+                const compressedSizeKB = (compressedFile.size / 1024).toFixed(0);
+
+                openModal('ADD_IDEA', {
+                    initialData: {
+                        description: "",
+                        photoUrls: [result]
+                    }
+                });
+
+                showSuccess(`Image compressed from ${originalSizeKB}KB to ${compressedSizeKB}KB`);
+
+                // Reset input
+                if (fileInputRef.current) fileInputRef.current.value = "";
+                setIsUploadingImage(false);
+            };
+
+            reader.onerror = () => {
+                showError("Failed to read image. Please try again.");
+                setIsUploadingImage(false);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+            };
+
+            reader.readAsDataURL(compressedFile);
+
+        } catch (error) {
+            console.error('Image compression error:', error);
+            showError("Failed to process image. Please try again.");
+            setIsUploadingImage(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
         }
     };
 
@@ -29,7 +105,7 @@ export function SmartInputBar() {
             // Handle as Link
             openModal('ADD_IDEA', {
                 initialData: {
-                    description: "Shared Link", // Placeholder, user should edit
+                    description: "Shared Link",
                     details: inputValue
                 }
             });
@@ -46,6 +122,13 @@ export function SmartInputBar() {
 
     return (
         <div className="w-full max-w-2xl mx-auto px-4 z-20 relative">
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileSelect}
+            />
             <motion.div
                 data-tour="add-idea-button"
                 className={`
@@ -65,6 +148,19 @@ export function SmartInputBar() {
                 >
                     {/* Left Actions */}
                     <div className="flex items-center pl-2 space-x-1 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => !isUploadingImage && fileInputRef.current?.click()}
+                            disabled={isUploadingImage}
+                            className="p-2.5 rounded-xl text-slate-400 hover:text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={isUploadingImage ? "Processing image..." : "Upload Image"}
+                        >
+                            {isUploadingImage ? (
+                                <Loader2 className="w-5 h-5 animate-spin text-pink-600" />
+                            ) : (
+                                <ImageIcon className="w-5 h-5" />
+                            )}
+                        </button>
                         <button
                             type="button"
                             data-tour="surprise-me-button"
@@ -101,7 +197,7 @@ export function SmartInputBar() {
                         onChange={(e) => setInputValue(e.target.value)}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                        placeholder="Add a date idea, paste a link, or ask AI..."
+                        placeholder="Type an idea, paste a link, upload an image, or ask AI..."
                         className="flex-1 bg-transparent border-none outline-none px-3 py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-base md:text-lg min-w-0"
                     />
 

@@ -251,6 +251,35 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                                 placeholder="https://example.com/image.jpg"
                                                 className="w-full font-mono text-xs"
                                             />
+
+                                            {/* Image Preview */}
+                                            {formData.photoUrls?.[0] && (
+                                                <div className="relative rounded-xl overflow-hidden border-2 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800">
+                                                    <img
+                                                        src={formData.photoUrls[0]}
+                                                        alt="Preview"
+                                                        className="w-full h-48 object-cover"
+                                                        onError={(e) => {
+                                                            e.currentTarget.style.display = 'none';
+                                                            const parent = e.currentTarget.parentElement;
+                                                            if (parent) {
+                                                                const errorDiv = document.createElement('div');
+                                                                errorDiv.className = 'w-full h-48 flex items-center justify-center text-slate-400 text-sm';
+                                                                errorDiv.textContent = 'Failed to load image';
+                                                                parent.appendChild(errorDiv);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData({ ...formData, photoUrls: [] })}
+                                                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                                                        title="Remove image"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="space-y-2 min-w-0">

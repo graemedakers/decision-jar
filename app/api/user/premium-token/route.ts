@@ -9,7 +9,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.email !== 'graemedakers@gmail.com') {
+    // Check if user is super admin
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { isSuperAdmin: true }
+    });
+
+    if (!user?.isSuperAdmin) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

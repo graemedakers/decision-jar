@@ -31,6 +31,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [isLogModalOpen, setIsLogModalOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
+    const [isSuperAdmin, setIsSuperAdmin] = useState(false);
     const [hasPartner, setHasPartner] = useState(false);
     const [inviteCode, setInviteCode] = useState("");
     const [isPremium, setIsPremium] = useState(false);
@@ -61,12 +62,14 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         setLocation(data.user.homeTown || data.user.location || "");
                         setInterests(data.user.interests || "");
                         setIsCreator(!!data.user.isCreator);
+                        setIsSuperAdmin(!!data.user.isSuperAdmin);
                         setActiveJarId(data.user.activeJarId);
 
                         // Role-based Check
                         const activeMembership = data.user.memberships?.find((m: any) => m.jarId === data.user.activeJarId);
                         const isAdminRole = ['OWNER', 'ADMIN'].includes(activeMembership?.role);
-                        setIsAdmin(isAdminRole || !!data.user.isCreator);
+                        const isSuperAdmin = !!data.user.isSuperAdmin;
+                        setIsAdmin(isAdminRole || !!data.user.isCreator || isSuperAdmin);
 
                         setHasPartner(!!data.user.hasPartner);
                         setInviteCode(data.user.coupleReferenceCode || "");
@@ -415,6 +418,37 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                         <Sparkles className="w-4 h-4 mr-2" /> Upgrade to Pro
                                                     </Button>
                                                 )}
+
+                                                {/* ADMIN OVERRIDE (For Super Admin) */}
+                                                {isSuperAdmin && (
+                                                    <div className="pt-4 mt-2 border-t border-dashed border-slate-200 dark:border-white/10">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className="text-[10px] uppercase font-bold text-purple-500">Admin Override</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={includePremiumToken}
+                                                                onChange={(e) => setIncludePremiumToken(e.target.checked)}
+                                                                className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 w-4 h-4"
+                                                            />
+                                                            <span className="text-xs text-slate-500">Gift Premium?</span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const params = new URLSearchParams();
+                                                                if (inviteCode) params.set('code', inviteCode);
+                                                                if (includePremiumToken && premiumInviteToken) params.set('pt', premiumInviteToken);
+                                                                navigator.clipboard.writeText(`${window.location.origin}/join?${params.toString()}`);
+                                                                showSuccess("Admin Link Copied");
+                                                            }}
+                                                            className="mt-2 w-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 py-2 rounded font-mono"
+                                                        >
+                                                            Copy Admin Link
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     )}
@@ -510,36 +544,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                     </div>
                                                 )}
 
-                                                {/* ADMIN OVERRIDE (Hidden unless specific user) */}
-                                                {currentUserEmail === 'graemedakers@gmail.com' && (
-                                                    <div className="pt-4 mt-2 border-t border-dashed border-slate-200 dark:border-white/10">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <span className="text-[10px] uppercase font-bold text-purple-500">Admin Override</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={includePremiumToken}
-                                                                onChange={(e) => setIncludePremiumToken(e.target.checked)}
-                                                                className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 w-4 h-4"
-                                                            />
-                                                            <span className="text-xs text-slate-500">Gift Premium?</span>
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                const params = new URLSearchParams();
-                                                                if (inviteCode) params.set('code', inviteCode);
-                                                                if (includePremiumToken && premiumInviteToken) params.set('pt', premiumInviteToken);
-                                                                navigator.clipboard.writeText(`${window.location.origin}/join?${params.toString()}`);
-                                                                showSuccess("Admin Link Copied");
-                                                            }}
-                                                            className="mt-2 w-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 py-2 rounded font-mono"
-                                                        >
-                                                            Copy Admin Link
-                                                        </button>
-                                                    </div>
-                                                )}
+
                                             </div>
 
                                             {/* DANGER ZONE */}

@@ -8,6 +8,7 @@ import { Button } from "./ui/Button";
 import { useState, useRef } from "react";
 import { Confetti } from "./Confetti";
 import { exportToPdf } from "@/lib/pdf-export";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 import { Idea } from "@/lib/types";
 
@@ -26,6 +27,8 @@ interface DateRevealProps {
 }
 
 export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOnly }: DateRevealProps) {
+    const isMobile = useMediaQuery("(max-width: 768px)");
+
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
     const [showAI, setShowAI] = useState(false);
@@ -114,6 +117,19 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
         setIsLoadingAI(false);
     }
 
+    // Animation Variants
+    const desktopVariants = {
+        hidden: { scale: 0.8, y: 50, opacity: 0 },
+        visible: { scale: 1, y: 0, opacity: 1 },
+        exit: { scale: 0.8, y: 50, opacity: 0 }
+    };
+
+    const mobileVariants = {
+        hidden: { y: "100%", opacity: 0 },
+        visible: { y: 0, opacity: 1 },
+        exit: { y: "100%", opacity: 0 }
+    };
+
     return (
         <AnimatePresence>
             {idea && (
@@ -121,15 +137,30 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    className={`fixed inset-0 z-50 flex ${isMobile ? 'items-end' : 'items-center justify-center'} p-0 md:p-4 bg-black/60 backdrop-blur-sm`}
+                    onClick={onClose} // Click backdrop to close
                 >
                     {!isViewOnly && <Confetti />}
                     <motion.div
-                        initial={{ scale: 0.8, y: 50, opacity: 0 }}
-                        animate={{ scale: 1, y: 0, opacity: 1 }}
-                        exit={{ scale: 0.8, y: 50, opacity: 0 }}
-                        className="glass-card w-full max-w-lg relative overflow-hidden flex flex-col max-h-[90vh] bg-white dark:bg-slate-900"
+                        variants={isMobile ? mobileVariants : desktopVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        onClick={(e) => e.stopPropagation()} // Prevent close on card click
+                        className={`glass-card w-full relative overflow-hidden flex flex-col bg-white dark:bg-slate-900 
+                            ${isMobile
+                                ? 'rounded-t-[2rem] rounded-b-none max-h-[85vh] h-auto pb-safe'
+                                : 'max-w-lg max-h-[90vh] rounded-2xl'
+                            }`}
                     >
+                        {/* Mobile Drag Handle */}
+                        {isMobile && (
+                            <div className="w-full flex justify-center pt-3 pb-1" onClick={onClose}>
+                                <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full" />
+                            </div>
+                        )}
+
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/20 blur-[50px] rounded-full -z-10" />
 
                         <button

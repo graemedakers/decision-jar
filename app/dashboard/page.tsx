@@ -8,7 +8,7 @@ import Link from "next/link";
 import {
     Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar,
     Activity, Utensils, Check, Star, ArrowRight, History, Layers,
-    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2
+    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2, Download
 } from "lucide-react";
 
 import { Jar3D } from "@/components/Jar3D";
@@ -28,6 +28,7 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import React from "react";
 import { SmartInputBar } from "@/components/SmartInputBar";
 import { useLoadingState } from "@/hooks/useLoadingState";
+import { usePWA } from "@/hooks/usePWA";
 
 // Lazy Loading
 const PreferenceQuizModal = dynamic(() => import("@/components/PreferenceQuizModal").then(m => m.PreferenceQuizModal), { ssr: false });
@@ -102,6 +103,8 @@ function DashboardContent() {
         // Utils
         openModal
     } = useDashboardLogic();
+
+    const { installPrompt, install } = usePWA();
 
     // --- View Logic / Layout Calculations ---
     const jarTopic = userData?.jarTopic;
@@ -224,6 +227,18 @@ function DashboardContent() {
 
                         {/* Right: Utility Tools - Desktop Only (Wide) */}
                         <div className="hidden lg:flex items-center justify-end gap-2 shrink-0">
+                            {installPrompt && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={install}
+                                    className="hidden md:flex gap-2 rounded-full border border-primary/20 text-primary hover:bg-primary/5 transition-colors px-4 h-11"
+                                >
+                                    <Download className="w-4 h-4" />
+                                    <span className="text-sm font-bold">Install App</span>
+                                </Button>
+                            )}
+
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -281,6 +296,17 @@ function DashboardContent() {
                         </div>
 
                         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 h-12">
+                            {installPrompt && (
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={install}
+                                    className="w-11 h-11 rounded-xl bg-primary/5 border-primary/20 shrink-0 text-primary"
+                                    aria-label="Install App"
+                                >
+                                    <Download className="w-5 h-5" />
+                                </Button>
+                            )}
                             <Button
                                 variant="outline"
                                 size="icon"
@@ -439,7 +465,7 @@ function DashboardContent() {
                                     </div>
                                 )}
 
-                                {!isVotingMode && !isAdminPickMode && (
+                                {!isVotingMode && (
                                     <div className="mt-8 w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col items-center gap-4">
                                         <SmartInputBar />
 

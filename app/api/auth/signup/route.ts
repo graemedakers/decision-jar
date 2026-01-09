@@ -154,6 +154,49 @@ export async function POST(request: Request) {
             });
         }
 
+        // Auto-add user to community feedback jars
+        try {
+            const feedbackJars = await prisma.jar.findMany({
+                where: {
+                    referenceCode: {
+                        in: ['BUGRPT', 'FEATREQ']
+                    }
+                },
+                select: { id: true, referenceCode: true }
+            });
+
+            if (feedbackJars.length > 0) {
+                // Check which jars the user is not already a member of
+                const existingMemberships = await prisma.jarMember.findMany({
+                    where: {
+                        userId: user.id,
+                        jarId: {
+                            in: feedbackJars.map(j => j.id)
+                        }
+                    },
+                    select: { jarId: true }
+                });
+
+                const existingJarIds = existingMemberships.map(m => m.jarId);
+                const jarsToJoin = feedbackJars.filter(j => !existingJarIds.includes(j.id));
+
+                // Add user to feedback jars they're not already in
+                for (const jar of jarsToJoin) {
+                    await prisma.jarMember.create({
+                        data: {
+                            userId: user.id,
+                            jarId: jar.id,
+                            role: 'MEMBER'
+                        }
+                    });
+                    console.log(`Added user ${user.email} to ${jar.referenceCode} jar`);
+                }
+            }
+        } catch (feedbackError) {
+            // Don't fail signup if feedback jar addition fails
+            console.error('Failed to add user to feedback jars:', feedbackError);
+        }
+
         // Send verification email
         await sendVerificationEmail(email, verificationToken);
 

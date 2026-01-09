@@ -55,10 +55,11 @@ export async function POST(request: Request) {
         let isPremiumGifted = false;
         if (premiumToken) {
             const inviter = await prisma.user.findFirst({
-                where: { premiumInviteToken: premiumToken }
+                where: { premiumInviteToken: premiumToken },
+                select: { isSuperAdmin: true }
             });
-            // Simplified check based on inviter (matching signup.ts logic)
-            if (inviter && inviter.email === 'graemedakers@gmail.com') {
+
+            if (inviter?.isSuperAdmin) {
                 isPremiumGifted = true;
             }
         }

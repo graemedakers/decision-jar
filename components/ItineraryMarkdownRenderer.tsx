@@ -49,7 +49,9 @@ export function ItineraryMarkdownRenderer({ markdown, configId, theme, variant }
                             return <div key={i} className="font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1 text-sm">{trimmed.replace(/\*\*/g, '')}</div>;
                         }
                         if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-                            return <li key={i} className="ml-4 list-disc pl-1 text-slate-600 dark:text-slate-300 text-sm">{trimmed.replace(/^[-*] /, '')}</li>;
+                            // List items - also need to handle URLs within them
+                            const listContent = trimmed.replace(/^[-*] /, '');
+                            return <li key={i} className="ml-4 list-disc pl-1 text-slate-600 dark:text-slate-300 text-sm">{renderTextWithLinks(listContent)}</li>;
                         }
 
                         // Link parsing (e.g. Map links)
@@ -59,16 +61,56 @@ export function ItineraryMarkdownRenderer({ markdown, configId, theme, variant }
                             const parts = line.split(full);
                             return (
                                 <p key={i} className="mb-1 text-sm">
-                                    {parts[0]}
+                                    {renderTextWithLinks(parts[0])}
                                     <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline font-medium inline-flex items-center gap-0.5">
                                         {text} <ArrowRight className="w-3 h-3" />
                                     </a>
-                                    {parts[1]}
+                                    {renderTextWithLinks(parts[1])}
                                 </p>
                             );
                         }
 
-                        return <p key={i} className="mb-1 text-sm text-slate-600 dark:text-slate-300">{line}</p>;
+                        return <p key={i} className="mb-1 text-sm text-slate-600 dark:text-slate-300">{renderTextWithLinks(line)}</p>;
+                    });
+                };
+
+                // Helper function to detect and render plain URLs as clickable links
+                const renderTextWithLinks = (text: string) => {
+                    if (!text) return text;
+
+                    // Regex to match URLs (http, https) - capture everything, then clean trailing punctuation
+                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                    const parts = text.split(urlRegex);
+
+                    return parts.map((part, idx) => {
+                        if (part.match(urlRegex)) {
+                            // Clean up any trailing punctuation (but not alphanumeric chars)
+                            let cleanUrl = part;
+                            let trailingPunctuation = '';
+
+                            // Only remove trailing punctuation characters (not letters/numbers/colons)
+                            // Exclude colon since it's part of https://
+                            while (cleanUrl.length > 0 && /[).,;!?]$/.test(cleanUrl)) {
+                                trailingPunctuation = cleanUrl.slice(-1) + trailingPunctuation;
+                                cleanUrl = cleanUrl.slice(0, -1);
+                            }
+
+                            return (
+                                <React.Fragment key={idx}>
+                                    <a
+                                        href={cleanUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 dark:text-blue-400 hover:underline font-medium break-all"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {cleanUrl}
+                                    </a>
+                                    {trailingPunctuation}
+                                </React.Fragment>
+                            );
+                        }
+                        return part;
                     });
                 };
 

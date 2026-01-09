@@ -67,10 +67,10 @@ export function ConciergeResultCard({
             <div className="flex flex-col sm:flex-row gap-4 mb-2">
                 <button
                     onClick={() => onFavorite(rec, categoryType)}
-                    className={`absolute top-3 right-3 p-2 rounded-full transition-all z-10 ${rec.isFavorite
+                    className={`absolute top-3 p-2 rounded-full transition-all z-10 ${rec.isFavorite
                         ? 'text-pink-500 bg-pink-500/10'
                         : 'text-slate-400 hover:text-pink-400 hover:bg-slate-100 dark:hover:bg-white/5'
-                        } ${expandable ? 'right-12' : 'right-3'}`}
+                        } ${expandable ? 'right-14' : 'right-3'}`}
                 >
                     <Heart className={`w-5 h-5 ${rec.isFavorite ? 'fill-current' : ''}`} />
                 </button>
@@ -79,6 +79,7 @@ export function ConciergeResultCard({
                     <button
                         onClick={onToggleExpand}
                         className="absolute top-3 right-3 p-2 rounded-full transition-all z-10 text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                        aria-label={isExpanded ? "Collapse details" : "View full plan"}
                     >
                         {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </button>

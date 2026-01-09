@@ -106,7 +106,7 @@ export default function PremiumPage() {
                             <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 mb-10 flex items-center gap-3">
                                 <Zap className="w-5 h-5 text-green-400" />
                                 <span className="text-green-400 font-bold text-sm">
-                                    Includes {PRICING.TRIAL_DAYS}-Day Free Full-Access Trial
+                                    New Subscribers: {PRICING.TRIAL_DAYS}-Day Free Trial
                                 </span>
                             </div>
 
@@ -118,7 +118,7 @@ export default function PremiumPage() {
                                     "Custom Itinerary Builder",
                                     "One-Tap Shortcuts (PWA)",
                                     "Priority Feature Access",
-                                    "Cancel anytime during trial"
+                                    "Cancel anytime"
                                 ].map((feature, i) => (
                                     <li key={i} className="flex items-center gap-3 text-slate-300">
                                         <div className="p-1 bg-primary/10 rounded-full">
@@ -135,10 +135,10 @@ export default function PremiumPage() {
                                     isLoading={isLoading}
                                     className="w-full h-14 bg-white text-slate-900 hover:bg-slate-100 text-lg font-bold rounded-2xl shadow-xl shadow-white/5 transition-all active:scale-[0.98]"
                                 >
-                                    Try 14 Days Free
+                                    Start Monthly Subscription
                                 </Button>
                                 <p className="text-center text-[11px] text-slate-500 font-medium">
-                                    AU$0.00 today, then {PRICING.MONTHLY}/mo after 14 days. <br />
+                                    {PRICING.MONTHLY}/mo. New subscribers get 14-day free trial. <br />
                                     Easy online cancellation at any time.
                                 </p>
                             </div>

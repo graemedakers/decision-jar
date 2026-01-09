@@ -72,21 +72,59 @@ The Dashboard is your command center.
 
 ## 5. Adding Ideas
 
-### Adding Ideas
-1.  Click **"Add Idea"** (Plus icon).
-2.  Enter a description and optional details.
-3.  Select categories (Activity, Meal, Event, etc.) and tags (Indoor, Outdoor).
-4.  Set estimated Duration, Cost, and Energy levels.
+There are multiple ways to add ideas to your jar. Choose the method that works best for you!
 
-### Surprise Me (AI Assistant)
+### Smart Input Bar (Recommended)
+The Smart Input Bar is the fastest way to add ideas. Located prominently on your dashboard, it automatically detects what type of content you're adding and handles it intelligently.
+
+#### Three Input Methods:
+
+**1. Type Text**
+- Simply type your idea and press Enter
+- Example: "Visit the local art museum"
+- The idea is added with default settings that you can edit later
+
+**2. Paste a Link**
+- Paste any URL and it's automatically detected
+- Great for sharing restaurant websites, event pages, or articles
+- The URL is saved in the "Details" field for easy reference
+
+**3. Upload an Image**
+- Click the image icon (📸) to upload a photo
+- Perfect for saving screenshots of events, menus, or inspiration
+- Supported formats: JPG, PNG, GIF, WebP
+- Images are automatically compressed for fast loading
+- Preview appears before saving
+
+### Manual Entry (Detailed Control)
+For more control over your idea's attributes:
+1. Click **"Add Idea"** (Plus icon)
+2. Fill in the detailed form with:
+   - **Description:** The main idea name
+   - **Details:** Additional notes or instructions
+   - **Setting:** Indoor or Outdoor
+   - **Duration:** How long it takes (15min to 8+ hours)
+   - **Cost:** Free, $, $$, or $$$
+   - **Energy Level:** Low, Medium, or High
+   - **Time of Day:** Day, Evening, or Any
+   - **Category:** Activity, Meal, Event, etc.
+   - **Photo URL:** Link to an image
+
+### AI Concierge
 Stuck for inspiration?
-1. Click **"Surprise Me"** (Sparkles icon).
-2. The AI generates a secret idea based on your interests and location.
-3. This is added as a **Hidden Surprise**—no one can see the details until it is picked by a spin!
+1. Click the **Sparkles icon** (✨) in the Smart Input Bar or visit the **Explore** tab
+2. Ask AI to generate custom ideas based on your interests and location
+3. Ideas are added as **Hidden Surprises**—details stay secret until you spin them!
+
+### Templates & Planners
+- Click the **Book icon** (📖) in the Smart Input Bar
+- Or visit the **Explore** tab
+- Browse pre-made templates and AI planners
+- Add complete itineraries or venue recommendations to your jar
 
 ### Permissions
-*   **Everyone** can add ideas.
-*   **Only the Creator** or a **Jar Admin** can edit or delete existing ideas.
+*   **Everyone** can add ideas
+*   **Only the Creator** or a **Jar Admin** can edit or delete existing ideas
 
 ---
 
