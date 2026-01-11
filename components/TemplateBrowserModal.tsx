@@ -45,16 +45,18 @@ export function TemplateBrowserModal({
     const handleTemplateClick = (template: JarTemplate) => {
         setSelectedTemplate(template);
 
-        // ✅ FIXED: Only show choice dialog if:
-        // 1. User has jars AND a current jar AND
-        // 2. Current jar already has ideas (not empty)
-        //
-        // Skip choice for empty jars - just create new jar from template
-        if (hasJars && currentJarId && currentJarIdeaCount > 0) {
-            setDialogChoice('new'); // Default to new jar
-            setShowChoiceDialog(true);
+        // If user has a current jar...
+        if (hasJars && currentJarId) {
+            // ...and it's not empty, ask them what to do
+            if (currentJarIdeaCount > 0) {
+                setDialogChoice('new'); // Default to new jar
+                setShowChoiceDialog(true);
+            } else {
+                // ...but if it IS empty, just fill it! (Avoids creating 2nd jar limit issue)
+                handleAddToCurrentJar(template.id);
+            }
         } else {
-            // No jars yet, empty jar, or not on a jar - just create new
+            // No jars yet or not in a jar context - create new
             handleCreateNewJar(template.id);
         }
     };
