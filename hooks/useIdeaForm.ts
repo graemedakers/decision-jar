@@ -35,18 +35,20 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
     useEffect(() => {
         if (initialData) {
             setFormData({
-                description: initialData.description,
+                description: initialData.description || "",
                 details: initialData.details || "",
-                indoor: initialData.indoor,
-                duration: Number.isInteger(initialData.duration) ? `${initialData.duration}.0` : String(initialData.duration),
-                activityLevel: initialData.activityLevel,
-                cost: initialData.cost,
-                timeOfDay: initialData.timeOfDay || "ANY",
-                category: initialData.category || "ACTIVITY",
-                suggestedBy: "",
-                isPrivate: initialData.isPrivate || false,
-                weather: initialData.weather || "ANY",
-                requiresTravel: initialData.requiresTravel || false,
+                indoor: initialData.indoor ?? DEFAULT_FORM_DATA.indoor,
+                duration: initialData.duration !== undefined
+                    ? (Number.isInteger(initialData.duration) ? `${initialData.duration}.0` : String(initialData.duration))
+                    : DEFAULT_FORM_DATA.duration,
+                activityLevel: initialData.activityLevel || DEFAULT_FORM_DATA.activityLevel,
+                cost: initialData.cost || DEFAULT_FORM_DATA.cost,
+                timeOfDay: initialData.timeOfDay || DEFAULT_FORM_DATA.timeOfDay,
+                category: initialData.category || DEFAULT_FORM_DATA.category,
+                suggestedBy: initialData.suggestedBy || "",
+                isPrivate: initialData.isPrivate ?? DEFAULT_FORM_DATA.isPrivate,
+                weather: initialData.weather || DEFAULT_FORM_DATA.weather,
+                requiresTravel: initialData.requiresTravel ?? DEFAULT_FORM_DATA.requiresTravel,
                 photoUrls: initialData.photoUrls || [],
             });
         } else {
