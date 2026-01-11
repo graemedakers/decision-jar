@@ -18,12 +18,13 @@ export function Jar3D() {
                 className="relative w-full h-full flex items-center justify-center pt-8"
             >
                 <Image
-                    src="/jar-hero.png"
-                    alt="Date Jar"
+                    src="/jar-main.jpg"
+                    alt="Decision Jar"
                     fill
                     className="object-contain drop-shadow-2xl"
                     sizes="(max-width: 768px) 100vw, 320px"
                     priority
+                    unoptimized={true}
                 />
             </motion.div>
         </div>
