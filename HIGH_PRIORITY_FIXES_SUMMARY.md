@@ -515,7 +515,56 @@ npx prisma generate
 
 ---
 
+---
+
+### ✅ Fix #9: OAuth Signups Landing in Bug Reports Jar
+
+**Problem**:
+- Users signing up via Google/Facebook were not being prompted to create a personal jar.
+- Instead, they were automatically added to "Community Jars" (Bug Reports, Feature Requests) and their `activeJarId` was defaulting to one of these (usually Bug Reports).
+- **Result**: New users landed in a confusing "Bug Reports" interface instead of a personal empty jar, destroying the onboarding experience.
+
+**Root Cause**:
+- The `createUser` event in `auth-options.ts` was correctly adding users to community jars but **failed to create a personal jar** for them.
+- Without a personal jar, the system fell back to the first available membership (Bug Reports).
+
+**Solution**:
+- **Updated `createUser` logic**:
+  - Immediately creates a "My First Jar" (Type: SOCIAL, Topic: General Fun) for every new OAuth user.
+  - Generates a unique reference code for this jar.
+  - Explicitly sets this new jar as the user's `activeJarId`.
+- **Outcome**: Users now land in their own private jar immediately after signup, ready to add ideas or use templates.
+
+**Impact**:
+- ✅ OAuth users have a seamless "Day 1" experience.
+- ✅ Eliminates the confusion of landing in a shared/public jar.
+
+---
+
+### ✅ Fix #10: Infinite Redirect Loop on Deleted User
+
+**Problem**:
+- If a user was deleted from the database while still having an active session cookie, visiting the site would cause an infinite redirect loop.
+- **Loop**: `Middleware` (sees cookie) -> `Dashboard` (user not found) -> `Nuke Session` (tries to clear cookie) -> `Home` -> `Middleware` (sees cookie again)...
+
+**Root Cause**:
+- The `nuke-session` route was attempting to clear cookies using default settings.
+- In **Production**, cookies are set with `Secure: true` and `SameSite: Lax`.
+- Browsers **ignore** requests to delete/overwrite a Secure cookie if the delete request does not *also* specify `Secure: true`.
+- Consequently, the session cookie remained in the browser, causing the middleware to think the user was still logged in.
+
+**Solution**:
+- **Updated `app/api/auth/nuke-session/route.ts`**:
+  - Added specific logic to target cookies with matching attributes (`path: '/'`, `sameSite: 'lax'`, `secure: isProduction`).
+  - Clears both `session`, `next-auth.session-token`, and their `__Secure-` variants to be absolutely safe.
+
+**Impact**:
+- ✅ "Deleted" users are now correctly logged out and redirected to the home page.
+- ✅ Prevents the "Access Denied / Redirect Loop" of death.
+
+---
+
 **Fixes Implemented By**: Engineering Team  
 **Date**: January 11, 2026  
 **Status**: ✅ **COMPLETED**  
-**Priority**: HIGH - Onboarding/Activation Flow
+**Priority**: CRITICAL - Onboarding & Core Auth Stability
