@@ -446,6 +446,7 @@ export function useConciergeActions({
         handleAddToJar,
         handleGoTonight,
         handleFavorite,
-        toggleSelection
+        toggleSelection,
+        isAddingToJar  // Expose loading state for UI feedback
     };
 }

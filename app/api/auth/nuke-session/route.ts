@@ -8,13 +8,14 @@ export async function GET(request: Request) {
     const isProduction = process.env.NODE_ENV === 'production';
 
     // Forcefully delete all known auth cookies with matching attributes
-    // Browser requires matching Secure/Path attributes to overwrite/delete
+    // Browser requires matching Secure/Path/HttpOnly attributes to overwrite/delete
     const commonOptions = {
         path: '/',
         maxAge: 0,
         expires: new Date(0),
         sameSite: 'lax' as const,
-        secure: isProduction
+        secure: isProduction,
+        httpOnly: true  // Must match how cookies were originally set
     };
 
     // 1. Clear Custom Session

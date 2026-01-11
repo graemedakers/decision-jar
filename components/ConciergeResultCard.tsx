@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, ChevronDown, ChevronUp, Check } from "lucide-react";
+import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, ChevronDown, ChevronUp, Check, Loader2 } from "lucide-react";
 import React from "react";
 import { ShareButton } from "@/components/ShareButton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,6 +30,7 @@ interface ConciergeResultCardProps {
     onFavorite: (rec: any, type: any) => void;
     onAddToJar: (rec: any, type: any, isPrivate: boolean) => void;
     onGoAction: (rec: any, type: any, isPrivate: boolean) => void;
+    isAddingToJar?: boolean;  // Loading state for Add to Jar button
 
     // Visual Overrides
     goActionLabel?: string;
@@ -54,6 +55,7 @@ export function ConciergeResultCard({
     onFavorite,
     onAddToJar,
     onGoAction,
+    isAddingToJar = false,
     goActionLabel = "Go Now",
     goActionClass = "bg-gradient-to-r from-emerald-400/20 to-teal-400/20 text-emerald-700 dark:text-emerald-200 border border-emerald-400/30 hover:bg-emerald-400/30",
     ratingClass = "text-yellow-400",
@@ -168,13 +170,17 @@ export function ConciergeResultCard({
 
                     <Button
                         size="sm"
-                        disabled={rec.isAdded}
+                        disabled={rec.isAdded || isAddingToJar}
                         onClick={() => onAddToJar(rec, categoryType, isPrivate)}
                         className={`text-xs h-8 transition-all ${rec.isAdded
                             ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                            : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"}`}
+                            : isAddingToJar
+                                ? "bg-slate-200 dark:bg-white/20 text-slate-500 cursor-wait"
+                                : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"}`}
                     >
-                        {rec.isAdded ? (
+                        {isAddingToJar ? (
+                            <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> Adding...</>
+                        ) : rec.isAdded ? (
                             <><Check className="w-3.5 h-3.5 mr-1" /> Added</>
                         ) : (
                             <><Plus className="w-3.5 h-3.5 mr-1" /> Jar</>

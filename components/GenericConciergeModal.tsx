@@ -241,7 +241,7 @@ export function GenericConciergeModal({
     }, [recommendations]);
 
     // Concierge action handlers
-    const { handleAddToJar, handleGoTonight: handleGoTonightFromHook, handleFavorite } = useConciergeActions({
+    const { handleAddToJar, handleGoTonight: handleGoTonightFromHook, handleFavorite, isAddingToJar } = useConciergeActions({
         onIdeaAdded,
         onGoTonight,
         onFavoriteUpdated,
@@ -593,6 +593,7 @@ export function GenericConciergeModal({
                                                     onGoAction={() => onGoAction(rec)}
                                                     goActionLabel={config.resultCard.goActionLabel || "Go Tonight"}
                                                     ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
+                                                    isAddingToJar={isAddingToJar}
 
                                                     // Inline Expansion for Holidays
                                                     expandable={isHoliday}
