@@ -95,7 +95,14 @@ export async function GET() {
                     }
                 });
             }
-            return NextResponse.json({ user: null });
+
+            // ❌ CRITICAL: User session exists but user is deleted from database
+            // Return 401 to trigger nuke-session redirect and prevent infinite loop
+            console.warn(`Session exists for deleted user: ${session.user.email}`);
+            return NextResponse.json(
+                { error: 'User account not found' },
+                { status: 401 }
+            );
         }
 
         const members = activeJar.members || (activeJar as any).users || [];
