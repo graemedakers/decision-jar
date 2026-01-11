@@ -38,8 +38,13 @@ export default auth(async (req) => {
         }
     }
 
-    // 2. Protected Routes
-    if (path.startsWith('/dashboard') || path.startsWith('/jar') || path.startsWith('/memories')) {
+    // 2. Protected Routes (Ensure we don't match public files like /jar-main.jpg)
+    const isProtectedRoute =
+        path.startsWith('/dashboard') ||
+        (path.startsWith('/jar/') || path === '/jar') || // Only match /jar as a route, not as a prefix for assets
+        path.startsWith('/memories');
+
+    if (isProtectedRoute) {
         if (!isAuthenticated) {
             return NextResponse.redirect(new URL('/', req.url));
         }
@@ -60,8 +65,15 @@ export default auth(async (req) => {
 });
 
 export const config = {
-    // Match everything BUT static files and next internals
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public files with extensions (png, jpg, jpeg, gif, svg, webp)
+     */
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)).*)',
     ],
 }
