@@ -94,22 +94,27 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
         const targetMembership = user.memberships.find(m => m.jarId === jarId);
         const targetJar = targetMembership?.jar;
 
-        if (!targetJar || jarId === activeJar?.id) return;
+        if (jarId === activeJar?.id) return;
 
         setIsLoading(true);
 
-        // ✅ OPTIMISTIC UPDATE: Update UI immediately for instant feedback
-        queryClient.setQueryData(CacheKeys.user(), (old: any) => {
-            if (!old) return old;
-            return {
-                ...old,
-                activeJarId: jarId,
-                jarName: targetJar.name,
-                // Also update jar-specific gamification data
-                level: targetJar.level || 1,
-                xp: targetJar.xp || 0
-            };
-        });
+        // ✅ OPTIMISTIC UPDATE: Only possible if we know the jar details
+        if (targetJar) {
+            queryClient.setQueryData(CacheKeys.user(), (old: any) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    activeJarId: jarId,
+                    jarName: targetJar.name,
+                    // Also update jar-specific gamification data
+                    level: targetJar.level || 1,
+                    xp: targetJar.xp || 0
+                };
+            });
+        }
+
+        // ✅ CRITICAL: Invalidate ideas cache to fetch ideas for new jar
+        queryClient.invalidateQueries({ queryKey: CacheKeys.ideas() });
 
         try {
             const res = await fetch('/api/auth/switch-jar', {
@@ -130,12 +135,14 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
             } else {
                 // ❌ API failed: Rollback optimistic update
                 queryClient.invalidateQueries({ queryKey: CacheKeys.user() });
+                queryClient.invalidateQueries({ queryKey: CacheKeys.ideas() });
                 showError("Failed to switch jar");
             }
         } catch (error) {
             // ❌ Network error: Rollback optimistic update
             console.error("Failed to switch jar", error);
             queryClient.invalidateQueries({ queryKey: CacheKeys.user() });
+            queryClient.invalidateQueries({ queryKey: CacheKeys.ideas() });
             showError("Failed to switch jar");
         } finally {
             setIsLoading(false);
