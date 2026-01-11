@@ -2,6 +2,7 @@ import { NextAuthConfig } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
+import { generateUniqueCode } from "@/lib/utils";
 
 export const authOptions: NextAuthConfig = {
     adapter: PrismaAdapter(prisma) as any,
@@ -10,7 +11,33 @@ export const authOptions: NextAuthConfig = {
         createUser: async ({ user }) => {
             if (!user.id) return;
             try {
-                // Find community jars
+                // 1. Create a default personal jar for the user
+                // Do this FIRST so it becomes their active jar
+                const code = await generateUniqueCode();
+
+                const personalJar = await prisma.jar.create({
+                    data: {
+                        name: "My First Jar",
+                        type: "SOCIAL", // Default to social/general
+                        topic: "General Fun",
+                        referenceCode: code,
+                        members: {
+                            create: {
+                                userId: user.id,
+                                role: 'OWNER',
+                                status: 'ACTIVE'
+                            }
+                        }
+                    }
+                });
+
+                // Set this as the active jar immediately
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { activeJarId: personalJar.id }
+                });
+
+                // 2. Add to community jars (as secondary jars)
                 const communityJars = await prisma.jar.findMany({
                     where: {
                         referenceCode: { in: ['BUGRPT', 'FEATREQ'] }
@@ -18,7 +45,6 @@ export const authOptions: NextAuthConfig = {
                 });
 
                 if (communityJars.length > 0) {
-                    // Add memberships to community jars
                     await prisma.jarMember.createMany({
                         data: communityJars.map(jar => ({
                             jarId: jar.id,
@@ -26,16 +52,9 @@ export const authOptions: NextAuthConfig = {
                             role: 'MEMBER'
                         }))
                     });
-
-                    // ✅ CRITICAL FIX: Do NOT set activeJarId to community jar
-                    // Leave activeJarId as null so user is prompted to create personal jar
-                    // Previous behavior caused OAuth users to land in empty BUGRPT jar
-
-                    // NOTE: User will see "Create Your First Jar" modal on dashboard
-                    // This provides better onboarding experience for OAuth users
                 }
             } catch (error) {
-                console.error("Error adding user to community jars:", error);
+                console.error("Error setting up new user jars:", error);
             }
         }
     },
