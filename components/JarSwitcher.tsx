@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ChevronDown, Plus, Users, User, Heart, Check, LogOut, Loader2, MoreVertical, Trash2, Utensils, Film, PartyPopper, CheckSquare, Sparkles, Layers, Book } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { CacheKeys } from "@/lib/cache-utils";
 import { cn } from "@/lib/utils";
 import { CreateJarModal } from "./CreateJarModal";
 import { JoinJarModal } from "./JoinJarModal";
@@ -23,6 +25,8 @@ interface Jar {
     name: string | null;
     type: "ROMANTIC" | "SOCIAL" | "GENERIC";
     topic?: string | null;
+    level?: number;
+    xp?: number;
 }
 
 const getJarIcon = (jar: Jar, className?: string) => {
@@ -76,6 +80,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
     const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
+    const queryClient = useQueryClient();
 
     const activeMembership = user.memberships.find(m => m.jarId === user.activeJarId) || user.memberships[0];
     const activeJar = activeMembership?.jar;
@@ -85,9 +90,27 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
     const hasRomanticJar = user.memberships.some(m => m.jar.type === 'ROMANTIC');
 
     const handleSwitchJar = async (jarId: string) => {
-        if (jarId === activeJar?.id) return;
+        // Find the target jar
+        const targetMembership = user.memberships.find(m => m.jarId === jarId);
+        const targetJar = targetMembership?.jar;
+
+        if (!targetJar || jarId === activeJar?.id) return;
 
         setIsLoading(true);
+
+        // ✅ OPTIMISTIC UPDATE: Update UI immediately for instant feedback
+        queryClient.setQueryData(CacheKeys.user(), (old: any) => {
+            if (!old) return old;
+            return {
+                ...old,
+                activeJarId: jarId,
+                jarName: targetJar.name,
+                // Also update jar-specific gamification data
+                level: targetJar.level || 1,
+                xp: targetJar.xp || 0
+            };
+        });
+
         try {
             const res = await fetch('/api/auth/switch-jar', {
                 method: 'POST',
@@ -96,15 +119,24 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
             });
 
             if (res.ok) {
+                // Refetch to sync with server (background)
                 if (onSwitch) {
                     await onSwitch();
-                    router.refresh(); // Update generic server components
+                    router.refresh(); // Update server components
                 } else {
-                    window.location.reload();
+                    // Fallback: still do optimistic update, then hard refresh
+                    setTimeout(() => window.location.reload(), 100);
                 }
+            } else {
+                // ❌ API failed: Rollback optimistic update
+                queryClient.invalidateQueries({ queryKey: CacheKeys.user() });
+                showError("Failed to switch jar");
             }
         } catch (error) {
+            // ❌ Network error: Rollback optimistic update
             console.error("Failed to switch jar", error);
+            queryClient.invalidateQueries({ queryKey: CacheKeys.user() });
+            showError("Failed to switch jar");
         } finally {
             setIsLoading(false);
         }
@@ -171,7 +203,12 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                             data-tour="jar-selector"
                         >
                             <h1 className="text-lg md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1 min-w-0">
-                                {activeJar ? (
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin flex-shrink-0 text-purple-500" />
+                                        <span className="opacity-60 transition-opacity">Switching...</span>
+                                    </>
+                                ) : activeJar ? (
                                     <>
                                         <span className="truncate min-w-0">
                                             {activeJar.name || "My Jar"}
