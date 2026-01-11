@@ -486,7 +486,36 @@ npx prisma generate
 
 ---
 
+---
+
+### ✅ Fix #8: Template Browser "Failed to Create Jar" Limit Error
+
+**Problem**:
+- New users (on the Free plan) who just created their account and first jar were unable to use templates.
+- Attempting to use a template resulted in a `403 Forbidden` error with the message "Failed to create jar".
+- This occurred because the "Use Template" action was attempting to create a **new** jar. Since the free plan limit is 1 jar, the second creation attempt was blocked by the backend.
+
+**Root Cause**:
+- `TemplateBrowserModal.tsx` simply checked if the user already had jars (`hasJars`). If true, it defaulted to showing a dialog to create a *new* jar from the template.
+- It did not check if the *current* jar was empty.
+- Consequently, a user with 1 empty jar (their initial jar) was being forced to try and create a 2nd jar to use a template, hitting the plan limit.
+
+**Solution**:
+- **Smart Context Detection**: Updated `TemplateBrowserModal.tsx` to check `currentJarIdeaCount`.
+- **Logic Update**:
+  - If the user has a jar, BUT that jar is empty (`currentJarIdeaCount === 0`):
+  - **Action**: Bypass the "Create New vs Add to Current" dialog.
+  - **Result**: Automatically call `handleAddToCurrentJar` to populate the existing empty jar with the template ideas.
+- **Outcome**: The user stays within their 1 jar limit while successfully populating their initial jar.
+
+**Impact**:
+- ✅ New users can instantly populate their first empty jar using any template.
+- ✅ Removes a major friction point in the onboarding flow.
+- ✅ Prevents confusing "Failed to create jar" errors for free users.
+
+---
+
 **Fixes Implemented By**: Engineering Team  
 **Date**: January 11, 2026  
 **Status**: ✅ **COMPLETED**  
-**Priority**: CRITICAL - Branding/Landing Page Visibility
+**Priority**: HIGH - Onboarding/Activation Flow
