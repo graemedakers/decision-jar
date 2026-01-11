@@ -18,7 +18,7 @@ export function Jar3D() {
                 className="relative w-full h-full flex items-center justify-center pt-8"
             >
                 <Image
-                    src="/jar-3d.png"
+                    src="/jar-hero.png"
                     alt="Date Jar"
                     fill
                     className="object-contain drop-shadow-2xl"

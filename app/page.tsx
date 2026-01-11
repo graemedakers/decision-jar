@@ -2,7 +2,7 @@
 
 import { Jar3D } from "@/components/Jar3D";
 import { Button } from "@/components/ui/Button";
-import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key, Book, Menu, ChefHat, Gamepad2, Trophy } from "lucide-react";
+import { Heart, Sparkles, Calendar, Utensils, Wine, Shuffle, Users, ArrowRight, Star, CheckCircle2, User, Brain, Disc, Clapperboard, Bed, Leaf, Dumbbell, Ticket, Key, Book, Menu, ChefHat, Gamepad2, Trophy, Plane } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -416,18 +416,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FeatureCard
-              icon={Book}
-              title="Book Finder"
-              description="[NEW] Curated lists for your next read. Filter by genre, vibe, and era to discover books you'll actually finish."
-              delay={0.12}
-            />
-            <FeatureCard
-              icon={Key}
-              title="Escape Room Scout"
-              description="Unlock the fun. Find highly-rated escape rooms nearby based on themes like Horror, Mystery, or Heist."
-              delay={0.18}
-            />
+            {/* Core Features */}
             <FeatureCard
               icon={Shuffle}
               title="Spin the Jar"
@@ -440,92 +429,122 @@ export default function Home() {
               description="Perfect for couples, roommates, and groups. Invite friends to a shared jar and sync ideas instantly across devices."
               delay={0.15}
             />
+
+            {/* Planning Tools */}
+            <FeatureCard
+              icon={Sparkles}
+              title="AI Concierge"
+              description="Your personal genius. Ask for any specific idea - from 'quiet places to study' to 'unique anniversary gifts' - and get instant, tailored recommendations."
+              delay={0.2}
+            />
             <FeatureCard
               icon={Calendar}
               title="Weekend Planner"
-              description="Build a complete itinerary. Our smart AI planner finds live events and activities for a perfect weekend."
-              delay={0.2}
+              description="Maximize your free time. Our smart AI finds live events, markets, and festivals happening right now in your city."
+              delay={0.25}
+            />
+            <FeatureCard
+              icon={Heart}
+              title="Date Night Planner"
+              description="Plan a complete evening out. Combining dinner, drinks, and activities into a seamless itinerary for you and your partner."
+              delay={0.3}
+            />
+            <FeatureCard
+              icon={Plane}
+              title="Holiday Planner"
+              description="Travel smarter. Create a complete travel itinerary with transport, dining, and activities for your next trip."
+              delay={0.35}
             />
 
+            {/* Food & Drink */}
             <FeatureCard
               icon={Utensils}
               title="Dining Concierge"
-              description="Find top-rated restaurants nearby. Curated recommendations for breakfast, lunch, or dinner."
-              delay={0.25}
+              description="Stop scrolling food apps. Get curated restaurant recommendations based on cuisine, vibe, and dietary needs in seconds."
+              delay={0.4}
             />
             <FeatureCard
               icon={Wine}
               title="Bar Scout"
-              description="Discover hidden speakeasies and rooftop bars. The best nightlife spots for a drink with the crew."
-              delay={0.3}
-            />
-            <FeatureCard
-              icon={Disc}
-              title="Nightclub Scout"
-              description="Find the hottest clubs and dance venues. Get the party started with top-rated nightlife picks."
-              delay={0.35}
-            />
-
-            <FeatureCard
-              icon={Clapperboard}
-              title="Movie Scout"
-              description="See what's playing nearby. Find cinemas, showtimes, and the perfect movie for date night."
-              delay={0.4}
-            />
-            <FeatureCard
-              icon={Brain}
-              title="Activity Planner"
-              description="Step-by-step itineraries for any occasion. Let AI create a custom schedule for your day out."
+              description="Find the perfect watering hole. From hidden speakeasies and rooftop bars to cozy pubs and wine lounges."
               delay={0.45}
             />
             <FeatureCard
-              icon={Bed}
-              title="Hotel Finder"
-              description="Find the perfect stay. Discover top-rated hotels and getaways for your next trip."
+              icon={Disc}
+              title="Nightlife Navigator"
+              description="Own the night. Discover top-rated clubs, dance venues, and late-night spots to keep the party going."
               delay={0.5}
             />
+            <FeatureCard
+              icon={ChefHat}
+              title="Dinner Party Chef"
+              description="Host like a pro. Generate custom menus and recipes for dinner parties, date nights in, or family feasts."
+              delay={0.55}
+            />
 
+            {/* Entertainment */}
+            <FeatureCard
+              icon={Clapperboard}
+              title="Movie Picker"
+              description="End the streaming scroll. Find the perfect movie in theaters or on streaming services based on your mood."
+              delay={0.6}
+            />
+            <FeatureCard
+              icon={Book}
+              title="Book Finder"
+              description="Discover your next read. Curated book recommendations filtered by genre, era, and emotional vibe."
+              delay={0.65}
+            />
+            <FeatureCard
+              icon={Ticket}
+              title="Theatre & Arts"
+              description="Get some culture. Discover plays, musicals, art exhibitions, and live performances happening nearby."
+              delay={0.7}
+            />
+            <FeatureCard
+              icon={Key}
+              title="Escape Room Scout"
+              description="Unlock the fun. Find highly-rated escape rooms nearby based on themes like Horror, Mystery, or Heist."
+              delay={0.72}
+            />
+            <FeatureCard
+              icon={Gamepad2}
+              title="Game Guru"
+              description="Level up your social plans. Find board game cafes, arcades, and gaming venues for a fun group outing."
+              delay={0.75}
+            />
+
+            {/* Lifestyle */}
+            <FeatureCard
+              icon={Bed}
+              title="Staycation Finder"
+              description="Find the perfect getaway. Discover top-rated hotels and resorts for a local staycation or weekend trip."
+              delay={0.78}
+            />
             <FeatureCard
               icon={Leaf}
               title="Wellness & Spa"
-              description="Relax and recharge. Find the best spas, yoga studios, and wellness centers near you."
-              delay={0.55}
+              description="Relax and recharge. Locate the best spas, yoga studios, and wellness centers for some much-needed self-care."
+              delay={0.8}
             />
             <FeatureCard
               icon={Dumbbell}
               title="Fitness Finder"
-              description="Get moving. Locate gyms, hiking trails, and fitness classes wherever you are."
-              delay={0.6}
-            />
-            <FeatureCard
-              icon={Ticket}
-              title="Theatre Scout"
-              description="Discover plays, musicals, and performances. Find the best seats in the house for a night of culture."
-              delay={0.65}
-            />
-            <FeatureCard
-              icon={Gamepad2}
-              title="Game Finder"
-              description="Find board game cafes, arcades, and gaming venues. Level up your social plans."
-              delay={0.68}
+              description="Get moving. Find gyms, hiking trails, rock climbing, and fitness classes wherever you are."
+              delay={0.82}
             />
             <FeatureCard
               icon={Trophy}
-              title="Sports Scout"
-              description="Find clubs, courts, and facilities for solo or joint activities. Get active together."
-              delay={0.72}
+              title="Sports Finder"
+              description="Get in the game. Find places to watch the big match or courts and fields to play your favorite sports."
+              delay={0.85}
             />
-            <FeatureCard
-              icon={ChefHat}
-              title="Catering Planner"
-              description="Plan menus for parties and gatherings. AI-powered meal planning for every occasion."
-              delay={0.75}
-            />
+
             <FeatureCard
               icon={Star}
               title="The Vault"
               description="Keep a digital scrapbook. Rate your experiences, upload photos, and cherish every moment."
-              delay={0.78}
+              delay={0.9}
             />
           </div>
         </div>

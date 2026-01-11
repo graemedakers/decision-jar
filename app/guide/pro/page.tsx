@@ -13,71 +13,103 @@ export default function GuidePro() {
                 Unlock the full power of smart decision making and premium jar management.
             </p>
 
-            <h2 className="text-2xl font-bold mb-6">Concierge Services</h2>
+            <h2 className="text-2xl font-bold mb-6">Explore the Premium Toolkit</h2>
             <p className="mb-8 font-medium">
                 Sometimes you want more than a random pick. Pro users get access to our full suite of theme-specific tools
                 who act as your personal planners:
             </p>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4">
-                        <Utensils className="text-orange-600 w-6 h-6" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Dining Concierge</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Find the perfect breakfast, lunch, or dinner spot nearby. Our system checks real ratings to ensure a great meal.
-                    </p>
+            <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 mb-12">
+                <div>
+                    <h3 className="font-bold text-lg mb-4 text-purple-600 dark:text-purple-400 border-b border-purple-100 dark:border-purple-900/30 pb-2">Planning Tools</h3>
+                    <ul className="space-y-3">
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">✨ AI Concierge</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Your personal genius. Ask for any specific idea and get tailored recommendations.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">📅 Weekend Planner</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Finds live events, markets, and festivals happening right now in your city.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">❤️ Date Night Planner</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Combines dinner, drinks, and activities into a seamless evening itinerary.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">✈️ Holiday Planner</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Creates complete travel itineraries with transport, dining, and activities.</span>
+                        </li>
+                    </ul>
                 </div>
 
-                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4">
-                        <Calendar className="text-purple-600 w-6 h-6" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Weekend Planner</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Hand-picked events and activities for your next big adventure or weekend getaway.
-                    </p>
+                <div>
+                    <h3 className="font-bold text-lg mb-4 text-orange-600 dark:text-orange-400 border-b border-orange-100 dark:border-orange-900/30 pb-2">Food & Drink</h3>
+                    <ul className="space-y-3">
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🍽️ Dining Concierge</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Get curated restaurant recommendations based on cuisine, vibe, and diet.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🍷 Bar Scout</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Find hidden speakeasies, rooftop bars, and cozy pubs nearby.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🕺 Nightlife Navigator</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Discover top-rated clubs and dance venues to keep the party going.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">👨‍🍳 Dinner Party Chef</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Generate custom menus and recipes for any occasion.</span>
+                        </li>
+                    </ul>
                 </div>
 
-                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center mb-4">
-                        <Wine className="text-pink-600 w-6 h-6" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Bar Scout</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                        The ultimate guide to hidden bars, speakeasies, and social venues nearby.
-                    </p>
+                <div>
+                    <h3 className="font-bold text-lg mb-4 text-blue-600 dark:text-blue-400 border-b border-blue-100 dark:border-blue-900/30 pb-2">Entertainment</h3>
+                    <ul className="space-y-3">
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🎬 Movie Picker</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Find perfect movies in theaters or on streaming based on your mood.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">📚 Book Finder</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Discover your next read filtered by genre, era, and emotional vibe.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🎭 Theatre & Arts</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Discover plays, musicals, and live performances nearby.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🔑 Escape Room Scout</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Find rated escape rooms by theme (Horror, Mystery, etc.).</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🎲 Game Guru</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Locate board game cafes, arcades, and gaming venues.</span>
+                        </li>
+                    </ul>
                 </div>
 
-                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4">
-                        <Moon className="text-rose-600 w-6 h-6" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Activity Planner</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Generates step-by-step itineraries for any occasion, from dates to family outings.
-                    </p>
-                </div>
-
-                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-4">
-                        <Disc className="text-indigo-600 w-6 h-6" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Nightclub Scout</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Discover the hottest clubs and dance venues to keep the energy going all night.
-                    </p>
-                </div>
-
-                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center mb-4">
-                        <Bed className="text-cyan-600 w-6 h-6" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Hotel Concierge</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Planning a staycation? Let our system find the best boutique hotels and unique stays.
-                    </p>
+                <div>
+                    <h3 className="font-bold text-lg mb-4 text-emerald-600 dark:text-emerald-400 border-b border-emerald-100 dark:border-emerald-900/30 pb-2">Lifestyle & Wellness</h3>
+                    <ul className="space-y-3">
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🏨 Staycation Finder</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Discover top-rated hotels and resorts for a local getaway.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🧘 Wellness & Spa</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Locate spas, yoga studios, and wellness centers.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">💪 Fitness Finder</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Find gyms, hiking trails, rock climbing, and classes nearby.</span>
+                        </li>
+                        <li>
+                            <strong className="block text-slate-800 dark:text-white">🏆 Sports Finder</strong>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Find places to watch the match or courts to play on.</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 

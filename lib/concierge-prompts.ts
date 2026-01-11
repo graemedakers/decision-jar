@@ -514,9 +514,11 @@ export const getConciergePromptAndMock = (
                 ${extraInstructions}
                 
                 INSTRUCTIONS:
-                1. Prioritize TIMELY events (markets, festivals, shows) happening this weekend.
-                2. If no specific temporary events are found, suggest high-quality evergreen activities that fit the vibe.
-                3. Ensure venues are open on the requested days.
+                1. PRIMARY GOAL: Find events scheduled for a SHORT TIME PERIOD only (e.g. happening specifically this weekend, this week, or this month).
+                   - Look for: Pop-up markets, festivals, live music gigs, theatre shows, limited-run exhibitions, sports matches, community events.
+                   - Do NOT suggest "always open" places like standard museums, parks, or cinemas UNLESS they have a specific special event on.
+                2. FALLBACK: Only if you cannot find 5 high-quality time-limited events, fill the remaining spots with exceptional "evergreen" activities that perfectly match the requested vibe.
+                3. Ensure venues are confirmed open on the requested days.
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, day (e.g. "Saturday 2pm"), price, address, website, google_rating
