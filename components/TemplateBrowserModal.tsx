@@ -48,11 +48,12 @@ export function TemplateBrowserModal({
         // If user has a current jar...
         if (hasJars && currentJarId) {
             // ...and it's not empty, ask them what to do
-            if (currentJarIdeaCount > 0) {
+            // Explicit check for undefined to handle edge cases
+            if (currentJarIdeaCount !== undefined && currentJarIdeaCount > 0) {
                 setDialogChoice('new'); // Default to new jar
                 setShowChoiceDialog(true);
             } else {
-                // ...but if it IS empty, just fill it! (Avoids creating 2nd jar limit issue)
+                // ...but if it IS empty (or count unavailable), just fill it! (Avoids creating 2nd jar limit issue)
                 handleAddToCurrentJar(template.id);
             }
         } else {

@@ -1,7 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { JAR_TEMPLATES } from '@/lib/jar-templates';
-import { generateUniqueCode } from '@/lib/utils';
+import { generateUniqueJarCode } from '@/lib/utils';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
@@ -39,7 +39,8 @@ export async function POST(req: Request) {
             }, { status: 403 });
         }
 
-        const code = await generateUniqueCode();
+        // Generate database-verified unique code
+        const code = await generateUniqueJarCode();
 
         // Create Jar and Ideas in a transaction
         const result = await prisma.$transaction(async (tx) => {

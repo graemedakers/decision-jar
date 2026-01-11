@@ -15,6 +15,37 @@ export async function generateUniqueCode(length = 6): Promise<string> {
     return result;
 }
 
+/**
+ * Generates a unique jar reference code with database verification
+ * Retries up to maxAttempts times if collisions occur
+ * @param length - Length of the code (default: 6)
+ * @param maxAttempts - Maximum retry attempts (default: 10)
+ * @returns A guaranteed unique reference code
+ * @throws Error if unable to generate unique code after maxAttempts
+ */
+export async function generateUniqueJarCode(length = 6, maxAttempts = 10): Promise<string> {
+    const { prisma } = await import('./prisma');
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const code = await generateUniqueCode(length);
+
+        // Check if code already exists
+        const existing = await prisma.jar.findUnique({
+            where: { referenceCode: code },
+            select: { id: true }
+        });
+
+        if (!existing) {
+            return code;
+        }
+
+        // Log collision for monitoring
+        console.warn(`Jar code collision detected: ${code} (attempt ${attempt + 1}/${maxAttempts})`);
+    }
+
+    throw new Error(`Failed to generate unique jar code after ${maxAttempts} attempts`);
+}
+
 function safeParseJSON(input: string | any) {
     if (typeof input !== 'string') return input;
 

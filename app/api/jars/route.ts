@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { generateUniqueCode } from '@/lib/utils';
+import { generateUniqueJarCode } from '@/lib/utils';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
@@ -61,8 +61,8 @@ export async function POST(req: Request) {
             }, { status: 403 });
         }
 
-        // Create Jar
-        const code = await generateUniqueCode();
+        // Create Jar with database-verified unique code
+        const code = await generateUniqueJarCode();
 
         // Map types safely? 
         // We assume frontend sends valid enum values or strings that match
