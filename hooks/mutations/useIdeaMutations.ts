@@ -5,13 +5,24 @@ import { createIdea, updateIdea, deleteIdea } from "@/app/actions/ideas";
 import { Idea } from "@/lib/types";
 import { showSuccess, showError } from "@/lib/toast";
 import { CacheKeys, createCacheInvalidator } from "@/lib/cache-utils";
+import { isDemoMode, addDemoIdea, updateDemoIdea, deleteDemoIdea } from "@/lib/demo-storage"; // ✅ Import demo functions
 
 export function useIdeaMutations() {
     const queryClient = useQueryClient();
     const cache = createCacheInvalidator(queryClient);
+    const isDemo = isDemoMode(); // ✅ Check if in demo mode
 
     const addIdeaMutation = useMutation({
-        mutationFn: createIdea,
+        mutationFn: async (newItemArgs: any) => {
+            // ✅ If demo mode, use localStorage instead of API
+            if (isDemo) {
+                const demoIdea = addDemoIdea(newItemArgs);
+                return { success: true, idea: demoIdea };
+            }
+
+            // Regular mode: Call server action
+            return createIdea(newItemArgs);
+        },
         onMutate: async (newItemArgs) => {
             await queryClient.cancelQueries({ queryKey: CacheKeys.ideas() });
             const previousIdeas = queryClient.getQueryData<Idea[]>(CacheKeys.ideas());
@@ -41,10 +52,16 @@ export function useIdeaMutations() {
         },
         onSuccess: (data) => {
             if (!data.success) {
-                throw new Error(data.error);
+                const errorMessage = 'error' in data ? data.error : 'Unknown error';
+                throw new Error(errorMessage);
             }
-            // Invalidate to get the real ID and data from server
-            cache.invalidateIdeas();
+
+            // ✅ For demo mode, skip reload - let the demo page's onClose handler refresh data
+            if (!isDemo) {
+                // Regular mode: Invalidate to get the real ID and data from server
+                cache.invalidateIdeas();
+            }
+            // Demo mode: Do nothing - demo page calls loadDemoData() in handleCloseAddModal
         },
     });
 

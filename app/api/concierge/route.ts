@@ -23,14 +23,18 @@ export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
     try {
-        // 1. Auth & Subscription Check
+        // 1. Parse Request Body (need to check demo mode early)
+        const { configId, inputs, location: cachedLocation, useMockData, isDemo } = await req.json();
+
+        // 2. Auth & Subscription Check
         const session = await getSession();
-        if (!session?.user?.email) {
+
+        // ✅ FIX: Allow demo mode without authentication
+        const isDemoMode = isDemo === true;
+
+        if (!session?.user?.email && !isDemoMode) {
             return apiError('Unauthorized', 401, 'UNAUTHORIZED');
         }
-
-        // 2. Parse Request Body
-        const { configId, inputs, location: cachedLocation, useMockData } = await req.json();
 
         // 3. Find Tool Config
         // We search by ID first (e.g., 'dining_concierge') or Key (e.g., 'DINING')
@@ -44,19 +48,21 @@ export async function POST(req: NextRequest) {
 
         const config = CONCIERGE_CONFIGS[toolKey];
 
-        // 4. Rate Limiting
-        if (ratelimit) {
-            const identifier = session.user.id;
+        // 4. Rate Limiting (skip for demo mode)
+        if (ratelimit && !isDemoMode) {
+            const identifier = session!.user.id;
             const { success } = await ratelimit.limit(identifier);
             if (!success) {
                 return apiError('Rate limit exceeded. Please try again later.', 429, 'RATE_LIMIT');
             }
         }
 
-        // 5. Subscription Check
-        const access = await checkSubscriptionAccess(session.user.id, config.id);
-        if (!access.allowed) {
-            return apiError(access.reason || 'Premium required', 403, 'PREMIUM_REQUIRED');
+        // 5. Subscription Check (skip for demo mode - limit handled client-side)
+        if (!isDemoMode) {
+            const access = await checkSubscriptionAccess(session!.user.id, config.id);
+            if (!access.allowed) {
+                return apiError(access.reason || 'Premium required', 403, 'PREMIUM_REQUIRED');
+            }
         }
 
         // 6. Location Context

@@ -18,7 +18,7 @@ export const authOptions: NextAuthConfig = {
                 });
 
                 if (communityJars.length > 0) {
-                    // Add memberships
+                    // Add memberships to community jars
                     await prisma.jarMember.createMany({
                         data: communityJars.map(jar => ({
                             jarId: jar.id,
@@ -27,14 +27,12 @@ export const authOptions: NextAuthConfig = {
                         }))
                     });
 
-                    // Set active jar to Bug Reports (BUGRPT) if found
-                    const bugJar = communityJars.find(j => j.referenceCode === 'BUGRPT');
-                    if (bugJar) {
-                        await prisma.user.update({
-                            where: { id: user.id },
-                            data: { activeJarId: bugJar.id }
-                        });
-                    }
+                    // ✅ CRITICAL FIX: Do NOT set activeJarId to community jar
+                    // Leave activeJarId as null so user is prompted to create personal jar
+                    // Previous behavior caused OAuth users to land in empty BUGRPT jar
+
+                    // NOTE: User will see "Create Your First Jar" modal on dashboard
+                    // This provides better onboarding experience for OAuth users
                 }
             } catch (error) {
                 console.error("Error adding user to community jars:", error);

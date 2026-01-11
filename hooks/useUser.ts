@@ -64,13 +64,29 @@ export function useUser(options: UseUserOptions = {}) {
 
     // Level Up Side Effect
     useEffect(() => {
-        if (typeof level === 'number') {
-            if (prevLevelRef.current !== null && level > prevLevelRef.current) {
+        if (typeof level === 'number' && userData?.activeJarId) {
+            const jarId = userData.activeJarId;
+            const storageKey = `level_shown_${jarId}`;
+
+            // Get last shown level for this jar from localStorage
+            const lastShownLevel = parseInt(localStorage.getItem(storageKey) || '0', 10);
+
+            // Only show level up modal if:
+            // 1. Previous ref level exists (not first load) AND
+            // 2. New level is higher than previous ref level AND
+            // 3. Haven't shown this level for this jar yet
+            if (prevLevelRef.current !== null &&
+                level > prevLevelRef.current &&
+                level > lastShownLevel) {
+                // Show modal
                 onLevelUp?.(level);
+                // Remember we showed this level for this jar
+                localStorage.setItem(storageKey, level.toString());
             }
+
             prevLevelRef.current = level;
         }
-    }, [level, onLevelUp]);
+    }, [level, onLevelUp, userData?.activeJarId]);
 
     // Use centralized cache invalidator
     const cache = createCacheInvalidator(queryClient);

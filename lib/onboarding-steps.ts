@@ -10,7 +10,8 @@ export interface OnboardingStep {
     };
 }
 
-export const ONBOARDING_STEPS: OnboardingStep[] = [
+// Common steps used across all modes
+const COMMON_WELCOME_STEPS: OnboardingStep[] = [
     {
         id: 'welcome',
         title: '👋 Welcome to Decision Jar!',
@@ -37,14 +38,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         description: 'This shows how many ideas are ready to be selected. The number grows as you add more ideas!',
         targetElement: '[data-tour="jar-visual"]',
         position: 'bottom'
-    },
-    {
-        id: 'spin-jar',
-        title: '🎯 Spin the Jar',
-        description: 'Ready to decide? Click here to randomly select an idea from your jar. You can filter by budget, duration, and more!',
-        targetElement: '[data-tour="spin-button-desktop"], [data-tour="spin-button"]',
-        position: 'top'
-    },
+    }
+];
+
+const COMMON_ENDING_STEPS: OnboardingStep[] = [
     {
         id: 'open-jar',
         title: '📂 Browse All Ideas',
@@ -87,3 +84,74 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         position: 'center'
     }
 ];
+
+// Mode-specific selection steps
+const RANDOM_MODE_STEP: OnboardingStep = {
+    id: 'spin-jar',
+    title: '🎯 Spin the Jar',
+    description: 'Ready to decide? Click here to randomly select an idea from your jar. You can filter by budget, duration, and more!',
+    targetElement: '[data-tour="spin-button-desktop"], [data-tour="spin-button"]',
+    position: 'top'
+};
+
+const ADMIN_PICK_MODE_STEP: OnboardingStep = {
+    id: 'admin-pick',
+    title: '👤 Admin Pick Mode',
+    description: 'As the admin, you manually select which idea to use next. Browse your list and pick what feels right!',
+    targetElement: '[data-tour="list-tab"], [data-tour="list-tab-mobile"]',
+    position: 'bottom'
+};
+
+const VOTING_MODE_STEP: OnboardingStep = {
+    id: 'voting',
+    title: '🗳️ Voting Mode',
+    description: 'Everyone in your jar can vote on ideas! Start a voting round to let the group decide together what to do next.',
+    targetElement: '[data-tour="admin-controls"], [data-tour="voting-button"]',
+    position: 'top'
+};
+
+const ALLOCATION_MODE_STEP: OnboardingStep = {
+    id: 'allocation',
+    title: '📋 Task Allocation',
+    description: 'Assign ideas to specific team members. Perfect for managing tasks and responsibilities in group projects!',
+    targetElement: '[data-tour="list-tab"], [data-tour="list-tab-mobile"]',
+    position: 'bottom'
+};
+
+// Default steps for RANDOM mode (backward compatible)
+export const ONBOARDING_STEPS: OnboardingStep[] = [
+    ...COMMON_WELCOME_STEPS,
+    RANDOM_MODE_STEP,
+    ...COMMON_ENDING_STEPS
+];
+
+/**
+ * Get mode-specific onboarding steps
+ * @param mode - The jar's selection mode
+ * @returns Array of onboarding steps tailored to the mode
+ */
+export function getOnboardingSteps(mode?: string): OnboardingStep[] {
+    let modeStep: OnboardingStep;
+
+    switch (mode) {
+        case 'ADMIN_PICK':
+            modeStep = ADMIN_PICK_MODE_STEP;
+            break;
+        case 'VOTING':
+            modeStep = VOTING_MODE_STEP;
+            break;
+        case 'ALLOCATION':
+            modeStep = ALLOCATION_MODE_STEP;
+            break;
+        case 'RANDOM':
+        default:
+            modeStep = RANDOM_MODE_STEP;
+            break;
+    }
+
+    return [
+        ...COMMON_WELCOME_STEPS,
+        modeStep,
+        ...COMMON_ENDING_STEPS
+    ];
+}

@@ -134,6 +134,38 @@ model User {
   analyticsEvents       AnalyticsEvent[]
   pushSubscriptions     PushSubscription[]
   rateLimit             RateLimit?
+  
+  // ✅ NEW: Premium invite tokens created by this user
+  createdPremiumTokens  PremiumInviteToken[] @relation("TokenCreator")
+  usedPremiumToken      PremiumInviteToken?  @relation("TokenUser")
+}
+
+// ✅ HIGH PRIORITY FIX: Secure premium token system
+model PremiumInviteToken {
+  id            String   @id @default(uuid())
+  token         String   @unique // The actual token string
+  
+  // Security & Limits
+  createdById   String
+  createdBy     User     @relation("TokenCreator", fields: [createdById], references: [id])
+  expiresAt     DateTime // Token expiration date
+  maxUses       Int      @default(1) // How many times it can be used
+  currentUses   Int      @default(0) // How many times it's been used
+  isActive      Boolean  @default(true) // Can be manually deactivated
+  
+  // Usage Tracking
+  usedById      String?  @unique
+  usedBy        User?    @relation("TokenUser", fields: [usedById], references: [id])
+  usedAt        DateTime?
+  
+  // Metadata
+  notes         String?  // e.g., "Gift for Sarah", "Black Friday special"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([token])
+  @@index([createdById])
+  @@index([expiresAt])
 }
 
 model PushSubscription {

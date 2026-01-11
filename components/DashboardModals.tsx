@@ -265,6 +265,7 @@ export function DashboardModals({
                 currentJarId={userData?.activeJarId}
                 currentJarName={userData?.jarName || null}
                 hasJars={!!userData?.activeJarId || (userData?.memberships?.length || 0) > 0}
+                currentJarIdeaCount={ideas.length} // ✅ NEW: Pass idea count
                 onSuccess={handleContentUpdate}
             />
 

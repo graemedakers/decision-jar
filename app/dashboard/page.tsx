@@ -22,7 +22,7 @@ import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { SmartToolsGrid } from "@/components/SmartToolsGrid";
 import { DashboardModals } from "@/components/DashboardModals";
 import { useDashboardLogic } from "@/hooks/useDashboardLogic";
-import { ONBOARDING_STEPS } from "@/lib/onboarding-steps";
+import { getOnboardingSteps } from "@/lib/onboarding-steps";
 import { getJarLabels } from "@/lib/labels";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import React from "react";
@@ -141,21 +141,27 @@ function DashboardContent() {
         }
     }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, openModal, isCommunityJar]);
 
-    // NEW USER SETUP: If auto-enrolled in Community Jar but has NO personal jar, prompt creation
+    // ✅ CRITICAL FIX: Better handling for users without personal jars
+    // This covers: OAuth users, invite-only users, and users who only have community jar memberships
     useEffect(() => {
-        // Wait for user data to be fully loaded
-        if (userData?.activeJarId && isCommunityJar) {
-            // Check if user has ANY owned jars
-            const hasPersonalJars = userData.memberships?.some((m: any) => m.role === 'OWNER');
-            if (!hasPersonalJars) {
-                const hasSeenPrompt = sessionStorage.getItem('create_jar_prompt_shown');
+        if (!isLoadingUser && userData) {
+            // Check if user has ANY jar where they are ADMIN/OWNER (personal jar)
+            const hasPersonalJar = userData.memberships?.some((m: any) =>
+                m.role === 'ADMIN' || m.role === 'OWNER'
+            );
+
+            // If user has NO personal jar, prompt them to create one
+            if (!hasPersonalJar) {
+                const hasSeenPrompt = sessionStorage.getItem('create_first_jar_prompt');
                 if (!hasSeenPrompt) {
                     openModal('CREATE_JAR');
-                    sessionStorage.setItem('create_jar_prompt_shown', 'true');
+                    sessionStorage.setItem('create_first_jar_prompt', 'true');
+
+                    console.log('Prompting user to create first personal jar (OAuth/invite user)');
                 }
             }
         }
-    }, [userData, openModal, isCommunityJar]);
+    }, [userData, isLoadingUser, openModal]);
 
     const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
     const combinedLocation = userLocation || "";
@@ -566,7 +572,7 @@ function DashboardContent() {
                     handleCompleteOnboarding();
                     setShowOnboarding(false);
                 }}
-                steps={ONBOARDING_STEPS}
+                steps={getOnboardingSteps(jarSelectionMode)}
             />
 
             {/* Confetti Effect handled via state passed to Modals, but separate container if needed */}

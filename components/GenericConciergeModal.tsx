@@ -342,7 +342,8 @@ export function GenericConciergeModal({
                 inputs: selectionMap,
                 location: isLocationRelevant ? location : undefined,
                 price: config.hasPrice ? price : undefined,
-                extraInstructions: customInputs['extraInstructions'] // Support for extra instructions if added later
+                extraInstructions: customInputs['extraInstructions'], // Support for extra instructions if added later
+                isDemo: !!demoConcierge // ✅ FIX: Signal demo mode to backend
             };
 
             const res = await fetch('/api/concierge', { // New Unified Endpoint

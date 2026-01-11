@@ -15,6 +15,7 @@ interface TemplateBrowserModalProps {
     currentJarId?: string | null;
     currentJarName?: string | null;
     hasJars?: boolean;
+    currentJarIdeaCount?: number; // ✅ NEW: Track if current jar is empty
     onSuccess?: () => void;
 }
 
@@ -24,6 +25,7 @@ export function TemplateBrowserModal({
     currentJarId = null,
     currentJarName = null,
     hasJars = false,
+    currentJarIdeaCount = 0, // ✅ NEW: Default to 0
     onSuccess
 }: TemplateBrowserModalProps) {
     const router = useRouter();
@@ -43,12 +45,16 @@ export function TemplateBrowserModal({
     const handleTemplateClick = (template: JarTemplate) => {
         setSelectedTemplate(template);
 
-        // If they have jars and a current jar, show choice dialog
-        if (hasJars && currentJarId) {
+        // ✅ FIXED: Only show choice dialog if:
+        // 1. User has jars AND a current jar AND
+        // 2. Current jar already has ideas (not empty)
+        //
+        // Skip choice for empty jars - just create new jar from template
+        if (hasJars && currentJarId && currentJarIdeaCount > 0) {
             setDialogChoice('new'); // Default to new jar
             setShowChoiceDialog(true);
         } else {
-            // No jars yet or not on a jar - just create new
+            // No jars yet, empty jar, or not on a jar - just create new
             handleCreateNewJar(template.id);
         }
     };

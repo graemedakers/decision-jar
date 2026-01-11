@@ -116,20 +116,41 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: 'Invalid invite code' }, { status: 400 });
             }
 
-            // Check Premium Token
-            // The request body doesn't possess premiumToken yet, we need to add it to destructuring
-            // But I will access it from 'const body = await request.json()' if I refactor slightly
-            // or just assume 'premiumToken' is in the destructured vars.
-            // Let's assume the user of this tool will add it to the destructuring list.
-
+            // ✅ HIGH PRIORITY FIX: Secure premium token validation
             if (premiumToken) {
-                const inviter = await prisma.user.findFirst({
-                    where: { premiumInviteToken: premiumToken }
-                });
+                try {
+                    const tokenRecord = await prisma.premiumInviteToken.findUnique({
+                        where: { token: premiumToken },
+                        include: { createdBy: true }
+                    });
 
-                // Verify it is indeed the allowed user (extra security)
-                if (inviter && inviter.email === 'graemedakers@gmail.com') {
-                    isPremiumGifted = true;
+                    if (tokenRecord) {
+                        // Validate token
+                        const now = new Date();
+
+                        // Check if active
+                        if (!tokenRecord.isActive) {
+                            console.log(`Premium token ${premiumToken} is deactivated`);
+                        }
+                        // Check expiration
+                        else if (now > tokenRecord.expiresAt) {
+                            console.log(`Premium token ${premiumToken} expired at ${tokenRecord.expiresAt}`);
+                        }
+                        // Check usage limit
+                        else if (tokenRecord.currentUses >= tokenRecord.maxUses) {
+                            console.log(`Premium token ${premiumToken} already used ${tokenRecord.currentUses}/${tokenRecord.maxUses} times`);
+                        }
+                        // Token is valid!
+                        else {
+                            isPremiumGifted = true;
+                            console.log(`Premium token ${premiumToken} validated successfully`);
+                        }
+                    } else {
+                        console.log(`Premium token ${premiumToken} not found in database`);
+                    }
+                } catch (tokenError) {
+                    console.error('Error validating premium token:', tokenError);
+                    // Continue signup without premium
                 }
             }
 
@@ -152,6 +173,24 @@ export async function POST(request: Request) {
                     }
                 },
             });
+
+            // ✅ Update token usage if premium was granted
+            if (isPremiumGifted && premiumToken) {
+                try {
+                    await prisma.premiumInviteToken.update({
+                        where: { token: premiumToken },
+                        data: {
+                            currentUses: { increment: 1 },
+                            usedById: user.id,
+                            usedAt: new Date()
+                        }
+                    });
+                    console.log(`Updated premium token ${premiumToken} usage`);
+                } catch (updateError) {
+                    console.error('Error updating token usage:', updateError);
+                    // Premium already granted, just log the error
+                }
+            }
         }
 
         // Auto-add user to community feedback jars

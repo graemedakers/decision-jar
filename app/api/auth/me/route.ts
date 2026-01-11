@@ -38,19 +38,31 @@ export async function GET() {
         let hasPartner = false;
 
         if (user) {
+            // ✅ CRITICAL FIX: Validate activeJarId points to jar user has access to
             if (user.activeJarId) {
                 const membership = user.memberships.find(m => m.jarId === user.activeJarId);
-                activeJar = membership?.jar;
 
-                // Fallback: If for some reason membership find fails, fetch jar directly
-                if (!activeJar) {
-                    activeJar = await prisma.jar.findUnique({
-                        where: { id: user.activeJarId },
-                        include: {
-                            members: { include: { user: { select: { id: true, name: true } } } },
-                            achievements: true
-                        }
+                if (membership) {
+                    // User has valid membership in active jar
+                    activeJar = membership.jar;
+                } else {
+                    // ❌ activeJarId points to jar user doesn't have access to!
+                    // This can happen if user was removed from jar
+                    console.warn(`User ${user.id} has invalid activeJarId: ${user.activeJarId}`);
+
+                    // Auto-correct: Set to first available jar or null
+                    const firstAvailableJar = user.memberships[0]?.jar || null;
+                    const newActiveJarId = firstAvailableJar?.id || null;
+
+                    await prisma.user.update({
+                        where: { id: user.id },
+                        data: { activeJarId: newActiveJarId }
                     });
+
+                    activeJar = firstAvailableJar;
+
+                    // Log correction for debugging
+                    console.log(`Corrected activeJarId for user ${user.id}: ${user.activeJarId} -> ${newActiveJarId}`);
                 }
             } else if (user.memberships.length > 0) {
                 // Fallback to first jar
