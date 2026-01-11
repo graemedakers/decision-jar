@@ -455,7 +455,38 @@ npx prisma generate
 
 ---
 
+---
+
+### ✅ Fix #7: Missing Landing Page Image (Production & Local)
+
+**Problem**:
+- Hero image on the landing page was broken (appearing as a small empty icon).
+- Browser console showed 404 errors or redirected HTML content when trying to load the image.
+- PWA manifest icons were also failing to load.
+
+**Root Cause**:
+1. **Middleware Conflict**: The authentication middleware was protecting any path starting with `/jar` (e.g., `path.startsWith('/jar')`). This unintentionally caught static assets like `/jar-hero.png` or `/jar-3d.png`, redirecting the image request to the landing page and returning HTML instead of image data.
+2. **Matcher Omission**: The middleware matcher did not explicitly exclude common static image extensions, allowing the edge function to intercept them.
+3. **Incorrect Manifest Paths**: `app/manifest.ts` was pointing to `/icons/android-chrome-192x192.png`, but the actual files were in the root `/public` directory as `/icon-192.png`.
+
+**Solution**:
+1. **Asset Refresh**: Renamed the hero image to `public/jar-main.jpg`. Changing both the name and the extension (from `.png` to `.jpg`) successfully busted stale caches in the browser and Service Worker.
+2. **Middleware Logic Fix**:
+   - Refined the protected route check in `middleware.ts` to strictly match `/jar/` (with trailing slash) or the exact `/jar` route, preventing it from matching `/jar-main.jpg`.
+   - Updated the `matcher` regex to exclude all common static file extensions (`.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.ico`).
+3. **Component Optimization**:
+   - Updated `components/Jar3D.tsx` to use the new `/jar-main.jpg` path.
+   - Added `unoptimized={true}` to the `<Image />` component to ensure Next.js serves the raw static asset directly without potential optimization artifacts or header conflicts.
+4. **Manifest Alignment**: Updated `app/manifest.ts` icon paths to correctly match the existing files in the `/public` directory.
+
+**Impact**:
+- ✅ Hero image renders correctly on production and localhost.
+- ✅ PWA installation symbols and icons now load correctly.
+- ✅ Security headers are preserved while allowing static assets to bypass auth checks.
+
+---
+
 **Fixes Implemented By**: Engineering Team  
 **Date**: January 11, 2026  
-**Status**: ✅ **READY FOR MIGRATION**  
-**Priority**: HIGH - Security enhancement
+**Status**: ✅ **COMPLETED**  
+**Priority**: CRITICAL - Branding/Landing Page Visibility
