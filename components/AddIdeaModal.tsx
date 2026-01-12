@@ -112,7 +112,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                         <div className="px-4 md:px-6 pt-6 pb-4 flex flex-col gap-2">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                                 {viewMode === 'PREVIEW' && showPreviewToggle ? (itinerary ? "Itinerary Preview" : cateringPlan ? "Catering Plan" : "Plan Preview") :
-                                    (initialData && initialData.id ? "Edit Idea" : initialData ? "Duplicate Idea" : "Add New Idea")}
+                                    (initialData && initialData.id ? "Edit Idea" : "Add New Idea")}
                                 {(!initialData || !initialData.id) && !showPreviewToggle && (
                                     <button
                                         type="button"
