@@ -863,3 +863,74 @@ Added visual loading feedback:
 **Latest Update**: January 11, 2026  
 **Overall Status**: ✅ **ALL CRITICAL & HIGH PRIORITY ISSUES RESOLVED**  
 **Codebase Health**: Excellent - Production Ready 🚀
+
+---
+
+### ✅ Fix #18: Infinite Redirect Loop (Deleted User Root Cause)
+
+**Problem**:
+- Even after Fix #10 (cookie attributes), deleted users could still get stuck in a loop.
+- Dashboard loaded -> API returned `{user: null}` (200 OK) -> Hook saw no user but no error -> Refetched -> Loop.
+
+**Root Cause**:
+- `/api/auth/me` endpoint was returning **200 OK** when a valid session existed but the user was not found in the database.
+- The frontend `useUser` hook only triggered an automatic logout/redirect on **401 Unauthorized** errors.
+
+**Solution**:
+- Updated `app/api/auth/me/route.ts`:
+  - Added specific check for: Session exists AND User not found.
+  - Returns **401 Unauthorized** in this specific case.
+  - Logs a warning: "Session exists for deleted user".
+
+**Impact**:
+- ✅ Deleted users are immediately and cleanly logged out.
+- ✅ Eliminates the infinite loop completely.
+- ✅ Robust handling of orphaned sessions.
+
+---
+
+### ✅ Fix #19: Jar Switching Content & New Jar UX
+
+**Problem**:
+1. **Stale Content**: Switching jars optimistically updated the *title* instantly, but the *ideas list* remained from the old jar.
+2. **New Jar Bug**: Creating a new jar failed to switch to it automatically because the client didn't have the new jar in its cache yet.
+
+**Solution**:
+- **Updated `components/JarSwitcher.tsx`**:
+  - Added `queryClient.invalidateQueries({ queryKey: CacheKeys.ideas() })` after switch.
+  - Modified optimistic update logic to **allow switching** even if target jar isn't in local cache (skips optimistic title update, relies on server response).
+
+**Impact**:
+- ✅ Ideas list updates immediately when switching jars.
+- ✅ Successfully switches to newly created jars automatically.
+- ✅ Robust against missing cache data.
+
+---
+
+### ✅ Fix #20: Quick Add Validation & UX
+
+**Problem**:
+1. **API Error**: Using "Quick Add" (dashboard input) caused a 500 Error: `Argument 'activityLevel' is missing`.
+2. **Confusing UI**: The modal title said "Duplicate Idea" when using Quick Add.
+
+**Root Cause**:
+1. **Partial Data**: Quick Add sent only `{ description: "..." }`. The `useIdeaForm` hook overwrote default values (like `activityLevel: "MEDIUM"`) with `undefined` from the partial input.
+2. **Title Logic**: Modal logic assumed any `initialData` without an ID was a "Duplicate".
+
+**Solution**:
+1. **Fix Defaults**: Updated `hooks/useIdeaForm.ts` to correctly merge partial `initialData` with defaults using nullish coalescing (`??`).
+2. **Fix Title**: Updated `components/AddIdeaModal.tsx` to display "Add New Idea" for new entries, avoiding the "Duplicate" confusion.
+
+**Impact**:
+- ✅ Quick Add works perfectly without errors.
+- ✅ Clear and accurate UI text.
+- ✅ Database integrity maintained with correct default values.
+
+---
+
+## 🏁 Final Status (Jan 12, 2026)
+
+All reported issues from the recent stability sprint have been resolved. The application is stable, performant, and correctly handles edge cases (deleted users, new jars, partial inputs).
+
+**Total Fixes Delivered**: 20
+**Status**: Production Ready 🚀
