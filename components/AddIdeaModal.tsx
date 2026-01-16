@@ -52,7 +52,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     });
 
     // Wrapped setFormData to track interactions
-    const setFormData = (updater: Partial<Idea> | ((prev: Partial<Idea>) => Partial<Idea>)) => {
+    const setFormData: typeof originalSetFormData = (updater) => {
         setHadInteraction(true);
         originalSetFormData(updater);
     };
