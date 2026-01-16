@@ -121,7 +121,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     };
 
     // Wrapped submit handler to track successful additions
-    const handleSubmitWithTracking = async (e?: React.FormEvent) => {
+    const handleSubmitWithTracking = async (e: React.FormEvent) => {
         setHadInteraction(true); // Mark interaction on submit attempt
         const result = await handleSubmit(e);
         if (result) {
