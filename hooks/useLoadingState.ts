@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 /**
  * Unified Loading State Hook
@@ -75,7 +75,10 @@ export function useLoadingState({
     userData,
     ideas
 }: UseLoadingStateOptions): boolean {
-    return useMemo(() => {
+    const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
+    const [forceShowContent, setForceShowContent] = useState(false);
+
+    const shouldShowLoading = useMemo(() => {
         // If we don't have user data AND it's loading, show loading
         if (!userData && isLoadingUser) {
             return true;
@@ -89,6 +92,34 @@ export function useLoadingState({
         // All other cases: don't show loading (we have enough data to show UI)
         return false;
     }, [isLoadingUser, isLoadingIdeas, isFetchingIdeas, userData, ideas.length]);
+
+    // Safety timeout: If stuck loading for >10 seconds, force show content/error
+    useEffect(() => {
+        if (shouldShowLoading && !loadingStartTime) {
+            setLoadingStartTime(Date.now());
+            setForceShowContent(false);
+        } else if (!shouldShowLoading) {
+            setLoadingStartTime(null);
+            setForceShowContent(false);
+        }
+    }, [shouldShowLoading, loadingStartTime]);
+
+    useEffect(() => {
+        if (!loadingStartTime) return;
+
+        const timeout = setTimeout(() => {
+            console.warn('Loading timeout exceeded - forcing content display');
+            setForceShowContent(true);
+            // Clear any stuck state
+            if (typeof window !== 'undefined') {
+                sessionStorage.setItem('loading_timeout_occurred', Date.now().toString());
+            }
+        }, 10000); // 10 second timeout
+
+        return () => clearTimeout(timeout);
+    }, [loadingStartTime]);
+
+    return shouldShowLoading && !forceShowContent;
 }
 
 /**
