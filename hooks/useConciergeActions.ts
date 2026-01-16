@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { isDemoMode, addDemoIdea } from "@/lib/demo-storage";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackIdeaAdded } from "@/lib/analytics";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { logger } from "@/lib/logger";
 
@@ -97,12 +97,8 @@ export function useConciergeActions({
             });
 
             if (res.ok) {
-                // FIX 4: Track successful idea addition
-                trackEvent('idea_added_from_concierge', {
-                    category: category,
-                    is_private: isPrivate,
-                    source: 'concierge_tool'
-                });
+                // Track successful idea addition (includes time-to-first-idea)
+                trackIdeaAdded('ai', `concierge_${category}`);
 
                 // Mark as added in local state to prevent confusion
                 setRecommendations(prev => prev.map(item =>
@@ -358,6 +354,8 @@ export function useConciergeActions({
             let savedIdea = {};
             if (res.ok) {
                 savedIdea = await res.json();
+                // Track idea added with "go tonight" action (includes time-to-first-idea)
+                trackIdeaAdded('ai', `concierge_go_tonight_${category}`);
                 if (onIdeaAdded) onIdeaAdded();
             }
 

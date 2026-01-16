@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, Loader2, Sparkles, Lock, LucideIcon, Search } from "lucide-react";
+import { X, MapPin, Loader2, Sparkles, Lock, LucideIcon, Search, ArrowLeft } from "lucide-react";
 import { Button } from "./ui/Button";
 import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
@@ -10,9 +10,12 @@ import { RichDetailsModal } from "./RichDetailsModal";
 import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
 import { useDemoConcierge } from "@/lib/use-demo-concierge";
 import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
-import { trackAIToolUsed } from "@/lib/analytics";
+import { trackAIToolUsed, trackConciergeSkillSelected, trackIntentDetectionResult, trackModalAbandoned } from "@/lib/analytics";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { getCurrentLocation } from "@/lib/utils";
+import { ConciergeSkillPicker } from "./ConciergeSkillPicker";
+import { detectIntent, getIntentConfidence } from "@/lib/intent-detection";
+import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
 // --- Configuration Interfaces ---
 
@@ -62,7 +65,8 @@ export interface ConciergeToolConfig {
 interface GenericConciergeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    config: ConciergeToolConfig;
+    config?: ConciergeToolConfig; // Now optional - shows skill picker if not provided
+    skillId?: string; // Alternative: pass skill ID to load from CONCIERGE_CONFIGS
     userLocation?: string;
     initialPrompt?: string; // New: Support for Smart Input Bar
     onIdeaAdded?: () => void;
@@ -181,7 +185,8 @@ const getThemeClasses = (theme: string) => {
 export function GenericConciergeModal({
     isOpen,
     onClose,
-    config,
+    config: initialConfig,
+    skillId,
     userLocation,
     initialPrompt,
     onIdeaAdded,
@@ -191,6 +196,16 @@ export function GenericConciergeModal({
 }: GenericConciergeModalProps) {
     const demoConcierge = useDemoConcierge();
     const [showTrialUsedPrompt, setShowTrialUsedPrompt] = useState(false);
+
+    // Dynamic config selection - can change based on user input or skill picker
+    const [activeConfig, setActiveConfig] = useState<ConciergeToolConfig | null>(() => {
+        if (initialConfig) return initialConfig;
+        if (skillId && CONCIERGE_CONFIGS[skillId]) return CONCIERGE_CONFIGS[skillId];
+        return null; // Show skill picker
+    });
+
+    // Show skill picker when no config is selected
+    const [showSkillPicker, setShowSkillPicker] = useState(!initialConfig && !skillId);
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -207,7 +222,23 @@ export function GenericConciergeModal({
     const [viewingItem, setViewingItem] = useState<any | null>(null);
     const [expandedRecIndex, setExpandedRecIndex] = useState<number | null>(null);
 
+    // Abandonment tracking
+    const [modalOpenTime, setModalOpenTime] = useState<number | null>(null);
+    const [hadInteraction, setHadInteraction] = useState(false);
+    const [lastFieldTouched, setLastFieldTouched] = useState<string>('');
+
+    // Use active config or fallback to initial
+    const config = activeConfig || initialConfig || CONCIERGE_CONFIGS.CONCIERGE;
     const theme = getThemeClasses(config.colorTheme);
+
+    // Track modal open time for abandonment analytics
+    useEffect(() => {
+        if (isOpen) {
+            setModalOpenTime(Date.now());
+            setHadInteraction(false);
+            setLastFieldTouched('');
+        }
+    }, [isOpen]);
 
     // Initialize location and custom inputs on first open
     // React key pattern ensures this component remounts when tool changes
@@ -220,9 +251,91 @@ export function GenericConciergeModal({
             // Set initial prompt if provided and selections are empty
             if (initialPrompt && Object.keys(selections).length === 0) {
                 setCustomInputs({ extraInstructions: initialPrompt });
+                
+                // Auto-detect intent from initial prompt
+                if (!activeConfig || activeConfig.id === 'generic_concierge') {
+                    const detectedIntent = detectIntent(initialPrompt);
+                    if (detectedIntent && detectedIntent !== 'CONCIERGE' && CONCIERGE_CONFIGS[detectedIntent]) {
+                        const confidence = getIntentConfidence(initialPrompt, detectedIntent);
+                        // Lower threshold (0.05 = 5%) to be more helpful - even single keyword match is useful
+                        if (confidence > 0.05) {
+                            // Track successful intent detection
+                            trackIntentDetectionResult(initialPrompt, detectedIntent, true);
+                            trackConciergeSkillSelected(detectedIntent, 'intent_detection', {
+                                user_input: initialPrompt,
+                                confidence: confidence,
+                                available_skills_count: Object.keys(CONCIERGE_CONFIGS).length
+                            });
+                            
+                            setActiveConfig(CONCIERGE_CONFIGS[detectedIntent]);
+                            setShowSkillPicker(false);
+                        } else {
+                            // Track low confidence detection (not used)
+                            trackIntentDetectionResult(initialPrompt, detectedIntent, false);
+                        }
+                    } else {
+                        // Track no intent detected
+                        trackIntentDetectionResult(initialPrompt, detectedIntent, false);
+                    }
+                }
             }
         }
     }, [isOpen, userLocation, initialPrompt]);
+
+    // Handle skill selection from picker
+    const handleSkillSelect = (selectedConfig: ConciergeToolConfig) => {
+        // Check if this is a correction from auto-detected intent
+        const wasAutoDetected = !showSkillPicker && activeConfig && activeConfig.id !== selectedConfig.id;
+        const previousSkillId = activeConfig?.id;
+        
+        // Track manual skill selection
+        trackConciergeSkillSelected(selectedConfig.id, 'picker', {
+            was_corrected: wasAutoDetected,
+            available_skills_count: Object.keys(CONCIERGE_CONFIGS).length
+        });
+        
+        // If user is correcting auto-detection, track that
+        if (wasAutoDetected && previousSkillId) {
+            trackIntentDetectionResult(
+                customInputs.extraInstructions || '',
+                previousSkillId,
+                false,
+                selectedConfig.id
+            );
+        }
+        
+        setActiveConfig(selectedConfig);
+        setShowSkillPicker(false);
+        // Clear previous selections when switching skills
+        setSelections({});
+        setRecommendations([]);
+    };
+
+    // Handle back to skill picker
+    const handleBackToSkillPicker = () => {
+        setShowSkillPicker(true);
+        setRecommendations([]);
+    };
+
+    // Helper to mark user interaction
+    const markInteraction = (fieldName: string) => {
+        setHadInteraction(true);
+        setLastFieldTouched(fieldName);
+    };
+
+    // Enhanced onClose with abandonment tracking
+    const handleClose = () => {
+        // Track abandonment if modal is being closed without getting recommendations
+        if (modalOpenTime && !isLoading && recommendations.length === 0) {
+            const timeOpenSeconds = (Date.now() - modalOpenTime) / 1000;
+            trackModalAbandoned('concierge', timeOpenSeconds, hadInteraction, {
+                last_field_touched: lastFieldTouched || undefined,
+                skill_id: activeConfig?.id || 'none',
+                had_skill_selected: !!activeConfig
+            });
+        }
+        onClose();
+    };
 
     // Sync location if it arrives late (after modal already open)
     useEffect(() => {
@@ -258,6 +371,7 @@ export function GenericConciergeModal({
     };
 
     const toggleSelection = (option: string, sectionId: string, type: 'multi-select' | 'single-select') => {
+        markInteraction(`selection_${sectionId}`);
         setSelections(prev => {
             const current = prev[sectionId] || [];
             if (type === 'single-select') {
@@ -387,6 +501,15 @@ export function GenericConciergeModal({
                         {/* HEADER */}
                         <div className="p-6 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-gradient-to-r from-transparent via-transparent to-white/5">
                             <div className="flex items-center gap-3">
+                                {!showSkillPicker && activeConfig && (
+                                    <button
+                                        onClick={handleBackToSkillPicker}
+                                        className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                                        aria-label="Back to skill picker"
+                                    >
+                                        <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                                    </button>
+                                )}
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.bg}`}>
                                     <config.icon className={`w-5 h-5 ${theme.text}`} />
                                 </div>
@@ -396,7 +519,7 @@ export function GenericConciergeModal({
                                 </div>
                             </div>
                             <button
-                                onClick={onClose}
+                                onClick={handleClose}
                                 className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
                                 aria-label="Close"
                             >
@@ -405,7 +528,15 @@ export function GenericConciergeModal({
                         </div>
 
                         <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 space-y-6 px-7 custom-scrollbar">
-                            <div className="space-y-6">
+                            {/* SKILL PICKER VIEW */}
+                            {showSkillPicker ? (
+                                <ConciergeSkillPicker
+                                    onSelectSkill={handleSkillSelect}
+                                    currentSkillId={activeConfig?.id}
+                                />
+                            ) : (
+                                <div className="space-y-6">
+                                {/* ORIGINAL FORM VIEW */}
                                 {/* LOCATION */}
                                 {/* LOCATION */}
                                 {(config.hasLocation || (config.locationCondition && (selections[config.locationCondition.sectionId] || []).some(v => config.locationCondition?.values.includes(v)))) && (
@@ -415,6 +546,7 @@ export function GenericConciergeModal({
                                             <button
                                                 type="button"
                                                 onClick={async () => {
+                                                    markInteraction('location_gps');
                                                     try {
                                                         const currentLoc = await getCurrentLocation();
                                                         setLocation(currentLoc);
@@ -430,7 +562,10 @@ export function GenericConciergeModal({
                                         </div>
                                         <LocationInput
                                             value={location}
-                                            onChange={setLocation}
+                                            onChange={(val) => {
+                                                markInteraction('location_input');
+                                                setLocation(val);
+                                            }}
                                             placeholder="City, Neighborhood, or Zip"
                                             className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
                                             updateProfileLocation={true}
@@ -459,7 +594,10 @@ export function GenericConciergeModal({
                                                     <input
                                                         type="date"
                                                         value={dateRanges[section.id]?.start || ''}
-                                                        onChange={(e) => setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], start: e.target.value } }))}
+                                                        onChange={(e) => {
+                                                            markInteraction(`date_start_${section.id}`);
+                                                            setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], start: e.target.value } }));
+                                                        }}
                                                         className={`flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white`}
                                                         placeholder="Check In"
                                                     />
@@ -467,7 +605,10 @@ export function GenericConciergeModal({
                                                     <input
                                                         type="date"
                                                         value={dateRanges[section.id]?.end || ''}
-                                                        onChange={(e) => setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], end: e.target.value } }))}
+                                                        onChange={(e) => {
+                                                            markInteraction(`date_end_${section.id}`);
+                                                            setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], end: e.target.value } }));
+                                                        }}
                                                         className={`flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white`}
                                                         placeholder="Check Out"
                                                     />
@@ -498,7 +639,10 @@ export function GenericConciergeModal({
                                                         type="text"
                                                         placeholder="Other (specify)..."
                                                         value={customInputs[section.id] || ''}
-                                                        onChange={(e) => setCustomInputs(prev => ({ ...prev, [section.id]: e.target.value }))}
+                                                        onChange={(e) => {
+                                                            markInteraction(`custom_${section.id}`);
+                                                            setCustomInputs(prev => ({ ...prev, [section.id]: e.target.value }));
+                                                        }}
                                                         className={`w-full px-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400`}
                                                         aria-label={`Custom ${section.label}`}
                                                     />
@@ -517,7 +661,10 @@ export function GenericConciergeModal({
                                                 <button
                                                     key={p}
                                                     type="button"
-                                                    onClick={() => setPrice(p)}
+                                                    onClick={() => {
+                                                        markInteraction('price');
+                                                        setPrice(p);
+                                                    }}
                                                     className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-all ${price === p
                                                         ? `${theme.lightBg} ${theme.border} ${theme.text}`
                                                         : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'
@@ -542,7 +689,6 @@ export function GenericConciergeModal({
                                         className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 min-h-[80px] resize-none`}
                                     />
                                 </div>
-                            </div>
 
                             <div className="py-2">
                                 <Button
@@ -591,7 +737,7 @@ export function GenericConciergeModal({
                                                     onFavorite={handleFavorite}
                                                     onAddToJar={handleAddToJar}
                                                     onGoAction={() => onGoAction(rec)}
-                                                    goActionLabel={config.resultCard.goActionLabel || "Go Tonight"}
+                                                    goActionLabel={config.resultCard.goActionLabel || "I'll do this!"}
                                                     ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
                                                     isAddingToJar={isAddingToJar}
 
@@ -619,6 +765,8 @@ export function GenericConciergeModal({
                                         reason="premium"
                                         message={`Loved the ${config.title}? Sign up for unlimited access to ALL 11 premium concierge tools!`}
                                     />
+                                </div>
+                            )}
                                 </div>
                             )}
                         </div>

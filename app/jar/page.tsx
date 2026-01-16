@@ -276,7 +276,7 @@ export default function JarPage() {
                                             >
                                                 {isAdminPickMode ? (
                                                     <span className="flex items-center gap-1"><Crown className="w-3 h-3" /> Pick Winner</span>
-                                                ) : "Go Tonight"}
+                                                ) : "I'll do this!"}
                                             </Button>
                                         ) : null}
                                         <div className={`w-2 h-2 rounded-full ${idea.activityLevel === 'HIGH' ? 'bg-red-400' : idea.activityLevel === 'MEDIUM' ? 'bg-yellow-400' : 'bg-green-400'}`} title={`Activity: ${idea.activityLevel}`} />

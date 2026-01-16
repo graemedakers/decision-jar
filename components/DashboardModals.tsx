@@ -203,15 +203,16 @@ export function DashboardModals({
 
             {!isCommunityJar && (
                 <>
-                    {/* Generic Concierge Modal */}
-                    {activeModal === 'CONCIERGE' && modalProps?.toolId && CONCIERGE_CONFIGS[modalProps.toolId] && (
+                    {/* Generic Concierge Modal - Now supports skill picker when no toolId */}
+                    {activeModal === 'CONCIERGE' && (
                         <GenericConciergeModal
-                            key={modalProps.toolId}
+                            key={modalProps?.toolId || 'unified'}
                             isOpen={true}
                             onClose={closeModal}
-                            config={CONCIERGE_CONFIGS[modalProps.toolId]}
+                            config={modalProps?.toolId ? CONCIERGE_CONFIGS[modalProps.toolId] : undefined}
+                            skillId={modalProps?.toolId}
                             userLocation={userLocation || undefined}
-                            initialPrompt={modalProps?.initialPrompt} // Pass Initial Prompt
+                            initialPrompt={modalProps?.initialPrompt}
                             onIdeaAdded={() => {
                                 fetchIdeas();
                                 refreshUser();
@@ -219,15 +220,6 @@ export function DashboardModals({
                             onGoTonight={(idea) => {
                                 closeModal();
                                 openModal('DATE_REVEAL', { idea });
-                                // Was: setSelectedIdea(idea); setIsModalOpen(true); -> WAIT
-                                // If I set selectedIdea, DateReveal opens?
-                                // Let's check original code: `setSelectedIdea(idea); setIsModalOpen(true);`
-                                // Wait, `setIsModalOpen` opens `AddIdeaModal`. `setSelectedIdea` opens `DateReveal`??
-                                // NO. `DateReveal` has `isOpen={!!selectedIdea}` in original code.
-                                // BUT `AddIdeaModal` has `isOpen={isModalOpen}`.
-                                // It seems they were opening BOTH?? That's a bug or I misread.
-                                // Let's simplify: Concierge "Go Tonight" usually shows the result. 
-                                // I will assume it opens DateReveal to show the idea details clearly.
                             }}
                             onFavoriteUpdated={fetchFavorites}
                             onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}

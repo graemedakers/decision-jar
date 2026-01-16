@@ -1,4 +1,5 @@
 import { posthog } from './posthog'
+import { SessionTracker } from './session-tracker'
 
 // Template Events
 export const trackTemplateBrowsed = () => {
@@ -49,6 +50,23 @@ export const trackIdeaAdded = (method: 'manual' | 'ai' | 'template', source?: st
         method: method,
         source: source,
     })
+    
+    // Track time to first idea if this is the first idea in the session
+    if (!SessionTracker.hasTrackedFirstIdea()) {
+        const duration = SessionTracker.getSessionDuration();
+        trackTimeToFirstIdea(duration, getSourceCategory(method, source), {
+            session_id: SessionTracker.getSessionId()
+        });
+        SessionTracker.markFirstIdeaTracked();
+    }
+}
+
+// Helper to convert method/source to path category
+function getSourceCategory(method: 'manual' | 'ai' | 'template', source?: string): 'smart_input' | 'concierge' | 'template' | 'manual' {
+    if (method === 'template') return 'template';
+    if (method === 'ai' || source?.includes('concierge')) return 'concierge';
+    if (source?.includes('smart_input') || source?.includes('url') || source?.includes('image')) return 'smart_input';
+    return 'manual';
 }
 
 // User Events
@@ -98,4 +116,110 @@ export const resetAnalytics = () => {
 // Generic event tracking (for backward compatibility)
 export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
     posthog.capture(eventName, properties)
+}
+
+// ===== THREE-PATH STRATEGY ANALYTICS =====
+
+// Path Selection Events
+export const trackPathSelected = (
+    path: '1_have_idea' | '2_need_inspiration' | '3_browse_templates',
+    metadata?: {
+        session_start_time?: number
+        previous_path?: string
+        trigger?: string
+    }
+) => {
+    posthog.capture('path_selected', {
+        path: path,
+        timestamp: Date.now(),
+        ...metadata,
+    })
+}
+
+// Enhanced Concierge Tracking
+export const trackConciergeSkillSelected = (
+    skillId: string,
+    via: 'picker' | 'intent_detection' | 'direct_link',
+    metadata?: {
+        user_input?: string
+        confidence?: number
+        was_corrected?: boolean
+        available_skills_count?: number
+    }
+) => {
+    posthog.capture('concierge_skill_selected', {
+        skill_id: skillId,
+        selection_method: via,
+        timestamp: Date.now(),
+        ...metadata,
+    })
+}
+
+// Time to First Idea
+export const trackTimeToFirstIdea = (
+    durationSeconds: number,
+    source: 'smart_input' | 'concierge' | 'template' | 'manual',
+    metadata?: {
+        path_used?: string
+        session_id?: string
+    }
+) => {
+    posthog.capture('time_to_first_idea', {
+        duration_seconds: durationSeconds,
+        source: source,
+        met_5s_goal: durationSeconds <= 5,
+        met_10s_goal: durationSeconds <= 10,
+        ...metadata,
+    })
+}
+
+// Modal Abandonment
+export const trackModalAbandoned = (
+    modalType: string,
+    timeOpenSeconds: number,
+    hadInteraction: boolean,
+    metadata?: {
+        last_field_touched?: string
+        completion_percent?: number
+        reason?: string
+    }
+) => {
+    posthog.capture('modal_abandoned', {
+        modal_type: modalType,
+        time_open_seconds: timeOpenSeconds,
+        had_interaction: hadInteraction,
+        ...metadata,
+    })
+}
+
+// Intent Detection Accuracy
+export const trackIntentDetectionResult = (
+    userInput: string,
+    detectedSkill: string | null,
+    wasAccepted: boolean,
+    correctedTo?: string
+) => {
+    posthog.capture('intent_detection_result', {
+        user_input_length: userInput.length,
+        user_input_preview: userInput.slice(0, 50), // First 50 chars for context
+        detected_skill: detectedSkill,
+        was_accepted: wasAccepted,
+        corrected_to: correctedTo,
+        accuracy: wasAccepted ? 'correct' : 'incorrect',
+    })
+}
+
+// Modal Opened (for tracking modal flow)
+export const trackModalOpened = (
+    modalType: string,
+    metadata?: {
+        triggered_by?: string
+        previous_modal?: string
+    }
+) => {
+    posthog.capture('modal_opened', {
+        modal_type: modalType,
+        timestamp: Date.now(),
+        ...metadata,
+    })
 }

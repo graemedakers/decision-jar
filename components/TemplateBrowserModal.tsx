@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { JAR_TEMPLATES, type JarTemplate } from '@/lib/jar-templates';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { trackTemplateBrowsed, trackTemplateUsed } from '@/lib/analytics';
+import { trackTemplateBrowsed, trackTemplateUsed, trackPathSelected, trackModalAbandoned } from '@/lib/analytics';
 import { showSuccess, showError } from '@/lib/toast';
 
 interface TemplateBrowserModalProps {
@@ -35,14 +35,36 @@ export function TemplateBrowserModal({
     const [selectedTemplate, setSelectedTemplate] = useState<JarTemplate | null>(null);
     const [dialogChoice, setDialogChoice] = useState<'new' | 'current'>('new');
 
+    // Abandonment tracking
+    const [modalOpenTime, setModalOpenTime] = useState<number | null>(null);
+    const [hadInteraction, setHadInteraction] = useState(false);
+    const templateWasUsed = useRef(false);
+
     // Track when modal opens
     useEffect(() => {
         if (isOpen) {
+            setModalOpenTime(Date.now());
+            setHadInteraction(false);
+            templateWasUsed.current = false;
+            trackPathSelected('3_browse_templates', { trigger: 'modal_opened' });
             trackTemplateBrowsed();
         }
     }, [isOpen]);
 
+    // Enhanced close handler with abandonment tracking
+    const handleClose = () => {
+        // Track abandonment if modal is being closed without using a template
+        if (modalOpenTime && !templateWasUsed.current) {
+            const timeOpenSeconds = (Date.now() - modalOpenTime) / 1000;
+            trackModalAbandoned('template_browser', timeOpenSeconds, hadInteraction, {
+                templates_expanded: expandedTemplate ? 1 : 0
+            });
+        }
+        onClose();
+    };
+
     const handleTemplateClick = (template: JarTemplate) => {
+        setHadInteraction(true); // Mark interaction
         setSelectedTemplate(template);
 
         // If user has a current jar...
@@ -90,8 +112,12 @@ export function TemplateBrowserModal({
 
             const jar = await response.json();
 
+            // Mark that template was successfully used
+            templateWasUsed.current = true;
+            trackTemplateUsed(templateId, 'new_jar');
+
             // Close modal and navigate to the new jar
-            onClose();
+            handleClose();
             onSuccess?.();
             router.refresh(); // Refresh to show new jar in list
 
@@ -126,8 +152,12 @@ export function TemplateBrowserModal({
 
             const result = await response.json();
 
+            // Mark that template was successfully used
+            templateWasUsed.current = true;
+            trackTemplateUsed(templateId, 'add_to_jar');
+
             // Close modal and refresh to show new ideas
-            onClose();
+            handleClose();
             onSuccess?.();
             router.refresh();
 
@@ -142,7 +172,7 @@ export function TemplateBrowserModal({
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden bg-slate-50 dark:bg-slate-900 p-0">
                 {/* Header */}
                 <div className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 p-6">
@@ -156,7 +186,7 @@ export function TemplateBrowserModal({
                             </p>
                         </div>
                         <button
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
                         >
                             <X className="w-5 h-5 text-slate-500" />

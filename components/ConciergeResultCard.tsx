@@ -56,7 +56,7 @@ export function ConciergeResultCard({
     onAddToJar,
     onGoAction,
     isAddingToJar = false,
-    goActionLabel = "Go Now",
+    goActionLabel = "I'll do this!",
     goActionClass = "bg-gradient-to-r from-emerald-400/20 to-teal-400/20 text-emerald-700 dark:text-emerald-200 border border-emerald-400/30 hover:bg-emerald-400/30",
     ratingClass = "text-yellow-400",
     expandable = false,
@@ -134,66 +134,75 @@ export function ConciergeResultCard({
                     )}
                 </div>
 
-                <div className="flex flex-wrap sm:flex-col gap-2 justify-start sm:justify-end">
-                    {rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME' && (
+                {/* Action Buttons Container */}
+                <div className="flex flex-col gap-2 mt-3">
+                    {/* Info Buttons Row (Map, Web) - Only shown when applicable */}
+                    {(rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME') || rec.website ? (
+                        <div className="flex gap-2 sm:justify-end">
+                            {rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME' && (
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-xs text-slate-600 dark:text-slate-300 h-8 flex-1 sm:flex-none whitespace-nowrap"
+                                    onClick={() => {
+                                        const query = rec.cinema_name ? `${rec.cinema_name} ${rec.address}` : `${rec.name} ${rec.address}`;
+                                        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+                                    }}
+                                >
+                                    <ExternalLink className="w-3.5 h-3.5 mr-1" /> Map
+                                </Button>
+                            )}
+
+                            {rec.website && (
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-xs text-slate-600 dark:text-slate-300 h-8 flex-1 sm:flex-none whitespace-nowrap"
+                                    onClick={() => window.open(rec.website, '_blank')}
+                                >
+                                    <ExternalLink className="w-3.5 h-3.5 mr-1" /> {rec.showtimes ? 'Tickets' : 'Web'}
+                                </Button>
+                            )}
+                        </div>
+                    ) : null}
+
+                    {/* Primary Action Buttons - Always stacked on mobile, wrapped horizontal on desktop */}
+                    <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-end gap-2">
+                        <ShareButton
+                            title={`${getRecommendationEmoji(categoryType)} ${rec.name}`}
+                            description={getShareDescription(rec, categoryType)}
+                            source={categoryType.toLowerCase() + '_concierge'}
+                            contentType={categoryType.toLowerCase()}
+                            className="text-xs h-8 w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap"
+                        />
+
                         <Button
                             size="sm"
-                            variant="ghost"
-                            className="text-xs text-slate-600 dark:text-slate-300 h-8"
-                            onClick={() => {
-                                const query = rec.cinema_name ? `${rec.cinema_name} ${rec.address}` : `${rec.name} ${rec.address}`;
-                                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
-                            }}
+                            disabled={rec.isAdded || isAddingToJar}
+                            onClick={() => onAddToJar(rec, categoryType, isPrivate)}
+                            className={`text-xs h-8 w-full sm:w-auto sm:flex-shrink-0 transition-all whitespace-nowrap ${rec.isAdded
+                                ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                                : isAddingToJar
+                                    ? "bg-slate-200 dark:bg-white/20 text-slate-500 cursor-wait"
+                                    : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"}`}
                         >
-                            <ExternalLink className="w-3.5 h-3.5 mr-1" /> Map
+                            {isAddingToJar ? (
+                                <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> Adding...</>
+                            ) : rec.isAdded ? (
+                                <><Check className="w-3.5 h-3.5 mr-1" /> Added</>
+                            ) : (
+                                <><Plus className="w-3.5 h-3.5 mr-1" /> Jar</>
+                            )}
                         </Button>
-                    )}
 
-                    {rec.website && (
                         <Button
                             size="sm"
-                            variant="ghost"
-                            className="text-xs text-slate-600 dark:text-slate-300 h-8"
-                            onClick={() => window.open(rec.website, '_blank')}
+                            onClick={() => onGoAction(rec, categoryType, isPrivate)}
+                            className={`text-xs h-8 w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap ${goActionClass}`}
                         >
-                            <ExternalLink className="w-3.5 h-3.5 mr-1" /> {rec.showtimes ? 'Tickets' : 'Web'}
+                            <Zap className="w-3.5 h-3.5 mr-1" /> {goActionLabel}
                         </Button>
-                    )}
-
-                    <ShareButton
-                        title={`${getRecommendationEmoji(categoryType)} ${rec.name}`}
-                        description={getShareDescription(rec, categoryType)}
-                        source={categoryType.toLowerCase() + '_concierge'}
-                        contentType={categoryType.toLowerCase()}
-                        className="text-xs h-8"
-                    />
-
-                    <Button
-                        size="sm"
-                        disabled={rec.isAdded || isAddingToJar}
-                        onClick={() => onAddToJar(rec, categoryType, isPrivate)}
-                        className={`text-xs h-8 transition-all ${rec.isAdded
-                            ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                            : isAddingToJar
-                                ? "bg-slate-200 dark:bg-white/20 text-slate-500 cursor-wait"
-                                : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"}`}
-                    >
-                        {isAddingToJar ? (
-                            <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> Adding...</>
-                        ) : rec.isAdded ? (
-                            <><Check className="w-3.5 h-3.5 mr-1" /> Added</>
-                        ) : (
-                            <><Plus className="w-3.5 h-3.5 mr-1" /> Jar</>
-                        )}
-                    </Button>
-
-                    <Button
-                        size="sm"
-                        onClick={() => onGoAction(rec, categoryType, isPrivate)}
-                        className={`text-xs h-8 ${goActionClass}`}
-                    >
-                        <Zap className="w-3.5 h-3.5 mr-1" /> {goActionLabel}
-                    </Button>
+                    </div>
                 </div>
             </div>
 

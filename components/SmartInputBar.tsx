@@ -6,11 +6,13 @@ import { useModalSystem } from "@/components/ModalProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import imageCompression from 'browser-image-compression';
 import { showError, showSuccess } from "@/lib/toast";
+import { trackPathSelected, trackModalOpened } from "@/lib/analytics";
 
 export function SmartInputBar() {
     const [inputValue, setInputValue] = useState("");
     const [isFocused, setIsFocused] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [hasTrackedFocus, setHasTrackedFocus] = useState(false);
     const { openModal } = useModalSystem();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -22,6 +24,37 @@ export function SmartInputBar() {
         } catch {
             return false;
         }
+    };
+
+    /**
+     * Detect if input is a request/question vs an actual idea
+     * Requests should go to AI Concierge, ideas should go to manual entry
+     */
+    const isRequest = (text: string): boolean => {
+        const lowerText = text.toLowerCase().trim();
+        
+        // Question patterns
+        const questionStarters = [
+            'find', 'where', 'what', 'how', 'show', 'suggest', 'recommend',
+            'need', 'want', 'looking for', 'help me', 'can you', 'could you',
+            'any ideas', 'give me', 'tell me', 'show me', 'i need', 'i want'
+        ];
+        
+        // Check if starts with a question word/phrase
+        const startsWithQuestion = questionStarters.some(starter => 
+            lowerText.startsWith(starter)
+        );
+        
+        // Check if contains question words anywhere
+        const containsQuestionWord = ['find', 'recommend', 'suggest', 'need', 'want'].some(word =>
+            lowerText.includes(word)
+        );
+        
+        // Check if ends with question mark
+        const isQuestion = text.trim().endsWith('?');
+        
+        // It's a request if it starts with question word OR is a question OR contains strong request words
+        return startsWithQuestion || isQuestion || (containsQuestionWord && lowerText.split(' ').length > 2);
     };
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +99,10 @@ export function SmartInputBar() {
                 const originalSizeKB = (file.size / 1024).toFixed(0);
                 const compressedSizeKB = (compressedFile.size / 1024).toFixed(0);
 
+                // Track path selection (image upload)
+                trackPathSelected('1_have_idea', { trigger: 'image_upload' });
+                trackModalOpened('add_idea', { triggered_by: 'smart_input_image' });
+
                 openModal('ADD_IDEA', {
                     initialData: {
                         description: "",
@@ -103,14 +140,31 @@ export function SmartInputBar() {
 
         if (isUrl(inputValue)) {
             // Handle as Link
+            trackPathSelected('1_have_idea', { trigger: 'url_paste' });
+            trackModalOpened('add_idea', { triggered_by: 'smart_input_url' });
+            
             openModal('ADD_IDEA', {
                 initialData: {
                     description: "Shared Link",
                     details: inputValue
                 }
             });
+        } else if (isRequest(inputValue)) {
+            // Smart Routing: Detected as request/question → Route to AI Concierge
+            trackPathSelected('2_need_inspiration', { 
+                trigger: 'smart_routing_detected_request',
+                previous_path: '1_have_idea' 
+            });
+            trackModalOpened('concierge', { triggered_by: 'smart_input_auto_routed' });
+            
+            openModal('CONCIERGE', {
+                initialPrompt: inputValue
+            });
         } else {
-            // Handle as Text
+            // Handle as Manual Idea
+            trackPathSelected('1_have_idea', { trigger: 'text_entry' });
+            trackModalOpened('add_idea', { triggered_by: 'smart_input_text' });
+            
             openModal('ADD_IDEA', {
                 initialData: {
                     description: inputValue
@@ -165,6 +219,12 @@ export function SmartInputBar() {
                             type="button"
                             data-tour="surprise-me-button"
                             onClick={() => {
+                                trackPathSelected('2_need_inspiration', { 
+                                    trigger: 'smart_input_ai_button',
+                                    previous_path: '1_have_idea' 
+                                });
+                                trackModalOpened('concierge', { triggered_by: 'smart_input_ai_button' });
+                                
                                 openModal('CONCIERGE', {
                                     toolId: 'CONCIERGE',
                                     initialPrompt: inputValue
@@ -178,7 +238,14 @@ export function SmartInputBar() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => openModal('TEMPLATE_BROWSER')}
+                            onClick={() => {
+                                trackPathSelected('3_browse_templates', { 
+                                    trigger: 'smart_input_template_button',
+                                    previous_path: '1_have_idea'
+                                });
+                                trackModalOpened('template_browser', { triggered_by: 'smart_input_template_button' });
+                                openModal('TEMPLATE_BROWSER');
+                            }}
                             className="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors hidden sm:block"
                             title="Browse Templates"
                         >
@@ -195,7 +262,14 @@ export function SmartInputBar() {
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        onFocus={() => setIsFocused(true)}
+                        onFocus={() => {
+                            setIsFocused(true);
+                            // Track first focus as path 1 selection
+                            if (!hasTrackedFocus) {
+                                trackPathSelected('1_have_idea', { trigger: 'input_focus' });
+                                setHasTrackedFocus(true);
+                            }
+                        }}
                         onBlur={() => setIsFocused(false)}
                         placeholder="Type an idea, paste a link, upload an image, or ask AI..."
                         className="flex-1 bg-transparent border-none outline-none px-3 py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-base md:text-lg min-w-0"

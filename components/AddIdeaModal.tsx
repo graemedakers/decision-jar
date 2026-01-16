@@ -15,6 +15,7 @@ import { useMagicIdea } from "@/hooks/useMagicIdea";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
 import { Idea, UserData } from "@/lib/types";
 import { IdeaWizard } from "@/components/wizard/IdeaWizard"; // Import Wizard
+import { trackModalAbandoned } from "@/lib/analytics";
 
 interface AddIdeaModalProps {
     isOpen: boolean;
@@ -36,7 +37,12 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
 
-    const { formData, setFormData, isLoading, handleSubmit, handleDelete, categories, isCommunitySubmission } = useIdeaForm({
+    // Abandonment tracking
+    const [modalOpenTime, setModalOpenTime] = useState<number | null>(null);
+    const [hadInteraction, setHadInteraction] = useState(false);
+    const ideaWasAdded = useRef(false);
+
+    const { formData, setFormData: originalSetFormData, isLoading, handleSubmit, handleDelete, categories, isCommunitySubmission } = useIdeaForm({
         initialData,
         currentUser,
         jarTopic,
@@ -44,6 +50,12 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         onSuccess,
         onClose
     });
+
+    // Wrapped setFormData to track interactions
+    const setFormData = (updater: any) => {
+        setHadInteraction(true);
+        originalSetFormData(updater);
+    };
 
     const { randomize, isLoading: isMagicLoading } = useMagicIdea({
         jarTopic,
@@ -86,6 +98,38 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         }
     }, [isOpen, initialData?.id]);
 
+    // Track modal open time for abandonment analytics
+    useEffect(() => {
+        if (isOpen) {
+            setModalOpenTime(Date.now());
+            setHadInteraction(false);
+            ideaWasAdded.current = false;
+        }
+    }, [isOpen]);
+
+    // Enhanced close handler with abandonment tracking
+    const handleClose = () => {
+        // Track abandonment if modal is being closed without adding an idea
+        if (modalOpenTime && !ideaWasAdded.current) {
+            const timeOpenSeconds = (Date.now() - modalOpenTime) / 1000;
+            trackModalAbandoned('add_idea', timeOpenSeconds, hadInteraction, {
+                mode: isWizardMode ? 'wizard' : 'form',
+                is_edit: !!initialData?.id
+            });
+        }
+        onClose();
+    };
+
+    // Wrapped submit handler to track successful additions
+    const handleSubmitWithTracking = async (e?: React.FormEvent) => {
+        setHadInteraction(true); // Mark interaction on submit attempt
+        const result = await handleSubmit(e);
+        if (result) {
+            ideaWasAdded.current = true; // Mark that idea was successfully added
+        }
+        return result;
+    };
+
     const itinerary = getItinerary(formData.details);
     const cateringPlan = getCateringPlan(formData.details);
     const hasMarkdown = formData.details && (formData.details.includes("###") || formData.details.includes("**"));
@@ -102,7 +146,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                         className="glass-card w-full max-w-lg relative bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 p-0 overflow-hidden"
                     >
                         <button
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors z-20"
                             aria-label="Close modal"
                         >
@@ -200,7 +244,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                     formData={formData}
                                     setFormData={setFormData}
                                     categories={categories}
-                                    onSubmit={handleSubmit}
+                                    onSubmit={handleSubmitWithTracking}
                                     onCancel={onClose}
                                     isLoading={isLoading}
                                 />

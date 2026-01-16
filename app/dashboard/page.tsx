@@ -10,6 +10,7 @@ import {
     Activity, Utensils, Check, Star, ArrowRight, History, Layers,
     Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2, Download
 } from "lucide-react";
+import { SessionTracker } from "@/lib/session-tracker";
 
 import { Jar3D } from "@/components/Jar3D";
 import { PremiumBanner } from "@/components/PremiumBanner";
@@ -29,6 +30,7 @@ import React from "react";
 import { SmartInputBar } from "@/components/SmartInputBar";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { usePWA } from "@/hooks/usePWA";
+import { UnifiedConciergeButton } from "@/components/UnifiedConciergeButton";
 
 // Lazy Loading
 const PreferenceQuizModal = dynamic(() => import("@/components/PreferenceQuizModal").then(m => m.PreferenceQuizModal), { ssr: false });
@@ -103,6 +105,11 @@ function DashboardContent() {
         // Utils
         openModal
     } = useDashboardLogic();
+
+    // Initialize session tracking for time-to-first-idea analytics
+    useEffect(() => {
+        SessionTracker.initSession();
+    }, []);
 
     const { installPrompt, install } = usePWA();
 
@@ -492,15 +499,19 @@ function DashboardContent() {
                                 )}
 
                                 {!isVotingMode && (
-                                    <div className="mt-8 w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col items-center gap-4">
+                                    <div className="mt-8 w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col items-center gap-6">
                                         <SmartInputBar />
+
+                                        <div className="w-full">
+                                            <UnifiedConciergeButton isPremium={isPremium} />
+                                        </div>
 
                                         <button
                                             onClick={() => openModal('TOOLS')}
                                             className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 py-2"
                                         >
                                             <Dices className="w-3.5 h-3.5" />
-                                            Browse specialized tools & finders
+                                            View all AI concierge tools
                                         </button>
                                     </div>
                                 )}
