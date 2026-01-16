@@ -4,8 +4,8 @@ import { SessionTracker } from './session-tracker'
 // Safety wrapper to prevent errors if PostHog fails
 const safeCapture = (eventName: string, properties?: Record<string, any>) => {
     try {
-        if (posthog && typeof safeCapture === 'function') {
-            safeCapture(eventName, properties);
+        if (posthog && typeof posthog.capture === 'function') {
+            posthog.capture(eventName, properties);
         }
     } catch (error) {
         console.warn('PostHog tracking failed:', error);
