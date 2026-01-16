@@ -3,6 +3,7 @@ import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, ChevronDown, Chevr
 import React from "react";
 import { ShareButton } from "@/components/ShareButton";
 import { motion, AnimatePresence } from "framer-motion";
+import { ACTION_LABELS } from "@/lib/ui-constants";
 
 interface ConciergeRecommendation {
     name: string;
@@ -56,7 +57,7 @@ export function ConciergeResultCard({
     onAddToJar,
     onGoAction,
     isAddingToJar = false,
-    goActionLabel = "I'll do this!",
+    goActionLabel = ACTION_LABELS.DO_THIS,
     goActionClass = "bg-gradient-to-r from-emerald-400/20 to-teal-400/20 text-emerald-700 dark:text-emerald-200 border border-emerald-400/30 hover:bg-emerald-400/30",
     ratingClass = "text-yellow-400",
     expandable = false,
@@ -187,11 +188,11 @@ export function ConciergeResultCard({
                                     : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"}`}
                         >
                             {isAddingToJar ? (
-                                <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> Adding...</>
+                                <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> {ACTION_LABELS.ADDING}</>
                             ) : rec.isAdded ? (
-                                <><Check className="w-3.5 h-3.5 mr-1" /> Added</>
+                                <><Check className="w-3.5 h-3.5 mr-1" /> {ACTION_LABELS.ADDED}</>
                             ) : (
-                                <><Plus className="w-3.5 h-3.5 mr-1" /> Jar</>
+                                <><Plus className="w-3.5 h-3.5 mr-1" /> {ACTION_LABELS.JAR}</>
                             )}
                         </Button>
 

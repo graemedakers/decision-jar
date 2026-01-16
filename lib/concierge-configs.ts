@@ -4,6 +4,7 @@ import {
     Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase, Sparkles, Plane, Calendar
 } from "lucide-react";
 import { ConciergeToolConfig } from "@/components/GenericConciergeModal";
+import { ACTION_LABELS } from "@/lib/ui-constants";
 
 export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
     DINING: {
@@ -32,7 +33,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Utensils,
             subtextKey: 'cuisine',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     CONCIERGE: {
@@ -69,7 +70,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             subtextKey: 'category', // Custom field to show Activity Type?
             secondIcon: Clock,
             secondSubtextKey: 'duration_label',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     BAR: {
@@ -98,7 +99,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Wine,
             subtextKey: 'speciality',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     BAR_CRAWL: {
@@ -133,7 +134,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Wine,
             subtextKey: 'duration_label',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     NIGHTCLUB: {
@@ -162,7 +163,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Music,
             subtextKey: 'music',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     HOTEL: {
@@ -191,7 +192,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Bed,
             subtextKey: 'style',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     MOVIE: {
@@ -248,7 +249,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             subtextKey: 'year',
             secondIcon: Star,
             secondSubtextKey: 'rating',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     BOOK: {
@@ -289,7 +290,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: BookOpen,
             subtextKey: 'author',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     WELLNESS: {
@@ -318,7 +319,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Leaf,
             subtextKey: 'type',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     FITNESS: {
@@ -347,7 +348,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Dumbbell,
             subtextKey: 'activity_type',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     THEATRE: {
@@ -376,7 +377,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Ticket,
             subtextKey: 'type',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     GAME: {
@@ -417,7 +418,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Gamepad2,
             subtextKey: 'genre',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     ESCAPE_ROOM: {
@@ -454,7 +455,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             subtextKey: 'theme_type',
             secondIcon: Briefcase,
             secondSubtextKey: 'difficulty_level',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     SPORTS: {
@@ -494,7 +495,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Trophy,
             subtextKey: 'sport',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     CHEF: {
@@ -548,7 +549,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: ChefHat,
             subtextKey: 'occasion',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
 
@@ -585,7 +586,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Sparkles,
             subtextKey: 'duration_label',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     WEEKEND_EVENTS: {
@@ -621,7 +622,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Calendar,
             subtextKey: 'day',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     },
     HOLIDAY: {
@@ -675,7 +676,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Calendar,
             subtextKey: 'duration_label',
-            goActionLabel: "I'll do this!"
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     }
 };

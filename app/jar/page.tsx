@@ -11,6 +11,7 @@ import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
 import { useModalSystem } from "@/components/ModalProvider";
 import { useFavorites } from "@/hooks/useFavorites";
+import { ACTION_LABELS } from "@/lib/ui-constants";
 import React from "react";
 
 export default function JarPage() {
@@ -276,7 +277,7 @@ export default function JarPage() {
                                             >
                                                 {isAdminPickMode ? (
                                                     <span className="flex items-center gap-1"><Crown className="w-3 h-3" /> Pick Winner</span>
-                                                ) : "I'll do this!"}
+                                                ) : ACTION_LABELS.DO_THIS}
                                             </Button>
                                         ) : null}
                                         <div className={`w-2 h-2 rounded-full ${idea.activityLevel === 'HIGH' ? 'bg-red-400' : idea.activityLevel === 'MEDIUM' ? 'bg-yellow-400' : 'bg-green-400'}`} title={`Activity: ${idea.activityLevel}`} />

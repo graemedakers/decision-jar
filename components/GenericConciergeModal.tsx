@@ -16,6 +16,7 @@ import { getCurrentLocation } from "@/lib/utils";
 import { ConciergeSkillPicker } from "./ConciergeSkillPicker";
 import { detectIntent, getIntentConfidence } from "@/lib/intent-detection";
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
+import { ACTION_LABELS } from "@/lib/ui-constants";
 
 // --- Configuration Interfaces ---
 
@@ -737,7 +738,7 @@ export function GenericConciergeModal({
                                                     onFavorite={handleFavorite}
                                                     onAddToJar={handleAddToJar}
                                                     onGoAction={() => onGoAction(rec)}
-                                                    goActionLabel={config.resultCard.goActionLabel || "I'll do this!"}
+                                                    goActionLabel={config.resultCard.goActionLabel || ACTION_LABELS.DO_THIS}
                                                     ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
                                                     isAddingToJar={isAddingToJar}
 
