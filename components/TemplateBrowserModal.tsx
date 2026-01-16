@@ -156,7 +156,7 @@ export function TemplateBrowserModal({
             // Mark that template was successfully used
             templateWasUsed.current = true;
             const template = JAR_TEMPLATES.find(t => t.id === templateId);
-            trackTemplateUsed(templateId, template?.name || templateId, 'add_to_jar');
+            trackTemplateUsed(templateId, template?.name || templateId, 'add_to_current');
 
             // Close modal and refresh to show new ideas
             handleClose();
