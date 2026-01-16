@@ -182,6 +182,11 @@ export const trackModalAbandoned = (
         last_field_touched?: string
         completion_percent?: number
         reason?: string
+        mode?: string
+        is_edit?: boolean
+        skill_id?: string
+        had_skill_selected?: boolean
+        templates_expanded?: number
     }
 ) => {
     posthog.capture('modal_abandoned', {
