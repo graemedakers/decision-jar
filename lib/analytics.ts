@@ -1,13 +1,24 @@
 import { posthog } from './posthog'
 import { SessionTracker } from './session-tracker'
 
+// Safety wrapper to prevent errors if PostHog fails
+const safeCapture = (eventName: string, properties?: Record<string, any>) => {
+    try {
+        if (posthog && typeof safeCapture === 'function') {
+            safeCapture(eventName, properties);
+        }
+    } catch (error) {
+        console.warn('PostHog tracking failed:', error);
+    }
+};
+
 // Template Events
 export const trackTemplateBrowsed = () => {
-    posthog.capture('template_browser_opened')
+    safeCapture('template_browser_opened')
 }
 
 export const trackTemplateUsed = (templateId: string, templateName: string, method: 'new_jar' | 'add_to_current') => {
-    posthog.capture('template_used', {
+    safeCapture('template_used', {
         template_id: templateId,
         template_name: templateName,
         method: method,
@@ -16,7 +27,7 @@ export const trackTemplateUsed = (templateId: string, templateName: string, meth
 
 // Share Events
 export const trackShareClicked = (source: string, contentType: string) => {
-    posthog.capture('share_clicked', {
+    safeCapture('share_clicked', {
         source: source, // e.g., 'dining_concierge', 'bar_concierge', 'movie_scout'
         content_type: contentType, // e.g., 'restaurant', 'bar', 'movie'
     })
@@ -24,14 +35,14 @@ export const trackShareClicked = (source: string, contentType: string) => {
 
 // AI Tool Events
 export const trackAIToolUsed = (toolName: string, preferences?: Record<string, any>) => {
-    posthog.capture('ai_tool_used', {
+    safeCapture('ai_tool_used', {
         tool_name: toolName,
         ...preferences,
     })
 }
 
 export const trackAIRecommendation = (toolName: string, recommendationName: string) => {
-    posthog.capture('ai_recommendation_received', {
+    safeCapture('ai_recommendation_received', {
         tool_name: toolName,
         recommendation: recommendationName,
     })
@@ -39,14 +50,14 @@ export const trackAIRecommendation = (toolName: string, recommendationName: stri
 
 // Jar Events
 export const trackJarCreated = (source: 'template' | 'manual' | 'empty', templateId?: string) => {
-    posthog.capture('jar_created', {
+    safeCapture('jar_created', {
         source: source,
         template_id: templateId,
     })
 }
 
 export const trackIdeaAdded = (method: 'manual' | 'ai' | 'template', source?: string) => {
-    posthog.capture('idea_added', {
+    safeCapture('idea_added', {
         method: method,
         source: source,
     })
@@ -71,7 +82,7 @@ function getSourceCategory(method: 'manual' | 'ai' | 'template', source?: string
 
 // User Events
 export const trackSignup = async (method: string, utmSource?: string, utmMedium?: string, utmCampaign?: string) => {
-    posthog.capture('signup_completed', {
+    safeCapture('signup_completed', {
         method: method,
         utm_source: utmSource,
         utm_medium: utmMedium,
@@ -82,14 +93,14 @@ export const trackSignup = async (method: string, utmSource?: string, utmMedium?
 }
 
 export const trackLogin = (method: string) => {
-    posthog.capture('login_completed', {
+    safeCapture('login_completed', {
         method: method,
     })
 }
 
 // Feature Usage
 export const trackFeatureUsed = (featureName: string, details?: Record<string, any>) => {
-    posthog.capture('feature_used', {
+    safeCapture('feature_used', {
         feature: featureName,
         ...details,
     })
@@ -97,7 +108,7 @@ export const trackFeatureUsed = (featureName: string, details?: Record<string, a
 
 // Spin Events
 export const trackJarSpun = (ideaCount: number, hasFilters: boolean) => {
-    posthog.capture('jar_spun', {
+    safeCapture('jar_spun', {
         idea_count: ideaCount,
         has_filters: hasFilters,
     })
@@ -115,7 +126,7 @@ export const resetAnalytics = () => {
 
 // Generic event tracking (for backward compatibility)
 export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
-    posthog.capture(eventName, properties)
+    safeCapture(eventName, properties)
 }
 
 // ===== THREE-PATH STRATEGY ANALYTICS =====
@@ -129,7 +140,7 @@ export const trackPathSelected = (
         trigger?: string
     }
 ) => {
-    posthog.capture('path_selected', {
+    safeCapture('path_selected', {
         path: path,
         timestamp: Date.now(),
         ...metadata,
@@ -147,7 +158,7 @@ export const trackConciergeSkillSelected = (
         available_skills_count?: number
     }
 ) => {
-    posthog.capture('concierge_skill_selected', {
+    safeCapture('concierge_skill_selected', {
         skill_id: skillId,
         selection_method: via,
         timestamp: Date.now(),
@@ -164,7 +175,7 @@ export const trackTimeToFirstIdea = (
         session_id?: string
     }
 ) => {
-    posthog.capture('time_to_first_idea', {
+    safeCapture('time_to_first_idea', {
         duration_seconds: durationSeconds,
         source: source,
         met_5s_goal: durationSeconds <= 5,
@@ -189,7 +200,7 @@ export const trackModalAbandoned = (
         templates_expanded?: number
     }
 ) => {
-    posthog.capture('modal_abandoned', {
+    safeCapture('modal_abandoned', {
         modal_type: modalType,
         time_open_seconds: timeOpenSeconds,
         had_interaction: hadInteraction,
@@ -204,7 +215,7 @@ export const trackIntentDetectionResult = (
     wasAccepted: boolean,
     correctedTo?: string
 ) => {
-    posthog.capture('intent_detection_result', {
+    safeCapture('intent_detection_result', {
         user_input_length: userInput.length,
         user_input_preview: userInput.slice(0, 50), // First 50 chars for context
         detected_skill: detectedSkill,
@@ -222,7 +233,7 @@ export const trackModalOpened = (
         previous_modal?: string
     }
 ) => {
-    posthog.capture('modal_opened', {
+    safeCapture('modal_opened', {
         modal_type: modalType,
         timestamp: Date.now(),
         ...metadata,
