@@ -246,7 +246,7 @@ export function SmartInputBar() {
                                 trackModalOpened('template_browser', { triggered_by: 'smart_input_template_button' });
                                 openModal('TEMPLATE_BROWSER');
                             }}
-                            className="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors hidden sm:block"
+                            className="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                             title="Browse Templates"
                         >
                             <BookOpen className="w-5 h-5" />
