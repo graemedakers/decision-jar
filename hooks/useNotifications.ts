@@ -37,10 +37,31 @@ export function useNotifications() {
     const subscribeToPush = async () => {
         setIsLoading(true);
         try {
+            // Check if permission is denied
+            if (Notification.permission === 'denied') {
+                showError("Notifications blocked. Please enable them in your browser settings.");
+                setIsLoading(false);
+                return;
+            }
+
+            // Request permission if not granted
+            if (Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    showError("Notification permission denied. Please try again.");
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
             const registration = await navigator.serviceWorker.ready;
 
             // Get VAPID key from server (or Env)
             const response = await fetch('/api/notifications/vapid-key');
+            if (!response.ok) {
+                throw new Error("Failed to fetch VAPID key from server");
+            }
+            
             const { publicKey } = await response.json();
 
             if (!publicKey) throw new Error("VAPID Key not found");
@@ -53,19 +74,33 @@ export function useNotifications() {
             });
 
             // Send subscription to server
-            await fetch('/api/notifications/subscribe', {
+            const subscribeResponse = await fetch('/api/notifications/subscribe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(subscription)
+                body: JSON.stringify(subscription),
+                credentials: 'include'
             });
+
+            if (!subscribeResponse.ok) {
+                throw new Error("Failed to save subscription to server");
+            }
 
             setIsSubscribed(true);
             showSuccess("Notifications enabled! You'll stay updated.");
         } catch (error) {
             console.error("Failed to subscribe:", error);
-            showError("Failed to enable notifications. Please try again.");
+            
+            // Provide more specific error messages
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            if (errorMessage.includes("VAPID")) {
+                showError("Server configuration error. Please contact support.");
+            } else if (errorMessage.includes("service worker") || errorMessage.includes("ServiceWorker")) {
+                showError("Service worker not ready. Please refresh the page and try again.");
+            } else {
+                showError("Failed to enable notifications. Please try again.");
+            }
         } finally {
             setIsLoading(false);
         }
