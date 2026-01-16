@@ -123,11 +123,8 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     // Wrapped submit handler to track successful additions
     const handleSubmitWithTracking = async (e: React.FormEvent) => {
         setHadInteraction(true); // Mark interaction on submit attempt
-        const result = await handleSubmit(e);
-        if (result) {
-            ideaWasAdded.current = true; // Mark that idea was successfully added
-        }
-        return result;
+        ideaWasAdded.current = true; // Mark that idea was added (if submission fails, error is thrown and modal stays open)
+        await handleSubmit(e);
     };
 
     const itinerary = getItinerary(formData.details);
