@@ -114,7 +114,8 @@ export function TemplateBrowserModal({
 
             // Mark that template was successfully used
             templateWasUsed.current = true;
-            trackTemplateUsed(templateId, 'new_jar');
+            const template = JAR_TEMPLATES.find(t => t.id === templateId);
+            trackTemplateUsed(templateId, template?.name || templateId, 'new_jar');
 
             // Close modal and navigate to the new jar
             handleClose();
@@ -154,7 +155,8 @@ export function TemplateBrowserModal({
 
             // Mark that template was successfully used
             templateWasUsed.current = true;
-            trackTemplateUsed(templateId, 'add_to_jar');
+            const template = JAR_TEMPLATES.find(t => t.id === templateId);
+            trackTemplateUsed(templateId, template?.name || templateId, 'add_to_jar');
 
             // Close modal and refresh to show new ideas
             handleClose();
