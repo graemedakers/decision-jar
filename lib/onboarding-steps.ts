@@ -15,13 +15,13 @@ const COMMON_WELCOME_STEPS: OnboardingStep[] = [
     {
         id: 'welcome',
         title: '👋 Welcome to Decision Jar!',
-        description: 'Your personal idea jar for dates, activities, and adventures. Let\'s take a quick tour to get you started!',
+        description: 'Your personal idea jar for activities, adventures, and good times. Let\'s take a quick tour to get you started!',
         position: 'center'
     },
     {
         id: 'add-idea',
         title: '💡 Add Your First Idea',
-        description: 'Start by adding date ideas to your jar. Click here to add anything from simple coffee dates to epic adventures!',
+        description: 'Start by adding ideas to your jar. Click here to add anything from simple activities to epic adventures!',
         targetElement: '[data-tour="add-idea-button"]',
         position: 'top'
     },
@@ -65,8 +65,8 @@ const COMMON_ENDING_STEPS: OnboardingStep[] = [
     },
     {
         id: 'gamification',
-        title: '⭐ Level Up Your Romance',
-        description: 'Earn XP for adding ideas and completing dates. Unlock achievements and track your progress!',
+        title: '⭐ Level Up Your Jar',
+        description: 'Earn XP for adding ideas and picking activities. Unlock achievements and track your progress!',
         targetElement: '[data-tour="trophy-case"]',
         position: 'bottom'
     },
