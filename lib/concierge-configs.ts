@@ -133,7 +133,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Wine,
             subtextKey: 'duration_label',
-            goActionLabel: 'View Full Route'
+            goActionLabel: "I'll do this!"
         }
     },
     NIGHTCLUB: {
@@ -454,7 +454,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             subtextKey: 'theme_type',
             secondIcon: Briefcase,
             secondSubtextKey: 'difficulty_level',
-            goActionLabel: 'View Details'
+            goActionLabel: "I'll do this!"
         }
     },
     SPORTS: {
@@ -548,7 +548,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: ChefHat,
             subtextKey: 'occasion',
-            goActionLabel: 'View Full Menu'
+            goActionLabel: "I'll do this!"
         }
     },
 
@@ -585,7 +585,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Sparkles,
             subtextKey: 'duration_label',
-            goActionLabel: 'View Full Plan'
+            goActionLabel: "I'll do this!"
         }
     },
     WEEKEND_EVENTS: {
@@ -621,7 +621,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Calendar,
             subtextKey: 'day',
-            goActionLabel: 'View Details'
+            goActionLabel: "I'll do this!"
         }
     },
     HOLIDAY: {
