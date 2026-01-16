@@ -290,7 +290,7 @@ export function GenericConciergeModal({
         
         // Track manual skill selection
         trackConciergeSkillSelected(selectedConfig.id, 'picker', {
-            was_corrected: wasAutoDetected,
+            was_corrected: wasAutoDetected ?? undefined,
             available_skills_count: Object.keys(CONCIERGE_CONFIGS).length
         });
         
