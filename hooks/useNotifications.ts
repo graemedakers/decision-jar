@@ -36,7 +36,17 @@ export function useNotifications() {
 
     const subscribeToPush = async () => {
         setIsLoading(true);
+        
+        // Timeout protection: Force stop loading after 10 seconds
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+            showError("Request timed out. Please try again.");
+        }, 10000);
+        
         try {
+            console.log('[Notifications] Starting subscription process...');
+            console.log('[Notifications] Current permission:', Notification.permission);
+            
             // Check if permission is denied
             if (Notification.permission === 'denied') {
                 showError("Notifications blocked. Please enable them in your browser settings.");
@@ -54,15 +64,19 @@ export function useNotifications() {
                 }
             }
 
+            console.log('[Notifications] Waiting for service worker...');
             const registration = await navigator.serviceWorker.ready;
+            console.log('[Notifications] Service worker ready');
 
             // Get VAPID key from server (or Env)
+            console.log('[Notifications] Fetching VAPID key...');
             const response = await fetch('/api/notifications/vapid-key');
             if (!response.ok) {
                 throw new Error("Failed to fetch VAPID key from server");
             }
             
             const { publicKey } = await response.json();
+            console.log('[Notifications] VAPID key received:', publicKey ? 'Yes' : 'No');
 
             if (!publicKey) throw new Error("VAPID Key not found");
 
@@ -87,9 +101,11 @@ export function useNotifications() {
                 throw new Error("Failed to save subscription to server");
             }
 
+            clearTimeout(timeout);
             setIsSubscribed(true);
             showSuccess("Notifications enabled! You'll stay updated.");
         } catch (error) {
+            clearTimeout(timeout);
             console.error("Failed to subscribe:", error);
             
             // Provide more specific error messages
