@@ -105,7 +105,7 @@ export const trackIntentDetectionResult = (
     input: string, 
     topIntentId: string | null, 
     topIntentScoreOrRouted: number | boolean, 
-    threshold?: number
+    thresholdOrCorrectedSkill?: number | string
 ) => {
     let properties: Record<string, any> = {
         input_text: input.substring(0, 100), // Limit PII
@@ -113,13 +113,17 @@ export const trackIntentDetectionResult = (
     };
     
     if (typeof topIntentScoreOrRouted === 'boolean') {
-        // Simplified format: trackIntentDetectionResult(input, intentId, routed)
+        // Simplified format: trackIntentDetectionResult(input, intentId, routed, correctedSkill?)
         properties.routed = topIntentScoreOrRouted;
+        if (thresholdOrCorrectedSkill && typeof thresholdOrCorrectedSkill === 'string') {
+            properties.corrected_skill_id = thresholdOrCorrectedSkill;
+        }
     } else {
         // Full format: trackIntentDetectionResult(input, intentId, score, threshold)
         properties.top_intent_score = topIntentScoreOrRouted;
-        properties.threshold = threshold || 0.05;
-        properties.routed = topIntentScoreOrRouted >= (threshold || 0.05);
+        const threshold = typeof thresholdOrCorrectedSkill === 'number' ? thresholdOrCorrectedSkill : 0.05;
+        properties.threshold = threshold;
+        properties.routed = topIntentScoreOrRouted >= threshold;
     }
     
     safeCapture('intent_detection_result', properties);
