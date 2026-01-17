@@ -47,8 +47,8 @@ This document serves as a consolidated master list of features, technical debt, 
 ## 4. Premium Conversion & Pro Retention
 *Mechanisms to drive higher LTV and trial-to-paid conversion.*
 
-*   **Conversion "Nudge" Modals**:
-    *   **Trial Expiry Modal**: High-impact modal that appears immediately upon trial end (Day 15).
+*   ~~**Conversion "Nudge" Modals**:~~
+    *   ~~**Trial Expiry Modal**: High-impact modal that appears immediately upon trial end (Day 15).~~ ✅ **COMPLETED** (Jan 17, 2026)
     *   **Contextual Trial Status**: "X days left" badges inside Concierge tool headers.
 *   **Email Lifecycle Automation**: (Requires Postmark/Resend/SendGrid)
     *   Nurture sequence for trial users (Welcome -> Halfway -> Expiry Warning -> Special Offer).
