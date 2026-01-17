@@ -265,17 +265,5 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         conciergeId: 'BOOK',
         showInDashboard: true,
         showInExplore: true
-    },
-    {
-        id: 'home_chef',
-        title: 'Home Chef',
-        description: 'Get personalized menu ideas and recipes for any occasion.',
-        icon: ChefHat,
-        color: 'orange',
-        requiresPremium: true,
-        actionType: 'concierge',
-        conciergeId: 'CHEF',
-        showInDashboard: true,
-        showInExplore: true
     }
 ];
