@@ -311,3 +311,12 @@ export const trackTrialWarningShown = (daysRemaining: number) => {
         days_remaining: daysRemaining,
     });
 };
+
+// Ride-share deep link tracking
+export const trackRideShareClicked = (provider: 'uber' | 'lyft', destination: string, conciergeType: string) => {
+    safeCapture('rideshare_clicked', {
+        provider,
+        destination,
+        concierge_type: conciergeType,
+    });
+};

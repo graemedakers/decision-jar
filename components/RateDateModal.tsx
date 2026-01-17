@@ -6,6 +6,8 @@ import { X, Star, Save, Camera, Loader2, Trash2, Utensils, Calendar, Moon, Activ
 import { useState, useEffect, useRef } from "react";
 import { GooglePhotosPicker } from "./GooglePhotosPicker";
 import { useRouter } from "next/navigation";
+import imageCompression from 'browser-image-compression';
+import { showError, showSuccess } from "@/lib/toast";
 
 interface RateDateModalProps {
     isOpen: boolean;
@@ -69,21 +71,33 @@ export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rat
         if (!file) return;
 
         if (photoUrls.length >= 3) {
-            alert("Maximum 3 photos allowed.");
+            showError("Maximum 3 photos allowed.");
             return;
         }
 
-        if (file.size > 4 * 1024 * 1024) {
-            alert("File is too large. Please choose an image under 4MB.");
+        if (file.size > 10 * 1024 * 1024) {
+            showError("File is too large. Please choose an image under 10MB.");
             return;
         }
 
         setIsUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
 
         try {
-            // Updated to use Cloudinary endpoint
+            // Compress image before upload
+            const compressionOptions = {
+                maxSizeMB: 0.5, // Compress to max 500KB
+                maxWidthOrHeight: 1920, // Max dimension
+                useWebWorker: true,
+                fileType: file.type as any,
+            };
+
+            const compressedFile = await imageCompression(file, compressionOptions);
+            const originalSizeKB = (file.size / 1024).toFixed(0);
+            const compressedSizeKB = (compressedFile.size / 1024).toFixed(0);
+
+            const formData = new FormData();
+            formData.append('file', compressedFile);
+
             const res = await fetch('/api/upload-cloudinary', {
                 method: 'POST',
                 body: formData
@@ -97,6 +111,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rat
             const data = await res.json();
             if (data.success) {
                 setPhotoUrls(prev => [...prev, data.url]);
+                showSuccess(`Image compressed (${originalSizeKB}KB → ${compressedSizeKB}KB)`);
             } else {
                 throw new Error(data.error || "Upload failed");
             }
@@ -106,7 +121,7 @@ export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rat
             if (error instanceof Error) {
                 errorMessage += `: ${error.message}`;
             }
-            alert(errorMessage);
+            showError(errorMessage);
         } finally {
             setIsUploading(false);
             e.target.value = "";

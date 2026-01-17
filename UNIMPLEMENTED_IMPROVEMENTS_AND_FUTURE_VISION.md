@@ -1,5 +1,5 @@
 # Unimplemented Improvements & Future Vision
-**Last Updated:** January 17, 2026
+**Last Updated:** January 18, 2026
 
 This document serves as a consolidated master list of features, technical debt, and strategic opportunities identified during architectural reviews but **not yet implemented**. It is intended to guide future agents and developers in prioritizing roadmap items.
 
@@ -26,7 +26,7 @@ This document serves as a consolidated master list of features, technical debt, 
     *   **Host's Choice**: Spin 3 options, but leave the final decision to the Jar Admin.
 *   **Logistics & Planning**:
     *   **Availability Heatmap**: Sync (Google/Apple) calendars to visually show when most members are free.
-    *   **Ride-Share Deep Links**: Direct Uber/Lyft buttons on the "Result" card that pre-fill the location.
+    *   ~~**Ride-Share Deep Links**: Direct Uber/Lyft buttons on the "Result" card that pre-fill the location.~~ ✅ **COMPLETED** (Jan 18, 2026)
     *   **Bill Splitter**: Simple tracker within the "Memory" to log who paid for what.
 *   **Social Connectivity**:
     *   **Plan Chat ("The Hype Train")**: Per-plan comment threads for coordinating arrival times and logistics.
@@ -65,7 +65,7 @@ This document serves as a consolidated master list of features, technical debt, 
 *   **Offline "View-Only" Mode**: Enhance React Query and LocalStorage caching to allow users to view their jars while offline.
 *   **Automation Coverage**: Implementation of the Playwright E2E suite for the critical signup-to-spin path.
 *   **Server Actions Migration**: Continued refactoring of legacy API routes (`/api/*`) to Next.js Server Actions.
-*   **Image Compression**: Implement client-side image resizing/compression before uploading to Cloudinary to save on egress/storage costs.
+*   ~~**Image Compression**: Implement client-side image resizing/compression before uploading to Cloudinary to save on egress/storage costs.~~ ✅ **COMPLETED** (Jan 18, 2026)
 
 ---
 

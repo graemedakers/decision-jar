@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/Button";
-import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, Calendar, ChevronDown, ChevronUp, Check, Loader2 } from "lucide-react";
+import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, Calendar, ChevronDown, ChevronUp, Check, Loader2, Car } from "lucide-react";
 import React from "react";
 import { ShareButton } from "@/components/ShareButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { ACTION_LABELS } from "@/lib/ui-constants";
+import { trackRideShareClicked } from "@/lib/analytics";
 
 // Categories that are inherently digital/online and shouldn't show map
 const DIGITAL_CATEGORIES = ['BOOK', 'GAME', 'STREAMING', 'ONLINE', 'DIGITAL', 'VIRTUAL'];
@@ -182,17 +183,47 @@ export function ConciergeResultCard({
                 {((!isDigitalItem(rec, categoryType) && rec.address) || rec.website) && (
                     <div className="flex items-center gap-2">
                         {!isDigitalItem(rec, categoryType) && rec.address && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
-                                onClick={() => {
-                                    const query = rec.cinema_name ? `${rec.cinema_name} ${rec.address}` : `${rec.name} ${rec.address}`;
-                                    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
-                                }}
-                            >
-                                <ExternalLink className="w-3 h-3 mr-1" /> Map
-                            </Button>
+                            <>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
+                                    onClick={() => {
+                                        const query = rec.cinema_name ? `${rec.cinema_name} ${rec.address}` : `${rec.name} ${rec.address}`;
+                                        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+                                    }}
+                                >
+                                    <ExternalLink className="w-3 h-3 mr-1" /> Map
+                                </Button>
+                                {/* Uber deep link */}
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
+                                    onClick={() => {
+                                        const destination = rec.address || rec.name;
+                                        trackRideShareClicked('uber', destination, categoryType);
+                                        window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[formatted_address]=${encodeURIComponent(destination)}`, '_blank');
+                                    }}
+                                    title="Get Uber ride"
+                                >
+                                    <Car className="w-3 h-3 mr-1" /> Uber
+                                </Button>
+                                {/* Lyft deep link */}
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
+                                    onClick={() => {
+                                        const destination = rec.address || rec.name;
+                                        trackRideShareClicked('lyft', destination, categoryType);
+                                        window.open(`https://lyft.com/ride?destination[address]=${encodeURIComponent(destination)}`, '_blank');
+                                    }}
+                                    title="Get Lyft ride"
+                                >
+                                    <Car className="w-3 h-3 mr-1" /> Lyft
+                                </Button>
+                            </>
                         )}
 
                         {rec.website && (
