@@ -49,14 +49,15 @@ function validateRecommendation(
 
     // STRICT RULE 1: If user asks for "cafe" or "brunch"
     if (/\b(cafe|coffee shop|brunch|breakfast)\b/i.test(requestLower)) {
-        // Accept ONLY if explicitly mentioned as cafe/brunch
-        const isCafeBrunch = /\b(cafe|coffee|brunch|breakfast)\b/i.test(allText);
+        // Accept ONLY if explicitly mentioned as cafe/brunch in name, description OR cuisine
+        const hasCafeBrunchKeywords = /\b(cafe|coffee|brunch|breakfast)\b/i.test(allText);
         
-        // Reject if it's clearly a different type
-        const isWrongType = /\b(thai|chinese|indian|italian|pizza|japanese|sushi|vietnamese|mexican|greek|korean)\b/i.test(recCuisine);
+        // Reject if it's clearly a dinner-heavy type
+        const isDinnerHeavy = /\b(pizzeria|pizza|japanese|sushi|indian|thai|chinese|fine.dining|dinner.only)\b/i.test(recCuisine);
         
-        if (!isCafeBrunch || isWrongType) {
-            console.log(`  ❌ REJECT: Not a cafe/brunch spot (isCafeBrunch=${isCafeBrunch}, isWrongType=${isWrongType})`);
+        // REJECT if it lacks cafe keywords OR is a known dinner type
+        if (!hasCafeBrunchKeywords || isDinnerHeavy) {
+            console.log(`  ❌ REJECT: Non-cafe type (hasKeywords=${hasCafeBrunchKeywords}, isDinnerHeavy=${isDinnerHeavy})`);
             return false;
         }
         
@@ -98,13 +99,15 @@ function validateRecommendation(
 
 export async function POST(req: NextRequest) {
     try {
-        // 1. Parse Request Body (need to check demo mode early)
-        const { configId, inputs, location: cachedLocation, useMockData, isDemo } = await req.json();
+        // 1. Parse Request Body
+        const body = await req.json();
+        const { configId, inputs, location: cachedLocation, useMockData, isDemo } = body;
+        
+        // ✅ CRITICAL FIX: Capture extraInstructions from root body, not from inputs
+        const rawExtraInstructions = body.extraInstructions || inputs?.extraInstructions || "";
 
         // 2. Auth & Subscription Check
         const session = await getSession();
-
-        // ✅ FIX: Allow demo mode without authentication
         const isDemoMode = isDemo === true;
 
         if (!session?.user?.email && !isDemoMode) {
@@ -112,7 +115,6 @@ export async function POST(req: NextRequest) {
         }
 
         // 3. Find Tool Config
-        // We search by ID first (e.g., 'dining_concierge') or Key (e.g., 'DINING')
         const toolKey = Object.keys(CONCIERGE_CONFIGS).find(
             key => CONCIERGE_CONFIGS[key].id === configId || key === configId
         );
@@ -132,7 +134,7 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // 5. Subscription Check (skip for demo mode - limit handled client-side)
+        // 5. Subscription Check
         if (!isDemoMode) {
             const access = await checkSubscriptionAccess(session!.user.id, config.id);
             if (!access.allowed) {
@@ -142,10 +144,7 @@ export async function POST(req: NextRequest) {
 
         // 6. Location Context
         let targetLocation = "your area";
-        const needsLocation = config.hasLocation || (config.locationCondition &&
-            (inputs[config.locationCondition.sectionId] || "").split(", ").some((v: string) => config.locationCondition?.values.includes(v)));
-
-        if (needsLocation && cachedLocation) {
+        if (cachedLocation) {
             if (typeof cachedLocation === 'string') {
                 targetLocation = cachedLocation;
             } else if (typeof cachedLocation === 'object') {
@@ -155,61 +154,43 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        const extraInstructions = inputs.extraInstructions || "";
+        // 7. Prompt Generation & Execution (with Auto-Retry for Quality)
+        const runConciergeSearch = async (query: string, attempt: number = 1) => {
+            const { prompt } = getConciergePromptAndMock(
+                toolKey,
+                inputs,
+                targetLocation,
+                query
+            );
 
-        // 7. Prompt Generation
-        const { prompt, mockResponse } = getConciergePromptAndMock(
-            toolKey,
-            inputs,
-            targetLocation,
-            extraInstructions
-        );
-
-        if (useMockData) {
-            // Simulate stream for mock data
-            const stream = new ReadableStream({
-                start(controller) {
-                    controller.enqueue(JSON.stringify(mockResponse));
-                    controller.close();
-                }
-            });
-            return new Response(stream, {
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        // 8. Call AI (Using centralized reliable helper)
-        try {
-            const jsonResponse = await reliableGeminiCall(prompt, { jsonMode: true });
+            console.log(`[Concierge] Attempt ${attempt} for query: "${query}"`);
+            const jsonResponse = await reliableGeminiCall(prompt, { jsonMode: true }) as { recommendations?: any[] };
             
-            // 9. Filter recommendations based on user's extraInstructions
-            if (inputs.extraInstructions && jsonResponse.recommendations && Array.isArray(jsonResponse.recommendations)) {
-                console.log(`[Concierge] Validating ${jsonResponse.recommendations.length} recommendations against: "${inputs.extraInstructions}"`);
-                
-                // Validate each recommendation (now synchronous)
+            if (query && jsonResponse.recommendations && Array.isArray(jsonResponse.recommendations)) {
+                // Validate each recommendation
                 const filteredRecommendations = jsonResponse.recommendations.filter(
-                    (rec: any) => validateRecommendation(rec, inputs.extraInstructions, toolKey)
+                    (rec: any) => validateRecommendation(rec, query, toolKey)
                 );
                 
-                console.log(`[Concierge] Filtered from ${jsonResponse.recommendations.length} to ${filteredRecommendations.length} recommendations`);
-                
-                // Return filtered results
-                return NextResponse.json({
-                    ...jsonResponse,
-                    recommendations: filteredRecommendations,
-                    _meta: {
-                        originalCount: jsonResponse.recommendations.length,
-                        filteredCount: filteredRecommendations.length,
-                        userRequest: inputs.extraInstructions
-                    }
-                });
+                // ✅ RADICAL: If filtering removed more than 60% of results, and it's attempt 1, 
+                // try again with an even more aggressive prompt.
+                if (filteredRecommendations.length < 2 && attempt < 2) {
+                    console.log(`[Concierge] Low quality results (${filteredRecommendations.length}/5). Retrying with hyper-focus...`);
+                    return runConciergeSearch(`${query} (STRICT MATCH ONLY - IGNORE ALL OTHER CATEGORIES)`, attempt + 1);
+                }
+
+                return { ...jsonResponse, recommendations: filteredRecommendations };
             }
-            
-            return NextResponse.json(jsonResponse);
-        } catch (genError: any) {
-            console.error("Concierge AI Failed:", genError);
-            return apiError("AI Service Unavailable: " + genError.message, 500, "AI_ERROR");
+            return jsonResponse;
+        };
+
+        if (useMockData) {
+            const { mockResponse } = getConciergePromptAndMock(toolKey, inputs, targetLocation, rawExtraInstructions);
+            return NextResponse.json(mockResponse);
         }
+
+        const finalResult = await runConciergeSearch(rawExtraInstructions);
+        return NextResponse.json(finalResult);
 
     } catch (error: any) {
         return handleApiError(error);
