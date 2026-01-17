@@ -160,9 +160,9 @@ export function SmartToolsGrid({
     const visibleTools = DASHBOARD_TOOLS.filter(t => t.showInDashboard);
 
     return (
-        <div className="space-y-8">
-            {/* Compact Grid Layout */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="space-y-6">
+            {/* Spacious Grid Layout - fewer columns, more padding */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
                 {visibleTools.map((tool, index) => {
                     const styles = colorStyles[tool.color] || colorStyles.purple;
                     const Icon = tool.icon;
@@ -172,33 +172,33 @@ export function SmartToolsGrid({
                             key={tool.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.03 }}
-                            whileHover={{ scale: 1.03, y: -2 }}
+                            transition={{ delay: index * 0.02 }}
+                            whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.97 }}
                             onClick={() => handleToolClick(tool)}
                             className="group relative text-left"
                         >
                             {/* Card */}
-                            <div className="relative h-full bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-lg hover:border-slate-300 dark:hover:border-white/20 transition-all duration-300">
-                                {/* Icon */}
-                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${styles.bg} ${styles.text} ring-1 ${styles.ring} ${styles.hover} flex items-center justify-center transition-all duration-300`}>
-                                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                            <div className="relative h-full bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 rounded-2xl p-5 md:p-6 flex flex-col gap-3 hover:shadow-lg hover:border-slate-300 dark:hover:border-white/20 transition-all duration-300">
+                                {/* Icon + Lock Row */}
+                                <div className="flex items-center justify-between">
+                                    <div className={`w-12 h-12 rounded-xl ${styles.bg} ${styles.text} ring-1 ${styles.ring} ${styles.hover} flex items-center justify-center transition-all duration-300`}>
+                                        <Icon className="w-6 h-6" />
+                                    </div>
+                                    {!isPremium && tool.requiresPremium && (
+                                        <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                    )}
                                 </div>
 
-                                {/* Content */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-1">
-                                        <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight line-clamp-2">
-                                            {getToolTitle(tool)}
-                                        </h3>
-                                        {!isPremium && tool.requiresPremium && (
-                                            <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 flex-shrink-0 mt-0.5" />
-                                        )}
-                                    </div>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug mt-1.5 line-clamp-2 hidden sm:block">
-                                        {tool.description}
-                                    </p>
-                                </div>
+                                {/* Title */}
+                                <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+                                    {getToolTitle(tool)}
+                                </h3>
+
+                                {/* Description - hidden on small screens */}
+                                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 hidden md:block">
+                                    {tool.description}
+                                </p>
                             </div>
                         </motion.button>
                     );
