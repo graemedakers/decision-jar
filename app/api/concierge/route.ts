@@ -21,6 +21,57 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 // Allow streaming responses up to 60 seconds
 export const maxDuration = 60;
 
+/**
+ * Validates if a recommendation matches the user's specific request
+ * Uses AI to determine if the recommendation is relevant
+ */
+async function validateRecommendation(
+    recommendation: any,
+    userRequest: string,
+    toolType: string
+): Promise<boolean> {
+    // If no specific request, accept all recommendations
+    if (!userRequest || userRequest.trim().length === 0) {
+        return true;
+    }
+
+    // Quick validation prompt for AI
+    const validationPrompt = `
+You are a recommendation validator. Your job is to determine if a venue/item matches the user's specific request.
+
+USER'S REQUEST: "${userRequest}"
+TOOL TYPE: ${toolType}
+
+RECOMMENDATION TO VALIDATE:
+- Name: ${recommendation.name}
+- Description: ${recommendation.description}
+- Type/Cuisine: ${recommendation.cuisine || recommendation.category || recommendation.type || recommendation.speciality || 'N/A'}
+
+QUESTION: Does this recommendation match the user's specific request?
+
+Consider:
+- If user asked for "brunch cafes", this should be a brunch cafe (NOT a dinner restaurant, NOT a sushi place)
+- If user asked for "good coffee", this should be known for good coffee
+- If user asked for "pizza places", this should be a pizza restaurant
+- If user asked for specific cuisine/venue type, this should match that type
+
+Answer with ONLY "YES" or "NO" (one word only).
+`;
+
+    try {
+        const response = await reliableGeminiCall(validationPrompt, { jsonMode: false });
+        const answer = response.trim().toUpperCase();
+        
+        console.log(`[Validation] ${recommendation.name}: ${answer} (User request: "${userRequest}")`);
+        
+        return answer === 'YES' || answer.startsWith('YES');
+    } catch (error) {
+        console.error('[Validation] Error validating recommendation:', error);
+        // On error, accept the recommendation (fail open)
+        return true;
+    }
+}
+
 export async function POST(req: NextRequest) {
     try {
         // 1. Parse Request Body (need to check demo mode early)
@@ -108,6 +159,37 @@ export async function POST(req: NextRequest) {
         // 8. Call AI (Using centralized reliable helper)
         try {
             const jsonResponse = await reliableGeminiCall(prompt, { jsonMode: true });
+            
+            // 9. Filter recommendations based on user's extraInstructions
+            if (inputs.extraInstructions && jsonResponse.recommendations && Array.isArray(jsonResponse.recommendations)) {
+                console.log(`[Concierge] Validating ${jsonResponse.recommendations.length} recommendations against: "${inputs.extraInstructions}"`);
+                
+                // Validate each recommendation in parallel
+                const validationResults = await Promise.all(
+                    jsonResponse.recommendations.map(rec => 
+                        validateRecommendation(rec, inputs.extraInstructions, toolKey)
+                    )
+                );
+                
+                // Filter to only matching recommendations
+                const filteredRecommendations = jsonResponse.recommendations.filter(
+                    (_: any, index: number) => validationResults[index]
+                );
+                
+                console.log(`[Concierge] Filtered from ${jsonResponse.recommendations.length} to ${filteredRecommendations.length} recommendations`);
+                
+                // Return filtered results
+                return NextResponse.json({
+                    ...jsonResponse,
+                    recommendations: filteredRecommendations,
+                    _meta: {
+                        originalCount: jsonResponse.recommendations.length,
+                        filteredCount: filteredRecommendations.length,
+                        userRequest: inputs.extraInstructions
+                    }
+                });
+            }
+            
             return NextResponse.json(jsonResponse);
         } catch (genError: any) {
             console.error("Concierge AI Failed:", genError);
