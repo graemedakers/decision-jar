@@ -11,29 +11,62 @@ interface UseUserOptions {
     redirectToLogin?: boolean;
 }
 
+// ✅ CRITICAL: Global flag to prevent multiple redirects and further queries
+let isRedirecting = false;
+
+// ✅ Export function to check redirect status
+export function isUserRedirecting() {
+    return isRedirecting;
+}
+
 // Fetcher
 const fetchUserApi = async (redirectToLogin: boolean = true) => {
+    // ✅ If already redirecting, immediately throw to prevent further requests
+    if (isRedirecting) {
+        const error: any = new Error("Redirect in progress");
+        error.status = 401;
+        throw error;
+    }
+
     const res = await fetch(getApiUrl('/api/auth/me'), {
         credentials: 'include'
     });
 
     if (!res.ok) {
-        if (redirectToLogin && res.status === 401) {
-            window.location.href = '/api/auth/nuke-session';
-            throw new Error("Redirecting...");
+        if (redirectToLogin && res.status === 401 && !isRedirecting) {
+            console.warn('[useUser] User session invalid (401), nuking session and redirecting to login');
+            isRedirecting = true; // ✅ Set flag BEFORE redirect
+            // ✅ Use replace() to prevent back button issues
+            window.location.replace('/api/auth/nuke-session');
+            // Throw error with status to prevent React Query retry
+            const error: any = new Error("Redirecting to login...");
+            error.status = 401;
+            throw error;
         }
         try {
             const err = await res.json();
-            throw new Error(err.error || 'Failed to fetch user');
+            const error: any = new Error(err.error || 'Failed to fetch user');
+            error.status = res.status;
+            throw error;
         } catch (e: any) {
-            if (e.message !== "Redirecting...") throw new Error('Failed to fetch user');
+            if (e.message === "Redirecting to login...") throw e;
+            const error: any = new Error('Failed to fetch user');
+            error.status = res.status;
+            throw error;
         }
     }
 
     const data = await res.json();
-    if (!data?.user && redirectToLogin) {
-        window.location.href = '/api/auth/nuke-session';
-        throw new Error("Redirecting...");
+    
+    // ✅ CRITICAL: If user is null (deleted but session exists), treat as 401
+    if (!data?.user && redirectToLogin && !isRedirecting) {
+        console.warn('[useUser] User data is null despite valid session, nuking session and redirecting');
+        isRedirecting = true; // ✅ Set flag BEFORE redirect
+        // ✅ Use replace() to prevent back button issues
+        window.location.replace('/api/auth/nuke-session');
+        const error: any = new Error("User deleted, redirecting...");
+        error.status = 401;
+        throw error;
     }
 
     return data?.user || null;

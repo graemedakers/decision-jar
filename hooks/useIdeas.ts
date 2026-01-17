@@ -9,7 +9,11 @@ import { CacheKeys, createCacheInvalidator, STALE_TIME } from "@/lib/cache-utils
 // Fetcher Function
 const fetchIdeasApi = async (): Promise<Idea[]> => {
     const res = await fetch(getApiUrl('/api/ideas'), { credentials: 'include' });
-    if (!res.ok) throw new Error("Failed to fetch ideas");
+    if (!res.ok) {
+        const error: any = new Error("Failed to fetch ideas");
+        error.status = res.status;
+        throw error;
+    }
     const data = await res.json();
     return Array.isArray(data) ? data : [];
 };

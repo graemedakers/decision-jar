@@ -79,6 +79,19 @@ export function useLoadingState({
     const [forceShowContent, setForceShowContent] = useState(false);
 
     const shouldShowLoading = useMemo(() => {
+        // ✅ CRITICAL: If redirect is in progress, ALWAYS show loading to freeze UI
+        if (isUserRedirecting()) {
+            console.log('[Loading State] Redirect in progress, freezing UI');
+            return true;
+        }
+
+        // ✅ CRITICAL: If user query failed (user deleted but session exists), don't show loading
+        // This prevents infinite loading screen when user is deleted from database
+        if (!userData && !isLoadingUser) {
+            console.log('[Loading State] User data unavailable after load complete, allowing redirect');
+            return false;
+        }
+
         // If we don't have user data AND it's loading, show loading
         if (!userData && isLoadingUser) {
             return true;
@@ -108,7 +121,7 @@ export function useLoadingState({
         if (!loadingStartTime) return;
 
         const timeout = setTimeout(() => {
-            console.warn('Loading timeout exceeded - forcing content display');
+            console.warn('⚠️ Loading timeout exceeded - forcing content display to allow redirect');
             setForceShowContent(true);
             // Clear any stuck state
             if (typeof window !== 'undefined') {

@@ -1,6 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const args = process.argv.slice(2);
+const databaseUrlArg = args.find(arg => arg.startsWith('--database-url='));
+const databaseUrl = databaseUrlArg ? databaseUrlArg.split('=')[1] : process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+    console.error('❌ ERROR: No database URL provided');
+    console.error('Usage: npx tsx scripts/delete-users.ts --database-url="postgresql://..."');
+    process.exit(1);
+}
+
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url: databaseUrl
+        }
+    }
+});
 
 async function deleteUsersByEmail(emails: string[]) {
     console.log('Starting user deletion process...');
@@ -113,7 +129,19 @@ async function deleteUsersByEmail(emails: string[]) {
                         // User is the only admin, delete the entire jar
                         console.log(`  ⚠ Deleting jar "${jar.name}" (user is only admin)`);
 
-                        // Delete all jar members first
+                        // Delete unlocked achievements first (foreign key)
+                        const deletedAchievements = await tx.unlockedAchievement.deleteMany({
+                            where: { jarId: jar.id }
+                        });
+                        console.log(`    ✓ Deleted ${deletedAchievements.count} achievements`);
+
+                        // Delete deleted logs (foreign key)
+                        const deletedLogs = await tx.deletedLog.deleteMany({
+                            where: { jarId: jar.id }
+                        });
+                        console.log(`    ✓ Deleted ${deletedLogs.count} deleted logs`);
+
+                        // Delete all jar members
                         await tx.jarMember.deleteMany({
                             where: { jarId: jar.id }
                         });
@@ -162,9 +190,7 @@ async function deleteUsersByEmail(emails: string[]) {
 
 // Run the deletion
 const emailsToDelete = [
-    'graeme_dakers@hotmail.com',
-    'graeme@letmebefree.com',
-    'graeme@letmbefree.com'
+    'graemedakers@gmail.com'
 ];
 
 deleteUsersByEmail(emailsToDelete)
