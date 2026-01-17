@@ -227,8 +227,8 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         requiresPremium: true,
         actionType: 'modal',
         modalId: 'menu_planner',
-        showInDashboard: true,
-        showInExplore: true
+        showInDashboard: false, // Hidden - doesn't fit social/wellbeing focus
+        showInExplore: false    // Hidden - doesn't fit social/wellbeing focus
     },
     {
         id: 'escape_room_scout',
