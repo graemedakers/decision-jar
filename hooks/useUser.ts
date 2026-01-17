@@ -8,6 +8,7 @@ import { CacheKeys, createCacheInvalidator, STALE_TIME } from "@/lib/cache-utils
 
 interface UseUserOptions {
     onLevelUp?: (newLevel: number) => void;
+    onAchievementUnlocked?: (achievementId: string) => void;
     redirectToLogin?: boolean;
 }
 
@@ -73,9 +74,10 @@ const fetchUserApi = async (redirectToLogin: boolean = true) => {
 };
 
 export function useUser(options: UseUserOptions = {}) {
-    const { onLevelUp, redirectToLogin = true } = options;
+    const { onLevelUp, onAchievementUnlocked, redirectToLogin = true } = options;
     const queryClient = useQueryClient();
     const prevLevelRef = useRef<number | null>(null);
+    const prevAchievementsRef = useRef<string[]>([]);
 
     const query = useQuery({
         queryKey: CacheKeys.user(),
@@ -122,6 +124,25 @@ export function useUser(options: UseUserOptions = {}) {
             prevLevelRef.current = level;
         }
     }, [level, onLevelUp, userData?.activeJarId]);
+
+    // Achievement Unlock Side Effect
+    useEffect(() => {
+        if (achievements && achievements.length > 0 && userData?.activeJarId) {
+            // Check for newly unlocked achievements
+            const newAchievements = achievements.filter(
+                (id: string) => !prevAchievementsRef.current.includes(id)
+            );
+
+            // Only fire callback for new achievements (not on first load)
+            if (prevAchievementsRef.current.length > 0 && newAchievements.length > 0) {
+                newAchievements.forEach((achievementId: string) => {
+                    onAchievementUnlocked?.(achievementId);
+                });
+            }
+
+            prevAchievementsRef.current = [...achievements];
+        }
+    }, [achievements, onAchievementUnlocked, userData?.activeJarId]);
 
     // Use centralized cache invalidator
     const cache = createCacheInvalidator(queryClient);

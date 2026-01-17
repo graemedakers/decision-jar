@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { LEVEL_DEFINITIONS, ACHIEVEMENT_DEFINITIONS } from "./gamification-shared";
-import { trackStreakMilestone, trackStreakLost, trackStreakContinued } from "./analytics";
+import { trackStreakMilestoneReached, trackStreakLost, trackStreakContinued } from "./analytics";
 
 /**
  * Updates the daily streak for a jar
@@ -70,13 +70,13 @@ export async function updateStreak(jarId: string) {
 
         // Track analytics
         if (streakLost) {
-            trackStreakLost(previousStreak, { jar_id: jarId, days_since_last_active: Math.floor((today.getTime() - new Date(jar.lastActiveDate!).getTime()) / (1000 * 60 * 60 * 24)) });
+            trackStreakLost(jarId, previousStreak);
         } else if (streakContinued) {
-            trackStreakContinued(newStreak, { jar_id: jarId });
+            trackStreakContinued(jarId, newStreak);
             
             // Track milestones (7, 14, 30, 100 days)
             if ([7, 14, 30, 100].includes(newStreak)) {
-                trackStreakMilestone(newStreak, isNewRecord, { jar_id: jarId, previous_longest: jar.longestStreak });
+                trackStreakMilestoneReached(jarId, newStreak);
             }
         }
 

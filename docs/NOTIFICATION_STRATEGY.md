@@ -16,7 +16,7 @@ This document outlines when and how users receive notifications in the Decision 
 | Event | Recipient | Message | When |
 |-------|-----------|---------|------|
 | **Idea Selected** | Other jar members | "🎯 New pick: [Idea Name]" | When someone spins the jar |
-| **New Idea Added** | Other jar members | "💡 [Name] added a new idea" | When member adds idea |
+| **New Idea Added** | Other jar members | "💡 [Name] added a new idea" <br> _or_ "🤫 It's a secret... spin to find out!" (private/surprise) | When member adds idea |
 | **24h Reminder** | All jar members | "How was it? Save the memory!" | 24h after selection (no rating) |
 | **Vote Complete** | _(Future)_ | "✅ Voting complete! Winner: [Idea]" | When voting concludes |
 
@@ -169,9 +169,9 @@ Body: [Context/Details]
 ## Future Enhancements
 
 ### Short-Term (Next 3 months):
-- [ ] Add notification preferences UI
+- [x] Add notification preferences UI
+- [x] Send notification on new idea added (respects private/surprise mode)
 - [ ] Implement quiet hours
-- [ ] Send notification on new idea added
 - [ ] Send notification when vote completes
 
 ### Medium-Term (6 months):

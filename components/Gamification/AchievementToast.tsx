@@ -1,55 +1,118 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, X } from "lucide-react";
 import { useEffect } from "react";
+import confetti from "canvas-confetti";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+import * as Icons from "lucide-react";
+import { AchievementDef } from "@/lib/achievements-shared";
+import { trackAchievementNotificationShown } from "@/lib/analytics";
 
 interface AchievementToastProps {
-    achievement: { title: string, description: string, xp: number } | null;
-    onClose: () => void;
+    achievement: AchievementDef;
+    onDismiss?: () => void;
 }
 
-export function AchievementToast({ achievement, onClose }: AchievementToastProps) {
-    useEffect(() => {
-        if (achievement) {
-            const timer = setTimeout(onClose, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [achievement, onClose]);
+/**
+ * Custom Achievement Toast Component
+ * Shows a celebratory toast with confetti when user unlocks an achievement
+ */
+function AchievementToastContent({ achievement, onDismiss }: AchievementToastProps) {
+    // Get the Lucide icon dynamically
+    const IconComponent = (Icons as any)[achievement.icon] || Icons.Trophy;
+
+    // Category colors
+    const categoryColors = {
+        CREATION: "from-blue-500 to-cyan-500",
+        ACTION: "from-purple-500 to-pink-500",
+        COMPLETION: "from-green-500 to-emerald-500",
+        STREAK: "from-orange-500 to-red-500"
+    };
+
+    const bgGradient = categoryColors[achievement.category] || "from-yellow-500 to-orange-500";
 
     return (
-        <AnimatePresence>
-            {achievement && (
+        <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className={`bg-gradient-to-r ${bgGradient} p-4 rounded-xl shadow-2xl border-2 border-white/20 min-w-[300px] max-w-[400px]`}
+        >
+            <div className="flex items-start gap-3">
+                {/* Icon */}
                 <motion.div
-                    initial={{ opacity: 0, y: 50, x: "-50%", scale: 0.8 }}
-                    animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
-                    exit={{ opacity: 0, y: 20, x: "-50%", scale: 0.8 }}
-                    className="fixed bottom-24 left-1/2 z-[100] w-[92%] max-w-sm"
+                    initial={{ rotate: -180, scale: 0 }}
+                    animate={{ rotate: 0, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    className="bg-white/20 backdrop-blur-sm p-2 rounded-full"
                 >
-                    <div className="glass-card bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/50 p-4 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-4 relative overflow-hidden">
-
-                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-500/10 animate-pulse" />
-
-                        <div className="relative p-3 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-full shadow-lg shrink-0">
-                            <Trophy className="w-6 h-6 text-white" />
-                        </div>
-
-                        <div className="flex-1 min-w-0 relative">
-                            <h4 className="font-bold text-yellow-500 text-xs uppercase tracking-wider mb-0.5">Achievement Unlocked!</h4>
-                            <h3 className="font-bold text-slate-900 dark:text-white truncate">{achievement.title}</h3>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 truncate">{achievement.description}</p>
-                        </div>
-
-                        <div className="relative font-bold text-yellow-600 dark:text-yellow-400 text-sm whitespace-nowrap">
-                            +{achievement.xp} XP
-                        </div>
-
-                        <button onClick={onClose} className="absolute top-2 right-2 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
+                    <IconComponent className="w-6 h-6 text-white" />
                 </motion.div>
-            )}
-        </AnimatePresence>
+
+                {/* Content */}
+                <div className="flex-1">
+                    <div className="text-white/80 text-xs font-semibold uppercase tracking-wider mb-1">
+                        Achievement Unlocked! 🎉
+                    </div>
+                    <h4 className="text-white font-bold text-lg mb-1">
+                        {achievement.title}
+                    </h4>
+                    <p className="text-white/90 text-sm">
+                        {achievement.description}
+                    </p>
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
+/**
+ * Show achievement toast with confetti animation
+ */
+export function showAchievementToast(achievement: AchievementDef) {
+    // Track analytics
+    trackAchievementNotificationShown(achievement.id, achievement.title, 'toast');
+
+    // Fire confetti
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+    function randomInRange(min: number, max: number) {
+        return Math.random() * (max - min) + min;
+    }
+
+    // Confetti burst (more intense for certain categories)
+    const burstIntensity = achievement.category === 'STREAK' || achievement.targetCount >= 20 ? 200 : 100;
+    
+    const interval = window.setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+            return clearInterval(interval);
+        }
+
+        const particleCount = burstIntensity * (timeLeft / duration);
+        
+        // Two bursts from different angles
+        confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+    }, 250);
+
+    // Show custom toast
+    toast.custom(
+        (t) => <AchievementToastContent achievement={achievement} onDismiss={() => toast.dismiss(t)} />,
+        {
+            duration: 5000,
+            position: "top-center",
+        }
     );
 }

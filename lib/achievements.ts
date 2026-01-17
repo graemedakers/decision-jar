@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ACHIEVEMENTS, AchievementDef } from "./achievements-shared";
+import { trackAchievementUnlocked } from "./analytics";
 
 export async function checkAndUnlockAchievements(jarId: string) {
     if (!jarId) return [];
@@ -52,6 +53,10 @@ export async function checkAndUnlockAchievements(jarId: string) {
                         achievementId: achievement.id
                     }
                 });
+                
+                // Track analytics
+                trackAchievementUnlocked(achievement.id, achievement.title, achievement.category, jarId);
+                
                 newUnlocks.push(achievement);
             }
         }

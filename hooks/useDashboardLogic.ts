@@ -11,6 +11,8 @@ import { signOut } from "next-auth/react";
 import { getApiUrl } from "@/lib/utils";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { DASHBOARD_TOOLS } from "@/lib/constants/tools";
+import { showAchievementToast } from "@/components/Gamification/AchievementToast";
+import { ACHIEVEMENTS } from "@/lib/achievements-shared";
 
 // Feature Hooks
 import { useSpin } from "@/hooks/features/useSpin";
@@ -40,7 +42,14 @@ export function useDashboardLogic() {
         currentStreak,
         longestStreak
     } = useUser({
-        onLevelUp: (newLevel) => openModal('LEVEL_UP', { level: newLevel })
+        onLevelUp: (newLevel) => openModal('LEVEL_UP', { level: newLevel }),
+        onAchievementUnlocked: (achievementId) => {
+            // Find the achievement definition and show toast
+            const achievement = ACHIEVEMENTS.find(a => a.id === achievementId);
+            if (achievement) {
+                showAchievementToast(achievement);
+            }
+        }
     });
 
     const { ideas, isLoading: isLoadingIdeas, isFetching: isFetchingIdeas, fetchIdeas } = useIdeas();

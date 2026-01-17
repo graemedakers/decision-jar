@@ -1,286 +1,138 @@
-import { posthog } from './posthog'
-import { SessionTracker } from './session-tracker'
+import posthog from 'posthog-js';
 
-// Safety wrapper to prevent errors if PostHog fails
-const safeCapture = (eventName: string, properties?: Record<string, any>) => {
+// Safe capture wrapper (handles DNS errors, PostHog not loaded, etc.)
+function safeCapture(eventName: string, properties?: Record<string, any>) {
+    if (typeof window === 'undefined') return; // SSR guard
     try {
-        if (posthog && typeof posthog.capture === 'function') {
+        if (posthog && posthog.capture) {
             posthog.capture(eventName, properties);
         }
     } catch (error) {
-        console.warn('PostHog tracking failed:', error);
+        // Silently fail (don't break user experience for analytics)
+        console.warn('Analytics capture failed:', error);
     }
+}
+
+export const trackPathSelected = (pathType: 'smart_input' | 'concierge' | 'templates') => {
+    safeCapture('path_selected', {
+        path: pathType,
+    });
 };
 
-// Template Events
-export const trackTemplateBrowsed = () => {
-    safeCapture('template_browser_opened')
-}
-
-export const trackTemplateUsed = (templateId: string, templateName: string, method: 'new_jar' | 'add_to_current') => {
-    safeCapture('template_used', {
-        template_id: templateId,
-        template_name: templateName,
-        method: method,
-    })
-}
-
-// Share Events
-export const trackShareClicked = (source: string, contentType: string) => {
-    safeCapture('share_clicked', {
-        source: source, // e.g., 'dining_concierge', 'bar_concierge', 'movie_scout'
-        content_type: contentType, // e.g., 'restaurant', 'bar', 'movie'
-    })
-}
-
-// AI Tool Events
-export const trackAIToolUsed = (toolName: string, preferences?: Record<string, any>) => {
-    safeCapture('ai_tool_used', {
-        tool_name: toolName,
-        ...preferences,
-    })
-}
-
-export const trackAIRecommendation = (toolName: string, recommendationName: string) => {
-    safeCapture('ai_recommendation_received', {
-        tool_name: toolName,
-        recommendation: recommendationName,
-    })
-}
-
-// Jar Events
-export const trackJarCreated = (source: 'template' | 'manual' | 'empty', templateId?: string) => {
-    safeCapture('jar_created', {
-        source: source,
-        template_id: templateId,
-    })
-}
-
-export const trackIdeaAdded = (method: 'manual' | 'ai' | 'template', source?: string) => {
-    safeCapture('idea_added', {
-        method: method,
-        source: source,
-    })
+export const trackModalOpened = (modalType: string) => {
+    const sessionId = sessionStorage.getItem('sessionId');
+    const sessionStartTime = sessionStorage.getItem('sessionStartTime');
     
-    // Track time to first idea if this is the first idea in the session
-    if (!SessionTracker.hasTrackedFirstIdea()) {
-        const duration = SessionTracker.getSessionDuration();
-        trackTimeToFirstIdea(duration, getSourceCategory(method, source), {
-            session_id: SessionTracker.getSessionId()
-        });
-        SessionTracker.markFirstIdeaTracked();
-    }
-}
-
-// Helper to convert method/source to path category
-function getSourceCategory(method: 'manual' | 'ai' | 'template', source?: string): 'smart_input' | 'concierge' | 'template' | 'manual' {
-    if (method === 'template') return 'template';
-    if (method === 'ai' || source?.includes('concierge')) return 'concierge';
-    if (source?.includes('smart_input') || source?.includes('url') || source?.includes('image')) return 'smart_input';
-    return 'manual';
-}
-
-// User Events
-export const trackSignup = async (method: string, utmSource?: string, utmMedium?: string, utmCampaign?: string) => {
-    safeCapture('signup_completed', {
-        method: method,
-        utm_source: utmSource,
-        utm_medium: utmMedium,
-        utm_campaign: utmCampaign,
-    })
-    // Wait a bit to ensure event is sent before redirect
-    await new Promise(resolve => setTimeout(resolve, 300))
-}
-
-export const trackLogin = (method: string) => {
-    safeCapture('login_completed', {
-        method: method,
-    })
-}
-
-// Feature Usage
-export const trackFeatureUsed = (featureName: string, details?: Record<string, any>) => {
-    safeCapture('feature_used', {
-        feature: featureName,
-        ...details,
-    })
-}
-
-// Spin Events
-export const trackJarSpun = (ideaCount: number, hasFilters: boolean) => {
-    safeCapture('jar_spun', {
-        idea_count: ideaCount,
-        has_filters: hasFilters,
-    })
-}
-
-// Identify user (call after login)
-export const identifyUser = (userId: string, properties?: Record<string, any>) => {
-    posthog.identify(userId, properties)
-}
-
-// Reset on logout
-export const resetAnalytics = () => {
-    posthog.reset()
-}
-
-// Generic event tracking (for backward compatibility)
-export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
-    safeCapture(eventName, properties)
-}
-
-// ===== THREE-PATH STRATEGY ANALYTICS =====
-
-// Path Selection Events
-export const trackPathSelected = (
-    path: '1_have_idea' | '2_need_inspiration' | '3_browse_templates',
-    metadata?: {
-        session_start_time?: number
-        previous_path?: string
-        trigger?: string
-    }
-) => {
-    safeCapture('path_selected', {
-        path: path,
-        timestamp: Date.now(),
-        ...metadata,
-    })
-}
-
-// Enhanced Concierge Tracking
-export const trackConciergeSkillSelected = (
-    skillId: string,
-    via: 'picker' | 'intent_detection' | 'direct_link',
-    metadata?: {
-        user_input?: string
-        confidence?: number
-        was_corrected?: boolean
-        available_skills_count?: number
-    }
-) => {
-    safeCapture('concierge_skill_selected', {
-        skill_id: skillId,
-        selection_method: via,
-        timestamp: Date.now(),
-        ...metadata,
-    })
-}
-
-// Time to First Idea
-export const trackTimeToFirstIdea = (
-    durationSeconds: number,
-    source: 'smart_input' | 'concierge' | 'template' | 'manual',
-    metadata?: {
-        path_used?: string
-        session_id?: string
-    }
-) => {
-    safeCapture('time_to_first_idea', {
-        duration_seconds: durationSeconds,
-        source: source,
-        met_5s_goal: durationSeconds <= 5,
-        met_10s_goal: durationSeconds <= 10,
-        ...metadata,
-    })
-}
-
-// Modal Abandonment
-export const trackModalAbandoned = (
-    modalType: string,
-    timeOpenSeconds: number,
-    hadInteraction: boolean,
-    metadata?: {
-        last_field_touched?: string
-        completion_percent?: number
-        reason?: string
-        mode?: string
-        is_edit?: boolean
-        skill_id?: string
-        had_skill_selected?: boolean
-        templates_expanded?: number
-    }
-) => {
-    safeCapture('modal_abandoned', {
-        modal_type: modalType,
-        time_open_seconds: timeOpenSeconds,
-        had_interaction: hadInteraction,
-        ...metadata,
-    })
-}
-
-// Intent Detection Accuracy
-export const trackIntentDetectionResult = (
-    userInput: string,
-    detectedSkill: string | null,
-    wasAccepted: boolean,
-    correctedTo?: string
-) => {
-    safeCapture('intent_detection_result', {
-        user_input_length: userInput.length,
-        user_input_preview: userInput.slice(0, 50), // First 50 chars for context
-        detected_skill: detectedSkill,
-        was_accepted: wasAccepted,
-        corrected_to: correctedTo,
-        accuracy: wasAccepted ? 'correct' : 'incorrect',
-    })
-}
-
-// Modal Opened (for tracking modal flow)
-export const trackModalOpened = (
-    modalType: string,
-    metadata?: {
-        triggered_by?: string
-        previous_modal?: string
-    }
-) => {
     safeCapture('modal_opened', {
         modal_type: modalType,
-        timestamp: Date.now(),
-        ...metadata,
-    })
-}
+        session_id: sessionId,
+        session_start_time: sessionStartTime,
+    });
+};
 
-// ===== STREAK ANALYTICS =====
+export const trackModalAbandoned = (modalType: string, reason: string, data?: any) => {
+    const sessionId = sessionStorage.getItem('sessionId');
+    
+    safeCapture('modal_abandoned', {
+        modal_type: modalType,
+        reason: reason,
+        session_id: sessionId,
+        ...data
+    });
+};
 
-// Streak Milestone Reached
-export const trackStreakMilestone = (
-    milestone: number,
-    isNewRecord: boolean,
-    metadata?: {
-        jar_id?: string
-        previous_longest?: number
+export const trackConciergeSkillSelected = (skillId: string, skillName: string, method: 'manual' | 'auto-routed') => {
+    safeCapture('concierge_skill_selected', {
+        skill_id: skillId,
+        skill_name: skillName,
+        method: method,
+    });
+};
+
+export const trackIntentDetectionResult = (input: string, topIntentId: string | null, topIntentScore: number, threshold: number) => {
+    safeCapture('intent_detection_result', {
+        input_text: input.substring(0, 100), // Limit PII
+        top_intent_id: topIntentId,
+        top_intent_score: topIntentScore,
+        threshold: threshold,
+        routed: topIntentScore >= threshold,
+    });
+};
+
+export const trackIdeaAdded = (source: 'manual' | 'template' | 'concierge', jarId: string) => {
+    const sessionId = sessionStorage.getItem('sessionId');
+    const sessionStartTime = sessionStorage.getItem('sessionStartTime');
+    
+    // Calculate time to first idea if this is the first one
+    const firstIdeaTracked = sessionStorage.getItem('firstIdeaTracked');
+    let timeToFirstIdea = null;
+    if (!firstIdeaTracked && sessionStartTime) {
+        const startTime = parseInt(sessionStartTime, 10);
+        timeToFirstIdea = Date.now() - startTime;
+        sessionStorage.setItem('firstIdeaTracked', 'true');
     }
-) => {
-    safeCapture('streak_milestone_reached', {
-        milestone: milestone,
-        is_new_record: isNewRecord,
-        ...metadata,
-    })
-}
+    
+    safeCapture('idea_added', {
+        source: source,
+        jar_id: jarId,
+        session_id: sessionId,
+        time_to_first_idea: timeToFirstIdea,
+    });
+};
 
-// Streak Lost
-export const trackStreakLost = (
-    previousStreak: number,
-    metadata?: {
-        jar_id?: string
-        days_since_last_active?: number
-    }
-) => {
-    safeCapture('streak_lost', {
-        previous_streak: previousStreak,
-        ...metadata,
-    })
-}
+export const trackTemplateBrowserOpened = () => {
+    safeCapture('template_browser_opened', {});
+};
 
-// Streak Continued
-export const trackStreakContinued = (
-    currentStreak: number,
-    metadata?: {
-        jar_id?: string
-    }
-) => {
+export const trackTemplateUsed = (templateName: string, ideaCount: number) => {
+    safeCapture('template_used', {
+        template_name: templateName,
+        idea_count: ideaCount,
+    });
+};
+
+export const trackConciergeShortcutCreated = (toolId: string, toolName: string, method: 'native_share' | 'clipboard' | 'download') => {
+    safeCapture('concierge_shortcut_created', {
+        tool_id: toolId,
+        tool_name: toolName,
+        method: method,
+    });
+};
+
+export const trackStreakContinued = (jarId: string, currentStreak: number) => {
     safeCapture('streak_continued', {
+        jar_id: jarId,
         current_streak: currentStreak,
-        ...metadata,
-    })
-}
+    });
+};
+
+export const trackStreakLost = (jarId: string, previousStreak: number) => {
+    safeCapture('streak_lost', {
+        jar_id: jarId,
+        previous_streak: previousStreak,
+    });
+};
+
+export const trackStreakMilestoneReached = (jarId: string, milestone: number) => {
+    safeCapture('streak_milestone_reached', {
+        jar_id: jarId,
+        milestone: milestone,
+    });
+};
+
+export const trackAchievementUnlocked = (achievementId: string, achievementTitle: string, category: string, jarId: string) => {
+    safeCapture('achievement_unlocked', {
+        achievement_id: achievementId,
+        achievement_title: achievementTitle,
+        category: category,
+        jar_id: jarId,
+    });
+};
+
+export const trackAchievementNotificationShown = (achievementId: string, achievementTitle: string, displayMethod: 'toast' | 'modal') => {
+    safeCapture('achievement_notification_shown', {
+        achievement_id: achievementId,
+        achievement_title: achievementTitle,
+        display_method: displayMethod,
+    });
+};
