@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trophy, RefreshCcw } from "lucide-react";
 import { useState } from "react";
-import { AchievementToast } from "@/components/Gamification/AchievementToast";
 
 interface QuickDecisionsModalProps {
     isOpen: boolean;
@@ -178,11 +177,6 @@ export function QuickDecisionsModal({ isOpen, onClose }: QuickDecisionsModalProp
                 )}
 
             </AnimatePresence>
-
-            <AchievementToast
-                achievement={unlockedAchievement}
-                onClose={() => setUnlockedAchievement(null)}
-            />
         </>
     );
 }

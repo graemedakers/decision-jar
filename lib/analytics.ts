@@ -13,12 +13,31 @@ function safeCapture(eventName: string, properties?: Record<string, any>) {
     }
 }
 
+// Generic event tracker
+export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
+    safeCapture(eventName, properties);
+};
+
+// User identification
+export const identifyUser = (userId: string, traits?: Record<string, any>) => {
+    if (typeof window === 'undefined') return;
+    try {
+        if (posthog && posthog.identify) {
+            posthog.identify(userId, traits);
+        }
+    } catch (error) {
+        console.warn('User identification failed:', error);
+    }
+};
+
+// Path selection tracking
 export const trackPathSelected = (pathType: 'smart_input' | 'concierge' | 'templates') => {
     safeCapture('path_selected', {
         path: pathType,
     });
 };
 
+// Modal tracking
 export const trackModalOpened = (modalType: string) => {
     const sessionId = sessionStorage.getItem('sessionId');
     const sessionStartTime = sessionStorage.getItem('sessionStartTime');
@@ -41,6 +60,7 @@ export const trackModalAbandoned = (modalType: string, reason: string, data?: an
     });
 };
 
+// Concierge tracking
 export const trackConciergeSkillSelected = (skillId: string, skillName: string, method: 'manual' | 'auto-routed') => {
     safeCapture('concierge_skill_selected', {
         skill_id: skillId,
@@ -59,6 +79,14 @@ export const trackIntentDetectionResult = (input: string, topIntentId: string | 
     });
 };
 
+export const trackAIToolUsed = (toolName: string, properties?: Record<string, any>) => {
+    safeCapture('ai_tool_used', {
+        tool_name: toolName,
+        ...properties
+    });
+};
+
+// Idea tracking
 export const trackIdeaAdded = (source: 'manual' | 'template' | 'concierge', jarId: string) => {
     const sessionId = sessionStorage.getItem('sessionId');
     const sessionStartTime = sessionStorage.getItem('sessionStartTime');
@@ -80,8 +108,13 @@ export const trackIdeaAdded = (source: 'manual' | 'template' | 'concierge', jarI
     });
 };
 
+// Template tracking
 export const trackTemplateBrowserOpened = () => {
     safeCapture('template_browser_opened', {});
+};
+
+export const trackTemplateBrowsed = () => {
+    safeCapture('template_browser_opened', {}); // Alias for backward compatibility
 };
 
 export const trackTemplateUsed = (templateName: string, ideaCount: number) => {
@@ -91,6 +124,7 @@ export const trackTemplateUsed = (templateName: string, ideaCount: number) => {
     });
 };
 
+// Shortcut tracking
 export const trackConciergeShortcutCreated = (toolId: string, toolName: string, method: 'native_share' | 'clipboard' | 'download') => {
     safeCapture('concierge_shortcut_created', {
         tool_id: toolId,
@@ -99,6 +133,7 @@ export const trackConciergeShortcutCreated = (toolId: string, toolName: string, 
     });
 };
 
+// Streak tracking
 export const trackStreakContinued = (jarId: string, currentStreak: number) => {
     safeCapture('streak_continued', {
         jar_id: jarId,
@@ -120,6 +155,7 @@ export const trackStreakMilestoneReached = (jarId: string, milestone: number) =>
     });
 };
 
+// Achievement tracking
 export const trackAchievementUnlocked = (achievementId: string, achievementTitle: string, category: string, jarId: string) => {
     safeCapture('achievement_unlocked', {
         achievement_id: achievementId,
@@ -134,5 +170,21 @@ export const trackAchievementNotificationShown = (achievementId: string, achieve
         achievement_id: achievementId,
         achievement_title: achievementTitle,
         display_method: displayMethod,
+    });
+};
+
+// Signup tracking
+export const trackSignup = (method: 'email' | 'google' | 'facebook', properties?: Record<string, any>) => {
+    safeCapture('signup', {
+        method: method,
+        ...properties
+    });
+};
+
+// Share tracking
+export const trackShareClicked = (method: string, content: string) => {
+    safeCapture('share_clicked', {
+        method: method,
+        content: content
     });
 };
