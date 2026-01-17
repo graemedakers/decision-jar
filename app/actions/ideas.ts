@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { awardXp, updateStreak } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { getBestCategoryFit } from '@/lib/categories';
+import { notifyJarMembers } from '@/lib/notifications';
 import { revalidatePath } from 'next/cache';
 
 export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea }>> {
@@ -105,6 +106,14 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
         } catch (xpError) {
             console.error("Gamification error:", xpError);
         }
+
+        // Send push notification to other jar members (non-blocking)
+        notifyJarMembers(currentJarId, session.user.id, {
+            title: `💡 ${session.user.name || 'Someone'} added a new idea`,
+            body: description.length > 60 ? description.substring(0, 57) + '...' : description,
+            url: '/jar',
+            icon: '/icon-192.png'
+        }).catch(err => console.error("Notification error:", err));
 
         revalidatePath('/dashboard');
         revalidatePath('/jar');

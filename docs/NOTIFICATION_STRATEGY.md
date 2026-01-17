@@ -16,7 +16,7 @@ This document outlines when and how users receive notifications in the Decision 
 | Event | Recipient | Message | When |
 |-------|-----------|---------|------|
 | **Idea Selected** | Other jar members | "🎯 New pick: [Idea Name]" | When someone spins the jar |
-| **New Idea Added** | _(Future)_ | "💡 [Name] added a new idea" | When member adds idea |
+| **New Idea Added** | Other jar members | "💡 [Name] added a new idea" | When member adds idea |
 | **24h Reminder** | All jar members | "How was it? Save the memory!" | 24h after selection (no rating) |
 | **Vote Complete** | _(Future)_ | "✅ Voting complete! Winner: [Idea]" | When voting concludes |
 
