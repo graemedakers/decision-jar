@@ -245,12 +245,19 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
 ${extraInstructions}
 
 YOU MUST ensure ALL recommendations fully align with these specific requirements.
+If the user asks for a SPECIFIC MOVIE by name (e.g., "Avatar", "Barbie", "Oppenheimer"), 
+you MUST include that exact movie as the FIRST recommendation, regardless of whether it's currently in cinemas.
                 ` : ''}
                 
                 - Watch Mode: ${inputs.watchMode}
                 ${isCinema ? `
                 CINEMA MODE INSTRUCTIONS:
-                - Recommend movies that are LIKELY currently in cinemas (recent releases from the last 2-3 months, or major blockbusters)
+                ${extraInstructions ? `
+                PRIORITY 1: If user requested a specific movie, include it FIRST with status "Check Availability"
+                PRIORITY 2: Fill remaining slots with movies currently in cinemas
+                ` : `
+                - Recommend movies that are currently showing or coming soon to cinemas
+                `}
                 - Focus on the movie quality and match to user preferences
                 - DO NOT try to guess specific cinema names or generate cinema-specific URLs
                 - The "website" field MUST use this EXACT Google Search format for showtimes:
@@ -259,10 +266,9 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                   Example: For movie "Dune: Part Two" the URL should be:
                   https://www.google.com/search?q=Dune%3A+Part+Two+showtimes+near+${encodedLocation}
                 
-                This Google search will show the user:
-                - All nearby cinemas showing the movie
-                - Actual showtimes
-                - Direct booking links to the correct cinema websites
+                The Google search will show:
+                - If movie is showing: all nearby cinemas with showtimes and booking links
+                - If movie is NOT showing: user sees "no showtimes" and can explore alternatives
                 ` : ''}
                 - Genre: ${inputs.genre || "Any"}
                 - Mood: ${inputs.mood || "Any"}
@@ -273,7 +279,7 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Fields: name (Title), description (Plot summary - 2-3 sentences), year, rating (IMDb or Rotten Tomatoes score), genre, director, cast (top 3 actors)
                 ${isCinema ? `Also include: 
                 - website: Google showtimes search URL in format https://www.google.com/search?q=[URL+Encoded+Movie+Title]+showtimes+near+${encodedLocation}
-                - status: "Now Showing" or "Coming Soon"` 
+                - status: "Now Showing", "Coming Soon", or "Check Availability" (for older movies user specifically requested)` 
                 : 'Also include: streaming_service (e.g. Netflix, Prime Video), website (direct link to watch on that service)'}
                 `,
                 mockResponse: {
