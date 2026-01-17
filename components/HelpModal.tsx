@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers, Key } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Dices, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers, Key, Share2, MousePointer2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -44,6 +44,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "sports-concierge", title: "Sports Scout", icon: Trophy },
         { id: "wellness-concierge", title: "Wellness & Spa", icon: Leaf },
         { id: "fitness-concierge", title: "Fitness Finder", icon: Dumbbell },
+        { id: "premium-shortcuts", title: "Premium Shortcuts", icon: Share2 },
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
         { id: "weekend-planner", title: "Weekend Planner", icon: Calendar },
         { id: "catering-planner", title: "Catering Planner", icon: Utensils },
@@ -560,7 +561,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             </div>
                             <div className="bg-amber-50 dark:bg-amber-500/10 p-3 rounded-lg border border-amber-200 dark:border-amber-500/20">
                                 <h4 className="font-bold text-amber-800 dark:text-amber-300 text-sm mb-1">🎭 Theatre Scout</h4>
-                                <p className="text-xs text-slate-600 dark:text-slate-300">Find plays, musicals, comedy shows, and live performances.</p>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">Find plays, musicals, and live performances. Only shows currently running or upcoming are returned.</p>
                             </div>
                             <div className="bg-blue-50 dark:bg-blue-500/10 p-3 rounded-lg border border-blue-200 dark:border-blue-500/20">
                                 <h4 className="font-bold text-blue-800 dark:text-blue-300 text-sm mb-1">🎬 Movie Scout</h4>
@@ -574,6 +575,48 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
                             <strong>Pro Tip:</strong> All scouts provide direct booking links, ratings, and can add recommendations to your jar for future spins.
                         </p>
+                    </div>
+                );
+            case "premium-shortcuts":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Concierge Shortcuts <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-0.5 rounded-full ml-2">PREMIUM</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Get one-tap access to your favorite AI Concierges by adding shortcuts directly to your phone's home screen or your computer's desktop.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                    <MousePointer2 className="w-4 h-4 text-blue-500" /> Windows Desktop
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    Click <strong>"Add Shortcut"</strong> in any concierge header. A <code>.url</code> file will download automatically. Drag this file to your desktop for instant access with a custom icon!
+                                </p>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                    <HelpCircle className="w-4 h-4 text-primary" /> Android (Chrome)
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    1. Tap <strong>"Add Shortcut"</strong> to copy the deep link.<br />
+                                    2. Open Chrome and paste the link in the address bar.<br />
+                                    3. Tap the <strong>⋮ menu</strong> (top right) and select <strong>"Add to Home screen"</strong>.
+                                </p>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-secondary" /> iOS (Safari)
+                                </h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                    1. Tap <strong>"Add Shortcut"</strong> to copy the deep link.<br />
+                                    2. Open Safari and paste the link in the address bar.<br />
+                                    3. Tap the <strong>Share icon (□↑)</strong> and select <strong>"Add to Home Screen"</strong>.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 );
             case "weekend-planner":

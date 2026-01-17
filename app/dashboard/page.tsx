@@ -15,6 +15,7 @@ import { SessionTracker } from "@/lib/session-tracker";
 import { Jar3D } from "@/components/Jar3D";
 import { PremiumBanner } from "@/components/PremiumBanner";
 import { CollapsibleTrophyCase } from "@/components/Gamification/CollapsibleTrophyCase";
+import { StreakBadge } from "@/components/Gamification/StreakBadge";
 import { JarSwitcher } from "@/components/JarSwitcher";
 import { getThemeForTopic } from "@/lib/categories";
 import { VotingManager } from "@/components/VotingManager";
@@ -90,6 +91,7 @@ function DashboardContent() {
     const {
         // State
         userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
+        currentStreak, longestStreak,
         ideas, isLoadingIdeas, isFetchingIdeas, favoritesCount,
         isSpinning, userLocation, inviteCode, showConfetti, showOnboarding, showQuiz,
 
@@ -255,9 +257,16 @@ function DashboardContent() {
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 hidden sm:flex items-center gap-1">
-                                    make moments happen
-                                </p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 hidden sm:flex items-center gap-1">
+                                        make moments happen
+                                    </p>
+                                    {currentStreak > 0 && (
+                                        <div className="hidden sm:block">
+                                            <StreakBadge currentStreak={currentStreak} longestStreak={longestStreak} />
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

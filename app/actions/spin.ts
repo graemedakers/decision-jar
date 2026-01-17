@@ -4,7 +4,7 @@ import { ActionResponse, Idea } from '@/lib/types';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { sendPushNotification } from '@/lib/notifications';
-import { awardXp } from '@/lib/gamification';
+import { awardXp, updateStreak } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { COST_VALUES, ACTIVITY_VALUES } from '@/lib/constants';
 import { revalidatePath } from 'next/cache';
@@ -119,7 +119,8 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
 
                     await Promise.allSettled(notificationPromises);
 
-                    // Award XP and check achievements
+                    // Award XP, update streak, and check achievements
+                    await updateStreak(currentJarId);
                     await awardXp(currentJarId, 5);
                     await checkAndUnlockAchievements(currentJarId);
                 } catch (err) {

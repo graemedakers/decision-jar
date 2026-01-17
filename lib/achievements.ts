@@ -19,6 +19,13 @@ export async function checkAndUnlockAchievements(jarId: string) {
             }
         });
 
+        // Get current streak
+        const jar = await prisma.jar.findUnique({
+            where: { id: jarId },
+            select: { currentStreak: true }
+        });
+        const currentStreak = jar?.currentStreak || 0;
+
         // 2. Fetch already unlocked
         const existingUnlocks = await prisma.unlockedAchievement.findMany({
             where: { jarId },
@@ -36,6 +43,7 @@ export async function checkAndUnlockAchievements(jarId: string) {
             if (achievement.id.startsWith('IDEA_') && ideaCount >= achievement.targetCount) unlocked = true;
             if (achievement.id.startsWith('SPIN_') && spinCount >= achievement.targetCount) unlocked = true;
             if (achievement.id.startsWith('RATE_') && completedDatesCount >= achievement.targetCount) unlocked = true;
+            if (achievement.id.startsWith('STREAK_') && currentStreak >= achievement.targetCount) unlocked = true;
 
             if (unlocked) {
                 await prisma.unlockedAchievement.create({

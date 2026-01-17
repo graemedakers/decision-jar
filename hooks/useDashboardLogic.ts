@@ -36,7 +36,9 @@ export function useDashboardLogic() {
         achievements,
         hasPaid,
         coupleCreatedAt,
-        isTrialEligible
+        isTrialEligible,
+        currentStreak,
+        longestStreak
     } = useUser({
         onLevelUp: (newLevel) => openModal('LEVEL_UP', { level: newLevel })
     });
@@ -416,6 +418,7 @@ export function useDashboardLogic() {
     return {
         // State
         userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
+        currentStreak, longestStreak,
         ideas, isLoadingIdeas, isFetchingIdeas,
         favoritesCount,
         isSpinning, userLocation, inviteCode: userData?.coupleReferenceCode || userData?.referenceCode || userData?.jarReferenceCode || null, showConfetti, showOnboarding, showQuiz,

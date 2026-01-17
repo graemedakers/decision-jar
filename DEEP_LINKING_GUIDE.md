@@ -73,3 +73,17 @@ Opens the "Date Reveal" / Detail card for a specific idea.
 *   **Location:** `hooks/useDashboardLogic.ts`
 *   **Dependencies:** Requires `ideas` and `isLoading` to be settled before running (to ensure Modals can open with data).
 *   **Clean Up:** The code automatically removes `action`, `tool`, and `ideaId` params after execution to prevent loops.
+*   **Premium Check:** Concierge deep links (`action=concierge`) perform a real-time premium check. Non-premium users are redirected to the Premium Upgrade modal.
+
+---
+
+## Premium Shortcut Engine (NEW)
+
+The `ConciergeShortcutButton` component allows premium users to generate these deep links automatically for their device home screen.
+
+### How it generates links:
+1. Detects the `configKey` (e.g., `DINING`) of the active concierge.
+2. Constructs a URL: `[origin]/dashboard?action=concierge&tool=DINING`.
+3. **Windows:** Downloads a `.url` shortcut file with the app icon.
+4. **Mobile:** Copies the link and provides OS-specific "Add to Home Screen" instructions.
+5. **Analytics:** Tracks usage via the `concierge_shortcut_created` event.

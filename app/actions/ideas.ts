@@ -4,7 +4,7 @@ import { ActionResponse, Idea } from '@/lib/types';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
-import { awardXp } from '@/lib/gamification';
+import { awardXp, updateStreak } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { getBestCategoryFit } from '@/lib/categories';
 import { revalidatePath } from 'next/cache';
@@ -99,6 +99,7 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
 
         // Gamification
         try {
+            await updateStreak(currentJarId);
             await awardXp(currentJarId, 15);
             await checkAndUnlockAchievements(currentJarId);
         } catch (xpError) {

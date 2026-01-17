@@ -129,6 +129,10 @@ export async function GET() {
                 xp: activeJar.xp || 0,
                 level: activeJar.level || 1,
                 unlockedAchievements: activeJar.achievements?.map((a: any) => a.achievementId) || [],
+                // TODO: Re-enable after Neon pooler cache clears (waiting ~5 minutes)
+                // currentStreak: (activeJar as any).currentStreak || 0,
+                // longestStreak: (activeJar as any).longestStreak || 0,
+                // lastActiveDate: (activeJar as any).lastActiveDate || null,
 
                 // Helper flags
                 activeJarId: activeJar.id,

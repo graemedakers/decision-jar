@@ -3,7 +3,7 @@ export interface AchievementDef {
     title: string;
     description: string;
     icon: string; // Lucide icon name
-    category: 'CREATION' | 'ACTION' | 'COMPLETION';
+    category: 'CREATION' | 'ACTION' | 'COMPLETION' | 'STREAK';
     targetCount: number;
 }
 
@@ -18,4 +18,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     { id: 'RATE_1', title: 'Memory Maker', description: 'Complete and rate your first entry', icon: 'Heart', category: 'COMPLETION', targetCount: 1 },
     { id: 'RATE_5', title: 'Consistent Cooker', description: 'Complete 5 entries', icon: 'Flame', category: 'COMPLETION', targetCount: 5 },
     { id: 'RATE_20', title: 'Collection King/Queen', description: 'Complete 20 entries', icon: 'Crown', category: 'COMPLETION', targetCount: 20 },
+
+    { id: 'STREAK_7', title: 'Week Warrior', description: 'Maintain a 7-day streak', icon: 'Flame', category: 'STREAK', targetCount: 7 },
+    { id: 'STREAK_14', title: 'Fortnight Champion', description: 'Keep it up for 14 days', icon: 'Award', category: 'STREAK', targetCount: 14 },
+    { id: 'STREAK_30', title: 'Monthly Master', description: 'Incredible 30-day streak!', icon: 'Trophy', category: 'STREAK', targetCount: 30 },
+    { id: 'STREAK_100', title: 'Century Legend', description: 'Unstoppable 100-day streak', icon: 'Crown', category: 'STREAK', targetCount: 100 },
 ];

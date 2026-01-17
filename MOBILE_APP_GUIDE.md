@@ -11,11 +11,12 @@ To turn your "Date Jar" Next.js web application into a mobile app for iOS and An
 **Effort:** Low | **Maintenance:** Zero (Same as web)
 **Result:** Installable app icon, offline support (optional), fullscreen experience.
 
-Your app already has a `manifest.ts` file, which is the first step. To fully enable PWA capabilities:
+Your app already has a `manifest.json` file, which is the first step. To fully enable PWA capabilities:
 
-1.  **Enhance Manifest:** Add high-res icons (512x512) and screenshots to `app/manifest.ts`.
+1.  **Enhance Manifest:** Add high-res icons (512x512) and screenshots to `public/manifest.json`.
 2.  **Service Workers:** Use a library like `next-pwa` to cache assets for offline speed.
 3.  **Installation:** Users simply visit your site on Safari (iOS) or Chrome (Android) and tap "Add to Home Screen". It will look and feel like an app.
+4.  **Deep Link Shortcuts (NEW):** Premium users can create direct home-screen shortcuts for specific concierges (e.g., Dining, Movies) by tapping "Add Shortcut" inside the tool.
 
 ---
 

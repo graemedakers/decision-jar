@@ -239,3 +239,48 @@ export const trackModalOpened = (
         ...metadata,
     })
 }
+
+// ===== STREAK ANALYTICS =====
+
+// Streak Milestone Reached
+export const trackStreakMilestone = (
+    milestone: number,
+    isNewRecord: boolean,
+    metadata?: {
+        jar_id?: string
+        previous_longest?: number
+    }
+) => {
+    safeCapture('streak_milestone_reached', {
+        milestone: milestone,
+        is_new_record: isNewRecord,
+        ...metadata,
+    })
+}
+
+// Streak Lost
+export const trackStreakLost = (
+    previousStreak: number,
+    metadata?: {
+        jar_id?: string
+        days_since_last_active?: number
+    }
+) => {
+    safeCapture('streak_lost', {
+        previous_streak: previousStreak,
+        ...metadata,
+    })
+}
+
+// Streak Continued
+export const trackStreakContinued = (
+    currentStreak: number,
+    metadata?: {
+        jar_id?: string
+    }
+) => {
+    safeCapture('streak_continued', {
+        current_streak: currentStreak,
+        ...metadata,
+    })
+}

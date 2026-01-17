@@ -1,7 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { awardXp } from '@/lib/gamification';
+import { awardXp, updateStreak } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
 
 export async function GET(
@@ -103,6 +103,7 @@ export async function PUT(
         });
 
         // Gamification: Award 100 XP for rating/completing a date!
+        await updateStreak(currentJarId);
         await awardXp(currentJarId, 100);
         await checkAndUnlockAchievements(currentJarId);
 

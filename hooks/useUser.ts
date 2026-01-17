@@ -94,6 +94,8 @@ export function useUser(options: UseUserOptions = {}) {
     const hasPaid = !!userData?.hasPaid;
     const isTrialEligible = userData?.isTrialEligible !== false;
     const coupleCreatedAt = userData?.coupleCreatedAt || "";
+    const currentStreak = userData?.currentStreak || 0;
+    const longestStreak = userData?.longestStreak || 0;
 
     // Level Up Side Effect
     useEffect(() => {
@@ -136,6 +138,8 @@ export function useUser(options: UseUserOptions = {}) {
         hasPaid,
         coupleCreatedAt,
         isTrialEligible,
+        currentStreak,
+        longestStreak,
         error: query.error
     };
 }
