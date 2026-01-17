@@ -418,9 +418,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
         case 'THEATRE':
             return {
                 prompt: `
-                Act as a theatre critic and arts guide.
-                Recommend 5 distinct shows or arts exhibitions near ${targetLocation}.
-                Ensure these are real venues with accurate addresses in this region:
+                Act as a theatre critic and arts guide for ${targetLocation}.
+                Recommend 5 distinct shows, productions, or arts exhibitions.
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
@@ -435,13 +434,23 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
                 
+                ⚠️ CRITICAL DATE REQUIREMENTS:
+                - ONLY recommend shows that are CURRENTLY RUNNING or UPCOMING (opening soon).
+                - DO NOT include shows that have already CLOSED or finished their run.
+                - If you are unsure whether a show is still running, DO NOT include it.
+                - Focus on shows with confirmed future performance dates.
+                - Include the show dates or run period if known.
+                
+                For the 'website' field: Provide the official ticketing website or a Google search URL:
+                https://www.google.com/search?q=[Show+Name]+tickets+${encodedLocation}
+                
                 Return JSON with "recommendations" array.
-                Fields: name, description, type, price, address (Venue Name), website, google_rating
+                Fields: name, description, type, price, address (Venue Name), website, google_rating, show_dates (e.g., "Now - March 2026" or "Opens Feb 15, 2026")
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "The Mock Opera", description: "A classic performance.", type: "Opera", price: "$$$", address: "Grand Theater", google_rating: 4.8 },
-                        { name: "Comedy Cellar Mock", description: "Stand up night.", type: "Comedy", price: "$$", address: "Main St", google_rating: 4.6 }
+                        { name: "The Mock Opera", description: "A classic performance.", type: "Opera", price: "$$$", address: "Grand Theater", google_rating: 4.8, show_dates: "Now - April 2026" },
+                        { name: "Comedy Cellar Mock", description: "Stand up night.", type: "Comedy", price: "$$", address: "Main St", google_rating: 4.6, show_dates: "Every Friday" }
                     ]
                 }
             };

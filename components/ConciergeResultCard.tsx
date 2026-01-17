@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, ChevronDown, ChevronUp, Check, Loader2 } from "lucide-react";
+import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, Calendar, ChevronDown, ChevronUp, Check, Loader2 } from "lucide-react";
 import React from "react";
 import { ShareButton } from "@/components/ShareButton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -117,6 +117,11 @@ export function ConciergeResultCard({
                         {rec.showtimes && (
                             <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
                                 <Clock className="w-3 h-3" /> {rec.showtimes}
+                            </span>
+                        )}
+                        {rec.show_dates && (
+                            <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-medium">
+                                <Calendar className="w-3 h-3" /> {rec.show_dates}
                             </span>
                         )}
                         {rec.google_rating && (
