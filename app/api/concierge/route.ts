@@ -400,13 +400,42 @@ export async function POST(req: NextRequest) {
             return jsonResponse;
         };
 
+        // Helper: Normalize cinema URLs to Google search format
+        const normalizeCinemaUrls = (result: { recommendations?: any[] }) => {
+            if (toolKey !== 'MOVIE' || inputs.watchMode !== 'Cinema') {
+                return result;
+            }
+            
+            if (!result.recommendations || !Array.isArray(result.recommendations)) {
+                return result;
+            }
+
+            const encodedLocation = encodeURIComponent(targetLocation);
+            
+            result.recommendations = result.recommendations.map((rec: any) => {
+                const movieTitle = rec.name || '';
+                const currentUrl = rec.website || '';
+                
+                // If URL is NOT already a Google search URL, replace it
+                if (!currentUrl.includes('google.com/search')) {
+                    const encodedTitle = encodeURIComponent(movieTitle);
+                    rec.website = `https://www.google.com/search?q=${encodedTitle}+showtimes+near+${encodedLocation}`;
+                    console.log(`[Cinema URL Fix] Replaced "${currentUrl}" with Google search URL`);
+                }
+                
+                return rec;
+            });
+            
+            return result;
+        };
+
         if (useMockData) {
             const { mockResponse } = getConciergePromptAndMock(toolKey, inputs, targetLocation, rawExtraInstructions);
-            return NextResponse.json(mockResponse);
+            return NextResponse.json(normalizeCinemaUrls(mockResponse));
         }
 
         const finalResult = await runConciergeSearch(rawExtraInstructions);
-        return NextResponse.json(finalResult);
+        return NextResponse.json(normalizeCinemaUrls(finalResult));
 
     } catch (error: any) {
         return handleApiError(error);

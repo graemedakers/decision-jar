@@ -233,9 +233,11 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
         case 'MOVIE':
             // Movie is special: Logic for Streaming vs Cinema
             const isCinema = inputs.watchMode === 'Cinema';
+            // URL-encode location for Google search
+            const encodedLocation = encodeURIComponent(targetLocation);
             return {
                 prompt: `
-                Act as a movie critic and high-precision local cinema scout.
+                Act as a movie critic and recommendation expert.
                 Recommend 5 distinct movies based on the following:
                 
                 ${extraInstructions ? `
@@ -246,41 +248,33 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ` : ''}
                 
                 - Watch Mode: ${inputs.watchMode}
-                ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in physical cinemas near ${targetLocation}. 
+                ${isCinema ? `
+                CINEMA MODE INSTRUCTIONS:
+                - Recommend movies that are LIKELY currently in cinemas (recent releases from the last 2-3 months, or major blockbusters)
+                - Focus on the movie quality and match to user preferences
+                - DO NOT try to guess specific cinema names or generate cinema-specific URLs
+                - The "website" field MUST use this EXACT Google Search format for showtimes:
+                  https://www.google.com/search?q=[Movie+Title+URL+Encoded]+showtimes+near+${encodedLocation}
+                  
+                  Example: For movie "Dune: Part Two" the URL should be:
+                  https://www.google.com/search?q=Dune%3A+Part+Two+showtimes+near+${encodedLocation}
                 
-                1. 📍 IDENTIFY LOCAL CINEMAS:
-                   Find real cinemas currently operating within the same suburb or within 10km of ${targetLocation}.
-                
-                2. 🔍 BRAND VERIFICATION (CRITICAL):
-                   You MUST distinguish between cinema chains correctly. Common hallucinations to avoid:
-                   - ROUSE HILL (NSW) -> 'Reading Cinemas' (Rouse Hill Town Centre). NOT Hoyts.
-                   - EPPING (VIC) -> 'Reading Cinemas' (Pacific Epping). NOT Hoyts.
-                   - GENERIC: Do NOT default to 'Hoyts' or 'Event Cinemas'. Only use them if you have positively verified they operate in the target suburb.
-                
-                3. 🚫 ZERO HALLUCINATION POLICY:
-                   - Do NOT guess the chain. 
-                   - If the user is in Rouse Hill or Epping, the ticket URL must lead to ReadingCinemas.com.au.
-                
-                4. 🔗 URL KNOWLEDGE BASE (STRICT ENFORCEMENT):
-                   Use these EXACT patterns for ticket links. Do NOT invent your own paths like '/sessions/'.
-                   - Village Cinemas: "https://villagecinemas.com.au/cinemas/[SLUG]?tab=sessions" (e.g. .../cinemas/karingal?tab=sessions)
-                   - Reading Cinemas: "https://readingcinemas.com.au/cinemas/[SLUG]" (e.g. .../cinemas/rouse-hill)
-                   - Hoyts: "https://www.hoyts.com.au/cinemas/[SLUG]" (e.g. .../cinemas/broadway)
-                   - Event Cinemas: "https://www.eventcinemas.com.au/Cinema/[SLUG]" (e.g. .../Cinema/George-Street)
-                
-                5. 🎟️ DETAILS:
-                   - Check for movies playing today or tomorrow.
-                   - Provide the specific CINEMA NAME (including branch).
-                   - Provide the FULL PHYSICAL ADDRESS.
-                   - Provide the OFFICIAL TICKET URL using the patterns above.` : ''}
+                This Google search will show the user:
+                - All nearby cinemas showing the movie
+                - Actual showtimes
+                - Direct booking links to the correct cinema websites
+                ` : ''}
                 - Genre: ${inputs.genre || "Any"}
                 - Mood: ${inputs.mood || "Any"}
                 - Era: ${inputs.era || "Any"}
                 ${!isCinema && inputs.streamingServices ? `- Streaming on: ${inputs.streamingServices}` : ''}
                 
                 Return JSON with "recommendations" array.
-                Fields: name (Title), description (Plot summary), year, rating (IMDb/Rotten Tomatoes score as string), genre, director, cast
-                ${isCinema ? 'Also include: cinema_name, address (Physical address), website (Specific ticket/booking link for this cinema), showtimes (today/tomorrow)' : 'Also include: streaming_service, website (Link to watch)'}
+                Fields: name (Title), description (Plot summary - 2-3 sentences), year, rating (IMDb or Rotten Tomatoes score), genre, director, cast (top 3 actors)
+                ${isCinema ? `Also include: 
+                - website: Google showtimes search URL in format https://www.google.com/search?q=[URL+Encoded+Movie+Title]+showtimes+near+${encodedLocation}
+                - status: "Now Showing" or "Coming Soon"` 
+                : 'Also include: streaming_service (e.g. Netflix, Prime Video), website (direct link to watch on that service)'}
                 `,
                 mockResponse: {
                     recommendations: [
