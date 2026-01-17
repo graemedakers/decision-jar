@@ -438,17 +438,20 @@ export function SignupForm() {
                         </div>
                     </div>
 
-                    <div className="py-2">
-                        <button
-                            type="button"
-                            onClick={() => setShowMore(!showMore)}
-                            className="text-xs text-primary hover:text-primary/80 font-bold transition-colors flex items-center gap-1"
-                        >
-                            {showMore ? "Hide advanced options" : "Set up your first jar now (optional)"}
-                        </button>
-                    </div>
+                    {/* Only show "Show More Options" if NOT joining via invite code */}
+                    {!inviteCode && (
+                        <div className="py-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowMore(!showMore)}
+                                className="text-xs text-primary hover:text-primary/80 font-bold transition-colors flex items-center gap-1"
+                            >
+                                {showMore ? "Hide advanced options" : "Set up your first jar now (optional)"}
+                            </button>
+                        </div>
+                    )}
 
-                    {showMore && (
+                    {showMore && !inviteCode && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}

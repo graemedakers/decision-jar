@@ -56,32 +56,14 @@ export function LoginForm() {
             const data = await res.json();
 
             if (res.ok) {
-                // If invite code exists, try to join the jar
-                if (inviteCode) {
-                    try {
-                        const joinRes = await fetch('/api/jars/join', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                code: inviteCode,
-                                premiumToken
-                            }),
-                        });
-                        const joinData = await joinRes.json();
-                        if (joinRes.ok) {
-                            if (joinData.premiumGifted) {
-                                alert("Login successful! You have joined the jar and been upgraded to Premium via the invite link.");
-                            } else {
-                                alert("Login successful! You have joined the jar.");
-                            }
-                        }
-                    } catch (joinError) {
-                        console.error("Error joining jar:", joinError);
-                    }
-                }
-
-                // Use hard redirect to ensure cookies are fully propogated
-                window.location.href = "/dashboard";
+                // If invite code exists, redirect with code so dashboard can handle join
+                // (in case the join above fails or for double-checking)
+                const redirectUrl = inviteCode 
+                    ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}`
+                    : "/dashboard";
+                
+                // Use hard redirect to ensure cookies are fully propagated
+                window.location.href = redirectUrl;
             } else {
                 alert(data.error || "Login failed");
             }
