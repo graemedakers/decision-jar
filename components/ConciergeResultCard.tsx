@@ -137,72 +137,75 @@ export function ConciergeResultCard({
 
             </div>
 
-            {/* Action Buttons Container - Below content, horizontal wrap on desktop */}
-            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-white/5">
-                {/* Info Buttons (Map, Web) */}
-                {rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME' && (
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-xs text-slate-600 dark:text-slate-300 h-8 whitespace-nowrap"
-                        onClick={() => {
-                            const query = rec.cinema_name ? `${rec.cinema_name} ${rec.address}` : `${rec.name} ${rec.address}`;
-                            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
-                        }}
-                    >
-                        <ExternalLink className="w-3.5 h-3.5 mr-1" /> Map
-                    </Button>
+            {/* Action Buttons Container - Two rows for clarity */}
+            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/5 space-y-2">
+                {/* Row 1: Info Links (Map, Web) - only show if there are visible links */}
+                {((rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME') || rec.website) && (
+                    <div className="flex items-center gap-2">
+                        {rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME' && (
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
+                                onClick={() => {
+                                    const query = rec.cinema_name ? `${rec.cinema_name} ${rec.address}` : `${rec.name} ${rec.address}`;
+                                    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+                                }}
+                            >
+                                <ExternalLink className="w-3 h-3 mr-1" /> Map
+                            </Button>
+                        )}
+
+                        {rec.website && (
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
+                                onClick={() => window.open(rec.website, '_blank')}
+                            >
+                                <ExternalLink className="w-3 h-3 mr-1" /> {rec.showtimes ? 'Tickets' : 'Web'}
+                            </Button>
+                        )}
+                    </div>
                 )}
 
-                {rec.website && (
+                {/* Row 2: Primary Action Buttons - always on same line */}
+                <div className="flex items-center gap-1.5">
+                    <ShareButton
+                        title={`${getRecommendationEmoji(categoryType)} ${rec.name}`}
+                        description={getShareDescription(rec, categoryType)}
+                        source={categoryType.toLowerCase() + '_concierge'}
+                        contentType={categoryType.toLowerCase()}
+                        className="text-xs h-7 px-2 whitespace-nowrap"
+                    />
+
                     <Button
                         size="sm"
-                        variant="ghost"
-                        className="text-xs text-slate-600 dark:text-slate-300 h-8 whitespace-nowrap"
-                        onClick={() => window.open(rec.website, '_blank')}
+                        disabled={rec.isAdded || isAddingToJar}
+                        onClick={() => onAddToJar(rec, categoryType, isPrivate)}
+                        className={`text-xs h-7 px-2 transition-all whitespace-nowrap ${rec.isAdded
+                            ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                            : isAddingToJar
+                                ? "bg-slate-200 dark:bg-white/20 text-slate-500 cursor-wait"
+                                : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"}`}
                     >
-                        <ExternalLink className="w-3.5 h-3.5 mr-1" /> {rec.showtimes ? 'Tickets' : 'Web'}
+                        {isAddingToJar ? (
+                            <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> {ACTION_LABELS.ADDING}</>
+                        ) : rec.isAdded ? (
+                            <><Check className="w-3 h-3 mr-1" /> {ACTION_LABELS.ADDED}</>
+                        ) : (
+                            <><Plus className="w-3 h-3 mr-1" /> {ACTION_LABELS.JAR}</>
+                        )}
                     </Button>
-                )}
 
-                {/* Spacer to push action buttons to the right on desktop */}
-                <div className="flex-1 hidden sm:block" />
-
-                {/* Primary Action Buttons */}
-                <ShareButton
-                    title={`${getRecommendationEmoji(categoryType)} ${rec.name}`}
-                    description={getShareDescription(rec, categoryType)}
-                    source={categoryType.toLowerCase() + '_concierge'}
-                    contentType={categoryType.toLowerCase()}
-                    className="text-xs h-8 whitespace-nowrap"
-                />
-
-                <Button
-                    size="sm"
-                    disabled={rec.isAdded || isAddingToJar}
-                    onClick={() => onAddToJar(rec, categoryType, isPrivate)}
-                    className={`text-xs h-8 transition-all whitespace-nowrap ${rec.isAdded
-                        ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                        : isAddingToJar
-                            ? "bg-slate-200 dark:bg-white/20 text-slate-500 cursor-wait"
-                            : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"}`}
-                >
-                    {isAddingToJar ? (
-                        <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> {ACTION_LABELS.ADDING}</>
-                    ) : rec.isAdded ? (
-                        <><Check className="w-3.5 h-3.5 mr-1" /> {ACTION_LABELS.ADDED}</>
-                    ) : (
-                        <><Plus className="w-3.5 h-3.5 mr-1" /> {ACTION_LABELS.JAR}</>
-                    )}
-                </Button>
-
-                <Button
-                    size="sm"
-                    onClick={() => onGoAction(rec, categoryType, isPrivate)}
-                    className={`text-xs h-8 whitespace-nowrap ${goActionClass}`}
-                >
-                    <Zap className="w-3.5 h-3.5 mr-1" /> {goActionLabel}
-                </Button>
+                    <Button
+                        size="sm"
+                        onClick={() => onGoAction(rec, categoryType, isPrivate)}
+                        className={`text-xs h-7 px-2 whitespace-nowrap ${goActionClass}`}
+                    >
+                        <Zap className="w-3 h-3 mr-1" /> {goActionLabel}
+                    </Button>
+                </div>
             </div>
 
             <AnimatePresence>
