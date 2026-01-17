@@ -21,14 +21,19 @@ export const getConciergePromptAndMock = (
 ${extraInstructions}
 
 ⚠️ CRITICAL INSTRUCTION: The user's specific requirements above take ABSOLUTE PRECEDENCE over everything below.
-- If they specify a venue type (cafe, restaurant, bistro, brunch spot, etc.), ONLY recommend that type
-- If they specify a meal type (brunch, breakfast, lunch, dinner), ONLY recommend venues suitable for that meal
-- If they specify any dietary needs or food preferences, STRICTLY honor them
-- DO NOT recommend restaurants if they asked for cafes, DO NOT recommend dinner spots if they asked for brunch venues
+- If they specify a venue type (cafe, restaurant, bistro, brunch spot, etc.), ALL 5 RECOMMENDATIONS MUST BE EXACTLY THAT TYPE
+- If they specify a meal type (brunch, breakfast, lunch, dinner), ALL 5 RECOMMENDATIONS MUST BE SUITABLE FOR THAT EXACT MEAL
+- If they specify any dietary needs or food preferences, ALL 5 RECOMMENDATIONS MUST STRICTLY HONOR THEM
+- DO NOT MIX VENUE TYPES: If they asked for cafes, ALL 5 must be cafes. If they asked for brunch spots, ALL 5 must serve brunch.
+- DO NOT recommend restaurants if they asked for cafes
+- DO NOT recommend dinner spots if they asked for brunch venues
+- DO NOT recommend fine dining if they asked for casual spots
+
+REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC REQUEST ABOVE.
 
                 ` : ''}
                 
-                ${extraInstructions ? 'Based on the critical requirements above, recommend 5 distinct venues' : 'Recommend 5 distinct restaurants'} located near ${targetLocation}.
+                ${extraInstructions ? 'Based on the critical requirements above, recommend 5 distinct venues that ALL match those exact criteria' : 'Recommend 5 distinct restaurants'} located near ${targetLocation}.
                 
                 Additional preferences (only consider if they don't conflict with critical requirements above):
                 - Cuisine: ${inputs.cuisine || "Any good local food"}
@@ -36,6 +41,11 @@ ${extraInstructions}
                 - Price Range: ${inputs.price || "Any"}
                 
                 IMPORTANT: Perform a check to ensure the venue is currently OPEN for business and has NOT permanently closed.
+                
+                ${extraInstructions ? `
+🔴 REMINDER BEFORE YOU OUTPUT: Double-check that ALL 5 venues match this requirement: "${extraInstructions}"
+If they asked for brunch cafes, DO NOT include dinner restaurants. If they asked for pizza places, DO NOT include sushi restaurants.
+                ` : ''}
                 
                 For each venue, provide:
                 - Name
@@ -69,14 +79,21 @@ ${extraInstructions}
 USER REQUEST/CONTEXT: "${extraInstructions}"
 
 ⚠️ CRITICAL INSTRUCTION: The user's request above is your PRIMARY DIRECTIVE.
-- INTERPRET their request LITERALLY - if they ask for cafes, give cafes; if they ask for activities, give activities
-- DO NOT substitute or change what they're asking for
-- If their request is specific (e.g., "brunch cafes with good coffee"), ONLY recommend venues that match ALL criteria
-- If they mention meal times (breakfast, brunch, lunch, dinner), ONLY recommend venues open and suitable for that time
+- INTERPRET their request LITERALLY - if they ask for cafes, ALL 5 MUST BE CAFES; if they ask for activities, ALL 5 MUST BE ACTIVITIES
+- DO NOT SUBSTITUTE or change what they're asking for
+- If their request is specific (e.g., "brunch cafes with good coffee"), ALL 5 RECOMMENDATIONS MUST match ALL criteria
+- If they mention meal times (breakfast, brunch, lunch, dinner), ALL 5 RECOMMENDATIONS MUST be open and suitable for that exact time
+- DO NOT MIX TYPES: If they asked for one thing, don't give them something else for recommendations 2-5
+
+REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC REQUEST ABOVE.
 
                 ` : ''}
                 
                 Respond to the user's request with 5 distinct recommendations near ${targetLocation}.
+                
+                ${extraInstructions ? `
+🔴 REMINDER: All 5 recommendations must satisfy: "${extraInstructions}"
+                ` : ''}
                 
                 Additional preferences (secondary to the critical requirements above):
                 - Mood: ${inputs.mood || "Any"}
