@@ -14,59 +14,35 @@ export const getConciergePromptAndMock = (
         case 'DINING':
             return {
                 prompt: `
-                Act as a local dining concierge.
+                Act as a local dining concierge for ${targetLocation}.
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
+USER REQUEST: ${extraInstructions}
 
-⚠️ CRITICAL INSTRUCTION: The user's specific requirements above take ABSOLUTE PRECEDENCE.
-
-EXAMPLES TO ILLUSTRATE:
-- If user asks for "brunch cafes with good coffee" → ALL 5 must be BRUNCH CAFES that serve GOOD COFFEE
-  ❌ WRONG: 1 brunch cafe + 4 dinner restaurants
-  ✅ CORRECT: 5 brunch cafes
-  
-- If user asks for "pizza places" → ALL 5 must be PIZZA PLACES
-  ❌ WRONG: 1 pizza place + 4 sushi/Italian/burger restaurants  
-  ✅ CORRECT: 5 pizza places
-
-- If user asks for "vegan restaurants" → ALL 5 must be VEGAN-FOCUSED restaurants
-  ❌ WRONG: 1 vegan restaurant + 4 restaurants with "some vegan options"
-  ✅ CORRECT: 5 vegan or vegan-friendly restaurants
-
-DO NOT MIX VENUE TYPES. DO NOT DILUTE THE RESULTS. ALL 5 MUST MATCH THE EXACT REQUEST.
-
-                ` : ''}
+Based on this request, recommend 5 venues that match what the user is looking for.
+                ` : `Recommend 5 distinct restaurants.`}
                 
-                ${extraInstructions ? `Based on the critical requirements above ("${extraInstructions}"), recommend 5 distinct venues that ALL match those EXACT criteria` : 'Recommend 5 distinct restaurants'} located near ${targetLocation}.
-                
-                Additional preferences (only if they don't conflict with the critical requirements):
+                ${!extraInstructions ? `
+Additional preferences:
                 - Cuisine: ${inputs.cuisine || "Any good local food"}
                 - Vibe/Atmosphere: ${inputs.vibe || "Any"}
                 - Price Range: ${inputs.price || "Any"}
+                ` : ''}
                 
-                IMPORTANT: Perform a check to ensure the venue is currently OPEN for business and has NOT permanently closed.
+                Ensure all venues are currently open for business.
                 
                 For each venue, provide:
                 - Name
-                - A brief, appetizing description (1 sentence)
-                - Cuisine type (or venue type if it's a cafe/bakery/etc)
+                - A brief description (1-2 sentences)
+                - Cuisine type or venue category
                 - Price range ($, $$, $$$)
                 - Approximate address or neighborhood
-                - A likely website URL (or a Google Search URL if specific site unknown)
-                - Typical opening hours (adjust to match the meal type - brunch hours for brunch spots, dinner hours for dinner spots, etc.)
+                - Website URL (or Google Search URL if specific site unknown)
+                - Typical opening hours
                 - Approximate Google Rating (e.g. 4.5)
                 
                 Return JSON object with "recommendations" array.
                 Fields: name, description, cuisine, price, address, website, opening_hours, google_rating
-                
-                ${extraInstructions ? `
-🔴 FINAL VERIFICATION BEFORE RETURNING JSON:
-Before you return the JSON, verify that EVERY SINGLE recommendation (all 5) satisfies: "${extraInstructions}"
-If ANY recommendation doesn't match, REPLACE IT with one that does.
-Do NOT include ANY venues that don't match the user's specific request.
-                ` : ''}
                 `,
                 mockResponse: {
                     recommendations: [
