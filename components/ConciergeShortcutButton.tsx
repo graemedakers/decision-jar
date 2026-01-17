@@ -77,24 +77,27 @@ export function ConciergeShortcutButton({ toolId, toolName, isPremium }: Concier
         // DESKTOP WINDOWS: Generate and download a .url shortcut file
         if (isWindows && !isMobile) {
             try {
+                // Use favicon.ico if available (better Windows support), fallback to PNG
+                const faviconUrl = `${window.location.origin}/favicon.ico`;
+                
                 // Create Windows .url shortcut file content
                 const shortcutContent = `[InternetShortcut]
 URL=${deepLink}
-IconFile=${iconUrl}
+IconFile=${faviconUrl}
 IconIndex=0
 `;
                 // Create blob and trigger download
                 const blob = new Blob([shortcutContent], { type: 'application/internet-shortcut' });
-                const url = URL.createObjectURL(blob);
+                const blobUrl = URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.href = url;
+                link.href = blobUrl;
                 link.download = `${toolName.replace(/[^a-zA-Z0-9]/g, '_')}.url`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(url);
+                URL.revokeObjectURL(blobUrl);
 
-                showSuccess(`✨ Shortcut downloaded! Move it to your desktop for quick access.`);
+                showSuccess(`✨ Shortcut "${toolName}" downloaded! Drag it to your desktop.`);
                 return;
             } catch (err) {
                 console.error('Failed to create shortcut file:', err);
