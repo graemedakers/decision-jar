@@ -5,6 +5,32 @@ import { ShareButton } from "@/components/ShareButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { ACTION_LABELS } from "@/lib/ui-constants";
 
+// Categories that are inherently digital/online and shouldn't show map
+const DIGITAL_CATEGORIES = ['BOOK', 'GAME', 'STREAMING', 'ONLINE', 'DIGITAL', 'VIRTUAL'];
+
+// Keywords that indicate an item is digital/online (check address and name)
+const DIGITAL_KEYWORDS = [
+    'streaming', 'online', 'digital', 'virtual', 'app', 'mobile', 'web',
+    'netflix', 'disney+', 'amazon prime', 'hbo', 'hulu', 'spotify',
+    'audible', 'kindle', 'ebook', 'podcast', 'youtube', 'twitch',
+    'playstation', 'xbox', 'nintendo', 'steam', 'epic games', 'pc game'
+];
+
+/**
+ * Detects if a recommendation is a digital/online item
+ * that shouldn't show physical location buttons
+ */
+function isDigitalItem(rec: ConciergeRecommendation, categoryType: string): boolean {
+    // Check category type
+    if (DIGITAL_CATEGORIES.includes(categoryType.toUpperCase())) {
+        return true;
+    }
+    
+    // Check for digital keywords in name or address
+    const textToCheck = `${rec.name || ''} ${rec.address || ''} ${rec.description || ''}`.toLowerCase();
+    return DIGITAL_KEYWORDS.some(keyword => textToCheck.includes(keyword));
+}
+
 interface ConciergeRecommendation {
     name: string;
     description: string;
@@ -109,9 +135,16 @@ export function ConciergeResultCard({
                                 <SecondIcon className="w-3 h-3" /> {secondSubtext}
                             </span>
                         )}
-                        {rec.address && (
+                        {/* Only show address with MapPin for physical locations, not digital items */}
+                        {rec.address && !isDigitalItem(rec, categoryType) && (
                             <span className="flex items-center gap-1">
                                 <MapPin className="w-3 h-3" /> {rec.cinema_name ? `${rec.cinema_name} - ${rec.address}` : rec.address}
+                            </span>
+                        )}
+                        {/* For digital items, show platform info without MapPin */}
+                        {rec.address && isDigitalItem(rec, categoryType) && (
+                            <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                                <ExternalLink className="w-3 h-3" /> {rec.address}
                             </span>
                         )}
                         {rec.showtimes && (
@@ -145,9 +178,10 @@ export function ConciergeResultCard({
             {/* Action Buttons Container - Two rows for clarity */}
             <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/5 space-y-2">
                 {/* Row 1: Info Links (Map, Web) - only show if there are visible links */}
-                {((rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME') || rec.website) && (
+                {/* Hide Map button for digital items (games, streaming, ebooks, etc.) */}
+                {((!isDigitalItem(rec, categoryType) && rec.address) || rec.website) && (
                     <div className="flex items-center gap-2">
-                        {rec.address && !rec.address.toLowerCase().includes('streaming') && categoryType !== 'BOOK' && categoryType !== 'GAME' && (
+                        {!isDigitalItem(rec, categoryType) && rec.address && (
                             <Button
                                 size="sm"
                                 variant="ghost"
