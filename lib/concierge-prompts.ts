@@ -17,9 +17,13 @@ export const getConciergePromptAndMock = (
                 Act as a local dining concierge for ${targetLocation}.
                 
                 ${extraInstructions ? `
-USER REQUEST: ${extraInstructions}
+USER REQUEST: "${extraInstructions}"
 
-Based on this request, recommend 5 venues that match what the user is looking for.
+⚠️ MANDATORY CRITERIA:
+- ALL recommendations MUST strictly align with the user request above.
+- If the user request is specific (e.g. "brunch cafe with good coffee"), ONLY return venues that meet ALL those conditions.
+- If you cannot find at least 1 REAL venue that matches the user request, return an empty "recommendations" array: {"recommendations": []}.
+- DO NOT return generic restaurants or "close enough" options if they don't meet the specific request.
                 ` : `Recommend 5 distinct restaurants.`}
                 
                 ${!extraInstructions ? `
