@@ -103,6 +103,9 @@ export default function ExplorePage() {
                 case 'date_night':
                     openModal('DATE_NIGHT_PLANNER');
                     break;
+                case 'surprise_me':
+                    openModal('SURPRISE_ME');
+                    break;
             }
         }
     };
