@@ -272,7 +272,7 @@ export default function Home() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 -mr-2 text-slate-700 dark:text-slate-200">
+                <Button variant="ghost" size="icon" className="h-9 w-9 -mr-2 text-slate-700 dark:text-slate-200" suppressHydrationWarning>
                   <Menu className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
