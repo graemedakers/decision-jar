@@ -118,8 +118,12 @@ export function useDashboardLogic() {
     const { shouldShowTrialModal, dismissTrialModal } = useTrialStatus(userData);
     
     useEffect(() => {
+        // Don't show trial modal if we just returned from successful checkout
+        const params = new URLSearchParams(window.location.search);
+        const justUpgraded = params.get('success') === 'true';
+        
         // Show trial expired modal after a short delay for better UX
-        if (shouldShowTrialModal && !isLoadingUser && userData) {
+        if (shouldShowTrialModal && !isLoadingUser && userData && !justUpgraded) {
             const timer = setTimeout(() => {
                 openModal('TRIAL_EXPIRED');
             }, 1500); // 1.5 second delay for smoother experience
@@ -147,6 +151,11 @@ export function useDashboardLogic() {
         if (success && sessionId && refreshUser) {
             triggerHaptic(50);
             setShowConfetti(true);
+            
+            // Clear trial modal state since user just upgraded
+            localStorage.removeItem('trial_modal_dismissed_at');
+            localStorage.removeItem('trial_modal_snoozed_until');
+            
             window.history.replaceState({}, '', window.location.pathname);
             refreshUser();
         }

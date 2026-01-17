@@ -65,8 +65,8 @@ export function useTrialStatus(userData: UserData | null | undefined): TrialStat
             };
         }
 
-        // If user has paid or is lifetime pro, no trial concerns
-        if (userData.hasPaid || userData.isLifetimePro) {
+        // If user is premium (any method: paid, lifetime, trial, gifted), no modal needed
+        if (userData.isPremium || userData.hasPaid || userData.isLifetimePro) {
             return {
                 isInTrial: false,
                 isTrialExpired: false,
