@@ -108,9 +108,11 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
         }
 
         // Send push notification to other jar members (non-blocking)
+        // Hide details if idea is private or a surprise
+        const isSecretIdea = Boolean(isPrivate) || Boolean(data.isSurprise);
         notifyJarMembers(currentJarId, session.user.id, {
             title: `💡 ${session.user.name || 'Someone'} added a new idea`,
-            body: description.length > 60 ? description.substring(0, 57) + '...' : description,
+            body: isSecretIdea ? '🤫 It\'s a secret... spin to find out!' : (description.length > 60 ? description.substring(0, 57) + '...' : description),
             url: '/jar',
             icon: '/icon-192.png'
         }).catch(err => console.error("Notification error:", err));
