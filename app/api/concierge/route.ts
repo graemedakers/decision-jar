@@ -400,42 +400,74 @@ export async function POST(req: NextRequest) {
             return jsonResponse;
         };
 
-        // Helper: Normalize cinema URLs to Google search format
-        const normalizeCinemaUrls = (result: { recommendations?: any[] }) => {
-            if (toolKey !== 'MOVIE' || inputs.watchMode !== 'Cinema') {
-                return result;
-            }
-            
+        // Helper: Normalize URLs to Google search format for location-based concierges
+        // This prevents hallucinated URLs that lead to 404s or wrong sites
+        const normalizeVenueUrls = (result: { recommendations?: any[] }) => {
             if (!result.recommendations || !Array.isArray(result.recommendations)) {
                 return result;
             }
 
             const encodedLocation = encodeURIComponent(targetLocation);
             
-            result.recommendations = result.recommendations.map((rec: any) => {
-                const movieTitle = rec.name || '';
-                const currentUrl = rec.website || '';
-                
-                // If URL is NOT already a Google search URL, replace it
-                if (!currentUrl.includes('google.com/search')) {
-                    const encodedTitle = encodeURIComponent(movieTitle);
-                    rec.website = `https://www.google.com/search?q=${encodedTitle}+showtimes+near+${encodedLocation}`;
-                    console.log(`[Cinema URL Fix] Replaced "${currentUrl}" with Google search URL`);
-                }
-                
-                return rec;
-            });
+            // Define which concierges need URL normalization and their search suffix
+            const urlNormalizationRules: Record<string, string> = {
+                'MOVIE': 'showtimes+near',      // Cinema mode only (handled separately)
+                'DINING': 'restaurant',
+                'BAR': 'bar',
+                'WELLNESS': 'spa+wellness',
+                'FITNESS': 'gym+fitness',
+                'THEATRE': 'tickets',
+                'ESCAPE_ROOM': 'escape+room',
+                'SPORTS': 'sports',
+                'WEEKEND_EVENTS': 'official+website',
+                'HOTEL': 'hotel+booking',
+                'NIGHTCLUB': 'nightclub',
+            };
+            
+            // Special handling for cinema mode
+            if (toolKey === 'MOVIE' && inputs.watchMode === 'Cinema') {
+                result.recommendations = result.recommendations.map((rec: any) => {
+                    const currentUrl = rec.website || '';
+                    if (!currentUrl.includes('google.com/search')) {
+                        const encodedTitle = encodeURIComponent(rec.name || '');
+                        rec.website = `https://www.google.com/search?q=${encodedTitle}+showtimes+near+${encodedLocation}`;
+                        console.log(`[URL Fix] Cinema: Replaced "${currentUrl.substring(0, 50)}..." with Google search`);
+                    }
+                    return rec;
+                });
+                return result;
+            }
+            
+            // General URL normalization for other location-based concierges
+            const searchSuffix = urlNormalizationRules[toolKey];
+            if (searchSuffix) {
+                result.recommendations = result.recommendations.map((rec: any) => {
+                    const currentUrl = rec.website || '';
+                    
+                    // Only replace if URL looks suspicious (not google, not major platforms)
+                    const trustedDomains = ['google.com', 'facebook.com', 'instagram.com', 'yelp.com', 'tripadvisor.com', 'booking.com', 'airbnb.com'];
+                    const isTrusted = trustedDomains.some(domain => currentUrl.includes(domain));
+                    
+                    if (currentUrl && !isTrusted && !currentUrl.includes('google.com/search')) {
+                        const encodedName = encodeURIComponent(rec.name || '');
+                        rec.website = `https://www.google.com/search?q=${encodedName}+${encodedLocation}+${searchSuffix}`;
+                        console.log(`[URL Fix] ${toolKey}: Replaced suspicious URL with Google search`);
+                    }
+                    
+                    return rec;
+                });
+            }
             
             return result;
         };
 
         if (useMockData) {
             const { mockResponse } = getConciergePromptAndMock(toolKey, inputs, targetLocation, rawExtraInstructions);
-            return NextResponse.json(normalizeCinemaUrls(mockResponse));
+            return NextResponse.json(normalizeVenueUrls(mockResponse));
         }
 
         const finalResult = await runConciergeSearch(rawExtraInstructions);
-        return NextResponse.json(normalizeCinemaUrls(finalResult));
+        return NextResponse.json(normalizeVenueUrls(finalResult));
 
     } catch (error: any) {
         return handleApiError(error);

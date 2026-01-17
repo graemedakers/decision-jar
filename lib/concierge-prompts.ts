@@ -677,8 +677,17 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 2. FALLBACK: Only if you cannot find 5 high-quality time-limited events, fill the remaining spots with exceptional "evergreen" activities that perfectly match the requested vibe.
                 3. Ensure venues are confirmed open on the requested days.
                 
+                🔗 CRITICAL - WEBSITE FIELD:
+                DO NOT guess or invent website URLs. Instead, use this Google Search format:
+                https://www.google.com/search?q=[Event+or+Venue+Name]+[Location]+official+website
+                
+                Example: For "Victorian Farmers Markets" in Melbourne:
+                https://www.google.com/search?q=Victorian+Farmers+Markets+Melbourne+official+website
+                
+                This ensures users always find the correct, current website.
+                
                 Return JSON with "recommendations" array.
-                Fields: name, description, day (e.g. "Saturday 2pm"), price, address, website, google_rating
+                Fields: name, description, day (e.g. "Saturday 2pm"), price, address, website (Google search URL), google_rating
                 `,
                 mockResponse: {
                     recommendations: [
