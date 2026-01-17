@@ -44,12 +44,10 @@ model Jar {
   xp          Int      @default(0)
   level       Int      @default(1)
   
-  // Streak Tracking - TEMPORARILY COMMENTED OUT
-  // The database has these columns, but Neon connection pooler hasn't cached them yet.
-  // Re-enable after pooler cache clears (~5-10 minutes) or use direct connection.
-  // lastActiveDate    DateTime?
-  // currentStreak     Int      @default(0)
-  // longestStreak     Int      @default(0)
+  // Streak Tracking
+  lastActiveDate    DateTime?
+  currentStreak     Int      @default(0)
+  longestStreak     Int      @default(0)
 
   deletedLogs   DeletedLog[]
   favorites     FavoriteVenue[]
