@@ -116,6 +116,23 @@ export async function checkSubscriptionAccess(userId: string, toolId: string): P
 
     if (!user) return { allowed: false, reason: 'User not found' };
 
+    // Debug logging for trial issues
+    const now = new Date();
+    const created = new Date(user.createdAt);
+    const diffTime = Math.abs(now.getTime() - created.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    console.log('[PREMIUM_CHECK]', {
+        userId,
+        toolId,
+        isLifetimePro: user.isLifetimePro,
+        subscriptionStatus: user.subscriptionStatus,
+        createdAt: user.createdAt,
+        now: now.toISOString(),
+        diffDays,
+        isWithinTrial: diffDays <= 14
+    });
+
     // 1. Check Pro Status
     if (isUserPro(user as any)) {
         return { allowed: true };
