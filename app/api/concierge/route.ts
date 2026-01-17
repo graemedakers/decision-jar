@@ -155,9 +155,7 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        const extraInstructions = inputs.extraInstructions
-            ? `Additional User Instructions: "${inputs.extraInstructions}"`
-            : "";
+        const extraInstructions = inputs.extraInstructions || "";
 
         // 7. Prompt Generation
         const { prompt, mockResponse } = getConciergePromptAndMock(

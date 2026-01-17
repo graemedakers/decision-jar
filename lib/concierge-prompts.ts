@@ -14,39 +14,30 @@ export const getConciergePromptAndMock = (
         case 'DINING':
             return {
                 prompt: `
-                Act as a local dining concierge for ${targetLocation}.
+                You are a Hyper-Local Food & Venue Scout. A user has performed a specific search for venues in ${targetLocation}.
                 
-                ${extraInstructions ? `
-USER REQUEST: "${extraInstructions}"
-
-⚠️ MANDATORY CRITERIA:
-- ALL recommendations MUST strictly align with the user request above.
-- If the user request is specific (e.g. "brunch cafe with good coffee"), ONLY return venues that meet ALL those conditions.
-- If you cannot find at least 1 REAL venue that matches the user request, return an empty "recommendations" array: {"recommendations": []}.
-- DO NOT return generic restaurants or "close enough" options if they don't meet the specific request.
-                ` : `Recommend 5 distinct restaurants.`}
+                PRIMARY SEARCH QUERY: "${extraInstructions || "Best local restaurants"}"
                 
-                ${!extraInstructions ? `
-Additional preferences:
-                - Cuisine: ${inputs.cuisine || "Any good local food"}
-                - Vibe/Atmosphere: ${inputs.vibe || "Any"}
-                - Price Range: ${inputs.price || "Any"}
+                ${inputs.cuisine || inputs.vibe || inputs.price ? `
+                FILTER CONSTRAINTS:
+                - Preferred Cuisine: ${inputs.cuisine || "Any"}
+                - Target Vibe: ${inputs.vibe || "Any"}
+                - Budget: ${inputs.price || "Any"}
                 ` : ''}
+
+                YOUR MISSION:
+                1. Simulate a deep search of local reviews, food blogs, and maps for ${targetLocation}.
+                2. Identify 5 venues that are the HIGHEST RELEVANCE match for the PRIMARY SEARCH QUERY.
+                3. If the query asks for something specific (e.g. "brunch cafe with amazing coffee"), IGNORE generic dinner restaurants. Focus ONLY on those specific types of venues.
+                4. Prioritize "Local Legends" and "Top Rated" spots that real locals would recommend in a direct chat.
                 
-                Ensure all venues are currently open for business.
-                
-                For each venue, provide:
-                - Name
-                - A brief description (1-2 sentences)
-                - Cuisine type or venue category
-                - Price range ($, $$, $$$)
-                - Approximate address or neighborhood
-                - Website URL (or Google Search URL if specific site unknown)
-                - Typical opening hours
-                - Approximate Google Rating (e.g. 4.5)
-                
+                CRITICAL QUALITY CHECK:
+                - If you cannot find a match that fits the query, return an empty list: {"recommendations": []}. 
+                - Generic results that don't match the intent of the query are considered a FAILURE.
+                - Ensure venues are currently operating.
+
                 Return JSON object with "recommendations" array.
-                Fields: name, description, cuisine, price, address, website, opening_hours, google_rating
+                Fields: name, description (compelling and informative), cuisine, price, address, website, opening_hours, google_rating
                 `,
                 mockResponse: {
                     recommendations: [
