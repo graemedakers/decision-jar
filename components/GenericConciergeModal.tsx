@@ -234,6 +234,11 @@ export function GenericConciergeModal({
     // Use active config or fallback to initial
     const config = activeConfig || initialConfig || CONCIERGE_CONFIGS.CONCIERGE;
     const theme = getThemeClasses(config.colorTheme);
+    
+    // Find the CONCIERGE_CONFIGS key for this config (for deep links)
+    const configKey = Object.entries(CONCIERGE_CONFIGS).find(
+        ([_, cfg]) => cfg.id === config.id
+    )?.[0] || skillId || 'CONCIERGE';
 
     // Track modal open time for abandonment analytics
     useEffect(() => {
@@ -526,7 +531,7 @@ export function GenericConciergeModal({
                                 {/* Premium: Add shortcut button */}
                                 {!showSkillPicker && config && (
                                     <ConciergeShortcutButton
-                                        toolId={config.id}
+                                        toolId={configKey}
                                         toolName={config.title}
                                         isPremium={isPremium}
                                     />

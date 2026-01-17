@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Home, Check, Share2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, Share2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { trackEvent } from '@/lib/analytics';
 import { showSuccess, showInfo } from '@/lib/toast';
@@ -14,22 +14,50 @@ interface ConciergeShortcutButtonProps {
 
 export function ConciergeShortcutButton({ toolId, toolName, isPremium }: ConciergeShortcutButtonProps) {
     const [copied, setCopied] = useState(false);
+    const [isPremiumConfirmed, setIsPremiumConfirmed] = useState(isPremium);
+
+    // Check localStorage as fallback for premium status
+    useEffect(() => {
+        if (!isPremium) {
+            try {
+                const cached = localStorage.getItem('datejar_is_premium');
+                if (cached === 'true') {
+                    setIsPremiumConfirmed(true);
+                }
+            } catch (e) {
+                // Ignore storage errors
+            }
+        } else {
+            setIsPremiumConfirmed(true);
+        }
+    }, [isPremium]);
 
     // Only show for premium users
-    if (!isPremium) return null;
+    if (!isPremiumConfirmed) return null;
 
     const handleAddShortcut = async () => {
         const deepLink = `${window.location.origin}/dashboard?action=concierge&tool=${toolId.toLowerCase()}`;
+        const iconUrl = `${window.location.origin}/icon-96.png`;
+
+        // Detect platform
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const isMobile = isIOS || isAndroid;
+        const isWindows = /Windows/.test(navigator.userAgent);
+
+        // Check if Web Share API is available
+        const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
         // Track shortcut creation attempt
         trackEvent('concierge_shortcut_created', {
             tool_id: toolId,
             tool_name: toolName,
-            method: navigator.share ? 'native_share' : 'clipboard'
+            method: isMobile ? (canShare ? 'native_share' : 'clipboard') : 'desktop_shortcut',
+            platform: isWindows ? 'windows' : isIOS ? 'ios' : isAndroid ? 'android' : 'other'
         });
 
-        // Try native Web Share API first (best experience on mobile)
-        if (navigator.share) {
+        // MOBILE: Try native Web Share API first
+        if (isMobile && canShare) {
             try {
                 await navigator.share({
                     title: `${toolName} - Decision Jar`,
@@ -39,32 +67,55 @@ export function ConciergeShortcutButton({ toolId, toolName, isPremium }: Concier
                 showSuccess(`Share successful! Save to your home screen for quick access.`);
                 return;
             } catch (err: any) {
-                // User cancelled or error - fall through to clipboard
                 if (err.name === 'AbortError') {
-                    return; // User cancelled, don't show anything
+                    return; // User cancelled
                 }
+                // Fall through to other methods
             }
         }
 
-        // Fallback: Copy to clipboard
+        // DESKTOP WINDOWS: Generate and download a .url shortcut file
+        if (isWindows && !isMobile) {
+            try {
+                // Create Windows .url shortcut file content
+                const shortcutContent = `[InternetShortcut]
+URL=${deepLink}
+IconFile=${iconUrl}
+IconIndex=0
+`;
+                // Create blob and trigger download
+                const blob = new Blob([shortcutContent], { type: 'application/internet-shortcut' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${toolName.replace(/[^a-zA-Z0-9]/g, '_')}.url`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showSuccess(`✨ Shortcut downloaded! Move it to your desktop for quick access.`);
+                return;
+            } catch (err) {
+                console.error('Failed to create shortcut file:', err);
+                // Fall through to clipboard
+            }
+        }
+
+        // FALLBACK: Copy to clipboard with instructions
         try {
             await navigator.clipboard.writeText(deepLink);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-
-            // Show platform-specific instructions
-            const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
 
             if (isIOS) {
                 showInfo(`📱 Link copied! To add a shortcut:\n1. Open Safari\n2. Paste the link\n3. Tap Share → Add to Home Screen`);
             } else if (isAndroid) {
                 showInfo(`📱 Link copied! To add a shortcut:\n1. Open Chrome\n2. Paste the link\n3. Tap ⋮ → Add to Home Screen`);
             } else {
-                showSuccess(`✨ Link copied! Bookmark this URL for quick access to ${toolName}`);
+                showSuccess(`✨ Link copied! Create a bookmark or drag to your bookmarks bar.`);
             }
         } catch (err) {
-            // Last resort: show the link in an alert
             showInfo(`Copy this link to bookmark: ${deepLink}`);
         }
     };
