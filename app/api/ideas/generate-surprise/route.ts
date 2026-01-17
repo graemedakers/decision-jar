@@ -108,6 +108,7 @@ export async function POST(request: Request) {
                 jarId: user.activeJarId!,
                 createdById: user.id,
                 isPrivate: isPrivate !== undefined ? isPrivate : true,
+                isSurprise: true, // Always mark surprise ideas
 
                 // New Tags
                 weather: ideaData.weather || "ANY",
@@ -115,15 +116,7 @@ export async function POST(request: Request) {
             }
         });
 
-        // Manually set isSurprise to true via raw query since Prisma Client might be stale/locked
-        try {
-            await prisma.$executeRawUnsafe('UPDATE "Idea" SET "isSurprise" = $1 WHERE id = $2', true, newIdea.id);
-            (newIdea as any).isSurprise = true;
-        } catch (e) {
-            console.warn("Could not set isSurprise flag", e);
-        }
-
-        return NextResponse.json(newIdea);
+        return NextResponse.json({ success: true, idea: newIdea });
 
     } catch (error: any) {
         console.error('Generate Surprise Error:', error);
