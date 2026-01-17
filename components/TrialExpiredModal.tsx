@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +11,9 @@ import {
 } from "lucide-react";
 import { trackTrialModalShown, trackTrialModalAction } from "@/lib/analytics";
 import { fetchTrialUsageStats } from "@/hooks/useTrialStatus";
+
+// Coupon ID - must match what's configured in Stripe
+const TRIAL_COUPON_ID = 'TRIAL_EXPIRED_50';
 
 interface TrialExpiredModalProps {
     isOpen: boolean;
@@ -46,6 +50,7 @@ export function TrialExpiredModal({
     onUpgrade,
     onContinueFree,
 }: TrialExpiredModalProps) {
+    const router = useRouter();
     const [stats, setStats] = useState<UsageStats | null>(null);
     const [showLimitations, setShowLimitations] = useState(false);
     const [hasTracked, setHasTracked] = useState(false);
@@ -67,7 +72,9 @@ export function TrialExpiredModal({
 
     const handleUpgrade = () => {
         trackTrialModalAction('upgrade_clicked', stats || undefined);
-        onUpgrade();
+        onClose();
+        // Navigate to premium page with coupon applied
+        router.push(`/premium?coupon=${TRIAL_COUPON_ID}`);
     };
 
     const handleContinueFree = () => {

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { priceId, mode: requestedMode } = body;
+        const { priceId, mode: requestedMode, couponId, source } = body;
 
         // Default or specific price logic
         const targetPriceId = priceId || process.env.STRIPE_PRICE_ID;
@@ -57,14 +57,23 @@ export async function POST(req: Request) {
             metadata: {
                 userId: session.user.id,
                 jarId: (session.user as any).activeJarId || "",
-                type: isLifetime ? 'LIFETIME_CB' : 'SUBSCRIPTION_UPGRADE'
+                type: isLifetime ? 'LIFETIME_CB' : 'SUBSCRIPTION_UPGRADE',
+                source: source || 'direct', // Track where the checkout came from
+                couponApplied: couponId || 'none'
             },
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
         };
 
+        // Apply coupon if provided (for trial expiry discounts, etc.)
+        if (couponId && mode === 'subscription') {
+            checkoutSessionParams.discounts = [{ coupon: couponId }];
+            logger.info("[STRIPE_COUPON_APPLIED]", { userId: session.user.id, couponId, source });
+        }
+
         // Subscription Data (Trial) - Only grant trial if user hasn't used it yet
-        if (mode === 'subscription') {
+        // Note: Don't grant trial if a coupon is being used (they're already getting a discount)
+        if (mode === 'subscription' && !couponId) {
             // Only grant trial to users who haven't used their free trial
             if (!user?.hasUsedTrial) {
                 checkoutSessionParams.subscription_data = {

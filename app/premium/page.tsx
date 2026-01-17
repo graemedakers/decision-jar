@@ -1,15 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Sparkles, Check, ArrowLeft, Star, Utensils, Calendar, MapPin, Zap } from "lucide-react";
+import { Sparkles, Check, ArrowLeft, Star, Utensils, Calendar, MapPin, Zap, Gift } from "lucide-react";
 import { motion } from "framer-motion";
 import { PRICING } from "@/lib/config";
 
+// Coupon configuration
+const COUPON_CONFIG = {
+    TRIAL_EXPIRED_50: {
+        id: 'TRIAL_EXPIRED_50',
+        discount: '50% OFF',
+        description: 'First month',
+        color: 'from-amber-500 to-orange-500',
+    }
+};
+
+// Wrapper component to handle Suspense for useSearchParams
 export default function PremiumPage() {
+    return (
+        <Suspense fallback={<PremiumPageLoading />}>
+            <PremiumPageContent />
+        </Suspense>
+    );
+}
+
+function PremiumPageLoading() {
+    return (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+            <div className="text-white/50">Loading...</div>
+        </div>
+    );
+}
+
+function PremiumPageContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
+    
+    // Check for coupon in URL params
+    const couponId = searchParams?.get('coupon') || null;
+    const couponConfig = couponId ? COUPON_CONFIG[couponId as keyof typeof COUPON_CONFIG] : null;
 
     const handleSubscribe = async (priceType: 'price_monthly' | 'price_lifetime') => {
         setIsLoading(true);
@@ -22,14 +54,17 @@ export default function PremiumPage() {
                 method: 'POST',
                 body: JSON.stringify({
                     priceId,
-                    mode: priceType === 'price_lifetime' ? 'payment' : 'subscription'
+                    mode: priceType === 'price_lifetime' ? 'payment' : 'subscription',
+                    // Pass coupon only for monthly subscriptions (not lifetime)
+                    couponId: priceType === 'price_monthly' && couponId ? couponId : undefined,
+                    source: couponId ? 'trial_expiry_modal' : 'premium_page',
                 }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
             if (res.status === 401) {
-                const returnUrl = encodeURIComponent('/premium');
+                const returnUrl = encodeURIComponent(`/premium${couponId ? `?coupon=${couponId}` : ''}`);
                 router.push(`/login?redirect=${returnUrl}`);
                 return;
             }
@@ -66,6 +101,24 @@ export default function PremiumPage() {
                     <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
                     Back to Dashboard
                 </Button>
+
+                {/* Coupon Banner */}
+                {couponConfig && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`mb-8 p-4 rounded-2xl bg-gradient-to-r ${couponConfig.color} text-white text-center shadow-lg`}
+                    >
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                            <Gift className="w-5 h-5" />
+                            <span className="text-lg font-black">{couponConfig.discount}</span>
+                            <span className="font-medium">your {couponConfig.description}!</span>
+                        </div>
+                        <p className="text-sm text-white/80">
+                            Special offer applied automatically at checkout
+                        </p>
+                    </motion.div>
+                )}
 
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <motion.div
