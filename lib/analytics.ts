@@ -236,11 +236,27 @@ export const trackAchievementNotificationShown = (achievementId: string, achieve
 };
 
 // Signup tracking
-export const trackSignup = (method: 'email' | 'google' | 'facebook', properties?: Record<string, any>) => {
-    safeCapture('signup', {
+export const trackSignup = (
+    method: 'email' | 'google' | 'facebook' | string, 
+    utmSourceOrProperties?: string | Record<string, any>,
+    utmMedium?: string,
+    utmCampaign?: string
+) => {
+    let properties: Record<string, any> = {
         method: method,
-        ...properties
-    });
+    };
+    
+    if (typeof utmSourceOrProperties === 'object') {
+        // Format: trackSignup(method, properties)
+        properties = { ...properties, ...utmSourceOrProperties };
+    } else if (typeof utmSourceOrProperties === 'string') {
+        // Format: trackSignup(method, utmSource, utmMedium, utmCampaign)
+        if (utmSourceOrProperties) properties.utm_source = utmSourceOrProperties;
+        if (utmMedium) properties.utm_medium = utmMedium;
+        if (utmCampaign) properties.utm_campaign = utmCampaign;
+    }
+    
+    safeCapture('signup', properties);
 };
 
 // Share tracking
