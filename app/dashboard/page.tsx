@@ -158,24 +158,27 @@ function DashboardContent() {
         }
     }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, userData?.memberships, openModal, isCommunityJar]);
 
-    // ✅ CRITICAL FIX: Better handling for users without ANY jars
-    // This covers: OAuth users who sign up without creating a jar
+    // ✅ CRITICAL FIX: Better handling for users without ANY personal jars
+    // This covers: Email/password users who sign up and get added to community jars only
     useEffect(() => {
         if (!isLoadingUser && userData) {
-            // Check if user has ANY jar membership at all (including as MEMBER)
-            const hasAnyJarMembership = userData.memberships && userData.memberships.length > 0;
+            // Check if user has ANY personal (non-community) jar membership
+            // Community jars (like Bug Reports, Feature Requests) don't count as "personal jars"
+            const hasPersonalJarMembership = userData.memberships && userData.memberships.some((m: any) => !m.jar.isCommunityJar);
             
-            // Check if user has an active jar set
-            const hasActiveJar = !!userData.activeJarId;
+            // Check if user has an active jar set AND it's a personal jar
+            const hasActivePersonalJar = userData.activeJarId && userData.memberships?.some((m: any) => 
+                m.jar.id === userData.activeJarId && !m.jar.isCommunityJar
+            );
 
-            // Only prompt to create jar if user has NO jars at all
-            // (Not even as a member of someone else's jar via invite)
-            if (!hasAnyJarMembership && !hasActiveJar) {
+            // Only prompt to create jar if user has NO personal jars at all
+            // (Community jars like Bug Reports don't count)
+            if (!hasPersonalJarMembership && !hasActivePersonalJar) {
                 const hasSeenPrompt = sessionStorage.getItem('create_first_jar_prompt');
                 if (!hasSeenPrompt) {
                     openModal('CREATE_JAR');
                     sessionStorage.setItem('create_first_jar_prompt', 'true');
-                    console.log('Prompting user to create first jar (no memberships found)');
+                    console.log('Prompting user to create first jar (no personal jars found, only community jars)');
                 }
             }
         }

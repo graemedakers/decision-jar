@@ -189,9 +189,16 @@ async function deleteUsersByEmail(emails: string[]) {
 }
 
 // Run the deletion
-const emailsToDelete = [
-    'graemedakers@gmail.com'
-];
+const emailsToDelete = process.argv.slice(2).filter(arg => !arg.startsWith('--'));
+
+if (emailsToDelete.length === 0) {
+    console.error('❌ ERROR: No email addresses provided');
+    console.error('Usage: npx tsx scripts/delete-users.ts <email1> <email2> ...');
+    console.error('   Or: npx tsx scripts/delete-users.ts --database-url="..." <email1> <email2> ...');
+    process.exit(1);
+}
+
+console.log(`📧 Emails to delete: ${emailsToDelete.join(', ')}\n`);
 
 deleteUsersByEmail(emailsToDelete)
     .catch((error) => {
