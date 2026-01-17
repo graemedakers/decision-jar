@@ -139,6 +139,7 @@ export function DashboardModals({
                 initialMode={modalProps?.initialMode}
             />
 
+            {/* Surprise Me - Using original modal (reverted from WizardFrame) */}
             {!isCommunityJar && (
                 <SurpriseMeModal
                     isOpen={activeModal === 'SURPRISE_ME'}

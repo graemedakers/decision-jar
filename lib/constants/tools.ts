@@ -2,7 +2,7 @@
 import {
     Calendar, Utensils, Wine, Footprints, Moon, Clapperboard,
     Leaf, Dumbbell, Ticket, ChefHat, Gamepad2, Key, Trophy,
-    Book, Disc, Bed, Users, Plane
+    Book, Disc, Bed, Users, Plane, Sparkles
 } from "lucide-react";
 
 export type ToolColor = 'purple' | 'blue' | 'orange' | 'pink' | 'rose' | 'indigo' | 'violet' | 'red' | 'cyan' | 'emerald' | 'amber' | 'teal' | 'green';
@@ -20,7 +20,7 @@ export interface DashboardTool {
     // Action Logic
     actionType: ToolActionType;
     conciergeId?: string; // Maps to keys in CONCIERGE_CONFIGS
-    modalId?: 'weekend_planner' | 'catering' | 'bar_crawl' | 'date_night' | 'menu_planner';
+    modalId?: 'weekend_planner' | 'catering' | 'bar_crawl' | 'date_night' | 'menu_planner' | 'surprise_me';
     linkHref?: string;
 
     // Visibility / Filtering Logic
@@ -49,6 +49,18 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         showInDashboard: false,
         showInExplore: true,
         communityJarCompatible: true
+    },
+    {
+        id: 'surprise_me',
+        title: 'Surprise Me',
+        description: 'Get a secret AI-generated idea added to your jar.',
+        icon: Sparkles,
+        color: 'orange',
+        requiresPremium: false,
+        actionType: 'modal',
+        modalId: 'surprise_me',
+        showInDashboard: true,
+        showInExplore: true
     },
     {
         id: 'weekend_planner',
