@@ -15,30 +15,36 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a local dining concierge.
-                Recommend 5 distinct restaurants located near ${targetLocation}.
                 
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
 
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+⚠️ CRITICAL INSTRUCTION: The user's specific requirements above take ABSOLUTE PRECEDENCE over everything below.
+- If they specify a venue type (cafe, restaurant, bistro, brunch spot, etc.), ONLY recommend that type
+- If they specify a meal type (brunch, breakfast, lunch, dinner), ONLY recommend venues suitable for that meal
+- If they specify any dietary needs or food preferences, STRICTLY honor them
+- DO NOT recommend restaurants if they asked for cafes, DO NOT recommend dinner spots if they asked for brunch venues
+
                 ` : ''}
                 
-                Focus on venues as close as possible to this area based on the following preferences:
+                ${extraInstructions ? 'Based on the critical requirements above, recommend 5 distinct venues' : 'Recommend 5 distinct restaurants'} located near ${targetLocation}.
+                
+                Additional preferences (only consider if they don't conflict with critical requirements above):
                 - Cuisine: ${inputs.cuisine || "Any good local food"}
                 - Vibe/Atmosphere: ${inputs.vibe || "Any"}
                 - Price Range: ${inputs.price || "Any"}
                 
-                IMPORTANT: Perform a check to ensure the restaurant is currently OPEN for business and has NOT permanently closed.
+                IMPORTANT: Perform a check to ensure the venue is currently OPEN for business and has NOT permanently closed.
                 
-                For each restaurant, provide:
+                For each venue, provide:
                 - Name
                 - A brief, appetizing description (1 sentence)
-                - Cuisine type
+                - Cuisine type (or venue type if it's a cafe/bakery/etc)
                 - Price range ($, $$, $$$)
                 - Approximate address or neighborhood
                 - A likely website URL (or a Google Search URL if specific site unknown)
-                - Typical opening hours for dinner (e.g. "5pm - 10pm")
+                - Typical opening hours (adjust to match the meal type - brunch hours for brunch spots, dinner hours for dinner spots, etc.)
                 - Approximate Google Rating (e.g. 4.5)
                 
                 Return JSON object with "recommendations" array.
@@ -57,16 +63,22 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
             return {
                 prompt: `
                 Act as a versatile local lifestyle concierge.
-                Respond to the user's request with 5 distinct recommendations near ${targetLocation}.
                 
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 USER REQUEST/CONTEXT: "${extraInstructions}"
 
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+⚠️ CRITICAL INSTRUCTION: The user's request above is your PRIMARY DIRECTIVE.
+- INTERPRET their request LITERALLY - if they ask for cafes, give cafes; if they ask for activities, give activities
+- DO NOT substitute or change what they're asking for
+- If their request is specific (e.g., "brunch cafes with good coffee"), ONLY recommend venues that match ALL criteria
+- If they mention meal times (breakfast, brunch, lunch, dinner), ONLY recommend venues open and suitable for that time
+
                 ` : ''}
                 
-                Preferences:
+                Respond to the user's request with 5 distinct recommendations near ${targetLocation}.
+                
+                Additional preferences (secondary to the critical requirements above):
                 - Mood: ${inputs.mood || "Any"}
                 - Company: ${inputs.company || "Any"}
                 - Duration: ${inputs.duration || "Any"}
