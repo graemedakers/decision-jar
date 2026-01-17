@@ -235,6 +235,24 @@ export const trackAchievementNotificationShown = (achievementId: string, achieve
     });
 };
 
+// Progress Bar tracking
+export const trackProgressBarViewed = (level: number, xp: number, progressPercent: number) => {
+    safeCapture('progress_bar_viewed', {
+        level: level,
+        xp: xp,
+        progress_percent: progressPercent,
+    });
+};
+
+export const trackXpGained = (amount: number, source: string, newXp: number, newLevel: number) => {
+    safeCapture('xp_gained', {
+        xp_amount: amount,
+        source: source,
+        new_xp: newXp,
+        new_level: newLevel,
+    });
+};
+
 // Signup tracking
 export const trackSignup = (
     method: 'email' | 'google' | 'facebook' | string, 

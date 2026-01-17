@@ -16,11 +16,13 @@ import { Jar3D } from "@/components/Jar3D";
 import { PremiumBanner } from "@/components/PremiumBanner";
 import { CollapsibleTrophyCase } from "@/components/Gamification/CollapsibleTrophyCase";
 import { StreakBadge } from "@/components/Gamification/StreakBadge";
+import { MiniProgressBar } from "@/components/Gamification/MiniProgressBar";
 import { JarSwitcher } from "@/components/JarSwitcher";
 import { getThemeForTopic } from "@/lib/categories";
 import { VotingManager } from "@/components/VotingManager";
 import { OnboardingWizard } from "@/components/Onboarding/OnboardingWizard";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
+import { useXpAnimation, XpGainToast } from "@/hooks/useXpAnimation";
 import { SmartToolsGrid } from "@/components/SmartToolsGrid";
 import { DashboardModals } from "@/components/DashboardModals";
 import { useDashboardLogic } from "@/hooks/useDashboardLogic";
@@ -114,6 +116,9 @@ function DashboardContent() {
     }, []);
 
     const { installPrompt, install } = usePWA();
+    
+    // XP gain animation
+    const { xpGain } = useXpAnimation(xp || 0, level);
 
     // --- View Logic / Layout Calculations ---
     const jarTopic = userData?.jarTopic;
@@ -227,8 +232,8 @@ function DashboardContent() {
             </div>
 
             <div className="max-w-7xl mx-auto relative z-10">
-                {/* HEADER */}
-                <header className="flex flex-col gap-6 mb-8 md:mt-4">
+                {/* HEADER - Sticky on mobile */}
+                <header className="flex flex-col gap-6 mb-8 md:mt-4 lg:static lg:bg-transparent sticky top-0 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-sm z-40 -mx-4 px-4 md:mx-0 md:px-0 pt-4 pb-2 lg:pt-0 lg:pb-0">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="relative shrink-0">
@@ -270,8 +275,9 @@ function DashboardContent() {
                             </div>
                         </div>
 
-                        {/* Center: Trophy Case - Desktop Only (Wide) */}
-                        <div className="hidden lg:flex justify-center flex-1 px-4 lg:px-8" data-tour="trophy-case">
+                        {/* Center: XP Progress Bar & Trophy Case - Desktop Only (Wide) */}
+                        <div className="hidden lg:flex flex-col items-center justify-center flex-1 px-4 lg:px-8 gap-3" data-tour="trophy-case">
+                            <MiniProgressBar xp={xp || 0} level={level} />
                             <CollapsibleTrophyCase
                                 xp={xp || 0}
                                 level={level}
@@ -341,6 +347,9 @@ function DashboardContent() {
 
                     {/* Mobile/Tablet Quick Actions Row (Stacked when narrow) */}
                     <div className="flex flex-col lg:hidden gap-4">
+                        <div className="flex justify-center px-4">
+                            <MiniProgressBar xp={xp || 0} level={level} />
+                        </div>
                         <div className="flex justify-center -mb-2">
                             <CollapsibleTrophyCase
                                 xp={xp || 0}
@@ -615,6 +624,9 @@ function DashboardContent() {
                     {/* Placeholder for optional direct confetti */}
                 </div>
             )}
+
+            {/* XP Gain Toast */}
+            <XpGainToast xpGain={xpGain} />
 
         </main>
     );
