@@ -304,13 +304,14 @@ export function SmartInputBar() {
                     onSubmit={handleSubmit}
                     className="relative flex items-center bg-white dark:bg-slate-900 shadow-xl rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10"
                 >
-                    {/* Left Actions */}
-                    <div className="flex items-center pl-2 space-x-1 shrink-0">
+                    {/* Left Actions - Compact on mobile */}
+                    <div className="flex items-center pl-2 shrink-0">
+                        {/* Image Upload - Always visible */}
                         <button
                             type="button"
                             onClick={() => !isUploadingImage && fileInputRef.current?.click()}
                             disabled={isUploadingImage}
-                            className="p-2.5 rounded-xl text-slate-400 hover:text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 sm:p-2.5 rounded-xl text-slate-400 hover:text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title={isUploadingImage ? "Processing image..." : "Upload Image"}
                         >
                             {isUploadingImage ? (
@@ -319,6 +320,8 @@ export function SmartInputBar() {
                                 <ImageIcon className="w-5 h-5" />
                             )}
                         </button>
+                        
+                        {/* AI Concierge - Hidden on mobile (redundant with card below) */}
                         <button
                             type="button"
                             data-tour="surprise-me-button"
@@ -335,11 +338,13 @@ export function SmartInputBar() {
                                 });
                                 if (inputValue) setInputValue("");
                             }}
-                            className="p-2.5 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors tooltip-trigger"
+                            className="hidden sm:block p-2.5 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors tooltip-trigger"
                             title="Ask AI Concierge"
                         >
                             <Sparkles className="w-5 h-5" />
                         </button>
+                        
+                        {/* Templates - Hidden on mobile */}
                         <button
                             type="button"
                             onClick={() => {
@@ -350,17 +355,18 @@ export function SmartInputBar() {
                                 trackModalOpened('template_browser', { triggered_by: 'smart_input_template_button' });
                                 openModal('TEMPLATE_BROWSER');
                             }}
-                            className="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                            className="hidden sm:block p-2.5 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                             title="Browse Templates"
                         >
                             <BookOpen className="w-5 h-5" />
                         </button>
-                        {/* Voice Input Button */}
+                        
+                        {/* Voice Input Button - Always visible */}
                         {speechSupported && (
                             <button
                                 type="button"
                                 onClick={isListening ? stopVoiceInput : startVoiceInput}
-                                className={`p-2.5 rounded-xl transition-all ${
+                                className={`p-2 sm:p-2.5 rounded-xl transition-all ${
                                     isListening 
                                         ? 'text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse' 
                                         : 'text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
@@ -394,8 +400,8 @@ export function SmartInputBar() {
                             }
                         }}
                         onBlur={() => setIsFocused(false)}
-                        placeholder={isListening ? "Listening... speak now" : "Type, speak, or paste an idea..."}
-                        className={`flex-1 bg-transparent border-none outline-none px-3 py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-base md:text-lg min-w-0 ${isListening ? 'placeholder:text-red-400 placeholder:animate-pulse' : ''}`}
+                        placeholder={isListening ? "Listening..." : "Type or speak your idea..."}
+                        className={`flex-1 bg-transparent border-none outline-none px-2 sm:px-3 py-3 sm:py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-sm sm:text-base md:text-lg min-w-0 ${isListening ? 'placeholder:text-red-400 placeholder:animate-pulse' : ''}`}
                         disabled={isListening}
                     />
 
