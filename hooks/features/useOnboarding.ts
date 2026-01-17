@@ -21,6 +21,17 @@ export function useOnboarding({ userData, isLoadingUser }: { userData: UserData 
         const userOnboardingKey = `onboarding_completed_${userId}`;
         const hasCompletedOnboarding = localStorage.getItem(userOnboardingKey);
 
+        // ✅ NEW: Skip tour for invite users (they joined an existing jar)
+        const isInviteUser = sessionStorage.getItem('oauth_invite_signup') || 
+                             sessionStorage.getItem('email_invite_signup');
+        
+        if (isInviteUser) {
+            // Mark onboarding as completed for invite users (skip tour)
+            localStorage.setItem(userOnboardingKey, 'true');
+            console.log('[Onboarding] Skipping tour for invite user');
+            return;
+        }
+
         // ✅ CRITICAL FIX: Only trigger tour if user has a personal jar
         // Check if user has at least one jar where they are ADMIN (personal jar)
         const hasPersonalJar = userData?.memberships?.some(
@@ -33,6 +44,7 @@ export function useOnboarding({ userData, isLoadingUser }: { userData: UserData 
         // 3. User is authenticated
         // 4. User has a personal jar (not just community jar membership)
         // 5. ✅ NO MODALS ARE OPEN (don't interrupt other prompts)
+        // 6. ✅ NOT an invite user
         if (!hasCompletedOnboarding && !isLoadingUser && userData && hasPersonalJar && !activeModal) {
             setTimeout(() => {
                 // ✅ RE-CHECK: Only start tour if STILL no modal open

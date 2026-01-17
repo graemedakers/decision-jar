@@ -151,6 +151,9 @@ export function useDashboardLogic() {
                             showSuccess("Successfully joined the jar!");
                         }
 
+                        // ✅ Mark as invite user (for tour skip)
+                        sessionStorage.setItem('email_invite_signup', 'true');
+
                         // Clean URL
                         const newParams = new URLSearchParams(searchParams.toString());
                         newParams.delete('code');
@@ -176,6 +179,91 @@ export function useDashboardLogic() {
             handleJoin();
         }
     }, [searchParams, userData, isLoadingUser]);
+
+    // ✅ FIX: Handle OAuth Invite Signup Cleanup
+    // After OAuth callback, check for pending invite params in sessionStorage
+    // If user has auto-created "My First Jar" with 0 ideas, delete it and join invited jar
+    useEffect(() => {
+        if (isLoadingUser || !userData || isLoadingIdeas) return;
+
+        const isOAuthInviteSignup = sessionStorage.getItem('oauth_invite_signup');
+        const pendingCode = sessionStorage.getItem('pending_invite_code');
+        const pendingToken = sessionStorage.getItem('pending_premium_token');
+
+        if (isOAuthInviteSignup && pendingCode) {
+            const handleOAuthInviteCleanup = async () => {
+                try {
+                    console.log('[OAuth Invite Cleanup] Starting cleanup for invite code:', pendingCode);
+
+                    // Check if user has "My First Jar" with 0 ideas
+                    const hasMyFirstJar = userData.jarName === "My First Jar" && ideas.length === 0;
+                    const myFirstJarId = hasMyFirstJar ? userData.activeJarId : null;
+
+                    // Join the invited jar
+                    const joinRes = await fetch('/api/jars/join', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: pendingCode, premiumToken: pendingToken }),
+                    });
+
+                    const joinData = await joinRes.json();
+
+                    if (joinRes.ok) {
+                        console.log('[OAuth Invite Cleanup] Successfully joined invited jar');
+
+                        // If we have "My First Jar" to delete, do it now
+                        if (myFirstJarId) {
+                            try {
+                                const deleteRes = await fetch(`/api/jars/${myFirstJarId}`, {
+                                    method: 'DELETE',
+                                });
+
+                                if (deleteRes.ok) {
+                                    console.log('[OAuth Invite Cleanup] Successfully deleted "My First Jar"');
+                                } else {
+                                    console.warn('[OAuth Invite Cleanup] Failed to delete "My First Jar", but invite join succeeded');
+                                }
+                            } catch (deleteError) {
+                                console.error('[OAuth Invite Cleanup] Error deleting "My First Jar":', deleteError);
+                            }
+                        }
+
+                        // Show success message
+                        if (joinData.premiumGifted) {
+                            showSuccess("Welcome! You've joined the jar and upgraded to Premium!");
+                        } else {
+                            showSuccess("Successfully joined the jar!");
+                        }
+
+                        // Clear sessionStorage flags
+                        sessionStorage.removeItem('oauth_invite_signup');
+                        sessionStorage.removeItem('pending_invite_code');
+                        sessionStorage.removeItem('pending_premium_token');
+
+                        // Refresh data
+                        handleContentUpdate();
+                    } else {
+                        console.error('[OAuth Invite Cleanup] Failed to join jar:', joinData.error);
+                        showError(joinData.error || "Failed to join jar");
+
+                        // Clear flags even on failure to prevent retry loops
+                        sessionStorage.removeItem('oauth_invite_signup');
+                        sessionStorage.removeItem('pending_invite_code');
+                        sessionStorage.removeItem('pending_premium_token');
+                    }
+                } catch (error) {
+                    console.error('[OAuth Invite Cleanup] Error during cleanup:', error);
+                    
+                    // Clear flags to prevent retry loops
+                    sessionStorage.removeItem('oauth_invite_signup');
+                    sessionStorage.removeItem('pending_invite_code');
+                    sessionStorage.removeItem('pending_premium_token');
+                }
+            };
+
+            handleOAuthInviteCleanup();
+        }
+    }, [userData, isLoadingUser, isLoadingIdeas, ideas]);
 
     // Unified Deep Link Action Router
     useEffect(() => {

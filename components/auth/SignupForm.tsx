@@ -78,6 +78,17 @@ export function SignupForm() {
         await trackSignup(provider, utmSource, utmMedium, utmCampaign);
 
         try {
+            // ✅ FIX: Store invite params in sessionStorage before OAuth redirect
+            // This allows us to retrieve them after OAuth callback (since URL params are lost)
+            if (inviteCode) {
+                sessionStorage.setItem('pending_invite_code', inviteCode);
+                if (premiumToken) {
+                    sessionStorage.setItem('pending_premium_token', premiumToken);
+                }
+                // Flag to identify this as an OAuth invite signup (for tour skip + cleanup)
+                sessionStorage.setItem('oauth_invite_signup', 'true');
+            }
+
             const callbackUrl = inviteCode ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : "/dashboard";
             await signIn(provider, { callbackUrl });
         } catch (error) {
@@ -153,7 +164,11 @@ export function SignupForm() {
                 } else if (data.checkoutUrl) {
                     window.location.href = data.checkoutUrl;
                 } else {
-                    router.push("/dashboard");
+                    // ✅ FIX: Preserve invite code params when redirecting to dashboard
+                    const dashboardUrl = inviteCode 
+                        ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}`
+                        : "/dashboard";
+                    router.push(dashboardUrl);
                 }
             } else {
                 if (data.error === "User already exists") {
