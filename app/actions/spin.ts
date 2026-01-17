@@ -3,7 +3,7 @@
 import { ActionResponse, Idea } from '@/lib/types';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { sendDateNotificationEmail } from '@/lib/mailer';
+import { sendPushNotification } from '@/lib/notifications';
 import { awardXp } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { COST_VALUES, ACTIVITY_VALUES } from '@/lib/constants';
@@ -98,13 +98,28 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
             // Parallel background tasks
             (async () => {
                 try {
+                    // Send push notifications to other jar members (not the person who picked)
                     const members = await prisma.jarMember.findMany({
-                        where: { jarId: currentJarId },
+                        where: { 
+                            jarId: currentJarId,
+                            userId: { not: session.user.id } // Exclude the person who picked
+                        },
                         include: { user: true }
                     });
-                    const recipients = Array.from(new Set(members.map(m => m.user.email).filter(Boolean))) as string[];
-                    if (recipients.length > 0) await sendDateNotificationEmail(recipients, selectedIdea);
 
+                    // Send push notification to each member
+                    const notificationPromises = members.map(member => 
+                        sendPushNotification(member.userId, {
+                            title: `🎯 New pick: "${selectedIdea.description}"`,
+                            body: `${session.user.name || 'Someone'} selected this from your jar!`,
+                            url: `/jar?selected=${selectedIdea.id}`,
+                            icon: selectedIdea.photoUrls?.[0] || '/icon-192.png'
+                        })
+                    );
+
+                    await Promise.allSettled(notificationPromises);
+
+                    // Award XP and check achievements
                     await awardXp(currentJarId, 5);
                     await checkAndUnlockAchievements(currentJarId);
                 } catch (err) {
