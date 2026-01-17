@@ -31,14 +31,15 @@ export const identifyUser = (userId: string, traits?: Record<string, any>) => {
 };
 
 // Path selection tracking
-export const trackPathSelected = (pathType: 'smart_input' | 'concierge' | 'templates') => {
+export const trackPathSelected = (pathType: 'smart_input' | 'concierge' | 'templates' | string, data?: Record<string, any>) => {
     safeCapture('path_selected', {
         path: pathType,
+        ...data
     });
 };
 
 // Modal tracking
-export const trackModalOpened = (modalType: string) => {
+export const trackModalOpened = (modalType: string, data?: Record<string, any>) => {
     const sessionId = sessionStorage.getItem('sessionId');
     const sessionStartTime = sessionStorage.getItem('sessionStartTime');
     
@@ -46,6 +47,7 @@ export const trackModalOpened = (modalType: string) => {
         modal_type: modalType,
         session_id: sessionId,
         session_start_time: sessionStartTime,
+        ...data
     });
 };
 
