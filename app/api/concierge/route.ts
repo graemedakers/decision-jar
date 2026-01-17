@@ -23,7 +23,7 @@ export const maxDuration = 60;
 
 /**
  * Validates if a recommendation matches the user's specific request
- * Uses keyword matching for reliability (AI validation was too lenient)
+ * Uses keyword matching with strict rejection rules
  */
 function validateRecommendation(
     recommendation: any,
@@ -43,89 +43,57 @@ function validateRecommendation(
     // Combine all text fields for searching
     const allText = `${recName} ${recDesc} ${recCuisine}`.toLowerCase();
 
-    // Extract key requirements from user request
-    const keywords = {
-        brunch: /\b(brunch|breakfast)\b/i,
-        cafe: /\b(cafe|coffee shop|coffeehouse)\b/i,
-        coffee: /\b(coffee|espresso|cappuccino)\b/i,
-        pizza: /\b(pizza|pizzeria)\b/i,
-        italian: /\b(italian)\b/i,
-        sushi: /\b(sushi|japanese)\b/i,
-        chinese: /\b(chinese|dim sum|dumplings)\b/i,
-        thai: /\b(thai)\b/i,
-        vietnamese: /\b(vietnamese|pho)\b/i,
-        indian: /\b(indian|curry)\b/i,
-        mexican: /\b(mexican|tacos|burritos)\b/i,
-        burger: /\b(burger|burgers)\b/i,
-        vegan: /\b(vegan|plant.based)\b/i,
-        vegetarian: /\b(vegetarian)\b/i,
-        fine_dining: /\b(fine dining|upscale|elegant|michelin)\b/i,
-        casual: /\b(casual|relaxed|laid.back)\b/i,
-        pub: /\b(pub|bar|tavern)\b/i,
-        hotel: /\b(hotel|accommodation|stay)\b/i,
-    };
+    console.log(`[Validation] Checking "${recommendation.name}"`);
+    console.log(`  Cuisine field: "${recCuisine}"`);
+    console.log(`  User request: "${requestLower}"`);
 
-    // Identify what user is asking for
-    const userWants: string[] = [];
-    for (const [key, pattern] of Object.entries(keywords)) {
-        if (pattern.test(requestLower)) {
-            userWants.push(key);
+    // STRICT RULE 1: If user asks for "cafe" or "brunch"
+    if (/\b(cafe|coffee shop|brunch|breakfast)\b/i.test(requestLower)) {
+        // Accept ONLY if explicitly mentioned as cafe/brunch
+        const isCafeBrunch = /\b(cafe|coffee|brunch|breakfast)\b/i.test(allText);
+        
+        // Reject if it's clearly a different type
+        const isWrongType = /\b(thai|chinese|indian|italian|pizza|japanese|sushi|vietnamese|mexican|greek|korean)\b/i.test(recCuisine);
+        
+        if (!isCafeBrunch || isWrongType) {
+            console.log(`  ❌ REJECT: Not a cafe/brunch spot (isCafeBrunch=${isCafeBrunch}, isWrongType=${isWrongType})`);
+            return false;
         }
-    }
-
-    console.log(`[Validation] ${recommendation.name}: User wants [${userWants.join(', ')}]`);
-
-    // If no specific keywords detected, accept (too vague to filter)
-    if (userWants.length === 0) {
-        console.log(`[Validation] ${recommendation.name}: ACCEPT (no specific requirements detected)`);
+        
+        console.log(`  ✅ ACCEPT: Matches cafe/brunch request`);
         return true;
     }
 
-    // Check if recommendation matches ANY of the requirements
-    let matchCount = 0;
-    const mismatches: string[] = [];
+    // STRICT RULE 2: If user asks for specific cuisine
+    const cuisineRequests = {
+        pizza: /\b(pizza)\b/i,
+        italian: /\b(italian)\b/i,
+        sushi: /\b(sushi|japanese)\b/i,
+        chinese: /\b(chinese)\b/i,
+        thai: /\b(thai)\b/i,
+        vietnamese: /\b(vietnamese|pho)\b/i,
+        indian: /\b(indian|curry)\b/i,
+        mexican: /\b(mexican|tacos)\b/i,
+    };
 
-    for (const want of userWants) {
-        const pattern = keywords[want as keyof typeof keywords];
-        if (pattern.test(allText)) {
-            matchCount++;
-        } else {
-            mismatches.push(want);
-        }
-    }
-
-    // Special rules for common mismatches
-    // If user wants "cafe" or "brunch", reject obvious dinner-only restaurants
-    if ((userWants.includes('cafe') || userWants.includes('brunch')) && 
-        (/\b(dinner|fine.dining|upscale|wine.list|tasting.menu)\b/i.test(allText) && 
-         !/\b(brunch|breakfast|cafe|coffee)\b/i.test(allText))) {
-        console.log(`[Validation] ${recommendation.name}: REJECT (dinner restaurant when brunch/cafe requested)`);
-        return false;
-    }
-
-    // If user wants specific cuisine (pizza, sushi, etc.), reject other cuisines
-    const cuisineTypes = ['pizza', 'sushi', 'chinese', 'thai', 'vietnamese', 'indian', 'mexican', 'burger'];
-    const userWantsCuisine = userWants.filter(w => cuisineTypes.includes(w));
-    
-    if (userWantsCuisine.length > 0) {
-        // Check if recommendation is a different cuisine
-        const otherCuisines = cuisineTypes.filter(c => !userWantsCuisine.includes(c));
-        for (const otherCuisine of otherCuisines) {
-            const pattern = keywords[otherCuisine as keyof typeof keywords];
-            if (pattern.test(allText) && !userWants.some(w => keywords[w as keyof typeof keywords].test(allText))) {
-                console.log(`[Validation] ${recommendation.name}: REJECT (${otherCuisine} when ${userWantsCuisine.join('/')} requested)`);
+    for (const [cuisineName, pattern] of Object.entries(cuisineRequests)) {
+        if (pattern.test(requestLower)) {
+            // User wants this specific cuisine
+            const matches = pattern.test(recCuisine) || pattern.test(allText);
+            
+            if (!matches) {
+                console.log(`  ❌ REJECT: User wants ${cuisineName}, but this is ${recCuisine}`);
                 return false;
             }
+            
+            console.log(`  ✅ ACCEPT: Matches ${cuisineName} request`);
+            return true;
         }
     }
 
-    // Accept if at least 50% of requirements are met (for multi-requirement queries)
-    const matchRatio = matchCount / userWants.length;
-    const accepted = matchRatio >= 0.5;
-    
-    console.log(`[Validation] ${recommendation.name}: ${accepted ? 'ACCEPT' : 'REJECT'} (${matchCount}/${userWants.length} requirements met - ${mismatches.join(', ')} missing)`);
-    
-    return accepted;
+    // Default: accept if no strict rules violated
+    console.log(`  ✅ ACCEPT: No strict rules violated`);
+    return true;
 }
 
 export async function POST(req: NextRequest) {
