@@ -16,12 +16,18 @@ export const getConciergePromptAndMock = (
                 prompt: `
                 Act as a local dining concierge.
                 Recommend 5 distinct restaurants located near ${targetLocation}.
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 Focus on venues as close as possible to this area based on the following preferences:
                 - Cuisine: ${inputs.cuisine || "Any good local food"}
                 - Vibe/Atmosphere: ${inputs.vibe || "Any"}
                 - Price Range: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 IMPORTANT: Perform a check to ensure the restaurant is currently OPEN for business and has NOT permanently closed.
                 
@@ -53,7 +59,12 @@ export const getConciergePromptAndMock = (
                 Act as a versatile local lifestyle concierge.
                 Respond to the user's request with 5 distinct recommendations near ${targetLocation}.
                 
-                USER REQUEST/CONTEXT: "${extraInstructions}"
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+USER REQUEST/CONTEXT: "${extraInstructions}"
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
                 
                 Preferences:
                 - Mood: ${inputs.mood || "Any"}
@@ -82,11 +93,17 @@ export const getConciergePromptAndMock = (
                 prompt: `
                 Act as a local nightlife concierge.
                 Recommend 5 distinct bars or drink spots near ${targetLocation}.
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Drinks Preference: ${inputs.drinks || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 Ensure they are real, currently open businesses with accurate physical addresses.
                 Return JSON with "recommendations" array.
@@ -107,13 +124,18 @@ export const getConciergePromptAndMock = (
             Act as a nightlife guide and route planner.
             Create 3 DISTINCT Bar Crawl Routes near ${targetLocation}.
             
+            ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+            ` : ''}
+            
             Preferences:
             - Theme: ${inputs.theme || "Any"}
             - Stops: ${inputs.stops || "4"}
             - Vibe: ${inputs.vibe || "Any"}
             - Budget: ${inputs.price || "Any"}
-            
-            ${extraInstructions}
             
             INSTRUCTIONS:
             1. Create a logical walking or short-drive route between venues.
@@ -149,11 +171,17 @@ export const getConciergePromptAndMock = (
                 prompt: `
                 Act as a travel concierge for ${targetLocation}.
                 Recommend 5 distinct hotels/stays:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Style: ${inputs.style || "Any"}
                 - Must-Have Amenities: ${inputs.amenities || "Any"}
                 - Budget: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, speciality (style/vibe), price, address, website, google_rating
@@ -171,11 +199,17 @@ export const getConciergePromptAndMock = (
                 prompt: `
                 Act as a nightlife promoter for ${targetLocation}.
                 Recommend 5 distinct clubs/parties:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Music: ${inputs.music || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, music (genre), price, address, website, opening_hours, google_rating
@@ -195,6 +229,14 @@ export const getConciergePromptAndMock = (
                 prompt: `
                 Act as a movie critic and high-precision local cinema scout.
                 Recommend 5 distinct movies based on the following:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Watch Mode: ${inputs.watchMode}
                 ${isCinema ? `IMPORTANT: Only recommend movies that are CURRENTLY SHOWING in physical cinemas near ${targetLocation}. 
                 
@@ -228,8 +270,6 @@ export const getConciergePromptAndMock = (
                 - Era: ${inputs.era || "Any"}
                 ${!isCinema && inputs.streamingServices ? `- Streaming on: ${inputs.streamingServices}` : ''}
                 
-                ${extraInstructions}
-                
                 Return JSON with "recommendations" array.
                 Fields: name (Title), description (Plot summary), year, rating (IMDb/Rotten Tomatoes score as string), genre, director, cast
                 ${isCinema ? 'Also include: cinema_name, address (Physical address), website (Specific ticket/booking link for this cinema), showtimes (today/tomorrow)' : 'Also include: streaming_service, website (Link to watch)'}
@@ -247,12 +287,18 @@ export const getConciergePromptAndMock = (
                 prompt: `
                 Act as a literary curator.
                 Recommend 5 distinct books:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Genre: ${inputs.genre || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Length: ${inputs.length || "Any"}
                 - Era: ${inputs.era || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name (Title), description (Plot), author, year, genre, page_count (approx)
@@ -271,11 +317,17 @@ export const getConciergePromptAndMock = (
                 Act as a wellness concierge.
                 Recommend 5 distinct spas/studios near ${targetLocation}.
                 Prioritize venues as close as possible to this area:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Activity: ${inputs.activity || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, type (activity type), price, address, website, google_rating
@@ -294,11 +346,17 @@ export const getConciergePromptAndMock = (
                 Act as a fitness guide.
                 Recommend 5 distinct gyms or fitness activities near ${targetLocation}.
                 Prioritize options within easy reach of this area:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Activity: ${inputs.activity || "Any"}
                 - Level: ${inputs.level || "Any"}
                 - Price: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, activity_type, price, address, website, google_rating
@@ -317,11 +375,17 @@ export const getConciergePromptAndMock = (
                 Act as a theatre critic and arts guide.
                 Recommend 5 distinct shows or arts exhibitions near ${targetLocation}.
                 Ensure these are real venues with accurate addresses in this region:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Type: ${inputs.type || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, type, price, address (Venue Name), website, google_rating
@@ -339,12 +403,18 @@ export const getConciergePromptAndMock = (
                 prompt: `
                 Act as a gaming expert.
                 Recommend 5 distinct video games:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Genre: ${inputs.genre || "Any"}
                 - Players: ${inputs.players || "Any"}
                 - Budget: ${inputs.budget || "Any"}
                 - Duration: ${inputs.duration || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, genre, platform (PC, Console, etc), multiplayer_support, price_type (Free/Paid), website (Steam/Store link)
@@ -363,11 +433,17 @@ export const getConciergePromptAndMock = (
                 Act as an escape room enthusiast.
                 Recommend 5 distinct escape rooms located near ${targetLocation}.
                 Ensure the addresses are accurate for the specific branches in this area:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Theme: ${inputs.themes || "Any"}
                 - Difficulty: ${inputs.difficulty || "Any"}
                 - Group Size: ${inputs.groupSize || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, theme_type, difficulty_level, price, address, website, google_rating
@@ -385,11 +461,17 @@ export const getConciergePromptAndMock = (
                 prompt: `
                 Act as a local sports guide.
                 Recommend 5 distinct sports venues or events near ${targetLocation}:
+                
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 - Sport: ${inputs.sport || "Any"}
                 - Type: ${inputs.type || "Watch or Play"}
                 - Membership: ${inputs.membership || "Any"}
-                
-                ${extraInstructions}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, sport, price, address, website, google_rating
@@ -408,6 +490,13 @@ export const getConciergePromptAndMock = (
                 Act as a professional chef planning a menu.
                 Create 3 DISTINCT, complete menu concepts.
                 
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 Preference:
                 - Occasion: ${inputs.occasion || "Any"}
                 - Guests: ${inputs.guests || "Any"}
@@ -415,8 +504,6 @@ export const getConciergePromptAndMock = (
                 - Courses: ${inputs.courses || "Any"}
                 - Effort: ${inputs.complexity || "Any"}
                 - Dietary: ${inputs.dietary || "None"}
-                
-                ${extraInstructions}
                 
                 INSTRUCTIONS:
                 1. Provide a cohesive menu with courses that complement each other.
@@ -462,13 +549,18 @@ export const getConciergePromptAndMock = (
                 Act as a romantic concierge and event planner.
                 Create 3 DISTINCT, complete date night plans near ${targetLocation}.
                 
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 User Preferences:
                 - Vibe: ${inputs.vibe || "Any"}
                 - Structure: ${inputs.structure || "Any"}
                 - Cuisine: ${inputs.cuisine || "Any"}
                 - Budget: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 INSTRUCTIONS:
                 1. Each plan must be a logical sequence of events (e.g. Pre-dinner drink -> Dinner -> Dessert/Activity).
@@ -505,13 +597,18 @@ export const getConciergePromptAndMock = (
                 Act as a local events coordinator.
                 Recommend 5 distinct events or activities happening THIS WEEKEND near ${targetLocation}.
                 
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 Preferences:
                 - Vibe: ${inputs.mood || "Any"}
                 - Company: ${inputs.company || "Any"}
                 - Specific Day: ${inputs.day || "Any"}
                 - Budget: ${inputs.price || "Any"}
-                
-                ${extraInstructions}
                 
                 INSTRUCTIONS:
                 1. PRIMARY GOAL: Find events scheduled for a SHORT TIME PERIOD only (e.g. happening specifically this weekend, this week, or this month).
@@ -537,6 +634,13 @@ export const getConciergePromptAndMock = (
                 Act as a master travel agent and local expert.
                 Create 3 DISTINCT, detailed holiday itineraries for a trip to ${targetLocation}.
                 
+                ${extraInstructions ? `
+🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+${extraInstructions}
+
+YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
                 TRIP DETAILS:
                 - Dates: ${inputs.dates_start || "Unspecified"} to ${inputs.dates_end || "Unspecified"}
                 - Travel Party: ${inputs.party || "Any"}
@@ -545,8 +649,6 @@ export const getConciergePromptAndMock = (
                 - Dining Preferences: ${inputs.dining || "Any"}
                 - Interests/Vibe: ${inputs.interests || "Any"}
                 - Budget: ${inputs.price || "Any"}
-
-                ${extraInstructions}
 
                 INSTRUCTIONS:
                 1. Maximize the time available.
