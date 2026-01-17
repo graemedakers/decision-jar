@@ -169,11 +169,21 @@ export const trackTemplateBrowsed = () => {
     safeCapture('template_browser_opened', {}); // Alias for backward compatibility
 };
 
-export const trackTemplateUsed = (templateName: string, ideaCount: number) => {
-    safeCapture('template_used', {
+export const trackTemplateUsed = (templateId: string, templateName: string, actionOrIdeaCount: string | number) => {
+    let properties: Record<string, any> = {
+        template_id: templateId,
         template_name: templateName,
-        idea_count: ideaCount,
-    });
+    };
+    
+    if (typeof actionOrIdeaCount === 'string') {
+        // New format: trackTemplateUsed(templateId, templateName, action)
+        properties.action = actionOrIdeaCount;
+    } else {
+        // Old format: trackTemplateUsed(templateName, ideaCount) - for backward compatibility
+        properties.idea_count = actionOrIdeaCount;
+    }
+    
+    safeCapture('template_used', properties);
 };
 
 // Shortcut tracking
