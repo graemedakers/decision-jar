@@ -9,7 +9,8 @@ import { trackEvent } from "@/lib/analytics";
 import { triggerHaptic } from "@/lib/feedback";
 import { signOut } from "next-auth/react";
 import { getApiUrl } from "@/lib/utils";
-import { showSuccess, showError } from "@/lib/toast";
+import { showSuccess, showError, showInfo } from "@/lib/toast";
+import { DASHBOARD_TOOLS } from "@/lib/constants/tools";
 
 // Feature Hooks
 import { useSpin } from "@/hooks/features/useSpin";
@@ -304,8 +305,22 @@ export function useDashboardLogic() {
                     break;
                 case 'concierge':
                     if (toolId) {
-                        openModal('CONCIERGE', { toolId: toolId.toUpperCase() });
-                        newParams.delete('tool');
+                        // Check if tool requires premium
+                        const tool = DASHBOARD_TOOLS.find(t => 
+                            t.conciergeId?.toLowerCase() === toolId.toLowerCase() ||
+                            t.id.toLowerCase() === toolId.toLowerCase()
+                        );
+                        
+                        if (tool?.requiresPremium && !isPremium) {
+                            // Show premium modal instead of the concierge
+                            openModal('PREMIUM');
+                            showInfo('This concierge is available for Premium members. Upgrade to unlock!');
+                            newParams.delete('tool');
+                            newParams.delete('action');
+                        } else {
+                            openModal('CONCIERGE', { toolId: toolId.toUpperCase() });
+                            newParams.delete('tool');
+                        }
                     } else {
                         // Default to EXPLORE tab (which isn't a modal, but we can redirect or show generic)
                         router.push('/explore');

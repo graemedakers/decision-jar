@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MapPin, Loader2, Sparkles, Lock, LucideIcon, Search, ArrowLeft } from "lucide-react";
+import { ConciergeShortcutButton } from "./ConciergeShortcutButton";
 import { Button } from "./ui/Button";
 import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
@@ -74,6 +75,7 @@ interface GenericConciergeModalProps {
     onGoTonight?: (idea: any) => void;
     onFavoriteUpdated?: () => void;
     onUpdateUserLocation?: (newLocation: string) => void;
+    isPremium?: boolean; // For premium-only features like shortcuts
 }
 
 // --- Theme Helper ---
@@ -193,7 +195,8 @@ export function GenericConciergeModal({
     onIdeaAdded,
     onGoTonight,
     onFavoriteUpdated,
-    onUpdateUserLocation
+    onUpdateUserLocation,
+    isPremium = false
 }: GenericConciergeModalProps) {
     const demoConcierge = useDemoConcierge();
     const [showTrialUsedPrompt, setShowTrialUsedPrompt] = useState(false);
@@ -519,13 +522,23 @@ export function GenericConciergeModal({
                                     <p className="text-sm text-slate-500 dark:text-slate-400">{config.subtitle}</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={handleClose}
-                                className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
-                                aria-label="Close"
-                            >
-                                <X className="w-6 h-6" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                                {/* Premium: Add shortcut button */}
+                                {!showSkillPicker && config && (
+                                    <ConciergeShortcutButton
+                                        toolId={config.id}
+                                        toolName={config.title}
+                                        isPremium={isPremium}
+                                    />
+                                )}
+                                <button
+                                    onClick={handleClose}
+                                    className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
+                                    aria-label="Close"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 space-y-6 px-7 custom-scrollbar">

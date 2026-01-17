@@ -198,6 +198,7 @@ export function DashboardModals({
                     }}
                     onFavoriteUpdated={fetchFavorites}
                     onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
+                    isPremium={isPremium}
                 />
             )}
 
@@ -213,6 +214,7 @@ export function DashboardModals({
                             skillId={modalProps?.toolId}
                             userLocation={userLocation || undefined}
                             initialPrompt={modalProps?.initialPrompt}
+                            isPremium={isPremium}
                             onIdeaAdded={() => {
                                 fetchIdeas();
                                 refreshUser();
@@ -239,6 +241,7 @@ export function DashboardModals({
                             }}
                             onFavoriteUpdated={fetchFavorites}
                             onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
+                            isPremium={isPremium}
                         />
                     )}
                 </>
@@ -274,6 +277,7 @@ export function DashboardModals({
                     }}
                     onFavoriteUpdated={fetchFavorites}
                     onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
+                    isPremium={isPremium}
                 />
             )}
 
@@ -289,6 +293,7 @@ export function DashboardModals({
                         openModal('DATE_REVEAL', { idea });
                     }}
                     onFavoriteUpdated={fetchFavorites}
+                    isPremium={isPremium}
                 />
             )}
 

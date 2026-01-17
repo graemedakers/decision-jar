@@ -104,9 +104,31 @@
 
 ---
 
+## ✅ Phase 7: Premium Features (COMPLETE - Jan 17, 2026)
+
+### Concierge Deep Link Shortcuts
+- ✅ ConciergeShortcutButton component with Web Share API
+- ✅ Clipboard fallback with platform-specific instructions
+- ✅ Premium-only visibility in concierge modal header
+- ✅ Deep link format: `/dashboard?action=concierge&tool={TOOL_ID}`
+- ✅ Premium check on deep link access (shows upgrade modal for non-premium)
+- ✅ PostHog event: `concierge_shortcut_created`
+
+### Theatre Concierge Enhancement
+- ✅ Excludes shows that have already closed
+- ✅ Displays `show_dates` field with calendar icon
+- ✅ Instructions to only recommend currently running/upcoming shows
+
+### UI Refinements
+- ✅ Menu Planner hidden (doesn't fit social/wellbeing focus)
+- ✅ Concierge result card buttons restructured into two rows
+- ✅ +Jar loading state now shows only on clicked item
+
+---
+
 ## 🔄 Current Status
 
-**Production:** Stable at commit `1989ee9`  
+**Production:** Deploying...  
 **All major features:** Implemented and deployed
 
 ---
@@ -117,3 +139,4 @@
 2. **Community Jars** - Public jar discovery and forking
 3. **Performance** - React Query caching optimization
 4. **Testing** - E2E test coverage with Playwright
+5. **Dynamic Manifest** - Server-generated manifest with premium shortcuts
