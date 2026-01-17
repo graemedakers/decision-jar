@@ -11,6 +11,7 @@ import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { ModalProvider } from "@/components/ModalProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -161,6 +162,7 @@ export default function RootLayout({
         <PostHogProvider>
           <QueryProvider>
             <ModalProvider>
+              <ServiceWorkerRegistration />
               <Toaster position="top-center" expand={true} richColors />
               {children}
               <PWAInstaller />
