@@ -1,4 +1,4 @@
-import { LucideIcon, Users, Brain, Sparkles, Zap, MessageSquare, Compass, Heart, GraduationCap, ChefHat, Utensils, Layers } from "lucide-react";
+import { LucideIcon, Users, Brain, Sparkles, Zap, MessageSquare, Compass, Heart, GraduationCap, ChefHat, Utensils, Layers, Bell } from "lucide-react";
 
 export interface ResourceGuide {
     slug: string;
@@ -510,6 +510,64 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             {
                 title: "The Psychology of Decision Outsourcing",
                 content: "Research from Stanford shows that couples who externalize routine decisions report 31% higher relationship satisfaction. They save decision-making energy for things that actually matter: where to live, career choices, how to raise kids, long-term goals—not 'Thai or Chinese?'"
+            }
+        ]
+    },
+    {
+        slug: "staying-connected-notifications",
+        category: "Features",
+        title: "Staying Connected: Push Notifications for Shared Jars",
+        description: "How push notifications keep your group in sync without the endless text chains.",
+        icon: Bell,
+        readTime: "4 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "How Push Notifications Keep Your Group in Sync",
+            "description": "Learn how to use push notifications effectively to stay connected with your Decision Jar members."
+        },
+        faqs: [
+            {
+                question: "What notifications will I receive?",
+                answer: "You'll be notified when someone adds a new idea to your shared jar, when someone spins the jar and selects an activity, and a 24-hour reminder to rate completed activities."
+            },
+            {
+                question: "Can I turn off notifications?",
+                answer: "Yes! Go to Settings → My Preferences and toggle notifications off. You can also manage permissions in your browser or phone settings."
+            },
+            {
+                question: "Why don't notifications work in Incognito mode?",
+                answer: "Private browsing modes don't support push notifications for privacy reasons. Use a regular browser window to receive notifications."
+            },
+            {
+                question: "Do I need to enable notifications on each device?",
+                answer: "Yes, each device (phone, tablet, computer) needs to enable notifications separately. This gives you control over where you receive alerts."
+            }
+        ],
+        sections: [
+            {
+                title: "Why Notifications Matter for Shared Jars",
+                content: "When you share a jar with a partner, friend group, or family, staying in sync is essential. Without notifications, you might miss when someone adds an exciting new idea or selects an activity for tonight. Push notifications solve the 'Did you see my message?' problem by delivering instant, non-intrusive alerts directly to your device."
+            },
+            {
+                title: "What You'll Be Notified About",
+                content: "Decision Jar sends notifications for meaningful events only—never spam. You'll receive alerts when: (1) Someone adds a new idea to your shared jar, (2) Someone spins the jar and picks an activity, and (3) A gentle 24-hour reminder to rate and capture memories from completed activities. We deliberately don't send notifications for views, logins, or marketing content."
+            },
+            {
+                title: "How to Enable Notifications",
+                content: "Enabling notifications takes just 30 seconds: 1) Open Decision Jar and go to Settings (gear icon), 2) Navigate to 'My Preferences', 3) Click 'Enable Notifications', 4) Accept the browser permission prompt. That's it! You'll see a confirmation message when successful. Remember, each device needs to enable notifications separately."
+            },
+            {
+                title: "Best Practices for Groups",
+                content: "For the best experience: Enable notifications on your primary mobile device so you're always in the loop. Encourage all jar members to enable notifications—it's most effective when everyone participates. Click notifications to jump directly to your jar. And don't worry about notification fatigue—we keep alerts meaningful and minimal."
+            },
+            {
+                title: "Troubleshooting Common Issues",
+                content: "If notifications aren't working: (1) Check that you're not in Incognito/Private mode, (2) Verify browser permissions in your device settings, (3) Try disabling and re-enabling notifications in the app, (4) On iOS, ensure the app is added to your Home Screen as a PWA. If you see 'Notifications blocked', you'll need to enable them in your browser's site settings."
+            },
+            {
+                title: "Privacy & Control",
+                content: "Your privacy matters. Notifications are opt-in only—we never enable them without your permission. You can disable notifications anytime in Settings. We don't track your location through notifications. Notification data is encrypted and never shared with third parties. You're always in control of your notification preferences."
             }
         ]
     }

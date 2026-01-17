@@ -199,6 +199,14 @@ export default function Home() {
         },
         {
           '@type': 'Question',
+          name: 'How do push notifications work?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Enable push notifications in Settings to get instant alerts when someone adds an idea or spins the jar. You control which devices receive notifications.'
+          }
+        },
+        {
+          '@type': 'Question',
           name: 'Can I use it on iPhone and Android?',
           acceptedAnswer: {
             '@type': 'Answer',
@@ -770,6 +778,10 @@ export default function Home() {
                   <FaqItem
                     question="Can I save memories?"
                     answer="Yes! Every time you complete an activity from the jar, it's moved to 'The Vault'. There you can rate the experience, add private notes, and upload up to 3 photos to preserve the memory."
+                  />
+                  <FaqItem
+                    question="How do notifications work?"
+                    answer="Enable push notifications to get instant alerts when someone adds an idea or spins the jar. Go to Settings → My Preferences → Enable Notifications. Each device needs to enable separately."
                   />
                 </div>
               </div>
