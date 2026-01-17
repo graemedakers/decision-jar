@@ -442,7 +442,7 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 - Include the show dates or run period if known.
                 
                 For the 'website' field: Provide the official ticketing website or a Google search URL:
-                https://www.google.com/search?q=[Show+Name]+tickets+${encodedLocation}
+                https://www.google.com/search?q=[Show+Name]+tickets+${encodeURIComponent(targetLocation)}
                 
                 Return JSON with "recommendations" array.
                 Fields: name, description, type, price, address (Venue Name), website, google_rating, show_dates (e.g., "Now - March 2026" or "Opens Feb 15, 2026")
