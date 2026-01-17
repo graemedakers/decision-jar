@@ -113,6 +113,7 @@ export function LoginForm() {
                         <>
                             <div className="grid grid-cols-2 gap-4 mb-8">
                                 <Button
+                                    type="button"
                                     variant="secondary"
                                     onClick={() => handleSocialLogin('google')}
                                     className="flex items-center justify-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 shadow-sm transition-all py-6 group"
@@ -125,6 +126,7 @@ export function LoginForm() {
                                     <span className="text-sm font-bold text-slate-700">Google</span>
                                 </Button>
                                 <Button
+                                    type="button"
                                     variant="secondary"
                                     onClick={() => handleSocialLogin('facebook')}
                                     className="flex items-center justify-center gap-3 bg-[#1877F2] hover:bg-[#166fe5] border-transparent shadow-sm transition-all py-6 group"
