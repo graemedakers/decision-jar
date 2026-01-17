@@ -135,36 +135,47 @@ function DashboardContent() {
     useEffect(() => {
         // Skip for community jars (like Bug Reports) which are pre-seeded or specific
         if (showEmptyState && userData?.activeJarId && !isCommunityJar) {
-            try {
-                const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
-                if (!dismissed) {
-                    openModal('JAR_QUICKSTART', {
-                        jarId: userData.activeJarId,
-                        jarName: userData.jarName || 'Your Jar',
-                        jarTopic: userData.jarTopic || 'General'
-                    });
-                }
-            } catch (e) { }
+            // Only show modal if user is ADMIN/OWNER of this jar (not just a member)
+            const currentJarMembership = userData?.memberships?.find(
+                (m: any) => m.jarId === userData.activeJarId
+            );
+            const isOwnerOrAdmin = currentJarMembership?.role === 'ADMIN' || 
+                                   currentJarMembership?.role === 'OWNER';
+            
+            // Only prompt to add ideas if you OWN the jar
+            if (isOwnerOrAdmin) {
+                try {
+                    const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
+                    if (!dismissed) {
+                        openModal('JAR_QUICKSTART', {
+                            jarId: userData.activeJarId,
+                            jarName: userData.jarName || 'Your Jar',
+                            jarTopic: userData.jarTopic || 'General'
+                        });
+                    }
+                } catch (e) { }
+            }
         }
-    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, openModal, isCommunityJar]);
+    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, userData?.memberships, openModal, isCommunityJar]);
 
-    // ✅ CRITICAL FIX: Better handling for users without personal jars
-    // This covers: OAuth users, invite-only users, and users who only have community jar memberships
+    // ✅ CRITICAL FIX: Better handling for users without ANY jars
+    // This covers: OAuth users who sign up without creating a jar
     useEffect(() => {
         if (!isLoadingUser && userData) {
-            // Check if user has ANY jar where they are ADMIN/OWNER (personal jar)
-            const hasPersonalJar = userData.memberships?.some((m: any) =>
-                m.role === 'ADMIN' || m.role === 'OWNER'
-            );
+            // Check if user has ANY jar membership at all (including as MEMBER)
+            const hasAnyJarMembership = userData.memberships && userData.memberships.length > 0;
+            
+            // Check if user has an active jar set
+            const hasActiveJar = !!userData.activeJarId;
 
-            // If user has NO personal jar, prompt them to create one
-            if (!hasPersonalJar) {
+            // Only prompt to create jar if user has NO jars at all
+            // (Not even as a member of someone else's jar via invite)
+            if (!hasAnyJarMembership && !hasActiveJar) {
                 const hasSeenPrompt = sessionStorage.getItem('create_first_jar_prompt');
                 if (!hasSeenPrompt) {
                     openModal('CREATE_JAR');
                     sessionStorage.setItem('create_first_jar_prompt', 'true');
-
-                    console.log('Prompting user to create first personal jar (OAuth/invite user)');
+                    console.log('Prompting user to create first jar (no memberships found)');
                 }
             }
         }
