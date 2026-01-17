@@ -18,7 +18,11 @@ interface NotificationPayload {
     body: string;
     url?: string;
     icon?: string;
+    tag?: string;
+    requireInteraction?: boolean;
 }
+
+type NotificationPreferenceKey = 'notifyStreakReminder' | 'notifyAchievements' | 'notifyLevelUp' | 'notifyIdeaAdded' | 'notifyJarSpun';
 
 export async function sendPushNotification(userId: string, payload: NotificationPayload) {
     try {
@@ -46,7 +50,9 @@ export async function sendPushNotification(userId: string, payload: Notification
             title: payload.title,
             body: payload.body,
             url: payload.url || '/',
-            icon: payload.icon || '/icon.png'
+            icon: payload.icon || '/icon.png',
+            tag: payload.tag,
+            requireInteraction: payload.requireInteraction
         });
 
         // 3. Send notifications
@@ -85,18 +91,34 @@ export async function sendPushNotification(userId: string, payload: Notification
     }
 }
 
-export async function notifyJarMembers(jarId: string, excludeUserId: string | null, payload: NotificationPayload) {
+export async function notifyJarMembers(
+    jarId: string, 
+    excludeUserId: string | null, 
+    payload: NotificationPayload,
+    preferenceKey?: NotificationPreferenceKey
+) {
     try {
-        console.log(`[Notifications] notifyJarMembers called for jar ${jarId}, excluding user ${excludeUserId}`);
+        console.log(`[Notifications] notifyJarMembers called for jar ${jarId}, excluding user ${excludeUserId}, preference: ${preferenceKey || 'none'}`);
         
-        // Find active members of the jar
+        // Find active members of the jar with their notification preferences
         const members = await prisma.jarMember.findMany({
             where: {
                 jarId,
                 userId: excludeUserId ? { not: excludeUserId } : undefined,
                 status: 'ACTIVE'
             },
-            select: { userId: true }
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        notifyStreakReminder: true,
+                        notifyAchievements: true,
+                        notifyLevelUp: true,
+                        notifyIdeaAdded: true,
+                        notifyJarSpun: true
+                    }
+                }
+            }
         });
 
         console.log(`[Notifications] Found ${members.length} member(s) to notify`);
@@ -106,8 +128,20 @@ export async function notifyJarMembers(jarId: string, excludeUserId: string | nu
             return;
         }
 
-        const promises = members.map(member =>
-            sendPushNotification(member.userId, payload)
+        // Filter by preference if specified
+        const eligibleMembers = preferenceKey 
+            ? members.filter(member => member.user[preferenceKey] === true)
+            : members;
+
+        console.log(`[Notifications] ${eligibleMembers.length} member(s) eligible after preference filtering`);
+
+        if (eligibleMembers.length === 0) {
+            console.log('[Notifications] No members have this notification enabled');
+            return;
+        }
+
+        const promises = eligibleMembers.map(member =>
+            sendPushNotification(member.user.id, payload)
         );
 
         const results = await Promise.allSettled(promises);

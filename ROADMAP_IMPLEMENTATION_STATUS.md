@@ -147,9 +147,9 @@
 
 ## 🔄 Current Status
 
-**Production:** Stable (Commit a926156)  
-**Development:** Phase 8.3 (Dashboard Header Progress Bar) complete ✅  
-**All major features (Phases 1-8.3):** Complete and deployed ✅
+**Production:** Stable (Commit 757465b)  
+**Development:** Phase 8.4 (Push Notification Enhancement) complete ✅  
+**All major features (Phases 1-8.4):** Complete and deployed ✅
 
 ---
 
@@ -179,10 +179,18 @@
 
 **Impact Goal:** Constant visual reinforcement of progress increases engagement
 
-### 8.4 Push Notification Enhancement (Pending)
-- Streak reminder notifications (8pm if not active)
-- Achievement unlock notifications
-- Level-up notifications
+### 8.4 Push Notification Enhancement (COMPLETE - Jan 17, 2026) ⭐️
+- ✅ Notification Preferences UI in Settings modal
+- ✅ 5 granular notification settings per user (streak, achievements, level-up, ideas, spins)
+- ✅ Streak reminder cron job at `/api/cron/streak-reminders` (8pm daily UTC+10)
+- ✅ Achievement unlock push notifications with preference filtering
+- ✅ Level-up push notifications with preference filtering
+- ✅ Enhanced `notifyJarMembers` function with preference key parameter
+- ✅ PostHog tracking for `notification_preference_changed` event
+- ✅ Vercel cron configuration in `vercel.json`
+- ✅ XP gain animation toast (fixed TypeScript issue)
+
+**Impact Goal:** Reduce churn by sending proactive reminders
 
 ---
 

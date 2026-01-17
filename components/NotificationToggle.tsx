@@ -1,6 +1,7 @@
 import { useNotifications } from "@/hooks/useNotifications";
 import { Button } from "./ui/Button";
 import { Bell, BellOff, Loader2 } from "lucide-react";
+import { NotificationPreferences } from "./NotificationPreferences";
 
 export function NotificationToggle() {
     const { isSupported, isSubscribed, isLoading, subscribeToPush, unsubscribeFromPush } = useNotifications();
@@ -16,25 +17,28 @@ export function NotificationToggle() {
 
     if (isSubscribed) {
         return (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-lg text-sm text-green-700 dark:text-green-400">
-                <div className="flex items-center gap-3">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full flex-shrink-0">
-                        <Bell className="w-5 h-5" />
+            <div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-lg text-sm text-green-700 dark:text-green-400">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full flex-shrink-0">
+                            <Bell className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <span className="font-bold block">Notifications Active</span>
+                            <span className="text-xs opacity-80">You'll receive updates.</span>
+                        </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <span className="font-bold block">Notifications Active</span>
-                        <span className="text-xs opacity-80">You'll receive updates.</span>
-                    </div>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={unsubscribeFromPush}
+                        disabled={isLoading}
+                        className="w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Disable"}
+                    </Button>
                 </div>
-                <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={unsubscribeFromPush}
-                    disabled={isLoading}
-                    className="w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Disable"}
-                </Button>
+                <NotificationPreferences isSubscribed={isSubscribed} />
             </div>
         );
     }

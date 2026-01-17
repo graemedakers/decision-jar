@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { LEVEL_DEFINITIONS, ACHIEVEMENT_DEFINITIONS } from "./gamification-shared";
 import { trackStreakMilestoneReached, trackStreakLost, trackStreakContinued } from "./analytics";
+import { notifyJarMembers } from "./notifications";
 
 /**
  * Updates the daily streak for a jar
@@ -125,6 +126,19 @@ export async function awardXp(jarId: string, amount: number) {
                 level: finalLevel
             }
         });
+
+        // Send level-up notification (non-blocking, respects user preferences)
+        if (leveledUp) {
+            const levelTitle = matchingLevel?.title || "Level " + finalLevel;
+            notifyJarMembers(jarId, null, {
+                title: `🎉 Level Up! Level ${finalLevel}`,
+                body: `You've reached ${levelTitle}! Keep up the great work!`,
+                url: '/dashboard',
+                icon: '/icon-192.png',
+                tag: `level-up-${finalLevel}`,
+                requireInteraction: false
+            }, 'notifyLevelUp').catch(err => console.error("Level-up notification error:", err));
+        }
 
         return {
             xpAdded: amount,

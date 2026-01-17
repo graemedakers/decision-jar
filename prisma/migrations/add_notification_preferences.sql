@@ -1,0 +1,7 @@
+-- Add notification preferences to User table
+ALTER TABLE "User" 
+ADD COLUMN IF NOT EXISTS "notifyStreakReminder" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN IF NOT EXISTS "notifyAchievements" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN IF NOT EXISTS "notifyLevelUp" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN IF NOT EXISTS "notifyIdeaAdded" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN IF NOT EXISTS "notifyJarSpun" BOOLEAN NOT NULL DEFAULT true;

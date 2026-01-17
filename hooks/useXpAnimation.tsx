@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { trackXpGained } from "@/lib/analytics";
@@ -48,29 +49,27 @@ export function useXpAnimation(currentXp: number, currentLevel?: number) {
 /**
  * Component to display XP gain toast
  */
-export function XpGainToast({ xpGain }: { xpGain: XpGainNotification | null }) {
+export function XpGainToast({ xpGain }: { xpGain: XpGainNotification | null }): React.ReactNode {
+    if (!xpGain) return null;
+
     return (
-        <AnimatePresence>
-            {xpGain && (
+        <motion.div
+            initial={{ y: -50, opacity: 0, scale: 0.8 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: -50, opacity: 0, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[90] pointer-events-none"
+        >
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+                <span className="text-lg font-bold">+{xpGain.amount} XP</span>
                 <motion.div
-                    initial={{ y: -50, opacity: 0, scale: 0.8 }}
-                    animate={{ y: 0, opacity: 1, scale: 1 }}
-                    exit={{ y: -50, opacity: 0, scale: 0.8 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                    className="fixed top-20 left-1/2 -translate-x-1/2 z-[90] pointer-events-none"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="text-yellow-300"
                 >
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                        <span className="text-lg font-bold">+{xpGain.amount} XP</span>
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="text-yellow-300"
-                        >
-                            ✨
-                        </motion.div>
-                    </div>
+                    ✨
                 </motion.div>
-            )}
-        </AnimatePresence>
+            </div>
+        </motion.div>
     );
 }

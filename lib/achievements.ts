@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { ACHIEVEMENTS, AchievementDef } from "./achievements-shared";
 import { trackAchievementUnlocked } from "./analytics";
+import { notifyJarMembers } from "./notifications";
 
-export async function checkAndUnlockAchievements(jarId: string) {
+export async function checkAndUnlockAchievements(jarId: string): Promise<AchievementDef[]> {
     if (!jarId) return [];
 
     const newUnlocks: AchievementDef[] = [];
@@ -56,6 +57,16 @@ export async function checkAndUnlockAchievements(jarId: string) {
                 
                 // Track analytics
                 trackAchievementUnlocked(achievement.id, achievement.title, achievement.category, jarId);
+                
+                // Send push notification (non-blocking, respects user preferences)
+                notifyJarMembers(jarId, null, {
+                    title: '🏆 Achievement Unlocked!',
+                    body: `${achievement.title} - ${achievement.description}`,
+                    url: '/dashboard',
+                    icon: '/icon-192.png',
+                    tag: `achievement-${achievement.id}`,
+                    requireInteraction: false
+                }, 'notifyAchievements').catch(err => console.error("Achievement notification error:", err));
                 
                 newUnlocks.push(achievement);
             }

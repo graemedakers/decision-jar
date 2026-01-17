@@ -140,6 +140,13 @@ model User {
   pushSubscriptions     PushSubscription[]
   rateLimit             RateLimit?
   
+  // Notification Preferences
+  notifyStreakReminder  Boolean @default(true)   // 8pm daily reminder if inactive
+  notifyAchievements    Boolean @default(true)   // Achievement unlock notifications
+  notifyLevelUp         Boolean @default(true)   // Level-up notifications
+  notifyIdeaAdded       Boolean @default(true)   // When someone adds an idea to shared jar
+  notifyJarSpun         Boolean @default(true)   // When someone spins the jar
+  
   // ✅ NEW: Premium invite tokens created by this user
   createdPremiumTokens  PremiumInviteToken[] @relation("TokenCreator")
   usedPremiumToken      PremiumInviteToken?  @relation("TokenUser")
