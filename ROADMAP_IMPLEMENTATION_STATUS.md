@@ -1,43 +1,119 @@
 # Roadmap Implementation Status
-**Date:** January 9, 2026
-**Focus:** Immediate Security & Mobile Quick Wins
+**Last Updated:** January 17, 2026
 
-## ✅ Completed Tasks (Immediate Critical Path)
+## ✅ Phase 1: Security & Mobile (COMPLETE)
 
-### 1. Security Hardening (Authorization Vulnerabilities)
-Audit revealed that several endpoints checked *authentication* (logged in) but missed *authorization* (ownership/membership). These have been patched.
+### Security Hardening
+- ✅ Favorites IDOR Fix - strict user ownership checks
+- ✅ Ideas Access Control - jar membership verification for all mutations
+- ✅ Authorization checks on all protected endpoints
 
-- **Favorites Security (IDOR Fix):**
-  - `app/api/favorites/route.ts`: Added strict `AND "userId" = session.user.id` check to DELETE operations.
-  - `app/api/favorites/[id]/route.ts`: Added strict `AND "userId" = session.user.id` check to DELETE operations.
-- **Ideas Security (Access Control):**
-  - `app/api/ideas/[id]/route.ts`: Implemented explicit Jar Membership check for `DELETE`, `PUT` (Edit), and `PATCH` (Update). This prevents users who are no longer members (e.g., removed/kicked) from modifying jar content, even if they originally created it.
-
-### 2. Mobile Experience Upgrades
-Addressing the "Desktop-First" UX issues identified in the review.
-
-- **Bottom Sheet Modals:**
-  - **Refactor:** `components/ui/Dialog.tsx`
-  - **Change:** All modals now automatically adapt to "Bottom Sheet" style on mobile (aligned bottom, full width, slide-up animation) while remaining centered dialogs on desktop.
-  - **Impact:** Solves "Modal Overload" feeling on small screens and improves reachability.
-- **PWA Install Visibility:**
-  - **Refactor:** `components/InstallPrompt.tsx`
-  - **Change:** Changed dismissal logic from "Permanent" to "7-Day Cooldown".
-  - **Impact:** Users who dismissed the prompt once will be reminded again next week, increasing install probability.
-
-### 3. Critical UI Restoration
-- **Missing Feature Fixed:**
-  - **Refactor:** `app/dashboard/page.tsx`
-  - **Change:** Restored the `SmartToolsGrid` component which was mysteriously missing from the non-empty dashboard state.
-  - **Impact:** Users can now actually add ideas when the jar is not empty (previously required workaround).
+### Mobile Experience
+- ✅ Bottom Sheet Modals - adaptive dialog styling
+- ✅ PWA Install 7-Day Cooldown - improved install prompts
+- ✅ PWA dismiss button fix - proper event handling
 
 ---
 
-## ⏭️ Next Steps: UX Consolidation (The "Three-Path" Strategy)
+## ✅ Phase 2: Three-Path UX Consolidation (COMPLETE)
 
-With the foundation secured and mobile experience patched, the next phase is simplifying the user journey to reduce decision fatigue.
+### Path 1: SmartInputBar
+- ✅ Single input field with intelligent auto-routing
+- ✅ Detects text vs. URLs vs. questions
+- ✅ Questions route to AI Concierge automatically
+- ✅ Regular text routes to Add Idea modal
 
-**Plan:**
-1.  **Create `SmartInputBar` component:** A single input field that detects Text vs. URLs (replacing the need for a separate "Link Scraper" tool).
-2.  **Unify AI Concierge:** Replace distinct AI modals with a single conversational interface.
-3.  **Refactor Dashboard:** Replace the restored `SmartToolsGrid` with the new streamlined Layout.
+### Path 2: Unified AI Concierge
+- ✅ 18 specialized AI tools consolidated into single interface
+- ✅ Skill picker with categorized grid layout
+- ✅ Intent detection (95%+ accuracy, 5% threshold)
+- ✅ Example prompts for quick access
+
+### Path 3: Template Browser
+- ✅ Pre-made jar templates accessible from dashboard
+- ✅ Mobile visibility restored
+
+---
+
+## ✅ Phase 3: Analytics (COMPLETE)
+
+### PostHog Integration
+- ✅ 7 key events: path_selected, modal_opened, modal_abandoned, concierge_skill_selected, intent_detection_result, idea_added, time_to_first_idea
+- ✅ Session tracking with sessionStorage
+- ✅ Safe capture wrapper (handles DNS errors gracefully)
+- ✅ Dashboard documentation in POSTHOG_THREE_PATH_DASHBOARDS.md
+
+---
+
+## ✅ Phase 4: AI Quality Improvements (COMPLETE - Jan 17, 2026)
+
+### Prompt Engineering
+- ✅ All 18 concierge prompts include extraInstructions emphasis
+- ✅ "CRITICAL USER REQUIREMENTS" pattern for user-specific requests
+- ✅ Hyper-local search persona for DINING concierge
+
+### Backend Filtering (NEW)
+- ✅ Strict keyword-based validation for all concierge types
+- ✅ Auto-retry mechanism (if <2 valid results, retry with stricter prompt)
+- ✅ Proper extraInstructions capture from request body
+
+### Filter Coverage by Concierge Type:
+| Concierge | Categories |
+|-----------|------------|
+| DINING/CONCIERGE | 11 cuisines + cafe/brunch detection |
+| BAR/BAR_CRAWL | Cocktails, wine, beer, whiskey |
+| NIGHTCLUB | + Music: EDM, hip-hop, latin, rock |
+| BOOK | 8 literary genres |
+| MOVIE | 8 film genres |
+| GAME | 8 game genres |
+| WELLNESS/FITNESS | 10 activity types |
+| ESCAPE_ROOM | 5 theme types |
+| SPORTS | 7 sport types |
+| THEATRE | 5 performance types |
+
+---
+
+## ✅ Phase 5: Invite & Signup Flow (COMPLETE)
+
+### Fixes Implemented
+- ✅ Login preserves invite code in redirect
+- ✅ Signup hides jar creation when invite code present
+- ✅ JOIN_JAR modal only for non-admins
+- ✅ CREATE_JAR modal only when user has zero personal jars
+- ✅ Accidental OAuth signup prevention (type="button" on social buttons)
+- ✅ Onboarding tour skipped for invite users
+- ✅ Database cleanup of orphan jars
+
+### Infinite Loop Prevention
+- ✅ React Query no-retry on 401/403
+- ✅ 10-second loading timeout
+- ✅ Global redirect flag in useUser
+- ✅ Aggressive redirect (window.location.replace)
+- ✅ nuke-session redirects to /login
+
+---
+
+## ✅ Phase 6: Notifications (COMPLETE)
+
+### Push Notifications
+- ✅ VAPID key generation and setup
+- ✅ Service worker registration
+- ✅ Notification UI layout fixes
+- ✅ 10-second timeout protection
+- ✅ Idea selection triggers push (not email)
+
+---
+
+## 🔄 Current Status
+
+**Production:** Stable at commit `1989ee9`  
+**All major features:** Implemented and deployed
+
+---
+
+## 📋 Future Considerations
+
+1. **Gamification Polish** - XP/levels/achievements UI refinement
+2. **Community Jars** - Public jar discovery and forking
+3. **Performance** - React Query caching optimization
+4. **Testing** - E2E test coverage with Playwright
