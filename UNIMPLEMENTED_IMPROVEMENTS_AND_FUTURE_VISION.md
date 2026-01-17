@@ -49,7 +49,7 @@ This document serves as a consolidated master list of features, technical debt, 
 
 *   ~~**Conversion "Nudge" Modals**:~~
     *   ~~**Trial Expiry Modal**: High-impact modal that appears immediately upon trial end (Day 15).~~ ✅ **COMPLETED** (Jan 17, 2026)
-    *   **Contextual Trial Status**: "X days left" badges inside Concierge tool headers.
+    *   ~~**Contextual Trial Status**: "X days left" badges inside Concierge tool headers.~~ ✅ **COMPLETED** (Jan 18, 2026)
 *   **Email Lifecycle Automation**: (Requires Postmark/Resend/SendGrid)
     *   Nurture sequence for trial users (Welcome -> Halfway -> Expiry Warning -> Special Offer).
 *   **Admin Control (Phase 9.4)**:
