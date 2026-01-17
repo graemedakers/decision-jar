@@ -79,22 +79,50 @@ export const trackModalAbandoned = (modalType: string, reason: string | number, 
 };
 
 // Concierge tracking
-export const trackConciergeSkillSelected = (skillId: string, skillName: string, method: 'manual' | 'auto-routed') => {
-    safeCapture('concierge_skill_selected', {
+export const trackConciergeSkillSelected = (
+    skillId: string, 
+    skillNameOrMethod: string, 
+    methodOrData?: 'manual' | 'auto-routed' | Record<string, any>
+) => {
+    let properties: Record<string, any> = {
         skill_id: skillId,
-        skill_name: skillName,
-        method: method,
-    });
+    };
+    
+    if (typeof methodOrData === 'object') {
+        // New format: trackConciergeSkillSelected(skillId, method, data)
+        properties.method = skillNameOrMethod;
+        properties = { ...properties, ...methodOrData };
+    } else {
+        // Old format: trackConciergeSkillSelected(skillId, skillName, method)
+        properties.skill_name = skillNameOrMethod;
+        properties.method = methodOrData || 'manual';
+    }
+    
+    safeCapture('concierge_skill_selected', properties);
 };
 
-export const trackIntentDetectionResult = (input: string, topIntentId: string | null, topIntentScore: number, threshold: number) => {
-    safeCapture('intent_detection_result', {
+export const trackIntentDetectionResult = (
+    input: string, 
+    topIntentId: string | null, 
+    topIntentScoreOrRouted: number | boolean, 
+    threshold?: number
+) => {
+    let properties: Record<string, any> = {
         input_text: input.substring(0, 100), // Limit PII
         top_intent_id: topIntentId,
-        top_intent_score: topIntentScore,
-        threshold: threshold,
-        routed: topIntentScore >= threshold,
-    });
+    };
+    
+    if (typeof topIntentScoreOrRouted === 'boolean') {
+        // Simplified format: trackIntentDetectionResult(input, intentId, routed)
+        properties.routed = topIntentScoreOrRouted;
+    } else {
+        // Full format: trackIntentDetectionResult(input, intentId, score, threshold)
+        properties.top_intent_score = topIntentScoreOrRouted;
+        properties.threshold = threshold || 0.05;
+        properties.routed = topIntentScoreOrRouted >= (threshold || 0.05);
+    }
+    
+    safeCapture('intent_detection_result', properties);
 };
 
 export const trackAIToolUsed = (toolName: string, properties?: Record<string, any>) => {
