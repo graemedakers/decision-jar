@@ -34,6 +34,7 @@ export type ModalType =
     | 'MOVE_IDEA'
     | 'TOOLS'
     | 'ADD_MEMORY'
+    | 'TRIAL_EXPIRED'
     | null;
 
 interface ModalContextType {

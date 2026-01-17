@@ -334,13 +334,16 @@ export function DashboardModals({
                 onConfirm={modalProps?.onConfirm}
             />
 
-            {!isPremium && !hasPaid && (
-                <TrialExpiredModal
-                    hasPaid={hasPaid}
-                    isTrialExpired={coupleCreatedAt ? (Math.ceil(Math.abs(new Date().getTime() - new Date(coupleCreatedAt).getTime()) / (1000 * 60 * 60 * 24)) > 14) : false}
-                    isPremiumCandidate={isPremium}
-                />
-            )}
+            {/* Trial Expired Modal - triggered via modal system */}
+            <TrialExpiredModal
+                isOpen={activeModal === 'TRIAL_EXPIRED'}
+                onClose={closeModal}
+                onUpgrade={() => {
+                    closeModal();
+                    openModal('PREMIUM');
+                }}
+                onContinueFree={closeModal}
+            />
 
             {userData?.activeJarId && (
                 <CommunityAdminModal

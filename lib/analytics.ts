@@ -284,3 +284,30 @@ export const trackShareClicked = (method: string, content: string) => {
         content: content
     });
 };
+
+// Trial Expiry Modal tracking
+export const trackTrialModalShown = (usageStats?: { conciergeUses?: number; ideasCreated?: number; daysActive?: number }) => {
+    safeCapture('trial_expiry_modal_shown', {
+        concierge_uses: usageStats?.conciergeUses || 0,
+        ideas_created: usageStats?.ideasCreated || 0,
+        days_active: usageStats?.daysActive || 0,
+    });
+};
+
+export const trackTrialModalAction = (
+    action: 'upgrade_clicked' | 'continue_free' | 'dismissed' | 'learn_more',
+    usageStats?: { conciergeUses?: number; ideasCreated?: number; daysActive?: number }
+) => {
+    safeCapture('trial_expiry_modal_action', {
+        action: action,
+        concierge_uses: usageStats?.conciergeUses || 0,
+        ideas_created: usageStats?.ideasCreated || 0,
+        days_active: usageStats?.daysActive || 0,
+    });
+};
+
+export const trackTrialWarningShown = (daysRemaining: number) => {
+    safeCapture('trial_warning_shown', {
+        days_remaining: daysRemaining,
+    });
+};

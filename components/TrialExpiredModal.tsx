@@ -1,124 +1,290 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { Sparkles, Clock, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { 
+    Crown, Sparkles, Check, X, ChevronDown, ChevronUp,
+    Zap, Calendar, Users, Lock, Gift, ArrowRight
+} from "lucide-react";
+import { trackTrialModalShown, trackTrialModalAction } from "@/lib/analytics";
+import { fetchTrialUsageStats } from "@/hooks/useTrialStatus";
 
 interface TrialExpiredModalProps {
-    isTrialExpired: boolean;
-    hasPaid: boolean;
-    isPremiumCandidate: boolean; // Renamed to clarify we check effective premium status
+    isOpen: boolean;
+    onClose: () => void;
+    onUpgrade: () => void;
+    onContinueFree: () => void;
 }
 
-export function TrialExpiredModal({ isTrialExpired, hasPaid, isPremiumCandidate }: TrialExpiredModalProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const router = useRouter();
+interface UsageStats {
+    conciergeUses: number;
+    ideasCreated: number;
+    daysActive: number;
+}
 
+const PREMIUM_FEATURES = [
+    { icon: Sparkles, text: "Unlimited AI Concierge tools", highlight: true },
+    { icon: Zap, text: "Priority idea recommendations" },
+    { icon: Users, text: "Unlimited shared jars" },
+    { icon: Calendar, text: "Calendar integration" },
+    { icon: Crown, text: "Premium themes & badges" },
+];
+
+const FREE_LIMITATIONS = [
+    "Limited to 3 AI Concierge uses per month",
+    "Maximum 1 shared jar",
+    "Basic themes only",
+    "No calendar sync",
+    "Standard support",
+];
+
+export function TrialExpiredModal({
+    isOpen,
+    onClose,
+    onUpgrade,
+    onContinueFree,
+}: TrialExpiredModalProps) {
+    const [stats, setStats] = useState<UsageStats | null>(null);
+    const [showLimitations, setShowLimitations] = useState(false);
+    const [hasTracked, setHasTracked] = useState(false);
+
+    // Fetch usage stats when modal opens
     useEffect(() => {
-        // Safety: If user is premium or paid, ensure modal is closed
-        if (isPremiumCandidate || hasPaid) {
-            setIsOpen(false);
-            return;
+        if (isOpen && !stats) {
+            fetchTrialUsageStats().then(setStats);
         }
+    }, [isOpen, stats]);
 
-        // Show modal if trial is expired AND they are not effectively premium
-        if (isTrialExpired) {
-            const hasSeenRecently = sessionStorage.getItem('trial_expired_modal_shown');
-            if (!hasSeenRecently) {
-                setIsOpen(true);
-                sessionStorage.setItem('trial_expired_modal_shown', 'true');
-            }
+    // Track modal shown
+    useEffect(() => {
+        if (isOpen && !hasTracked) {
+            trackTrialModalShown(stats || undefined);
+            setHasTracked(true);
         }
-    }, [isTrialExpired, hasPaid, isPremiumCandidate]);
+    }, [isOpen, hasTracked, stats]);
 
-    if (!isOpen) return null;
+    const handleUpgrade = () => {
+        trackTrialModalAction('upgrade_clicked', stats || undefined);
+        onUpgrade();
+    };
+
+    const handleContinueFree = () => {
+        trackTrialModalAction('continue_free', stats || undefined);
+        onContinueFree();
+    };
+
+    const handleDismiss = () => {
+        trackTrialModalAction('dismissed', stats || undefined);
+        onClose();
+    };
 
     return (
-        <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-                    onClick={() => setIsOpen(false)}
-                />
-
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="relative w-full max-w-md bg-slate-900 border border-yellow-500/20 rounded-[2.5rem] shadow-2xl overflow-hidden p-8"
-                >
-                    {/* Background Glow */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-[60px] pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-500/10 rounded-full blur-[40px] pointer-events-none" />
-
+        <Dialog open={isOpen} onOpenChange={handleDismiss}>
+            <DialogContent className="max-w-lg w-full p-0 overflow-hidden bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-none">
+                {/* Header with Gradient */}
+                <div className="relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-8 text-white text-center">
+                    {/* Close Button */}
                     <button
-                        onClick={() => setIsOpen(false)}
-                        className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                        onClick={handleDismiss}
+                        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                     >
-                        <X className="w-5 h-5 text-slate-400" />
+                        <X className="w-5 h-5" />
                     </button>
 
-                    <div className="text-center space-y-6 relative z-10">
-                        <div className="w-20 h-20 mx-auto rounded-3xl bg-yellow-500/10 flex items-center justify-center ring-1 ring-yellow-500/20">
-                            <Clock className="w-10 h-10 text-yellow-500" />
-                        </div>
+                    {/* Crown Icon */}
+                    <motion.div
+                        initial={{ scale: 0, rotate: -20 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", duration: 0.6 }}
+                        className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm"
+                    >
+                        <Crown className="w-10 h-10" />
+                    </motion.div>
 
-                        <div>
-                            <h2 className="text-2xl font-black text-white mb-2 tracking-tight">
-                                Your Pro Trial has Concluded
-                            </h2>
-                            <p className="text-slate-400 leading-relaxed font-medium">
-                                We hope you enjoyed the AI-powered features! Upgrade now to restore your full access.
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-2xl font-black mb-2"
+                    >
+                        Your Free Trial Has Ended
+                    </motion.h2>
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="text-white/80 text-sm"
+                    >
+                        Upgrade to keep the good times rolling!
+                    </motion.p>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-6">
+                    {/* Personalized Stats */}
+                    {stats && (stats.ideasCreated > 0 || stats.conciergeUses > 0) && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-500/20"
+                        >
+                            <p className="text-sm text-purple-800 dark:text-purple-200 font-medium mb-3">
+                                During your trial, you:
                             </p>
-                        </div>
+                            <div className="grid grid-cols-3 gap-2 text-center">
+                                {stats.ideasCreated > 0 && (
+                                    <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
+                                        <div className="text-2xl font-black text-purple-600 dark:text-purple-400">
+                                            {stats.ideasCreated}
+                                        </div>
+                                        <div className="text-[10px] uppercase font-bold text-slate-500">
+                                            Ideas Created
+                                        </div>
+                                    </div>
+                                )}
+                                {stats.conciergeUses > 0 && (
+                                    <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
+                                        <div className="text-2xl font-black text-pink-600 dark:text-pink-400">
+                                            {stats.conciergeUses}
+                                        </div>
+                                        <div className="text-[10px] uppercase font-bold text-slate-500">
+                                            AI Assists
+                                        </div>
+                                    </div>
+                                )}
+                                {stats.daysActive > 0 && (
+                                    <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
+                                        <div className="text-2xl font-black text-orange-600 dark:text-orange-400">
+                                            {stats.daysActive}
+                                        </div>
+                                        <div className="text-[10px] uppercase font-bold text-slate-500">
+                                            Days Active
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
 
-                        <div className="text-left space-y-3 bg-white/5 p-6 rounded-[2rem] border border-white/5">
-                            <h4 className="text-[10px] uppercase tracking-widest font-black text-slate-500 mb-2">Restores Pro Features:</h4>
-                            <div className="flex items-center gap-3 text-sm text-slate-200">
-                                <div className="w-5 h-5 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
-                                    <Sparkles className="w-3 h-3 text-yellow-500" />
+                    {/* Premium Features */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                    >
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
+                            Keep enjoying Premium features:
+                        </p>
+                        <div className="space-y-2">
+                            {PREMIUM_FEATURES.map((feature, i) => (
+                                <div
+                                    key={i}
+                                    className={`flex items-center gap-3 p-2 rounded-lg ${
+                                        feature.highlight
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/20'
+                                            : ''
+                                    }`}
+                                >
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                        feature.highlight
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                                    }`}>
+                                        <Check className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className={`text-sm ${
+                                        feature.highlight
+                                            ? 'font-bold text-emerald-700 dark:text-emerald-300'
+                                            : 'text-slate-600 dark:text-slate-400'
+                                    }`}>
+                                        {feature.text}
+                                    </span>
                                 </div>
-                                <span>Unlimited AI Concierges</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-slate-200">
-                                <div className="w-5 h-5 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
-                                    <Sparkles className="w-3 h-3 text-yellow-500" />
-                                </div>
-                                <span>Advanced Activity Planning</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-slate-200">
-                                <div className="w-5 h-5 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
-                                    <Sparkles className="w-3 h-3 text-yellow-500" />
-                                </div>
-                                <span>Up to 50 Jars & Members</span>
-                            </div>
+                            ))}
                         </div>
+                    </motion.div>
 
-                        <div className="space-y-3 pt-2">
-                            <Button
-                                onClick={() => {
-                                    setIsOpen(false);
-                                    router.push('/premium');
-                                }}
-                                className="w-full h-14 bg-gradient-to-r from-yellow-500 to-orange-500 hover:opacity-90 text-white font-bold text-lg rounded-2xl shadow-xl shadow-yellow-500/20 border-none transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                            >
-                                Restore Pro Access
-                            </Button>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors py-2"
-                            >
-                                Continue with Free Plan
-                            </button>
+                    {/* Limited Time Offer */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6 }}
+                        className="bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-xl p-4 border border-amber-300 dark:border-amber-500/30"
+                    >
+                        <div className="flex items-center gap-2 mb-2">
+                            <Gift className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                            <span className="text-sm font-black text-amber-700 dark:text-amber-300 uppercase tracking-wide">
+                                Special Offer
+                            </span>
                         </div>
+                        <p className="text-sm text-amber-800 dark:text-amber-200">
+                            Upgrade today and get your <strong>first month at 50% off</strong>!
+                        </p>
+                    </motion.div>
+
+                    {/* CTA Buttons */}
+                    <div className="space-y-3">
+                        <Button
+                            onClick={handleUpgrade}
+                            className="w-full h-14 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-xl shadow-lg shadow-purple-500/20"
+                        >
+                            <Crown className="w-5 h-5 mr-2" />
+                            Upgrade to Premium
+                            <ArrowRight className="w-5 h-5 ml-2" />
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            onClick={handleContinueFree}
+                            className="w-full text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                        >
+                            Continue with Free (Limited Features)
+                        </Button>
                     </div>
-                </motion.div>
-            </div>
-        </AnimatePresence>
+
+                    {/* What Do I Lose Accordion */}
+                    <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
+                        <button
+                            onClick={() => setShowLimitations(!showLimitations)}
+                            className="flex items-center justify-between w-full text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                        >
+                            <span className="flex items-center gap-2">
+                                <Lock className="w-4 h-4" />
+                                What do I lose with the free plan?
+                            </span>
+                            {showLimitations ? (
+                                <ChevronUp className="w-4 h-4" />
+                            ) : (
+                                <ChevronDown className="w-4 h-4" />
+                            )}
+                        </button>
+
+                        <AnimatePresence>
+                            {showLimitations && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <ul className="mt-3 space-y-2 text-sm text-slate-500 dark:text-slate-400">
+                                        {FREE_LIMITATIONS.map((item, i) => (
+                                            <li key={i} className="flex items-start gap-2">
+                                                <X className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }

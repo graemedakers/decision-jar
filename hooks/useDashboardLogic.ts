@@ -13,6 +13,7 @@ import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { DASHBOARD_TOOLS } from "@/lib/constants/tools";
 import { showAchievementToast } from "@/components/Gamification/AchievementToast";
 import { ACHIEVEMENTS } from "@/lib/achievements-shared";
+import { useTrialStatus } from "@/hooks/useTrialStatus";
 
 // Feature Hooks
 import { useSpin } from "@/hooks/features/useSpin";
@@ -112,6 +113,19 @@ export function useDashboardLogic() {
             setUserLocation(userData.location);
         }
     }, [userData]);
+
+    // Trial Expiry Check
+    const { shouldShowTrialModal, dismissTrialModal } = useTrialStatus(userData);
+    
+    useEffect(() => {
+        // Show trial expired modal after a short delay for better UX
+        if (shouldShowTrialModal && !isLoadingUser && userData) {
+            const timer = setTimeout(() => {
+                openModal('TRIAL_EXPIRED');
+            }, 1500); // 1.5 second delay for smoother experience
+            return () => clearTimeout(timer);
+        }
+    }, [shouldShowTrialModal, isLoadingUser, userData, openModal]);
 
     // Premium Tip Check
     useEffect(() => {
