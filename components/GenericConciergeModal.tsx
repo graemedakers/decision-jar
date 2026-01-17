@@ -18,6 +18,8 @@ import { ConciergeSkillPicker } from "./ConciergeSkillPicker";
 import { detectIntent, getIntentConfidence } from "@/lib/intent-detection";
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 import { ACTION_LABELS } from "@/lib/ui-constants";
+import { useUser } from "@/hooks/useUser";
+import { TrialBadge } from "./TrialBadge";
 
 // --- Configuration Interfaces ---
 
@@ -199,6 +201,7 @@ export function GenericConciergeModal({
     isPremium = false
 }: GenericConciergeModalProps) {
     const demoConcierge = useDemoConcierge();
+    const { userData } = useUser({ redirectToLogin: false }); // For trial badge display
     const [showTrialUsedPrompt, setShowTrialUsedPrompt] = useState(false);
 
     // Dynamic config selection - can change based on user input or skill picker
@@ -522,8 +525,11 @@ export function GenericConciergeModal({
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.bg}`}>
                                     <config.icon className={`w-5 h-5 ${theme.text}`} />
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">{config.title}</h2>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">{config.title}</h2>
+                                        <TrialBadge userData={userData} variant="compact" />
+                                    </div>
                                     <p className="text-sm text-slate-500 dark:text-slate-400">{config.subtitle}</p>
                                 </div>
                             </div>

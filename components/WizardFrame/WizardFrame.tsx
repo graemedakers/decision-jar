@@ -25,6 +25,8 @@ import { WizardFrameProps, WizardStep, WizardResultItem, WizardField } from "@/l
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { showError, showSuccess } from "@/lib/toast";
 import { trackAIToolUsed } from "@/lib/analytics";
+import { useUser } from "@/hooks/useUser";
+import { TrialBadge } from "@/components/TrialBadge";
 
 // ============================================
 // LOADING PHRASE ROTATOR
@@ -54,6 +56,9 @@ export function WizardFrame({
     isPremium = false,
     callbacks,
 }: WizardFrameProps) {
+    // ---- User Data for Trial Badge ----
+    const { userData } = useUser({ redirectToLogin: false });
+    
     // ---- State Machine ----
     const [step, setStep] = useState<WizardStep>('INPUT');
     const [formData, setFormData] = useState<Record<string, any>>({});
@@ -308,9 +313,12 @@ export function WizardFrame({
                                     <config.icon className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                                        {config.title}
-                                    </h2>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                                            {config.title}
+                                        </h2>
+                                        <TrialBadge userData={userData} variant="compact" />
+                                    </div>
                                     {config.subtitle && (
                                         <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                                             {config.subtitle}
