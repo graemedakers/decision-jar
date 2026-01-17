@@ -5,6 +5,7 @@ import { login } from '@/lib/auth';
 import { stripe } from '@/lib/stripe';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '@/lib/mailer';
+import { validatePremiumToken, recordTokenUsage } from '@/lib/premium-token-validator';
 
 export async function POST(request: Request) {
     try {
@@ -116,41 +117,12 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: 'Invalid invite code' }, { status: 400 });
             }
 
-            // ✅ HIGH PRIORITY FIX: Secure premium token validation
+            // Validate premium token using unified validator
             if (premiumToken) {
-                try {
-                    const tokenRecord = await prisma.premiumInviteToken.findUnique({
-                        where: { token: premiumToken },
-                        include: { createdBy: true }
-                    });
-
-                    if (tokenRecord) {
-                        // Validate token
-                        const now = new Date();
-
-                        // Check if active
-                        if (!tokenRecord.isActive) {
-                            console.log(`Premium token ${premiumToken} is deactivated`);
-                        }
-                        // Check expiration
-                        else if (now > tokenRecord.expiresAt) {
-                            console.log(`Premium token ${premiumToken} expired at ${tokenRecord.expiresAt}`);
-                        }
-                        // Check usage limit
-                        else if (tokenRecord.currentUses >= tokenRecord.maxUses) {
-                            console.log(`Premium token ${premiumToken} already used ${tokenRecord.currentUses}/${tokenRecord.maxUses} times`);
-                        }
-                        // Token is valid!
-                        else {
-                            isPremiumGifted = true;
-                            console.log(`Premium token ${premiumToken} validated successfully`);
-                        }
-                    } else {
-                        console.log(`Premium token ${premiumToken} not found in database`);
-                    }
-                } catch (tokenError) {
-                    console.error('Error validating premium token:', tokenError);
-                    // Continue signup without premium
+                const validation = await validatePremiumToken(premiumToken);
+                isPremiumGifted = validation.isValid;
+                if (!validation.isValid && validation.reason) {
+                    console.log(`Premium token rejected during signup: ${validation.reason}`);
                 }
             }
 
@@ -174,22 +146,9 @@ export async function POST(request: Request) {
                 },
             });
 
-            // ✅ Update token usage if premium was granted
+            // Record token usage using unified tracker
             if (isPremiumGifted && premiumToken) {
-                try {
-                    await prisma.premiumInviteToken.update({
-                        where: { token: premiumToken },
-                        data: {
-                            currentUses: { increment: 1 },
-                            usedById: user.id,
-                            usedAt: new Date()
-                        }
-                    });
-                    console.log(`Updated premium token ${premiumToken} usage`);
-                } catch (updateError) {
-                    console.error('Error updating token usage:', updateError);
-                    // Premium already granted, just log the error
-                }
+                await recordTokenUsage(premiumToken, user.id, 'signup');
             }
         }
 

@@ -211,7 +211,294 @@
 
 ---
 
-## 📋 Future Considerations (Phase 9+)
+## � Phase 9: Premium Token System Unification (Pending)
+
+**Created:** January 17, 2026  
+**Status:** Planned  
+**Priority:** High (Security)  
+**Total Estimated Effort:** 6-8 hours
+
+### Problem Statement
+
+The current premium token gifting system has a **critical security inconsistency**:
+
+| Endpoint | Token Lookup Method | Security Features |
+|----------|---------------------|-------------------|
+| `/api/auth/signup` | Uses `PremiumInviteToken` model | ✅ Expiration, usage limits, active flag |
+| `/api/jars/join` | Uses `User.premiumInviteToken` field | ❌ No expiration, unlimited uses |
+
+**Impact:** Tokens never expire for existing users joining via `/api/jars/join`. Anyone with the token can use it unlimited times.
+
+### Phase 9.1: Fix Token Generation (Easy - 1 hour) ✅ COMPLETE
+
+**Goal:** Make `/api/user/premium-token` create entries in the `PremiumInviteToken` table with proper security features.
+
+**File:** `app/api/user/premium-token/route.ts`
+
+**Current Code (INSECURE):**
+```typescript
+const token = crypto.randomUUID();
+await prisma.user.update({
+    where: { id: session.user.id },
+    data: { premiumInviteToken: token }
+});
+```
+
+**New Code (SECURE):**
+```typescript
+const token = crypto.randomUUID();
+
+// Create token record with security features
+const tokenRecord = await prisma.premiumInviteToken.create({
+    data: {
+        token,
+        createdById: session.user.id,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        maxUses: 10,
+        isActive: true
+    }
+});
+
+// Also update User field for backward compatibility
+await prisma.user.update({
+    where: { id: session.user.id },
+    data: { premiumInviteToken: token }
+});
+```
+
+**Testing:**
+- [ ] Generate a new token as super admin
+- [ ] Verify entry exists in `PremiumInviteToken` table
+- [ ] Verify `expiresAt` is 30 days from now
+- [ ] Verify `maxUses` is 10
+- [ ] Verify `isActive` is true
+
+---
+
+### Phase 9.2: Unify Validation Logic (Medium - 2-3 hours) ✅ COMPLETE
+
+**Goal:** Create shared validation utility and update both routes to use consistent logic.
+
+#### Step 9.2.1: Create Shared Validator
+
+**New File:** `lib/premium-token-validator.ts`
+
+```typescript
+import { prisma } from '@/lib/prisma';
+
+export interface TokenValidationResult {
+    isValid: boolean;
+    reason?: 'not_found' | 'expired' | 'inactive' | 'max_uses_reached';
+    tokenRecord?: any;
+}
+
+export async function validatePremiumToken(token: string): Promise<TokenValidationResult> {
+    if (!token) return { isValid: false, reason: 'not_found' };
+
+    const tokenRecord = await prisma.premiumInviteToken.findUnique({
+        where: { token },
+        include: { createdBy: { select: { isSuperAdmin: true } } }
+    });
+
+    if (!tokenRecord) {
+        // FALLBACK: Check legacy User.premiumInviteToken field
+        const legacyUser = await prisma.user.findFirst({
+            where: { premiumInviteToken: token },
+            select: { isSuperAdmin: true }
+        });
+        
+        if (legacyUser?.isSuperAdmin) {
+            return { isValid: true }; // Legacy token, no record to update
+        }
+        return { isValid: false, reason: 'not_found' };
+    }
+
+    if (!tokenRecord.isActive) {
+        return { isValid: false, reason: 'inactive' };
+    }
+
+    if (new Date() > tokenRecord.expiresAt) {
+        return { isValid: false, reason: 'expired' };
+    }
+
+    if (tokenRecord.currentUses >= tokenRecord.maxUses) {
+        return { isValid: false, reason: 'max_uses_reached' };
+    }
+
+    return { isValid: true, tokenRecord };
+}
+
+export async function recordTokenUsage(token: string, userId: string): Promise<void> {
+    try {
+        await prisma.premiumInviteToken.update({
+            where: { token },
+            data: {
+                currentUses: { increment: 1 },
+                usedById: userId,
+                usedAt: new Date()
+            }
+        });
+    } catch (error) {
+        console.log(`Could not update token usage for ${token}:`, error);
+    }
+}
+```
+
+#### Step 9.2.2: Update `/api/jars/join/route.ts`
+
+**Replace lines 55-65:**
+```typescript
+import { validatePremiumToken, recordTokenUsage } from '@/lib/premium-token-validator';
+
+let isPremiumGifted = false;
+if (premiumToken) {
+    const validation = await validatePremiumToken(premiumToken);
+    isPremiumGifted = validation.isValid;
+}
+
+// After user update, add:
+if (isPremiumGifted && premiumToken) {
+    await recordTokenUsage(premiumToken, session.user.id);
+}
+```
+
+#### Step 9.2.3: Update `/api/auth/signup/route.ts`
+
+**Replace lines 120-154:**
+```typescript
+import { validatePremiumToken, recordTokenUsage } from '@/lib/premium-token-validator';
+
+if (premiumToken) {
+    const validation = await validatePremiumToken(premiumToken);
+    isPremiumGifted = validation.isValid;
+    if (!validation.isValid) {
+        console.log(`Premium token rejected: ${validation.reason}`);
+    }
+}
+
+// After user creation:
+if (isPremiumGifted && premiumToken) {
+    await recordTokenUsage(premiumToken, user.id);
+}
+```
+
+**Testing:**
+- [ ] New user signup with valid token → Premium granted
+- [ ] New user signup with expired token → No premium
+- [ ] Existing user join with valid token → Premium granted
+- [ ] Existing user join with max-uses-reached token → No premium
+- [ ] Verify `currentUses` increments correctly
+- [ ] Legacy tokens (pre-migration) still work via fallback
+
+---
+
+### Phase 9.3: Usage Tracking Enhancement (Easy - 30 min) ✅ COMPLETE
+
+**Goal:** Ensure all token redemptions are tracked properly.
+
+**Note:** Basic tracking is included in Phase 9.2 via `recordTokenUsage()`. This phase adds enhanced logging.
+
+**Add to `lib/premium-token-validator.ts`:**
+```typescript
+export async function logTokenRedemption(
+    token: string, 
+    userId: string, 
+    method: 'signup' | 'join'
+): Promise<void> {
+    console.log(`[PREMIUM_TOKEN] Redeemed: token=${token.substring(0,8)}... user=${userId} method=${method}`);
+    
+    // Optional: Track in analytics
+    // captureEvent('premium_token_redeemed', { method });
+}
+```
+
+**Testing:**
+- [ ] Check server logs show token redemptions
+- [ ] Verify distinct tracking for signup vs join flows
+
+---
+
+### Phase 9.4: Admin UI for Token Management (Medium - 3-4 hours) ⬜
+
+**Goal:** Create admin interface to view, create, and manage tokens.
+
+#### Step 9.4.1: API Routes
+
+**New File:** `app/api/admin/premium-tokens/route.ts`
+
+```typescript
+// GET  - List all tokens created by admin
+// POST - Create token with custom settings (expiration, maxUses, notes)
+```
+
+**New File:** `app/api/admin/premium-tokens/[id]/route.ts`
+
+```typescript
+// PATCH  - Update token (deactivate, change maxUses)
+// DELETE - Soft delete (set isActive=false)
+```
+
+#### Step 9.4.2: Admin Page
+
+**New File:** `app/admin/premium-tokens/page.tsx`
+
+**Features:**
+- [ ] List all tokens with status (active, expired, used up)
+- [ ] Show usage count and last redemption date
+- [ ] Create new token form:
+  - Expiration date picker (default: 30 days)
+  - Max uses input (default: 10)
+  - Notes field (e.g., "Black Friday promo")
+- [ ] Deactivate/reactivate toggle per token
+- [ ] Copy token link button
+
+#### Step 9.4.3: Link from Settings
+
+**Update:** `components/SettingsModal.tsx`
+
+Add link to `/admin/premium-tokens` in the Super Admin section.
+
+**Testing:**
+- [ ] Admin can view all their tokens
+- [ ] Admin can create new token with custom settings
+- [ ] Admin can deactivate a token
+- [ ] Deactivated tokens fail validation
+- [ ] Token link copies correctly
+
+---
+
+### Implementation Order
+
+```
+Phase 9.1 (1 hour)     → Fix Token Generation        ✅ COMPLETE
+        ↓
+Phase 9.2 (2-3 hours)  → Unify Validation Logic      ✅ COMPLETE
+        ↓
+Phase 9.3 (30 min)     → Usage Tracking              ✅ COMPLETE
+        ↓
+Phase 9.4 (3-4 hours)  → Admin UI                    ⬜ Can be deferred
+```
+
+### Quick Win Path (Phases 9.1 + 9.2 only = 3-4 hours)
+
+Addresses the security gap immediately without the admin UI.
+
+### Files to Create/Modify
+
+| File | Action | Phase |
+|------|--------|-------|
+| `app/api/user/premium-token/route.ts` | Modify | 9.1 |
+| `lib/premium-token-validator.ts` | Create | 9.2 |
+| `app/api/jars/join/route.ts` | Modify | 9.2 |
+| `app/api/auth/signup/route.ts` | Modify | 9.2 |
+| `app/api/admin/premium-tokens/route.ts` | Create | 9.4 |
+| `app/api/admin/premium-tokens/[id]/route.ts` | Create | 9.4 |
+| `app/admin/premium-tokens/page.tsx` | Create | 9.4 |
+| `components/SettingsModal.tsx` | Modify | 9.4 |
+
+---
+
+## �📋 Future Considerations (Phase 10+)
 
 1. **Community Jars** - Public jar discovery and forking
 2. **Performance** - React Query caching optimization

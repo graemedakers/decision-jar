@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { validatePremiumToken, recordTokenUsage } from '@/lib/premium-token-validator';
 
 export async function POST(request: Request) {
     const session = await getSession();
@@ -52,16 +53,11 @@ export async function POST(request: Request) {
             });
         }
 
+        // Validate premium token using unified validator
         let isPremiumGifted = false;
         if (premiumToken) {
-            const inviter = await prisma.user.findFirst({
-                where: { premiumInviteToken: premiumToken },
-                select: { isSuperAdmin: true }
-            });
-
-            if (inviter?.isSuperAdmin) {
-                isPremiumGifted = true;
-            }
+            const validation = await validatePremiumToken(premiumToken);
+            isPremiumGifted = validation.isValid;
         }
 
         // Join the jar
@@ -84,6 +80,11 @@ export async function POST(request: Request) {
             where: { id: session.user.id },
             data: updateData
         });
+
+        // Record token usage if premium was granted
+        if (isPremiumGifted && premiumToken) {
+            await recordTokenUsage(premiumToken, session.user.id, 'join');
+        }
 
         return NextResponse.json({
             success: true,
