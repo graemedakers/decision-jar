@@ -23,7 +23,7 @@ export const maxDuration = 60;
 
 /**
  * Validates if a recommendation matches the user's specific request
- * Uses keyword matching with strict rejection rules
+ * Uses keyword matching with strict rejection rules for each concierge type
  */
 function validateRecommendation(
     recommendation: any,
@@ -38,57 +38,273 @@ function validateRecommendation(
     const requestLower = userRequest.toLowerCase();
     const recName = (recommendation.name || '').toLowerCase();
     const recDesc = (recommendation.description || '').toLowerCase();
-    const recCuisine = (recommendation.cuisine || recommendation.category || recommendation.type || recommendation.speciality || '').toLowerCase();
+    const recType = (recommendation.cuisine || recommendation.category || recommendation.type || recommendation.speciality || recommendation.genre || recommendation.activity_type || recommendation.theme_type || recommendation.sport || recommendation.music || '').toLowerCase();
     
     // Combine all text fields for searching
-    const allText = `${recName} ${recDesc} ${recCuisine}`.toLowerCase();
+    const allText = `${recName} ${recDesc} ${recType}`.toLowerCase();
 
-    console.log(`[Validation] Checking "${recommendation.name}"`);
-    console.log(`  Cuisine field: "${recCuisine}"`);
+    console.log(`[Validation] Checking "${recommendation.name}" (Tool: ${toolType})`);
+    console.log(`  Type field: "${recType}"`);
     console.log(`  User request: "${requestLower}"`);
 
-    // STRICT RULE 1: If user asks for "cafe" or "brunch"
-    if (/\b(cafe|coffee shop|brunch|breakfast)\b/i.test(requestLower)) {
-        // Accept ONLY if explicitly mentioned as cafe/brunch in name, description OR cuisine
-        const hasCafeBrunchKeywords = /\b(cafe|coffee|brunch|breakfast)\b/i.test(allText);
-        
-        // Reject if it's clearly a dinner-heavy type
-        const isDinnerHeavy = /\b(pizzeria|pizza|japanese|sushi|indian|thai|chinese|fine.dining|dinner.only)\b/i.test(recCuisine);
-        
-        // REJECT if it lacks cafe keywords OR is a known dinner type
-        if (!hasCafeBrunchKeywords || isDinnerHeavy) {
-            console.log(`  ❌ REJECT: Non-cafe type (hasKeywords=${hasCafeBrunchKeywords}, isDinnerHeavy=${isDinnerHeavy})`);
-            return false;
-        }
-        
-        console.log(`  ✅ ACCEPT: Matches cafe/brunch request`);
-        return true;
-    }
-
-    // STRICT RULE 2: If user asks for specific cuisine
-    const cuisineRequests = {
-        pizza: /\b(pizza)\b/i,
-        italian: /\b(italian)\b/i,
-        sushi: /\b(sushi|japanese)\b/i,
-        chinese: /\b(chinese)\b/i,
-        thai: /\b(thai)\b/i,
-        vietnamese: /\b(vietnamese|pho)\b/i,
-        indian: /\b(indian|curry)\b/i,
-        mexican: /\b(mexican|tacos)\b/i,
-    };
-
-    for (const [cuisineName, pattern] of Object.entries(cuisineRequests)) {
-        if (pattern.test(requestLower)) {
-            // User wants this specific cuisine
-            const matches = pattern.test(recCuisine) || pattern.test(allText);
+    // ============================================
+    // DINING / CONCIERGE - Food & Venue Rules
+    // ============================================
+    if (toolType === 'DINING' || toolType === 'CONCIERGE') {
+        // RULE: Cafe/Brunch requests
+        if (/\b(cafe|coffee shop|brunch|breakfast)\b/i.test(requestLower)) {
+            const hasCafeBrunchKeywords = /\b(cafe|coffee|brunch|breakfast|bakery)\b/i.test(allText);
+            const isDinnerHeavy = /\b(pizzeria|pizza|japanese|sushi|indian|thai|chinese|fine.dining|dinner.only)\b/i.test(recType);
             
-            if (!matches) {
-                console.log(`  ❌ REJECT: User wants ${cuisineName}, but this is ${recCuisine}`);
+            if (!hasCafeBrunchKeywords || isDinnerHeavy) {
+                console.log(`  ❌ REJECT: Non-cafe type`);
                 return false;
             }
-            
-            console.log(`  ✅ ACCEPT: Matches ${cuisineName} request`);
             return true;
+        }
+
+        // RULE: Specific cuisine requests
+        const cuisinePatterns: Record<string, RegExp> = {
+            pizza: /\b(pizza|pizzeria)\b/i,
+            italian: /\b(italian|pasta|trattoria)\b/i,
+            sushi: /\b(sushi|japanese|ramen)\b/i,
+            chinese: /\b(chinese|dim.sum|cantonese)\b/i,
+            thai: /\b(thai)\b/i,
+            vietnamese: /\b(vietnamese|pho|banh.mi)\b/i,
+            indian: /\b(indian|curry|tandoori)\b/i,
+            mexican: /\b(mexican|tacos|burrito)\b/i,
+            korean: /\b(korean|bbq|kimchi)\b/i,
+            greek: /\b(greek|mediterranean|gyro)\b/i,
+            french: /\b(french|bistro|patisserie)\b/i,
+        };
+
+        for (const [cuisineName, pattern] of Object.entries(cuisinePatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${cuisineName}, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+
+    // ============================================
+    // BAR / BAR_CRAWL / NIGHTCLUB - Drink & Nightlife Rules
+    // ============================================
+    if (toolType === 'BAR' || toolType === 'BAR_CRAWL' || toolType === 'NIGHTCLUB') {
+        const drinkPatterns: Record<string, RegExp> = {
+            cocktails: /\b(cocktail|mixolog|speakeasy)\b/i,
+            wine: /\b(wine|vino|sommelier)\b/i,
+            beer: /\b(beer|brew|craft|ale|lager|pub)\b/i,
+            whiskey: /\b(whiskey|whisky|bourbon|scotch)\b/i,
+        };
+
+        for (const [drinkType, pattern] of Object.entries(drinkPatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${drinkType}, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        // Music genre for nightclubs
+        if (toolType === 'NIGHTCLUB') {
+            const musicPatterns: Record<string, RegExp> = {
+                edm: /\b(edm|electronic|techno|house|trance)\b/i,
+                hiphop: /\b(hip.hop|rap|r&b|rnb)\b/i,
+                latin: /\b(latin|salsa|reggaeton|bachata)\b/i,
+                rock: /\b(rock|indie|alternative)\b/i,
+            };
+
+            for (const [musicType, pattern] of Object.entries(musicPatterns)) {
+                if (pattern.test(requestLower)) {
+                    if (!pattern.test(allText)) {
+                        console.log(`  ❌ REJECT: User wants ${musicType} music, but this is ${recType}`);
+                        return false;
+                    }
+                    return true;
+                }
+            }
+        }
+    }
+
+    // ============================================
+    // BOOK - Genre Rules
+    // ============================================
+    if (toolType === 'BOOK') {
+        const bookPatterns: Record<string, RegExp> = {
+            mystery: /\b(mystery|thriller|detective|suspense|crime)\b/i,
+            romance: /\b(romance|love|romantic)\b/i,
+            scifi: /\b(sci-fi|science.fiction|space|dystopian|cyberpunk)\b/i,
+            fantasy: /\b(fantasy|magic|dragon|wizard|epic)\b/i,
+            horror: /\b(horror|scary|supernatural|ghost)\b/i,
+            biography: /\b(biography|memoir|autobiography|non-fiction)\b/i,
+            selfhelp: /\b(self-help|self.improvement|productivity|motivational)\b/i,
+            history: /\b(history|historical|war|ancient)\b/i,
+        };
+
+        for (const [genre, pattern] of Object.entries(bookPatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${genre} book, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+
+    // ============================================
+    // MOVIE - Genre Rules
+    // ============================================
+    if (toolType === 'MOVIE') {
+        const moviePatterns: Record<string, RegExp> = {
+            action: /\b(action|superhero|martial.arts)\b/i,
+            comedy: /\b(comedy|funny|humour|humor)\b/i,
+            drama: /\b(drama|emotional|tearjerker)\b/i,
+            horror: /\b(horror|scary|slasher|paranormal)\b/i,
+            scifi: /\b(sci-fi|science.fiction|space|alien)\b/i,
+            animation: /\b(animation|animated|cartoon|pixar|disney)\b/i,
+            documentary: /\b(documentary|docu|true.story)\b/i,
+            romance: /\b(romance|romantic|love.story)\b/i,
+        };
+
+        for (const [genre, pattern] of Object.entries(moviePatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${genre} movie, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+
+    // ============================================
+    // GAME - Genre Rules
+    // ============================================
+    if (toolType === 'GAME') {
+        const gamePatterns: Record<string, RegExp> = {
+            rpg: /\b(rpg|role.playing|jrpg)\b/i,
+            fps: /\b(fps|shooter|first.person)\b/i,
+            strategy: /\b(strategy|rts|turn.based|4x)\b/i,
+            puzzle: /\b(puzzle|brain|logic)\b/i,
+            racing: /\b(racing|driving|car)\b/i,
+            sports: /\b(sports|football|soccer|basketball|fifa)\b/i,
+            horror: /\b(horror|survival.horror|scary)\b/i,
+            coop: /\b(co-op|cooperative|multiplayer)\b/i,
+        };
+
+        for (const [genre, pattern] of Object.entries(gamePatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${genre} game, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+
+    // ============================================
+    // WELLNESS / FITNESS - Activity Rules
+    // ============================================
+    if (toolType === 'WELLNESS' || toolType === 'FITNESS') {
+        const activityPatterns: Record<string, RegExp> = {
+            yoga: /\b(yoga|vinyasa|hatha|hot.yoga)\b/i,
+            pilates: /\b(pilates|reformer)\b/i,
+            massage: /\b(massage|spa|relaxation|thai.massage)\b/i,
+            meditation: /\b(meditation|mindfulness|zen)\b/i,
+            crossfit: /\b(crossfit|hiit|functional)\b/i,
+            swimming: /\b(swim|pool|aqua)\b/i,
+            climbing: /\b(climb|bouldering|rock)\b/i,
+            boxing: /\b(boxing|kickboxing|mma|martial)\b/i,
+            cycling: /\b(cycling|spin|bike)\b/i,
+            running: /\b(running|jogging|trail)\b/i,
+        };
+
+        for (const [activity, pattern] of Object.entries(activityPatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${activity}, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+
+    // ============================================
+    // ESCAPE_ROOM - Theme Rules
+    // ============================================
+    if (toolType === 'ESCAPE_ROOM') {
+        const themePatterns: Record<string, RegExp> = {
+            horror: /\b(horror|scary|haunted|zombie)\b/i,
+            mystery: /\b(mystery|detective|sherlock|murder)\b/i,
+            heist: /\b(heist|bank|robbery|spy)\b/i,
+            fantasy: /\b(fantasy|magic|wizard|medieval)\b/i,
+            scifi: /\b(sci-fi|space|alien|futuristic)\b/i,
+        };
+
+        for (const [theme, pattern] of Object.entries(themePatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${theme} escape room, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+
+    // ============================================
+    // SPORTS - Sport Type Rules
+    // ============================================
+    if (toolType === 'SPORTS') {
+        const sportPatterns: Record<string, RegExp> = {
+            tennis: /\b(tennis|racquet)\b/i,
+            golf: /\b(golf|driving.range)\b/i,
+            soccer: /\b(soccer|football|futsal)\b/i,
+            basketball: /\b(basketball|hoops)\b/i,
+            swimming: /\b(swim|pool|aquatic)\b/i,
+            cricket: /\b(cricket)\b/i,
+            rugby: /\b(rugby|league|union)\b/i,
+        };
+
+        for (const [sport, pattern] of Object.entries(sportPatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${sport}, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+
+    // ============================================
+    // THEATRE - Performance Type Rules
+    // ============================================
+    if (toolType === 'THEATRE') {
+        const showPatterns: Record<string, RegExp> = {
+            musical: /\b(musical|broadway|west.end)\b/i,
+            comedy: /\b(comedy|stand-up|improv)\b/i,
+            drama: /\b(drama|play|shakespeare)\b/i,
+            ballet: /\b(ballet|dance|contemporary)\b/i,
+            opera: /\b(opera|orchestr)\b/i,
+        };
+
+        for (const [showType, pattern] of Object.entries(showPatterns)) {
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User wants ${showType}, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
         }
     }
 
