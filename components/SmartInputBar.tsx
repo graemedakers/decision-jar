@@ -40,7 +40,7 @@ export function SmartInputBar() {
 
     // Check for Speech Recognition support on mount
     useEffect(() => {
-        const supported = typeof window !== 'undefined' && 
+        const supported = typeof window !== 'undefined' &&
             ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
         setSpeechSupported(supported);
     }, []);
@@ -75,7 +75,7 @@ export function SmartInputBar() {
 
                 // If this is the final result
                 if (event.results[0]?.isFinal) {
-                    trackEvent('voice_input_completed', { 
+                    trackEvent('voice_input_completed', {
                         transcript_length: transcript.length,
                         transcript_word_count: transcript.split(' ').length
                     });
@@ -85,7 +85,7 @@ export function SmartInputBar() {
             recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
                 console.error('Speech recognition error:', event.error);
                 setIsListening(false);
-                
+
                 if (event.error === 'no-speech') {
                     showInfo("No speech detected. Please try again.");
                 } else if (event.error === 'not-allowed') {
@@ -95,7 +95,7 @@ export function SmartInputBar() {
                 } else {
                     showError("Voice input failed. Please try typing instead.");
                 }
-                
+
                 trackEvent('voice_input_error', { error: event.error });
             };
 
@@ -136,27 +136,27 @@ export function SmartInputBar() {
      */
     const isRequest = (text: string): boolean => {
         const lowerText = text.toLowerCase().trim();
-        
+
         // Question patterns
         const questionStarters = [
             'find', 'where', 'what', 'how', 'show', 'suggest', 'recommend',
             'need', 'want', 'looking for', 'help me', 'can you', 'could you',
             'any ideas', 'give me', 'tell me', 'show me', 'i need', 'i want'
         ];
-        
+
         // Check if starts with a question word/phrase
-        const startsWithQuestion = questionStarters.some(starter => 
+        const startsWithQuestion = questionStarters.some(starter =>
             lowerText.startsWith(starter)
         );
-        
+
         // Check if contains question words anywhere
         const containsQuestionWord = ['find', 'recommend', 'suggest', 'need', 'want'].some(word =>
             lowerText.includes(word)
         );
-        
+
         // Check if ends with question mark
         const isQuestion = text.trim().endsWith('?');
-        
+
         // It's a request if it starts with question word OR is a question OR contains strong request words
         return startsWithQuestion || isQuestion || (containsQuestionWord && lowerText.split(' ').length > 2);
     };
@@ -246,7 +246,7 @@ export function SmartInputBar() {
             // Handle as Link
             trackPathSelected('1_have_idea', { trigger: 'url_paste' });
             trackModalOpened('add_idea', { triggered_by: 'smart_input_url' });
-            
+
             openModal('ADD_IDEA', {
                 initialData: {
                     description: "Shared Link",
@@ -255,12 +255,12 @@ export function SmartInputBar() {
             });
         } else if (isRequest(inputValue)) {
             // Smart Routing: Detected as request/question → Route to AI Concierge
-            trackPathSelected('2_need_inspiration', { 
+            trackPathSelected('2_need_inspiration', {
                 trigger: 'smart_routing_detected_request',
-                previous_path: '1_have_idea' 
+                previous_path: '1_have_idea'
             });
             trackModalOpened('concierge', { triggered_by: 'smart_input_auto_routed' });
-            
+
             openModal('CONCIERGE', {
                 initialPrompt: inputValue
             });
@@ -268,7 +268,7 @@ export function SmartInputBar() {
             // Handle as Manual Idea
             trackPathSelected('1_have_idea', { trigger: 'text_entry' });
             trackModalOpened('add_idea', { triggered_by: 'smart_input_text' });
-            
+
             openModal('ADD_IDEA', {
                 initialData: {
                     description: inputValue
@@ -304,9 +304,9 @@ export function SmartInputBar() {
                     onSubmit={handleSubmit}
                     className="relative flex items-center bg-white dark:bg-slate-900 shadow-xl rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10"
                 >
-                    {/* Left Actions - Compact on mobile */}
-                    <div className="flex items-center pl-2 shrink-0">
-                        {/* Image Upload - Always visible */}
+                    {/* Left Actions - All icons visible, compact on mobile */}
+                    <div className="flex items-center pl-1.5 sm:pl-2 gap-0.5 shrink-0">
+                        {/* Image Upload */}
                         <button
                             type="button"
                             onClick={() => !isUploadingImage && fileInputRef.current?.click()}
@@ -315,40 +315,59 @@ export function SmartInputBar() {
                             title={isUploadingImage ? "Processing image..." : "Upload Image"}
                         >
                             {isUploadingImage ? (
-                                <Loader2 className="w-5 h-5 animate-spin text-pink-600" />
+                                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-pink-600" />
                             ) : (
-                                <ImageIcon className="w-5 h-5" />
+                                <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                             )}
                         </button>
-                        
-                        {/* AI Concierge - Hidden on mobile (redundant with card below) */}
+
+                        {/* Voice Input Button */}
+                        {speechSupported && (
+                            <button
+                                type="button"
+                                onClick={isListening ? stopVoiceInput : startVoiceInput}
+                                className={`p-2 sm:p-2.5 rounded-xl transition-all ${isListening
+                                        ? 'text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse'
+                                        : 'text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                    }`}
+                                title={isListening ? "Stop listening" : "Voice input"}
+                            >
+                                {isListening ? (
+                                    <MicOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                                ) : (
+                                    <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
+                                )}
+                            </button>
+                        )}
+
+                        {/* AI Concierge - Now visible on all screens */}
                         <button
                             type="button"
                             data-tour="surprise-me-button"
                             onClick={() => {
-                                trackPathSelected('2_need_inspiration', { 
+                                trackPathSelected('2_need_inspiration', {
                                     trigger: 'smart_input_ai_button',
-                                    previous_path: '1_have_idea' 
+                                    previous_path: '1_have_idea'
                                 });
                                 trackModalOpened('concierge', { triggered_by: 'smart_input_ai_button' });
-                                
+
                                 openModal('CONCIERGE', {
                                     toolId: 'CONCIERGE',
                                     initialPrompt: inputValue
                                 });
                                 if (inputValue) setInputValue("");
                             }}
-                            className="hidden sm:block p-2.5 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors tooltip-trigger"
+                            className="p-2 sm:p-2.5 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
                             title="Ask AI Concierge"
                         >
-                            <Sparkles className="w-5 h-5" />
+                            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
-                        
-                        {/* Templates - Hidden on mobile */}
+
+                        {/* Templates - Hidden on mobile to save space */}
                         <button
                             type="button"
                             onClick={() => {
-                                trackPathSelected('3_browse_templates', { 
+                                trackPathSelected('3_browse_templates', {
                                     trigger: 'smart_input_template_button',
                                     previous_path: '1_have_idea'
                                 });
@@ -360,30 +379,10 @@ export function SmartInputBar() {
                         >
                             <BookOpen className="w-5 h-5" />
                         </button>
-                        
-                        {/* Voice Input Button - Always visible */}
-                        {speechSupported && (
-                            <button
-                                type="button"
-                                onClick={isListening ? stopVoiceInput : startVoiceInput}
-                                className={`p-2 sm:p-2.5 rounded-xl transition-all ${
-                                    isListening 
-                                        ? 'text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse' 
-                                        : 'text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
-                                }`}
-                                title={isListening ? "Stop listening" : "Voice input"}
-                            >
-                                {isListening ? (
-                                    <MicOff className="w-5 h-5" />
-                                ) : (
-                                    <Mic className="w-5 h-5" />
-                                )}
-                            </button>
-                        )}
                     </div>
 
                     {/* Divider */}
-                    <div className="w-px h-6 bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
+                    <div className="w-px h-5 sm:h-6 bg-slate-200 dark:bg-white/10 mx-0.5 sm:mx-1" />
 
                     {/* Main Input */}
                     <input
@@ -401,7 +400,7 @@ export function SmartInputBar() {
                         }}
                         onBlur={() => setIsFocused(false)}
                         placeholder={isListening ? "Listening..." : "Type or speak your idea..."}
-                        className={`flex-1 bg-transparent border-none outline-none px-2 sm:px-3 py-3 sm:py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-sm sm:text-base md:text-lg min-w-0 ${isListening ? 'placeholder:text-red-400 placeholder:animate-pulse' : ''}`}
+                        className={`flex-1 bg-transparent border-none outline-none px-1.5 sm:px-3 py-3 sm:py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-sm sm:text-base md:text-lg min-w-0 ${isListening ? 'placeholder:text-red-400 placeholder:animate-pulse' : ''}`}
                         disabled={isListening}
                     />
 
