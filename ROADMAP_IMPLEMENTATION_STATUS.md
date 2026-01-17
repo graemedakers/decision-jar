@@ -147,9 +147,9 @@
 
 ## 🔄 Current Status
 
-**Production:** Stable (Commit 757465b)  
-**Development:** Phase 8.4 (Push Notification Enhancement) complete ✅  
-**All major features (Phases 1-8.4):** Complete and deployed ✅
+**Production:** Stable (Commit aa98411)  
+**Development:** Voice Input feature complete ✅  
+**All major features (Phases 1-8.4 + Voice Input):** Complete and deployed ✅
 
 ---
 
@@ -191,6 +191,23 @@
 - ✅ XP gain animation toast (fixed TypeScript issue)
 
 **Impact Goal:** Reduce churn by sending proactive reminders
+
+---
+
+## ✅ Voice Input Feature (COMPLETE - Jan 17, 2026)
+
+### SmartInputBar Voice Integration ⭐️
+- ✅ Web Speech API integration (SpeechRecognition)
+- ✅ Microphone button in SmartInputBar (appears on supported browsers)
+- ✅ Real-time transcription with interim results
+- ✅ Visual feedback during recording (pulsing red button, placeholder text changes)
+- ✅ Graceful error handling (microphone permissions, network errors, no speech)
+- ✅ Auto-focus input after voice input completes
+- ✅ PostHog tracking: `voice_input_started`, `voice_input_completed`, `voice_input_error`
+- ✅ Works with smart routing (voice can trigger AI Concierge if question detected)
+
+**Browser Support:** Chrome, Edge, Safari (iOS 14.5+)
+**Impact Goal:** Faster idea capture, especially on mobile
 
 ---
 

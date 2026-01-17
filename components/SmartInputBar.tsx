@@ -1,21 +1,125 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Sparkles, BookOpen, Plus, Image as ImageIcon, Link as LinkIcon, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Sparkles, BookOpen, Plus, Image as ImageIcon, Link as LinkIcon, Loader2, Mic, MicOff } from "lucide-react";
 import { useModalSystem } from "@/components/ModalProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import imageCompression from 'browser-image-compression';
-import { showError, showSuccess } from "@/lib/toast";
-import { trackPathSelected, trackModalOpened } from "@/lib/analytics";
+import { showError, showSuccess, showInfo } from "@/lib/toast";
+import { trackPathSelected, trackModalOpened, trackEvent } from "@/lib/analytics";
+
+// Type declarations for Web Speech API
+interface SpeechRecognitionEvent extends Event {
+    results: SpeechRecognitionResultList;
+    resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+    error: string;
+    message: string;
+}
+
+declare global {
+    interface Window {
+        SpeechRecognition: any;
+        webkitSpeechRecognition: any;
+    }
+}
 
 export function SmartInputBar() {
     const [inputValue, setInputValue] = useState("");
     const [isFocused, setIsFocused] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [hasTrackedFocus, setHasTrackedFocus] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+    const [speechSupported, setSpeechSupported] = useState(false);
     const { openModal } = useModalSystem();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const recognitionRef = useRef<any>(null);
+
+    // Check for Speech Recognition support on mount
+    useEffect(() => {
+        const supported = typeof window !== 'undefined' && 
+            ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+        setSpeechSupported(supported);
+    }, []);
+
+    const startVoiceInput = () => {
+        if (!speechSupported) {
+            showError("Voice input is not supported in this browser. Please try Chrome or Edge.");
+            return;
+        }
+
+        try {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognitionRef.current = recognition;
+
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = navigator.language || 'en-US';
+
+            recognition.onstart = () => {
+                setIsListening(true);
+                trackEvent('voice_input_started', { language: recognition.lang });
+            };
+
+            recognition.onresult = (event: SpeechRecognitionEvent) => {
+                const transcript = Array.from(event.results)
+                    .map((result: any) => result[0])
+                    .map((result: any) => result.transcript)
+                    .join('');
+
+                setInputValue(transcript);
+
+                // If this is the final result
+                if (event.results[0]?.isFinal) {
+                    trackEvent('voice_input_completed', { 
+                        transcript_length: transcript.length,
+                        transcript_word_count: transcript.split(' ').length
+                    });
+                }
+            };
+
+            recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+                console.error('Speech recognition error:', event.error);
+                setIsListening(false);
+                
+                if (event.error === 'no-speech') {
+                    showInfo("No speech detected. Please try again.");
+                } else if (event.error === 'not-allowed') {
+                    showError("Microphone access denied. Please enable microphone permissions.");
+                } else if (event.error === 'network') {
+                    showError("Network error. Please check your connection.");
+                } else {
+                    showError("Voice input failed. Please try typing instead.");
+                }
+                
+                trackEvent('voice_input_error', { error: event.error });
+            };
+
+            recognition.onend = () => {
+                setIsListening(false);
+                recognitionRef.current = null;
+                // Focus the input field after voice input
+                inputRef.current?.focus();
+            };
+
+            recognition.start();
+        } catch (error) {
+            console.error('Failed to start voice recognition:', error);
+            showError("Failed to start voice input. Please try again.");
+            setIsListening(false);
+        }
+    };
+
+    const stopVoiceInput = () => {
+        if (recognitionRef.current) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+        }
+    };
 
     const isUrl = (text: string) => {
         try {
@@ -251,6 +355,25 @@ export function SmartInputBar() {
                         >
                             <BookOpen className="w-5 h-5" />
                         </button>
+                        {/* Voice Input Button */}
+                        {speechSupported && (
+                            <button
+                                type="button"
+                                onClick={isListening ? stopVoiceInput : startVoiceInput}
+                                className={`p-2.5 rounded-xl transition-all ${
+                                    isListening 
+                                        ? 'text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse' 
+                                        : 'text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                }`}
+                                title={isListening ? "Stop listening" : "Voice input"}
+                            >
+                                {isListening ? (
+                                    <MicOff className="w-5 h-5" />
+                                ) : (
+                                    <Mic className="w-5 h-5" />
+                                )}
+                            </button>
+                        )}
                     </div>
 
                     {/* Divider */}
@@ -271,8 +394,9 @@ export function SmartInputBar() {
                             }
                         }}
                         onBlur={() => setIsFocused(false)}
-                        placeholder="Type an idea, paste a link, upload an image, or ask AI..."
-                        className="flex-1 bg-transparent border-none outline-none px-3 py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-base md:text-lg min-w-0"
+                        placeholder={isListening ? "Listening... speak now" : "Type, speak, or paste an idea..."}
+                        className={`flex-1 bg-transparent border-none outline-none px-3 py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-base md:text-lg min-w-0 ${isListening ? 'placeholder:text-red-400 placeholder:animate-pulse' : ''}`}
+                        disabled={isListening}
                     />
 
                     {/* Right Action (Dynamic) */}
