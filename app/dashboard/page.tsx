@@ -116,7 +116,7 @@ function DashboardContent() {
     }, []);
 
     const { installPrompt, install } = usePWA();
-    
+
     // XP gain animation
     const { xpGain } = useXpAnimation(xp || 0, level);
 
@@ -146,9 +146,9 @@ function DashboardContent() {
             const currentJarMembership = userData?.memberships?.find(
                 (m: any) => m.jarId === userData.activeJarId
             );
-            const isOwnerOrAdmin = currentJarMembership?.role === 'ADMIN' || 
-                                   currentJarMembership?.role === 'OWNER';
-            
+            const isOwnerOrAdmin = currentJarMembership?.role === 'ADMIN' ||
+                currentJarMembership?.role === 'OWNER';
+
             // Only prompt to add ideas if you OWN the jar
             if (isOwnerOrAdmin) {
                 try {
@@ -172,21 +172,20 @@ function DashboardContent() {
             // Check if user has ANY personal (non-community) jar membership
             // Community jars (like Bug Reports, Feature Requests) don't count as "personal jars"
             const hasPersonalJarMembership = userData.memberships && userData.memberships.some((m: any) => !m.jar.isCommunityJar);
-            
+
             // Check if user has an active jar set AND it's a personal jar
-            const hasActivePersonalJar = userData.activeJarId && userData.memberships?.some((m: any) => 
+            const hasActivePersonalJar = userData.activeJarId && userData.memberships?.some((m: any) =>
                 m.jar.id === userData.activeJarId && !m.jar.isCommunityJar
             );
 
             // Only prompt to create jar if user has NO personal jars at all
             // (Community jars like Bug Reports don't count)
             if (!hasPersonalJarMembership && !hasActivePersonalJar) {
-                const hasSeenPrompt = sessionStorage.getItem('create_first_jar_prompt');
-                if (!hasSeenPrompt) {
+                // Small delay to ensure modal system is ready (helps on mobile)
+                setTimeout(() => {
                     openModal('CREATE_JAR');
-                    sessionStorage.setItem('create_first_jar_prompt', 'true');
-                    console.log('Prompting user to create first jar (no personal jars found, only community jars)');
-                }
+                    console.log('Prompting user to create first jar (no personal jars found)');
+                }, 300);
             }
         }
     }, [userData, isLoadingUser, openModal]);
