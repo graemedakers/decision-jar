@@ -2,7 +2,8 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { Prisma, SelectionMode } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import { awardXp } from '@/lib/gamification';
+import { awardXp, updateStreak } from '@/lib/gamification';
+import { notifyJarMembers } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
@@ -113,12 +114,21 @@ export async function POST(request: Request) {
 
         // Gamification: Award XP for adding an idea
         try {
+            await updateStreak(currentJarId);
             await awardXp(currentJarId, 15);
             await checkAndUnlockAchievements(currentJarId);
         } catch (xpError) {
             console.error("Gamification error during idea creation:", xpError);
             // Non-blocking
         }
+
+        // Send push notification to other jar members (non-blocking)
+        notifyJarMembers(currentJarId, session.user.id, {
+            title: `💡 ${session.user.name || 'Someone'} added a new idea`,
+            body: description.length > 60 ? description.substring(0, 57) + '...' : description,
+            url: '/jar',
+            icon: '/icon-192.png'
+        }).catch(err => console.error("Notification error:", err));
 
         return NextResponse.json(idea);
     } catch (error: any) {
