@@ -139,7 +139,7 @@ export const trackAIToolUsed = (toolName: string, properties?: Record<string, an
 };
 
 // Idea tracking
-export const trackIdeaAdded = (source: 'manual' | 'template' | 'concierge', jarId: string) => {
+export const trackIdeaAdded = (source: 'manual' | 'template' | 'concierge' | 'ai' | string, jarId: string) => {
     const sessionId = sessionStorage.getItem('sessionId');
     const sessionStartTime = sessionStorage.getItem('sessionStartTime');
     
