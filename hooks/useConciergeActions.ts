@@ -21,7 +21,8 @@ export function useConciergeActions({
     onClose,
     setRecommendations
 }: ConciergeActionProps) {
-    const [isAddingToJar, setIsAddingToJar] = useState(false);
+    // Track which specific item is being added (by name) instead of a single boolean
+    const [addingItemName, setAddingItemName] = useState<string | null>(null);
 
     const formatDetails = (rec: any) => {
         if (rec.details) return rec.details;
@@ -37,13 +38,13 @@ export function useConciergeActions({
     };
 
     const handleAddToJar = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
-        // FIX 1: Prevent duplicate clicks
-        if (isAddingToJar) {
-            logger.info('Already adding idea, please wait...');
+        // FIX 1: Prevent duplicate clicks on the same item
+        if (addingItemName === rec.name) {
+            logger.info('Already adding this idea, please wait...');
             return;
         }
 
-        setIsAddingToJar(true);
+        setAddingItemName(rec.name);
 
         try {
             // Check if we're in demo mode
@@ -320,7 +321,7 @@ export function useConciergeActions({
             showError("Failed to add to jar.");
         } finally {
             // FIX 1: Always reset loading state
-            setIsAddingToJar(false);
+            setAddingItemName(null);
         }
     };
 
@@ -445,6 +446,6 @@ export function useConciergeActions({
         handleGoTonight,
         handleFavorite,
         toggleSelection,
-        isAddingToJar  // Expose loading state for UI feedback
+        addingItemName  // Expose which item is being added (null = none)
     };
 }
