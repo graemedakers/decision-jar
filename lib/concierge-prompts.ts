@@ -20,32 +20,33 @@ export const getConciergePromptAndMock = (
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
 
-⚠️ CRITICAL INSTRUCTION: The user's specific requirements above take ABSOLUTE PRECEDENCE over everything below.
-- If they specify a venue type (cafe, restaurant, bistro, brunch spot, etc.), ALL 5 RECOMMENDATIONS MUST BE EXACTLY THAT TYPE
-- If they specify a meal type (brunch, breakfast, lunch, dinner), ALL 5 RECOMMENDATIONS MUST BE SUITABLE FOR THAT EXACT MEAL
-- If they specify any dietary needs or food preferences, ALL 5 RECOMMENDATIONS MUST STRICTLY HONOR THEM
-- DO NOT MIX VENUE TYPES: If they asked for cafes, ALL 5 must be cafes. If they asked for brunch spots, ALL 5 must serve brunch.
-- DO NOT recommend restaurants if they asked for cafes
-- DO NOT recommend dinner spots if they asked for brunch venues
-- DO NOT recommend fine dining if they asked for casual spots
+⚠️ CRITICAL INSTRUCTION: The user's specific requirements above take ABSOLUTE PRECEDENCE.
 
-REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC REQUEST ABOVE.
+EXAMPLES TO ILLUSTRATE:
+- If user asks for "brunch cafes with good coffee" → ALL 5 must be BRUNCH CAFES that serve GOOD COFFEE
+  ❌ WRONG: 1 brunch cafe + 4 dinner restaurants
+  ✅ CORRECT: 5 brunch cafes
+  
+- If user asks for "pizza places" → ALL 5 must be PIZZA PLACES
+  ❌ WRONG: 1 pizza place + 4 sushi/Italian/burger restaurants  
+  ✅ CORRECT: 5 pizza places
+
+- If user asks for "vegan restaurants" → ALL 5 must be VEGAN-FOCUSED restaurants
+  ❌ WRONG: 1 vegan restaurant + 4 restaurants with "some vegan options"
+  ✅ CORRECT: 5 vegan or vegan-friendly restaurants
+
+DO NOT MIX VENUE TYPES. DO NOT DILUTE THE RESULTS. ALL 5 MUST MATCH THE EXACT REQUEST.
 
                 ` : ''}
                 
-                ${extraInstructions ? 'Based on the critical requirements above, recommend 5 distinct venues that ALL match those exact criteria' : 'Recommend 5 distinct restaurants'} located near ${targetLocation}.
+                ${extraInstructions ? `Based on the critical requirements above ("${extraInstructions}"), recommend 5 distinct venues that ALL match those EXACT criteria` : 'Recommend 5 distinct restaurants'} located near ${targetLocation}.
                 
-                Additional preferences (only consider if they don't conflict with critical requirements above):
+                Additional preferences (only if they don't conflict with the critical requirements):
                 - Cuisine: ${inputs.cuisine || "Any good local food"}
                 - Vibe/Atmosphere: ${inputs.vibe || "Any"}
                 - Price Range: ${inputs.price || "Any"}
                 
                 IMPORTANT: Perform a check to ensure the venue is currently OPEN for business and has NOT permanently closed.
-                
-                ${extraInstructions ? `
-🔴 REMINDER BEFORE YOU OUTPUT: Double-check that ALL 5 venues match this requirement: "${extraInstructions}"
-If they asked for brunch cafes, DO NOT include dinner restaurants. If they asked for pizza places, DO NOT include sushi restaurants.
-                ` : ''}
                 
                 For each venue, provide:
                 - Name
@@ -59,6 +60,13 @@ If they asked for brunch cafes, DO NOT include dinner restaurants. If they asked
                 
                 Return JSON object with "recommendations" array.
                 Fields: name, description, cuisine, price, address, website, opening_hours, google_rating
+                
+                ${extraInstructions ? `
+🔴 FINAL VERIFICATION BEFORE RETURNING JSON:
+Before you return the JSON, verify that EVERY SINGLE recommendation (all 5) satisfies: "${extraInstructions}"
+If ANY recommendation doesn't match, REPLACE IT with one that does.
+Do NOT include ANY venues that don't match the user's specific request.
+                ` : ''}
                 `,
                 mockResponse: {
                     recommendations: [
