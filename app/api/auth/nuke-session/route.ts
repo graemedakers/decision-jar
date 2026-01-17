@@ -30,7 +30,8 @@ export async function GET(request: Request) {
     cookieStore.set('next-auth.csrf-token', '', { ...commonOptions, secure: false });
     cookieStore.set('__Host-next-auth.csrf-token', '', { ...commonOptions, secure: true });
 
-    // Redirect to home
-    const url = new URL('/', request.url);
+    // ✅ FIX: Redirect to /login instead of / to avoid middleware redirect loop
+    // Middleware redirects authenticated users from / to /dashboard, causing infinite loop
+    const url = new URL('/login', request.url);
     return NextResponse.redirect(url);
 }
