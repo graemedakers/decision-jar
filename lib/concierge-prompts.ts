@@ -4,6 +4,26 @@ export type PromptGeneratorResponse = {
     mockResponse: { recommendations: any[] };
 };
 
+/**
+ * Universal priority rule for all concierges when user specifies an exact name
+ */
+const getExactNamePriorityRule = (extraInstructions: string) => {
+    if (!extraInstructions) return '';
+    return `
+🎯 EXACT NAME PRIORITY RULE:
+If the user mentions a SPECIFIC NAME of something (a restaurant, bar, book, movie, game, venue, etc.),
+you MUST include that exact item as your FIRST recommendation, unless it violates other criteria they specified.
+
+Examples:
+- "I want to go to Joe's Pizza" → Joe's Pizza MUST be recommendation #1
+- "Tell me about The Great Gatsby" → The Great Gatsby MUST be recommendation #1  
+- "Find The Mockingbird bar" → The Mockingbird MUST be recommendation #1
+- "I heard about a place called Sunrise Cafe" → Sunrise Cafe MUST be recommendation #1
+
+The remaining recommendations should be similar alternatives that also match their criteria.
+`;
+};
+
 export const getConciergePromptAndMock = (
     toolKey: string,
     inputs: Record<string, any>,
@@ -17,6 +37,8 @@ export const getConciergePromptAndMock = (
                 You are a Hyper-Local Food & Venue Scout. A user has performed a specific search for venues in ${targetLocation}.
                 
                 PRIMARY SEARCH QUERY: "${extraInstructions || "Best local restaurants"}"
+                
+                ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${inputs.cuisine || inputs.vibe || inputs.price ? `
                 FILTER CONSTRAINTS:
@@ -52,6 +74,8 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a versatile local lifestyle concierge.
+                
+                ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
@@ -102,6 +126,8 @@ REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC
                 Act as a local nightlife concierge.
                 Recommend 5 distinct bars or drink spots near ${targetLocation}.
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -131,6 +157,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 prompt: `
             Act as a nightlife guide and route planner.
             Create 3 DISTINCT Bar Crawl Routes near ${targetLocation}.
+            
+            ${getExactNamePriorityRule(extraInstructions)}
             
             ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
@@ -180,6 +208,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Act as a travel concierge for ${targetLocation}.
                 Recommend 5 distinct hotels/stays:
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -207,6 +237,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 prompt: `
                 Act as a nightlife promoter for ${targetLocation}.
                 Recommend 5 distinct clubs/parties:
+                
+                ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
@@ -296,6 +328,8 @@ you MUST include that exact movie as the FIRST recommendation, regardless of whe
                 Act as a literary curator.
                 Recommend 5 distinct books:
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -326,6 +360,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Recommend 5 distinct spas/studios near ${targetLocation}.
                 Prioritize venues as close as possible to this area:
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -354,6 +390,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Act as a fitness guide.
                 Recommend 5 distinct gyms or fitness activities near ${targetLocation}.
                 Prioritize options within easy reach of this area:
+                
+                ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
@@ -384,6 +422,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Recommend 5 distinct shows or arts exhibitions near ${targetLocation}.
                 Ensure these are real venues with accurate addresses in this region:
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -411,6 +451,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 prompt: `
                 Act as a gaming expert.
                 Recommend 5 distinct video games:
+                
+                ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
@@ -442,6 +484,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Recommend 5 distinct escape rooms located near ${targetLocation}.
                 Ensure the addresses are accurate for the specific branches in this area:
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -470,6 +514,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Act as a local sports guide.
                 Recommend 5 distinct sports venues or events near ${targetLocation}:
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -497,6 +543,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 prompt: `
                 Act as a professional chef planning a menu.
                 Create 3 DISTINCT, complete menu concepts.
+                
+                ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
@@ -557,6 +605,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Act as a romantic concierge and event planner.
                 Create 3 DISTINCT, complete date night plans near ${targetLocation}.
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -605,6 +655,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Act as a local events coordinator.
                 Recommend 5 distinct events or activities happening THIS WEEKEND near ${targetLocation}.
                 
+                ${getExactNamePriorityRule(extraInstructions)}
+                
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
 ${extraInstructions}
@@ -641,6 +693,8 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 prompt: `
                 Act as a master travel agent and local expert.
                 Create 3 DISTINCT, detailed holiday itineraries for a trip to ${targetLocation}.
+                
+                ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
