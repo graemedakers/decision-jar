@@ -45,32 +45,30 @@ export function ConciergeShortcutButton({ toolId, toolName, isPremium }: Concier
         const isMobile = isIOS || isAndroid;
         const isWindows = /Windows/.test(navigator.userAgent);
 
-        // Check if Web Share API is available
-        const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
-
         // Track shortcut creation attempt
         trackEvent('concierge_shortcut_created', {
             tool_id: toolId,
             tool_name: toolName,
-            method: isMobile ? (canShare ? 'native_share' : 'clipboard') : 'desktop_shortcut',
+            method: isMobile ? 'clipboard_with_instructions' : (isWindows ? 'windows_shortcut' : 'clipboard'),
             platform: isWindows ? 'windows' : isIOS ? 'ios' : isAndroid ? 'android' : 'other'
         });
 
-        // MOBILE: Try native Web Share API first
-        if (isMobile && canShare) {
+        // MOBILE: Copy to clipboard and show instructions
+        // Note: Web Share API doesn't support "Add to Home Screen" - that's a browser feature
+        if (isMobile) {
             try {
-                await navigator.share({
-                    title: `${toolName} - Decision Jar`,
-                    text: `Quick access to ${toolName}`,
-                    url: deepLink
-                });
-                showSuccess(`Share successful! Save to your home screen for quick access.`);
-                return;
-            } catch (err: any) {
-                if (err.name === 'AbortError') {
-                    return; // User cancelled
+                await navigator.clipboard.writeText(deepLink);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+
+                if (isIOS) {
+                    showInfo(`📱 Link copied!\n\nTo add to Home Screen:\n1. Open Safari\n2. Paste the link\n3. Tap Share (□↑) → "Add to Home Screen"`);
+                } else if (isAndroid) {
+                    showInfo(`📱 Link copied!\n\nTo add to Home Screen:\n1. Open Chrome\n2. Paste this link in the address bar\n3. Tap ⋮ menu → "Add to Home screen"`);
                 }
-                // Fall through to other methods
+                return;
+            } catch (err) {
+                // Fall through to show link
             }
         }
 
@@ -105,19 +103,12 @@ IconIndex=0
             }
         }
 
-        // FALLBACK: Copy to clipboard with instructions
+        // FALLBACK (non-Windows desktop): Copy to clipboard
         try {
             await navigator.clipboard.writeText(deepLink);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-
-            if (isIOS) {
-                showInfo(`📱 Link copied! To add a shortcut:\n1. Open Safari\n2. Paste the link\n3. Tap Share → Add to Home Screen`);
-            } else if (isAndroid) {
-                showInfo(`📱 Link copied! To add a shortcut:\n1. Open Chrome\n2. Paste the link\n3. Tap ⋮ → Add to Home Screen`);
-            } else {
-                showSuccess(`✨ Link copied! Create a bookmark or drag to your bookmarks bar.`);
-            }
+            showSuccess(`✨ Link copied! Create a bookmark or drag to your bookmarks bar.`);
         } catch (err) {
             showInfo(`Copy this link to bookmark: ${deepLink}`);
         }
