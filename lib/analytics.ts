@@ -49,15 +49,33 @@ export const trackModalOpened = (modalType: string) => {
     });
 };
 
-export const trackModalAbandoned = (modalType: string, reason: string, data?: any) => {
+export const trackModalAbandoned = (modalType: string, reason: string | number, hadInteraction?: boolean | any, data?: any) => {
     const sessionId = sessionStorage.getItem('sessionId');
     
-    safeCapture('modal_abandoned', {
+    // Handle both old format (reason, data) and new format (timeOpenSeconds, hadInteraction, data)
+    let properties: Record<string, any> = {
         modal_type: modalType,
-        reason: reason,
         session_id: sessionId,
-        ...data
-    });
+    };
+    
+    if (typeof reason === 'string') {
+        // Old format: trackModalAbandoned(modalType, reason, data)
+        properties.reason = reason;
+        if (hadInteraction && typeof hadInteraction === 'object') {
+            properties = { ...properties, ...hadInteraction };
+        }
+    } else {
+        // New format: trackModalAbandoned(modalType, timeOpenSeconds, hadInteraction, data)
+        properties.time_open_seconds = reason;
+        if (typeof hadInteraction === 'boolean') {
+            properties.had_interaction = hadInteraction;
+        }
+        if (data && typeof data === 'object') {
+            properties = { ...properties, ...data };
+        }
+    }
+    
+    safeCapture('modal_abandoned', properties);
 };
 
 // Concierge tracking
