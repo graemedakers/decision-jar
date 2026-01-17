@@ -228,7 +228,7 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         actionType: 'modal',
         modalId: 'menu_planner',
         showInDashboard: true,
-        showInExplore: false // Currently not in Explore
+        showInExplore: true
     },
     {
         id: 'escape_room_scout',
@@ -240,7 +240,7 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         actionType: 'concierge',
         conciergeId: 'ESCAPE_ROOM',
         showInDashboard: true,
-        showInExplore: false // Not in Explore previously
+        showInExplore: true
     },
     {
         id: 'sports_scout',
@@ -252,7 +252,7 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         actionType: 'concierge',
         conciergeId: 'SPORTS',
         showInDashboard: true,
-        showInExplore: false // Not in Explore previously
+        showInExplore: true
     },
     {
         id: 'book_finder',
@@ -264,6 +264,18 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         actionType: 'concierge',
         conciergeId: 'BOOK',
         showInDashboard: true,
-        showInExplore: false // Not in Explore previously
+        showInExplore: true
+    },
+    {
+        id: 'home_chef',
+        title: 'Home Chef',
+        description: 'Get personalized menu ideas and recipes for any occasion.',
+        icon: ChefHat,
+        color: 'orange',
+        requiresPremium: true,
+        actionType: 'concierge',
+        conciergeId: 'CHEF',
+        showInDashboard: true,
+        showInExplore: true
     }
 ];
