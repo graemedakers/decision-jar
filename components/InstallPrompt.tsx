@@ -69,7 +69,9 @@ export function InstallPrompt() {
         localStorage.setItem('pwa-last-prompted', Date.now().toString());
     };
 
-    const handleDismiss = () => {
+    const handleDismiss = (e?: React.MouseEvent) => {
+        e?.stopPropagation(); // Prevent any event bubbling
+        console.log('[PWA] Dismiss clicked'); // Debug log
         trackPWAEvent('pwa_install_dismissed');
         setShowPrompt(false);
         localStorage.setItem('pwa-last-prompted', Date.now().toString());
@@ -84,11 +86,12 @@ export function InstallPrompt() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
 
                 <button
+                    type="button"
                     onClick={handleDismiss}
-                    className="absolute top-4 right-4 p-2 rounded-full bg-black/10 hover:bg-black/20 text-white/70 hover:text-white transition-colors z-10"
+                    className="absolute top-4 right-4 p-2 rounded-full bg-black/10 hover:bg-black/20 text-white/70 hover:text-white transition-colors z-[100] cursor-pointer"
                     aria-label="Dismiss"
                 >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4 pointer-events-none" />
                 </button>
 
                 <div className="flex items-start gap-4 relative z-10">
