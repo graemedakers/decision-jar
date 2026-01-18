@@ -37,19 +37,7 @@ export interface DashboardTool {
 }
 
 export const DASHBOARD_TOOLS: DashboardTool[] = [
-    {
-        id: 'community_finder',
-        title: 'Community Finder',
-        description: 'Join public jars and find your squad.',
-        icon: Users,
-        color: 'blue',
-        requiresPremium: false,
-        actionType: 'link',
-        linkHref: '/community',
-        showInDashboard: false,
-        showInExplore: true,
-        communityJarCompatible: true
-    },
+
     {
         id: 'surprise_me',
         title: 'Surprise Me',

@@ -110,7 +110,7 @@ export default function LearnHubPage() {
                         <h4 className="font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-widest text-xs">Social Connections</h4>
                         <ul className="space-y-2">
                             <li><Link href="/learn/building-social-connections" className="hover:text-primary">Adult Friendships</Link></li>
-                            <li><Link href="/community" className="hover:text-primary">Community Finder</Link></li>
+
                         </ul>
                     </div>
                     <div>
