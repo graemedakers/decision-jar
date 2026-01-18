@@ -12,7 +12,21 @@ export async function checkAndUnlockAchievements(jarId: string): Promise<Achieve
         // 1. Get counts
         const ideaCount = await prisma.idea.count({ where: { jarId } });
         // Selected dates (Spins) - checking ideas that have been selected
-        const spinCount = await prisma.idea.count({ where: { jarId, selectedAt: { not: null } } });
+        // We filter out ideas that were selected immediately after creation (within 1 minute)
+        // because those are usually "Direct Choices" from the Concierge, not "Spins".
+        const selectionData = await prisma.idea.findMany({
+            where: { jarId, selectedAt: { not: null } },
+            select: { createdAt: true, selectedAt: true }
+        });
+
+        const spinCount = selectionData.filter(idea => {
+            if (!idea.selectedAt) return false;
+            // A "Spin" is when you select an idea that existed in the jar for a while.
+            // If it was created and selected in the same flow, it's a "Direct Selection".
+            // 60 seconds is a safe margin for any network lag vs a deliberate spin.
+            const diffMs = Math.abs(idea.selectedAt.getTime() - idea.createdAt.getTime());
+            return diffMs > 60000;
+        }).length;
         // Rated dates (Completed) - we look at Ratings made by users in this jar
         const completedDatesCount = await prisma.idea.count({
             where: {
@@ -54,10 +68,10 @@ export async function checkAndUnlockAchievements(jarId: string): Promise<Achieve
                         achievementId: achievement.id
                     }
                 });
-                
+
                 // Track analytics
                 trackAchievementUnlocked(achievement.id, achievement.title, achievement.category, jarId);
-                
+
                 // Send push notification (non-blocking, respects user preferences)
                 notifyJarMembers(jarId, null, {
                     title: '🏆 Achievement Unlocked!',
@@ -67,7 +81,7 @@ export async function checkAndUnlockAchievements(jarId: string): Promise<Achieve
                     tag: `achievement-${achievement.id}`,
                     requireInteraction: false
                 }, 'notifyAchievements').catch(err => console.error("Achievement notification error:", err));
-                
+
                 newUnlocks.push(achievement);
             }
         }

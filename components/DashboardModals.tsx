@@ -198,7 +198,7 @@ export function DashboardModals({
                     onIdeaAdded={handleContentUpdate}
                     onGoTonight={(idea) => {
                         closeModal();
-                        openModal('DATE_REVEAL', { idea });
+                        openModal('DATE_REVEAL', { idea, isDirectSelection: true });
                     }}
                     onFavoriteUpdated={fetchFavorites}
                     onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
@@ -227,7 +227,7 @@ export function DashboardModals({
                             }}
                             onGoTonight={(idea) => {
                                 closeModal();
-                                openModal('DATE_REVEAL', { idea });
+                                openModal('DATE_REVEAL', { idea, isDirectSelection: true });
                             }}
                             onFavoriteUpdated={fetchFavorites}
                             onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
@@ -245,7 +245,7 @@ export function DashboardModals({
                             onIdeaAdded={handleContentUpdate}
                             onGoTonight={(idea) => {
                                 closeModal();
-                                openModal('DATE_REVEAL', { idea });
+                                openModal('DATE_REVEAL', { idea, isDirectSelection: true });
                             }}
                             onFavoriteUpdated={fetchFavorites}
                             onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
@@ -283,7 +283,7 @@ export function DashboardModals({
                     onIdeaAdded={handleContentUpdate}
                     onGoTonight={(idea) => {
                         closeModal();
-                        openModal('DATE_REVEAL', { idea });
+                        openModal('DATE_REVEAL', { idea, isDirectSelection: true });
                     }}
                     onFavoriteUpdated={fetchFavorites}
                     onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
@@ -302,7 +302,7 @@ export function DashboardModals({
                     onIdeaAdded={handleContentUpdate}
                     onGoTonight={(idea) => {
                         closeModal();
-                        openModal('DATE_REVEAL', { idea });
+                        openModal('DATE_REVEAL', { idea, isDirectSelection: true });
                     }}
                     onFavoriteUpdated={fetchFavorites}
                     isPremium={isPremium}

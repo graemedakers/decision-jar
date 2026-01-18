@@ -24,9 +24,10 @@ interface DateRevealProps {
     userLocation?: string;
     onFindDining?: (location: string) => void;
     isViewOnly?: boolean;
+    isDirectSelection?: boolean;
 }
 
-export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOnly }: DateRevealProps) {
+export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOnly, isDirectSelection }: DateRevealProps) {
     const isMobile = useMediaQuery("(max-width: 768px)");
 
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -140,7 +141,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                     className={`fixed inset-0 z-50 flex ${isMobile ? 'items-end' : 'items-center justify-center'} p-0 md:p-4 bg-black/60 backdrop-blur-sm`}
                     onClick={onClose} // Click backdrop to close
                 >
-                    {!isViewOnly && <Confetti />}
+                    {!isViewOnly && !isDirectSelection && <Confetti />}
                     <motion.div
                         variants={isMobile ? mobileVariants : desktopVariants}
                         initial="hidden"
