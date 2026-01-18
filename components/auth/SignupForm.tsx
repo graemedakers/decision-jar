@@ -71,7 +71,9 @@ export function SignupForm() {
                 sessionStorage.setItem('oauth_invite_signup', 'true');
             }
 
-            const callbackUrl = inviteCode ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : "/dashboard";
+            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+            const callbackPath = inviteCode ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : "/dashboard";
+            const callbackUrl = `${origin}${callbackPath}`;
             await signIn(provider, { callbackUrl });
         } catch (error) {
             console.error(`${provider} login error:`, error);

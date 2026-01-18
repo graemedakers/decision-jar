@@ -204,7 +204,6 @@ export async function GET(request: Request) {
             const isSurprise = idea.isSurprise;
             const isPrivate = idea.isPrivate;
             const isGroupJar = idea.jar.type === 'SOCIAL';
-            const isCommunityJar = false; // Community jars removed
             const isVotingJar = (idea.jar.selectionMode as string) === 'VOTE';
 
             let processedIdea: any = {
@@ -216,9 +215,9 @@ export async function GET(request: Request) {
                 createdBy: idea.createdBy // Kept as object
             };
 
-            // Apply Masking Logic (Skip for Community Jars, or Admin in Admin Pick Mode)
+            // Apply Masking Logic (Skip for Admin in Admin Pick Mode)
             const isAdminPick = idea.jar.selectionMode === 'ADMIN_PICK';
-            if (!isSelected && !isMyIdea && !isCommunityJar && !(isAdmin && isAdminPick)) {
+            if (!isSelected && !isMyIdea && !(isAdmin && isAdminPick)) {
                 // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
                 if (isVotingJar && (isSurprise || isPrivate)) {
                     processedIdea = {

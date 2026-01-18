@@ -11,13 +11,11 @@ interface EnhancedEmptyStateProps {
     jarName: string;
     jarId: string;
     inviteCode?: string | null;
-    isCommunityJar?: boolean;
     onTemplateClick: () => void;
     onAddIdeaClick: () => void;
-    onCreateJar?: () => void;
 }
 
-export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, isCommunityJar, onTemplateClick, onAddIdeaClick, onCreateJar }: EnhancedEmptyStateProps) {
+export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, onTemplateClick, onAddIdeaClick }: EnhancedEmptyStateProps) {
     const { openModal } = useModalSystem();
 
     const suggestedConcierge = getSuggestedConcierge(jarTopic, jarName);
@@ -54,74 +52,48 @@ export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, isCom
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Create Personal Jar (Community Context) */}
-                    {isCommunityJar && onCreateJar && (
-                        <button
-                            onClick={onCreateJar}
-                            className="p-6 rounded-2xl border-2 border-pink-200 dark:border-pink-500/30 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 hover:from-pink-100 hover:to-rose-100 dark:hover:from-pink-900/30 dark:hover:to-rose-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-pink-500/10"
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-pink-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
-                                    <Plus className="w-6 h-6 text-white" />
-                                </div>
-                                <div className="flex-1 text-left">
-                                    <h4 className="font-bold text-lg text-pink-900 dark:text-pink-300 mb-1">
-                                        Create Your Own Jar
-                                    </h4>
-                                    <p className="text-sm text-pink-700 dark:text-pink-400">
-                                        Start a personal collection for your ideas
-                                    </p>
-                                </div>
-                            </div>
-                        </button>
-                    )}
-
                     {/* AI Concierge */}
-                    {!isCommunityJar && (
-                        <button
-                            onClick={handleUseAI}
-                            className="p-6 rounded-2xl border-2 border-purple-200 dark:border-purple-500/30 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 hover:from-purple-100 hover:to-indigo-100 dark:hover:from-purple-900/30 dark:hover:to-indigo-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-purple-500/10"
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
-                                    <Sparkles className="w-6 h-6 text-white" />
-                                </div>
-                                <div className="flex-1 text-left">
-                                    <h4 className="font-bold text-lg text-purple-900 dark:text-purple-300 mb-1">
-                                        {suggestedConcierge.name}
-                                    </h4>
-                                    <p className="text-sm text-purple-700 dark:text-purple-400">
-                                        {suggestedConcierge.description}
-                                    </p>
-                                    <p className="text-xs text-purple-600 dark:text-purple-500 mt-2 font-medium">
-                                        Premium feature
-                                    </p>
-                                </div>
+                    <button
+                        onClick={handleUseAI}
+                        className="p-6 rounded-2xl border-2 border-purple-200 dark:border-purple-500/30 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 hover:from-purple-100 hover:to-indigo-100 dark:hover:from-purple-900/30 dark:hover:to-indigo-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-purple-500/10"
+                    >
+                        <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
+                                <Sparkles className="w-6 h-6 text-white" />
                             </div>
-                        </button>
-                    )}
+                            <div className="flex-1 text-left">
+                                <h4 className="font-bold text-lg text-purple-900 dark:text-purple-300 mb-1">
+                                    {suggestedConcierge.name}
+                                </h4>
+                                <p className="text-sm text-purple-700 dark:text-purple-400">
+                                    {suggestedConcierge.description}
+                                </p>
+                                <p className="text-xs text-purple-600 dark:text-purple-500 mt-2 font-medium">
+                                    Premium feature
+                                </p>
+                            </div>
+                        </div>
+                    </button>
 
                     {/* Browse Templates */}
-                    {!isCommunityJar && (
-                        <button
-                            onClick={onTemplateClick}
-                            className="p-6 rounded-2xl border-2 border-blue-200 dark:border-blue-500/30 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 hover:from-blue-100 hover:to-cyan-100 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-blue-500/10"
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
-                                    <BookOpen className="w-6 h-6 text-white" />
-                                </div>
-                                <div className="flex-1 text-left">
-                                    <h4 className="font-bold text-lg text-blue-900 dark:text-blue-300 mb-1">
-                                        Browse Templates
-                                    </h4>
-                                    <p className="text-sm text-blue-700 dark:text-blue-400">
-                                        Import pre-made idea collections for {jarTopic}
-                                    </p>
-                                </div>
+                    <button
+                        onClick={onTemplateClick}
+                        className="p-6 rounded-2xl border-2 border-blue-200 dark:border-blue-500/30 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 hover:from-blue-100 hover:to-cyan-100 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-blue-500/10"
+                    >
+                        <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
+                                <BookOpen className="w-6 h-6 text-white" />
                             </div>
-                        </button>
-                    )}
+                            <div className="flex-1 text-left">
+                                <h4 className="font-bold text-lg text-blue-900 dark:text-blue-300 mb-1">
+                                    Browse Templates
+                                </h4>
+                                <p className="text-sm text-blue-700 dark:text-blue-400">
+                                    Import pre-made idea collections for {jarTopic}
+                                </p>
+                            </div>
+                        </div>
+                    </button>
 
                     {/* Add Manually */}
                     <button
@@ -134,36 +106,34 @@ export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, isCom
                             </div>
                             <div className="flex-1 text-left">
                                 <h4 className="font-bold text-lg text-emerald-900 dark:text-emerald-300 mb-1">
-                                    {isCommunityJar ? "Submit Bug / Feedback" : "Add Ideas Manually"}
+                                    Add Ideas Manually
                                 </h4>
                                 <p className="text-sm text-emerald-700 dark:text-emerald-400">
-                                    {isCommunityJar ? "Help us improve or report an issue" : "Start from scratch with your own suggestions"}
+                                    Start from scratch with your own suggestions
                                 </p>
                             </div>
                         </div>
                     </button>
 
                     {/* Invite Others */}
-                    {!isCommunityJar && (
-                        <button
-                            onClick={handleInvite}
-                            className="p-6 rounded-2xl border-2 border-amber-200 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-amber-500/10"
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
-                                    <Users className="w-6 h-6 text-white" />
-                                </div>
-                                <div className="flex-1 text-left">
-                                    <h4 className="font-bold text-lg text-amber-900 dark:text-amber-300 mb-1">
-                                        Invite Others
-                                    </h4>
-                                    <p className="text-sm text-amber-700 dark:text-amber-400">
-                                        Share your jar so others can contribute ideas
-                                    </p>
-                                </div>
+                    <button
+                        onClick={handleInvite}
+                        className="p-6 rounded-2xl border-2 border-amber-200 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-amber-500/10"
+                    >
+                        <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
+                                <Users className="w-6 h-6 text-white" />
                             </div>
-                        </button>
-                    )}
+                            <div className="flex-1 text-left">
+                                <h4 className="font-bold text-lg text-amber-900 dark:text-amber-300 mb-1">
+                                    Invite Others
+                                </h4>
+                                <p className="text-sm text-amber-700 dark:text-amber-400">
+                                    Share your jar so others can contribute ideas
+                                </p>
+                            </div>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>

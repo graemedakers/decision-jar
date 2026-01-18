@@ -26,10 +26,10 @@ const FavoritesModal = dynamic(() => import("@/components/FavoritesModal").then(
 const AddIdeaModal = dynamic(() => import("@/components/AddIdeaModal").then(m => m.AddIdeaModal), { ssr: false });
 const SurpriseMeModal = dynamic(() => import("@/components/SurpriseMeModal").then(m => m.SurpriseMeModal), { ssr: false });
 const SpinFiltersModal = dynamic(() => import("@/components/SpinFiltersModal").then(m => m.SpinFiltersModal), { ssr: false });
+// ... (imports)
 const SettingsModal = dynamic(() => import("@/components/SettingsModal").then(m => m.SettingsModal), { ssr: false });
 const QuickDecisionsModal = dynamic(() => import("@/components/QuickDecisionsModal").then(m => m.QuickDecisionsModal), { ssr: false });
 
-const CommunityAdminModal = dynamic(() => import("@/components/CommunityAdminModal").then(m => m.CommunityAdminModal), { ssr: false });
 const JarMembersModal = dynamic(() => import("@/components/JarMembersModal").then(m => m.JarMembersModal), { ssr: false });
 const JarQuickStartModal = dynamic(() => import("@/components/JarQuickStartModal").then(m => m.JarQuickStartModal), { ssr: false });
 const MoveIdeaModal = dynamic(() => import("@/components/MoveIdeaModal").then(m => m.MoveIdeaModal), { ssr: false });
@@ -78,23 +78,8 @@ export function DashboardModals({
 }: DashboardModalsProps) {
 
     const { activeModal, modalProps, closeModal, openModal } = useModalSystem();
-    const isCommunityJar = userData?.isCommunityJar;
 
-    // Helper for specialized logic (e.g., opening generic concierge)
-    const handleConciergeGoTonight = (idea: any) => {
-        closeModal(); // Close concierge
-        // Open Add Idea with this idea
-        openModal('ADD_IDEA', { initialData: null, prefilledIdea: idea });
-        // NOTE: AddIdeaModal logic might need adjustment to handle 'prefilledIdea' vs 'initialData' logic if distinct
-        // actually existing GenericConcierge logic was: setActiveConciergeTool(null); setEditingIdea(null); setSelectedIdea(idea); setIsModalOpen(true);
-        // This implies passing `selectedIdea` to `DateReveal` NOT `AddIdeaModal`?
-        // Wait, checking codebase: 
-        // onGoTonight={(idea) => { setActive...; setSelectedIdea(idea); setIsModalOpen(true); }}
-        // This actually seems to open AddIdeaModal (isModalOpen)?? NO, DateReveal uses selectedIdea.
-        // Wait, DateReveal is `isOpen={!!selectedIdea}`.
-        // AddIdeaModal is `isOpen={isModalOpen || !!editingIdea}`.
-        // So `GenericConciergeModal` was opening `AddIdeaModal`.
-    };
+    // ... helper functions
 
     return (
         <>
@@ -141,27 +126,23 @@ export function DashboardModals({
             />
 
             {/* Surprise Me - Using original modal (reverted from WizardFrame) */}
-            {!isCommunityJar && (
-                <SurpriseMeModal
-                    isOpen={activeModal === 'SURPRISE_ME'}
-                    onClose={closeModal}
-                    onIdeaAdded={fetchIdeas}
-                    initialLocation={userLocation || ""}
-                    jarTopic={jarTopic}
-                    customCategories={userData?.customCategories}
-                />
-            )}
+            <SurpriseMeModal
+                isOpen={activeModal === 'SURPRISE_ME'}
+                onClose={closeModal}
+                onIdeaAdded={fetchIdeas}
+                initialLocation={userLocation || ""}
+                jarTopic={jarTopic}
+                customCategories={userData?.customCategories}
+            />
 
-            {!isCommunityJar && (
-                <SpinFiltersModal
-                    isOpen={activeModal === 'FILTERS'}
-                    onClose={closeModal}
-                    onSpin={handleSpinJar}
-                    jarTopic={jarTopic}
-                    ideas={ideas}
-                    customCategories={userData?.customCategories}
-                />
-            )}
+            <SpinFiltersModal
+                isOpen={activeModal === 'FILTERS'}
+                onClose={closeModal}
+                onSpin={handleSpinJar}
+                jarTopic={jarTopic}
+                ideas={ideas}
+                customCategories={userData?.customCategories}
+            />
 
             <SettingsModal
                 isOpen={activeModal === 'SETTINGS'}
@@ -180,14 +161,12 @@ export function DashboardModals({
                 customCategories={userData?.customCategories}
             />
 
-            {!isCommunityJar && (
-                <QuickDecisionsModal
-                    isOpen={activeModal === 'QUICK_TOOLS'}
-                    onClose={closeModal}
-                />
-            )}
+            <QuickDecisionsModal
+                isOpen={activeModal === 'QUICK_TOOLS'}
+                onClose={closeModal}
+            />
 
-            {!isCommunityJar && activeModal === 'WEEKEND_PLANNER' && (
+            {activeModal === 'WEEKEND_PLANNER' && (
                 <GenericConciergeModal
                     isOpen={true}
                     onClose={closeModal}
@@ -206,53 +185,49 @@ export function DashboardModals({
                 />
             )}
 
-            {!isCommunityJar && (
-                <>
-                    {/* Generic Concierge Modal - Now supports skill picker when no toolId */}
-                    {activeModal === 'CONCIERGE' && (
-                        <GenericConciergeModal
-                            key={modalProps?.toolId || 'unified'}
-                            isOpen={true}
-                            onClose={closeModal}
-                            config={modalProps?.toolId ? CONCIERGE_CONFIGS[modalProps.toolId] : undefined}
-                            skillId={modalProps?.toolId}
-                            userLocation={userLocation || undefined}
-                            initialPrompt={modalProps?.initialPrompt}
-                            isPremium={isPremium}
-                            availableJars={availableJars}
-                            currentJarId={userData?.activeJarId || null}
-                            onIdeaAdded={() => {
-                                fetchIdeas();
-                                refreshUser();
-                            }}
-                            onGoTonight={(idea) => {
-                                closeModal();
-                                openModal('DATE_REVEAL', { idea, isDirectSelection: true });
-                            }}
-                            onFavoriteUpdated={fetchFavorites}
-                            onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
-                        />
-                    )}
+            {/* Generic Concierge Modal - Now supports skill picker when no toolId */}
+            {activeModal === 'CONCIERGE' && (
+                <GenericConciergeModal
+                    key={modalProps?.toolId || 'unified'}
+                    isOpen={true}
+                    onClose={closeModal}
+                    config={modalProps?.toolId ? CONCIERGE_CONFIGS[modalProps.toolId] : undefined}
+                    skillId={modalProps?.toolId}
+                    userLocation={userLocation || undefined}
+                    initialPrompt={modalProps?.initialPrompt}
+                    isPremium={isPremium}
+                    availableJars={availableJars}
+                    currentJarId={userData?.activeJarId || null}
+                    onIdeaAdded={() => {
+                        fetchIdeas();
+                        refreshUser();
+                    }}
+                    onGoTonight={(idea) => {
+                        closeModal();
+                        openModal('DATE_REVEAL', { idea, isDirectSelection: true });
+                    }}
+                    onFavoriteUpdated={fetchFavorites}
+                    onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
+                />
+            )}
 
-                    {activeModal === 'BAR_CRAWL_PLANNER' && (
-                        <GenericConciergeModal
-                            isOpen={true}
-                            onClose={closeModal}
-                            config={CONCIERGE_CONFIGS.BAR_CRAWL}
-                            userLocation={userLocation || undefined}
-                            availableJars={availableJars}
-                            currentJarId={userData?.activeJarId || null}
-                            onIdeaAdded={handleContentUpdate}
-                            onGoTonight={(idea) => {
-                                closeModal();
-                                openModal('DATE_REVEAL', { idea, isDirectSelection: true });
-                            }}
-                            onFavoriteUpdated={fetchFavorites}
-                            onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
-                            isPremium={isPremium}
-                        />
-                    )}
-                </>
+            {activeModal === 'BAR_CRAWL_PLANNER' && (
+                <GenericConciergeModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    config={CONCIERGE_CONFIGS.BAR_CRAWL}
+                    userLocation={userLocation || undefined}
+                    availableJars={availableJars}
+                    currentJarId={userData?.activeJarId || null}
+                    onIdeaAdded={handleContentUpdate}
+                    onGoTonight={(idea) => {
+                        closeModal();
+                        openModal('DATE_REVEAL', { idea, isDirectSelection: true });
+                    }}
+                    onFavoriteUpdated={fetchFavorites}
+                    onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}
+                    isPremium={isPremium}
+                />
             )}
 
             <AdminControlsModal
@@ -355,15 +330,6 @@ export function DashboardModals({
                 }}
                 onContinueFree={closeModal}
             />
-
-            {userData?.activeJarId && (
-                <CommunityAdminModal
-                    isOpen={activeModal === 'COMMUNITY_ADMIN'}
-                    onClose={closeModal}
-                    jarId={userData.activeJarId}
-                    jarName={userData.jarName || "Community Jar"}
-                />
-            )}
 
             <LevelUpModal
                 isOpen={activeModal === 'LEVEL_UP'}

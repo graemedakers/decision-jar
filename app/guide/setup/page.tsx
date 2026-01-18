@@ -49,17 +49,7 @@ export default function GuideSetup() {
                 organize your decisions.
             </p>
 
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                <Users className="text-blue-500" /> Public Community Jars
-            </h2>
-            <p className="mb-6">
-                Want to open your jar to the world? Premium users can create <strong>Community Jars</strong>.
-            </p>
-            <ul className="list-disc pl-6 mb-8 space-y-2">
-                <li><strong>Public Index:</strong> Your jar appears in the "Discover Communities" list.</li>
-                <li><strong>Member Limits:</strong> Set a cap (e.g., 50 members) to keep it manageable.</li>
-                <li><strong>Waitlists:</strong> If full, new users join a waitlist and are auto-promoted when spots open!</li>
-            </ul>
+
 
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                 <UserPlus className="text-purple-600" /> Inviting Members

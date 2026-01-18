@@ -123,7 +123,7 @@ function DashboardContent() {
     // --- View Logic / Layout Calculations ---
     const jarTopic = userData?.jarTopic;
     const jarSelectionMode = userData?.jarSelectionMode;
-    const isCommunityJar = false; // Community jars removed
+
     const isVotingMode = jarSelectionMode === 'VOTE';
     const isAllocationMode = jarSelectionMode === 'ALLOCATION';
     // const theme = getThemeForTopic(jarTopic); // Theme usage removed from Jar3D as it accepts no props
@@ -149,8 +149,7 @@ function DashboardContent() {
 
     // Check if we should show QuickStart modal for empty jar on dashboard
     useEffect(() => {
-        // Skip for community jars (like Bug Reports) which are pre-seeded or specific
-        if (showEmptyState && userData?.activeJarId && !isCommunityJar) {
+        if (showEmptyState && userData?.activeJarId) {
             // Only show modal if user is ADMIN/OWNER of this jar (not just a member)
             const currentJarMembership = userData?.memberships?.find(
                 (m: any) => m.jarId === userData.activeJarId
@@ -172,7 +171,7 @@ function DashboardContent() {
                 } catch (e) { }
             }
         }
-    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, userData?.memberships, openModal, isCommunityJar]);
+    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, userData?.memberships, openModal]);
 
     // ✅ CRITICAL: Auto-prompt for users without personal jars
     // This covers: New users who sign up and only have access to community jars (Bug Reports, etc.)
@@ -198,7 +197,7 @@ function DashboardContent() {
                 openModal('CREATE_JAR');
             }, 500);
         }
-    }, [userData, isLoadingUser, openModal, isCommunityJar]);
+    }, [userData, isLoadingUser, openModal]);
 
     const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
     const combinedLocation = userLocation || "";
@@ -400,11 +399,7 @@ function DashboardContent() {
                                 </Button>
                             </Link>
 
-                            <Link href="/community" className="shrink-0" aria-label="Discover Communities">
-                                <Button variant="outline" size="icon" className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
-                                    <Users className="w-5 h-5 text-slate-500" />
-                                </Button>
-                            </Link>
+
 
                             <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Quick Tools">
                                 <Dices className="w-5 h-5 text-slate-500" />
@@ -430,7 +425,7 @@ function DashboardContent() {
 
                     {/* Invite Code Banner */}
                     <div className="animate-in fade-in slide-in-from-top-4 duration-700">
-                        {!isCommunityJar && <InviteCodeDisplay code={inviteCode} topic={jarTopic} />}
+                        <InviteCodeDisplay code={inviteCode} topic={jarTopic} />
                     </div>
 
                     {/* JAR VISUALIZATION SECTION */}
@@ -457,10 +452,8 @@ function DashboardContent() {
                                             jarName={userData?.jarName || 'Your Jar'}
                                             jarId={userData?.activeJarId || ''}
                                             inviteCode={inviteCode}
-                                            isCommunityJar={isCommunityJar}
                                             onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
                                             onAddIdeaClick={() => openModal('ADD_IDEA')}
-                                            onCreateJar={() => openModal('CREATE_JAR')}
                                         />
                                     )}
                                     {showAdminStatus && (

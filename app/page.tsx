@@ -703,8 +703,7 @@ export default function Home() {
                   "Unlimited Jars & Members",
                   "All AI Planners & Concierges",
                   "Custom Itinerary Builder",
-                  "Cloud Memory Storage",
-                  "Excl. Community Jar Hosting"
+                  "Cloud Memory Storage"
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
                     <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
@@ -771,10 +770,7 @@ export default function Home() {
                     question="What is Task Allocation mode?"
                     answer="Allocation mode is built for shared responsibilities. You can create a list of tasks (like chores) and the app will randomly distribute them among members evenly."
                   />
-                  <FaqItem
-                    question="How do Community Jars work?"
-                    answer="Community Jars are public collections you can discover and join. While anyone can join for free, creating and hosting a public Community Jar requires a separate annual hosting fee for the organizer."
-                  />
+
                   <FaqItem
                     question="Can I save memories?"
                     answer="Yes! Every time you complete an activity from the jar, it's moved to 'The Vault'. There you can rate the experience, add private notes, and upload up to 3 photos to preserve the memory."

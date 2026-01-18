@@ -68,7 +68,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
         }
     }, [jarTopic, categories]);
 
-    const isCommunitySubmission = currentUser?.isCommunityJar && !currentUser?.isCreator && !initialData?.id;
+
 
     const { addIdea, updateIdea, deleteIdea } = useIdeaMutations();
     const isLoading = addIdea.isPending || updateIdea.isPending || deleteIdea.isPending;
@@ -104,11 +104,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 showSuccess("Idea updated successfully!");
             } else {
                 await addIdea.mutateAsync(apiBody);
-                if (isCommunitySubmission) {
-                    showSuccess("🚀 Suggestion sent! The jar admin will review your idea soon.");
-                } else {
-                    showSuccess("Idea added to jar!");
-                }
+                showSuccess("Idea added to jar!");
             }
 
             if (onSuccess) onSuccess();
@@ -140,6 +136,6 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
         handleSubmit,
         handleDelete,
         categories,
-        isCommunitySubmission
+
     };
 }

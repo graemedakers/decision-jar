@@ -17,7 +17,6 @@ interface JarSummary {
     memberCount: number;
     ideaCount: number;
     createdAt: string;
-    isCommunityJar: boolean;
     topic?: string;
     referenceCode?: string;
 }
@@ -160,7 +159,7 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
                 <DialogContent className="max-w-2xl">
                     <div className="space-y-4">
                         <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed px-1">
-                            Leave communities you're no longer interested in, or manage the settings of Jars you've created.
+                            Leave Jars you're no longer interested in, or manage the settings of Jars you've created.
                         </p>
 
                         {isLoading ? (
@@ -182,7 +181,7 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
                                     >
                                         <div className="flex items-start gap-4">
                                             <div className="w-12 h-12 rounded-xl bg-violet-500/10 dark:bg-violet-500/20 border border-violet-500/20 flex items-center justify-center shrink-0">
-                                                {jar.isCommunityJar ? <Users className="w-6 h-6 text-indigo-500" /> : <LayoutGrid className="w-6 h-6 text-violet-500" />}
+                                                <LayoutGrid className="w-6 h-6 text-violet-500" />
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2 flex-wrap min-h-[32px]">

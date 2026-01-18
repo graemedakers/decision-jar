@@ -172,13 +172,19 @@ export function useDashboardLogic() {
 
     // Handle Invite Codes on Dashboard (Direct Landing or Social Redirect)
     useEffect(() => {
-        if (isLoadingUser || !userData) return;
+        if (isLoadingUser || !userData || isLoadingIdeas) return;
 
         const code = searchParams?.get('code');
         const premiumToken = searchParams?.get('pt');
 
         if (code) {
             const handleJoin = async () => {
+                // Check if we should clean up "My First Jar"
+                // Only if it's "My First Jar" and it's empty
+                const jarIdToDelete = (userData.jarName === "My First Jar" && ideas.length === 0)
+                    ? userData.activeJarId
+                    : null;
+
                 try {
                     const res = await fetch('/api/jars/join', {
                         method: 'POST',
@@ -195,6 +201,20 @@ export function useDashboardLogic() {
                             showSuccess("Successfully joined the jar!");
                         }
 
+                        // Use the cleanup logic if applicable
+                        if (jarIdToDelete && data.jarId !== jarIdToDelete) {
+                            try {
+                                const deleteRes = await fetch(`/api/jars/${jarIdToDelete}`, {
+                                    method: 'DELETE',
+                                });
+                                if (deleteRes.ok) {
+                                    console.log('[Dashboard Join] Cleaned up empty "My First Jar"');
+                                }
+                            } catch (e) {
+                                console.error("Failed to delete empty jar", e);
+                            }
+                        }
+
                         // ✅ Mark as invite user (for tour skip)
                         sessionStorage.setItem('email_invite_signup', 'true');
 
@@ -207,7 +227,7 @@ export function useDashboardLogic() {
                         // Refresh data
                         handleContentUpdate();
                     } else {
-                        // Only show error if it's not a session issue (which shouldn't happen here as we check userData)
+                        // Only show error if it's not a session issue
                         showError(data.error || "Failed to join jar");
 
                         // Clean URL even on failure to prevent repeated attempts
@@ -222,7 +242,7 @@ export function useDashboardLogic() {
             };
             handleJoin();
         }
-    }, [searchParams, userData, isLoadingUser]);
+    }, [searchParams, userData, isLoadingUser, isLoadingIdeas, ideas]);
 
     // ✅ FIX: Handle OAuth Invite Signup Cleanup
     // After OAuth callback, check for pending invite params in sessionStorage
@@ -377,7 +397,7 @@ export function useDashboardLogic() {
                     openModal('SETTINGS');
                     break;
                 case 'invite':
-                    openModal('COMMUNITY_ADMIN'); // Or scroll to invite code
+                    openModal('SETTINGS');
                     break;
                 case 'capture':
                     if (ideaId) {

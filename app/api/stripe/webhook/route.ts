@@ -109,20 +109,6 @@ export async function POST(req: Request) {
 
                 logger.info(`[STRIPE_WEBHOOK] ✅ Created new user and jar for ${email} (${user.id})`);
             });
-        } else if (metadata?.type === 'COMMUNITY_JAR_CREATION') {
-            const jarId = metadata.jarId;
-            if (jarId) {
-                logger.info(`[STRIPE_WEBHOOK] Activating Community Jar ${jarId}`);
-                await prisma.jar.update({
-                    where: { id: jarId },
-                    data: {
-                        subscriptionStatus: 'active',
-                        stripeCustomerId: session.customer as string,
-                        stripeSubscriptionId: session.subscription as string,
-                    }
-                });
-                logger.info(`[STRIPE_WEBHOOK] ✅ Community Jar ${jarId} activated`);
-            }
         }
     } else if (event.type === 'customer.subscription.updated') {
         const subscription = event.data.object as Stripe.Subscription;
@@ -137,14 +123,7 @@ export async function POST(req: Request) {
         });
         logger.info(`[STRIPE_WEBHOOK] ✅ Updated ${result.count} user(s) to status: ${subscription.status}`);
 
-        // Also update JAR status (for communities)
-        const jarResult = await prisma.jar.updateMany({
-            where: { stripeSubscriptionId: subscription.id },
-            data: {
-                subscriptionStatus: subscription.status
-            }
-        });
-        logger.info(`[STRIPE_WEBHOOK] ✅ Updated ${jarResult.count} jar(s) to status: ${subscription.status}`);
+
 
         if (subscription.status === 'past_due') {
             // Find user to get email logic (updateMany doesn't return the record)
@@ -174,15 +153,7 @@ export async function POST(req: Request) {
         });
         logger.info(`[STRIPE_WEBHOOK] ✅ Canceled ${result.count} user subscription(s)`);
 
-        // Also update JAR status (for communities)
-        const jarResult = await prisma.jar.updateMany({
-            where: { stripeSubscriptionId: subscription.id },
-            data: {
-                subscriptionStatus: 'canceled',
-                subscriptionRenewsAt: null // No longer renews
-            }
-        });
-        logger.info(`[STRIPE_WEBHOOK] ✅ Canceled ${jarResult.count} jar subscription(s)`);
+
     }
 
     logger.info(`[STRIPE_WEBHOOK] ✅ Successfully processed ${event.type}`);
