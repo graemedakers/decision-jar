@@ -35,8 +35,6 @@ async function main() {
                                 topic: true,
                                 selectionMode: true,
                                 customCategories: true,
-                                imageUrl: true,
-                                description: true
                             }
                         }
                     }
