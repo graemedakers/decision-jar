@@ -48,7 +48,7 @@ async function main() {
         }
 
         console.log(`✅ User found: ${user.id}`);
-        console.log(`📊 Stats: XP=${user.xp}, Level=${user.level}`);
+
         console.log(`🏺 Active Jar ID: ${user.activeJarId}`);
         console.log(`👥 Membership count: ${user.memberships.length}`);
 
