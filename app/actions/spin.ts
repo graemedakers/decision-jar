@@ -3,7 +3,7 @@
 import { ActionResponse, Idea } from '@/lib/types';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { sendPushNotification } from '@/lib/notifications';
+import { notifyJarMembers } from '@/lib/notifications';
 import { awardXp, updateStreak } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { COST_VALUES, ACTIVITY_VALUES } from '@/lib/constants';
@@ -112,25 +112,13 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
             (async () => {
                 try {
                     // Send push notifications to other jar members (not the person who picked)
-                    const members = await prisma.jarMember.findMany({
-                        where: {
-                            jarId: currentJarId,
-                            userId: { not: session.user.id } // Exclude the person who picked
-                        },
-                        include: { user: true }
-                    });
-
-                    // Send push notification to each member
-                    const notificationPromises = members.map(member =>
-                        sendPushNotification(member.userId, {
-                            title: `🎯 New pick: "${selectedIdea.description}"`,
-                            body: `${session.user.name || 'Someone'} selected this from your jar!`,
-                            url: `/jar?selected=${selectedIdea.id}`,
-                            icon: selectedIdea.photoUrls?.[0] || '/icon-192.png'
-                        })
-                    );
-
-                    await Promise.allSettled(notificationPromises);
+                    // Send push notification to other jar members (not the person who picked)
+                    await notifyJarMembers(currentJarId, session.user.id, {
+                        title: `🎯 New pick: "${selectedIdea.description}"`,
+                        body: `${session.user.name || 'Someone'} selected this from your jar!`,
+                        url: `/jar?selected=${selectedIdea.id}`,
+                        icon: selectedIdea.photoUrls?.[0] || '/icon-192.png'
+                    }, 'notifyJarSpun');
 
                     // Award XP, update streak, and check achievements
                     await updateStreak(currentJarId);

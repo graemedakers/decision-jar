@@ -12,6 +12,17 @@ export function useIdeaMutations() {
     const cache = createCacheInvalidator(queryClient);
     const isDemo = isDemoMode(); // ✅ Check if in demo mode
 
+    const dispatchBroadcast = (jarId: string | undefined) => {
+        if (!jarId) return;
+        // Dispatch window event for useSquadMode to pick up and broadcast via Supabase
+        // Use generic Event if CustomEvent TS issues arise, but CustomEvent is standard in DOM lib
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('decision-jar:broadcast', {
+                detail: { jarId, event: 'content-update' }
+            }));
+        }
+    };
+
     const addIdeaMutation = useMutation({
         mutationFn: async (newItemArgs: any) => {
             // ✅ If demo mode, use localStorage instead of API
@@ -60,6 +71,7 @@ export function useIdeaMutations() {
             if (!isDemo) {
                 // Regular mode: Invalidate to get the real ID and data from server
                 cache.invalidateIdeas();
+                if (data.idea?.jarId) dispatchBroadcast(data.idea.jarId);
             }
             // Demo mode: Do nothing - demo page calls loadDemoData() in handleCloseAddModal
         },
@@ -89,6 +101,7 @@ export function useIdeaMutations() {
         onSuccess: (data) => {
             if (!data.success) throw new Error(data.error);
             cache.invalidateIdeas();
+            if (data.idea?.jarId) dispatchBroadcast(data.idea.jarId);
         },
     });
 
@@ -98,6 +111,10 @@ export function useIdeaMutations() {
             await queryClient.cancelQueries({ queryKey: CacheKeys.ideas() });
             const previousIdeas = queryClient.getQueryData<Idea[]>(CacheKeys.ideas());
 
+            // Capture jarId for broadcast
+            const ideaToDelete = previousIdeas?.find(i => i.id === id);
+            const jarId = ideaToDelete?.jarId;
+
             // Optimistic Update: Return list without the deleted item
             if (previousIdeas) {
                 queryClient.setQueryData<Idea[]>(CacheKeys.ideas(), (old) =>
@@ -105,7 +122,7 @@ export function useIdeaMutations() {
                 );
             }
 
-            return { previousIdeas };
+            return { previousIdeas, jarId };
         },
         onError: (err, id, context) => {
             if (context?.previousIdeas) {
@@ -113,9 +130,10 @@ export function useIdeaMutations() {
             }
             showError("Failed to delete idea");
         },
-        onSuccess: (data) => {
+        onSuccess: (data, id, context) => {
             if (!data.success) throw new Error(data.error);
             cache.invalidateIdeas();
+            if (context?.jarId) dispatchBroadcast(context.jarId);
         },
     });
 

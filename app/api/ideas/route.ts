@@ -128,7 +128,7 @@ export async function POST(request: Request) {
             body: isSecretIdea ? '🤫 It\'s a secret... spin to find out!' : (description.length > 60 ? description.substring(0, 57) + '...' : description),
             url: '/jar',
             icon: '/icon-192.png'
-        }).catch(err => console.error("Notification error:", err));
+        }, 'notifyIdeaAdded').catch(err => console.error("Notification error:", err));
 
         return NextResponse.json(idea);
     } catch (error: any) {

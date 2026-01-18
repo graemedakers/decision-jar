@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useModalSystem } from "@/components/ModalProvider";
 import { useUser } from "@/hooks/useUser";
@@ -65,10 +65,10 @@ export function useDashboardLogic() {
     // Prevent double execution of OAuth cleanup
     const oauthCleanupRef = useRef(false);
 
-    const handleContentUpdate = () => {
+    const handleContentUpdate = useCallback(() => {
         fetchIdeas();
         refreshUser();
-    };
+    }, [fetchIdeas, refreshUser]);
 
     // 3. Feature Composition
     const { activeModal } = useModalSystem();
@@ -88,7 +88,8 @@ export function useDashboardLogic() {
     const { broadcastSpinStart, broadcastSpinResult } = useSquadMode(
         userData?.activeJarId,
         handleExternalSpinStart,
-        handleExternalSpinComplete
+        handleExternalSpinComplete,
+        handleContentUpdate
     );
 
     const handleSpinJar = async (filters: any = {}) => {
