@@ -38,7 +38,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     return (
         <AnimatePresence>
             {open && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-hidden">
+                <div className="fixed inset-0 z-50 overflow-y-auto">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -47,9 +47,11 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
                         onClick={() => onOpenChange(false)}
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                     />
-                    {/* Content Container - properly centered with safe margins */}
-                    <div className="relative z-50 w-full sm:max-w-lg sm:p-4 sm:my-8 max-h-full flex items-center justify-center">
-                        {children}
+                    {/* Content Container - flex wrapper for centering */}
+                    <div className="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+                        <div className="relative z-50 w-full sm:max-w-lg">
+                            {children}
+                        </div>
                     </div>
                 </div>
             )}
