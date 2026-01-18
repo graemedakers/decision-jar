@@ -38,7 +38,7 @@ const fetchUserApi = async (redirectToLogin: boolean = true) => {
             console.warn('[useUser] User session invalid (401), nuking session and redirecting to login');
             isRedirecting = true; // ✅ Set flag BEFORE redirect
             // ✅ Use replace() to prevent back button issues
-            window.location.replace('/api/auth/nuke-session');
+            window.location.replace('/api/auth/nuke-session?target=/');
             // Throw error with status to prevent React Query retry
             const error: any = new Error("Redirecting to login...");
             error.status = 401;
@@ -58,13 +58,13 @@ const fetchUserApi = async (redirectToLogin: boolean = true) => {
     }
 
     const data = await res.json();
-    
+
     // ✅ CRITICAL: If user is null (deleted but session exists), treat as 401
     if (!data?.user && redirectToLogin && !isRedirecting) {
         console.warn('[useUser] User data is null despite valid session, nuking session and redirecting');
         isRedirecting = true; // ✅ Set flag BEFORE redirect
         // ✅ Use replace() to prevent back button issues
-        window.location.replace('/api/auth/nuke-session');
+        window.location.replace('/api/auth/nuke-session?target=/');
         const error: any = new Error("User deleted, redirecting...");
         error.status = 401;
         throw error;
