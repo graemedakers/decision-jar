@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { logger } from "@/lib/logger";
 
@@ -11,27 +10,38 @@ export function useSquadMode(
 ) {
     const [isConnected, setIsConnected] = useState(false);
 
+    // Use refs to hold latest callbacks, preventing stale closures without re-subscribing
+    const onSpinStartRef = useRef(onExternalSpinStart);
+    const onSpinResultRef = useRef(onExternalSpinResult);
+    const onContentUpdateRef = useRef(onContentUpdate);
+
+    useEffect(() => {
+        onSpinStartRef.current = onExternalSpinStart;
+        onSpinResultRef.current = onExternalSpinResult;
+        onContentUpdateRef.current = onContentUpdate;
+    }, [onExternalSpinStart, onExternalSpinResult, onContentUpdate]);
+
     useEffect(() => {
         if (!jarId || !supabase) return;
 
         const channel = supabase.channel(`jar:${jarId}`)
             .on('broadcast', { event: 'spin-start' }, () => {
                 logger.info('Squad: Received spin-start');
-                onExternalSpinStart?.();
+                if (onSpinStartRef.current) onSpinStartRef.current();
             })
             .on('broadcast', { event: 'spin-result' }, (payload) => {
                 logger.info('Squad: Received spin-result', payload);
-                onExternalSpinResult?.(payload.payload.idea);
+                if (onSpinResultRef.current) onSpinResultRef.current(payload.payload.idea);
             })
             .on('broadcast', { event: 'content-update' }, () => {
                 logger.info('Squad: Received content-update');
-                onContentUpdate?.();
+                if (onContentUpdateRef.current) onContentUpdateRef.current();
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') setIsConnected(true);
             });
 
-        // Listen for local broadcast requests from other components (like mutation hooks)
+        // Listen for local broadcast requests from other components
         const handleBroadcastRequest = async (e: Event) => {
             const customEvent = e as CustomEvent;
             if (customEvent.detail?.jarId === jarId && customEvent.detail?.event) {
@@ -51,7 +61,7 @@ export function useSquadMode(
             if (supabase) supabase.removeChannel(channel);
             setIsConnected(false);
         };
-    }, [jarId]); // Removed callbacks from dependency array to prevent reconnection loops. Assuming stable refs or OK to be stale closure if updated.
+    }, [jarId]);
 
     const broadcastSpinStart = async () => {
         if (!jarId || !supabase) return;

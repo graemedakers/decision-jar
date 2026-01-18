@@ -17,6 +17,7 @@ export function useIdeaMutations() {
         // Dispatch window event for useSquadMode to pick up and broadcast via Supabase
         // Use generic Event if CustomEvent TS issues arise, but CustomEvent is standard in DOM lib
         if (typeof window !== 'undefined') {
+            console.log(`[useIdeaMutations] Dispatching local broadcast request for jar ${jarId}`);
             window.dispatchEvent(new CustomEvent('decision-jar:broadcast', {
                 detail: { jarId, event: 'content-update' }
             }));
