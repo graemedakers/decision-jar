@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useModalSystem } from "@/components/ModalProvider";
 import { useUser } from "@/hooks/useUser";
@@ -61,6 +61,9 @@ export function useDashboardLogic() {
     const [userLocation, setUserLocation] = useState<string | null>(null);
     const [showConfetti, setShowConfetti] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
+
+    // Prevent double execution of OAuth cleanup
+    const oauthCleanupRef = useRef(false);
 
     const handleContentUpdate = () => {
         fetchIdeas();
@@ -232,6 +235,9 @@ export function useDashboardLogic() {
         const pendingToken = sessionStorage.getItem('pending_premium_token');
 
         if (isOAuthInviteSignup && pendingCode) {
+            if (oauthCleanupRef.current) return;
+            oauthCleanupRef.current = true;
+
             const handleOAuthInviteCleanup = async () => {
                 try {
                     console.log('[OAuth Invite Cleanup] Starting cleanup for invite code:', pendingCode);

@@ -94,6 +94,16 @@ export async function POST(request: Request) {
 
     } catch (error: any) {
         console.error("Join Jar Error:", error);
+
+        // Handle Unique Constraint Violation (Race Condition - Already Joined)
+        if (error.code === 'P2002') {
+            return NextResponse.json({
+                success: true,
+                message: "Already a member (race condition handled)",
+                jarId: session.user.activeJarId // Return current active jar
+            });
+        }
+
         return NextResponse.json({
             error: "Internal Server Error",
             details: error.message
