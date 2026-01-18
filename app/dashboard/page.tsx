@@ -149,7 +149,9 @@ function DashboardContent() {
 
     // Check if we should show QuickStart modal for empty jar on dashboard
     useEffect(() => {
-        if (showEmptyState && userData?.activeJarId) {
+        // Did we just sign up? (Only show if we didn't use an invite code)
+        // If inviteCode is present, we are likely transitioning to another jar, so don't show "My First Jar" modal.
+        if (showEmptyState && userData?.activeJarId && !inviteCode) {
             // Only show modal if user is ADMIN/OWNER of this jar (not just a member)
             const currentJarMembership = userData?.memberships?.find(
                 (m: any) => m.jarId === userData.activeJarId
@@ -171,7 +173,7 @@ function DashboardContent() {
                 } catch (e) { }
             }
         }
-    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, userData?.memberships, openModal]);
+    }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, userData?.memberships, openModal, inviteCode]);
 
     // ✅ CRITICAL: Auto-prompt for users without personal jars
     // This covers: New users who sign up and only have access to community jars (Bug Reports, etc.)
