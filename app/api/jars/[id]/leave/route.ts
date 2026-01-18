@@ -1,6 +1,6 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { checkAndPromoteWaitlist } from '@/lib/community';
+
 import { NextResponse } from 'next/server';
 
 export async function POST(
@@ -42,8 +42,7 @@ export async function POST(
             where: { userId_jarId: { userId, jarId } }
         });
 
-        // Trigger Waitlist Promotion
-        await checkAndPromoteWaitlist(jarId);
+
 
         return NextResponse.json({ success: true });
 
