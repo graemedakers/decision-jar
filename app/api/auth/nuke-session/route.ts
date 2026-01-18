@@ -30,8 +30,10 @@ export async function GET(request: Request) {
     cookieStore.set('next-auth.csrf-token', '', { ...commonOptions, secure: false });
     cookieStore.set('__Host-next-auth.csrf-token', '', { ...commonOptions, secure: true });
 
-    // ✅ FIX: Redirect to /login instead of / to avoid middleware redirect loop
-    // Middleware redirects authenticated users from / to /dashboard, causing infinite loop
-    const url = new URL('/login', request.url);
+    // ✅ FIX: Redirect to specified target or /login (default)
+    // Using a dynamic target allows escaping redirect loops if a user is at /dashboard with a bad session
+    const { searchParams } = new URL(request.url);
+    const target = searchParams.get('target') || '/login';
+    const url = new URL(target, request.url);
     return NextResponse.redirect(url);
 }

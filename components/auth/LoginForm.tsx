@@ -58,10 +58,10 @@ export function LoginForm() {
             if (res.ok) {
                 // If invite code exists, redirect with code so dashboard can handle join
                 // (in case the join above fails or for double-checking)
-                const redirectUrl = inviteCode 
+                const redirectUrl = inviteCode
                     ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}`
                     : "/dashboard";
-                
+
                 // Use hard redirect to ensure cookies are fully propagated
                 window.location.href = redirectUrl;
             } else {
@@ -89,8 +89,8 @@ export function LoginForm() {
                 className="w-full max-w-md"
             >
                 <div className="glass-card relative overflow-hidden bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 shadow-xl p-8">
-                    {/* Close Button */}
-                    <Link href="/" className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors z-10">
+                    {/* Close Button - Clear session when escaping auth screens to prevent middleware redirect loops */}
+                    <Link href="/api/auth/nuke-session?target=/" className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors z-10">
                         <X className="w-5 h-5" />
                     </Link>
 
