@@ -73,12 +73,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'You are not a member of this jar' }, { status: 403 });
         }
 
-        const isAdmin = membership.role === 'ADMIN';
+        const isAdmin = (membership as any).role === 'ADMIN' || (membership as any).role === 'OWNER';
 
-        // NEW: Status logic
-        // If it's a community jar and the contributor isn't an admin, it's PENDING.
-        // Otherwise it's APPROVED (standard behavior for private/romantic jars).
-        const ideaStatus = (jar.isCommunityJar && !isAdmin) ? 'PENDING' : 'APPROVED';
+        // All ideas are auto-approved (community jars removed)
+        const ideaStatus = 'APPROVED';
 
         const safeDuration = typeof duration === 'string' ? parseFloat(duration) : Number(duration);
 
@@ -191,8 +189,7 @@ export async function GET(request: Request) {
                 jar: {
                     select: {
                         type: true,
-                        selectionMode: true,
-                        isCommunityJar: true
+                        selectionMode: true
                     }
                 }
             },
@@ -207,7 +204,7 @@ export async function GET(request: Request) {
             const isSurprise = idea.isSurprise;
             const isPrivate = idea.isPrivate;
             const isGroupJar = idea.jar.type === 'SOCIAL';
-            const isCommunityJar = idea.jar.isCommunityJar;
+            const isCommunityJar = false; // Community jars removed
             const isVotingJar = (idea.jar.selectionMode as string) === 'VOTE';
 
             let processedIdea: any = {
@@ -216,7 +213,6 @@ export async function GET(request: Request) {
                 // Keeping flattened structure to match raw query response shape for safety:
                 jarType: idea.jar.type,
                 selectionMode: idea.jar.selectionMode,
-                isCommunityJar: idea.jar.isCommunityJar,
                 createdBy: idea.createdBy // Kept as object
             };
 

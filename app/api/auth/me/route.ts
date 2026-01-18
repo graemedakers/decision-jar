@@ -141,7 +141,6 @@ export async function GET() {
                 jarTopic: activeJar.topic,
                 jarSelectionMode: (activeJar as any).selectionMode,
                 customCategories: (activeJar as any).customCategories,
-                isCommunityJar: Boolean((activeJar as any).isCommunityJar),
                 jarImageUrl: (activeJar as any).imageUrl || null,
                 jarDescription: (activeJar as any).description || null,
                 memberCount: members.length,

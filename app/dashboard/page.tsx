@@ -123,7 +123,7 @@ function DashboardContent() {
     // --- View Logic / Layout Calculations ---
     const jarTopic = userData?.jarTopic;
     const jarSelectionMode = userData?.jarSelectionMode;
-    const isCommunityJar = !!(userData as any)?.isCommunityJar;
+    const isCommunityJar = false; // Community jars removed
     const isVotingMode = jarSelectionMode === 'VOTE';
     const isAllocationMode = jarSelectionMode === 'ALLOCATION';
     // const theme = getThemeForTopic(jarTopic); // Theme usage removed from Jar3D as it accepts no props
@@ -184,7 +184,7 @@ function DashboardContent() {
         const memberships = userData.memberships || [];
 
         // Count personal (non-community) jars
-        const personalJars = memberships.filter((m: any) => !m.jar?.isCommunityJar);
+        const personalJars = memberships;
         const hasPersonalJars = personalJars.length > 0;
 
         // Check if current active jar is a personal jar
