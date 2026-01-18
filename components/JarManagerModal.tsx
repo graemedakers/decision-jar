@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, LogOut, Users, Loader2, Crown, LayoutGrid, Calendar, Pencil, Check, UserPlus, Sparkles } from "lucide-react";
+import { Trash2, LogOut, Users, Loader2, Crown, LayoutGrid, Calendar, Pencil, Check, UserPlus, Sparkles, X } from "lucide-react";
 import { getApiUrl } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { JarMembersModal } from "./JarMembersModal";
