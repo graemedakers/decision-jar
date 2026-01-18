@@ -40,7 +40,7 @@ describe('Spin Jar Action', () => {
         const mockUser = {
             id: 'user-123',
             activeJarId: 'jar-456',
-            memberships: [{ jarId: 'jar-456', role: 'MEMBER' }]
+            memberships: [{ jarId: 'jar-456', role: 'ADMIN' }]
         };
 
         const mockIdeas = [

@@ -32,6 +32,23 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
         const currentJarId = user.activeJarId || user.memberships?.[0]?.jarId;
         if (!currentJarId) return { success: false, error: 'No active jar found', status: 400 };
 
+        // 🚨 Permission Check: Only Admins/Owners can spin
+        const currentUserMembership = user.memberships.find(m => m.jarId === currentJarId);
+
+        // OWNER isn't an enum value in MemberRole usually (it's ADMIN), but just in case, we check both.
+        // Actually, schema usually has roles like 'ADMIN', 'MEMBER'.
+        // Let's verify schema...
+        // Assuming role is 'ADMIN' | 'MEMBER'. Owners usually have 'ADMIN' role.
+        const canSpin = currentUserMembership?.role === 'ADMIN';
+
+        if (!canSpin) {
+            return {
+                success: false,
+                error: 'Only jar admins can spin the jar. Ask an admin to spin!',
+                status: 403
+            };
+        }
+
         // 2. Build Prisma-level Filters
         const whereClause: any = {
             jarId: currentJarId,
@@ -100,7 +117,7 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
                 try {
                     // Send push notifications to other jar members (not the person who picked)
                     const members = await prisma.jarMember.findMany({
-                        where: { 
+                        where: {
                             jarId: currentJarId,
                             userId: { not: session.user.id } // Exclude the person who picked
                         },
@@ -108,7 +125,7 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
                     });
 
                     // Send push notification to each member
-                    const notificationPromises = members.map(member => 
+                    const notificationPromises = members.map(member =>
                         sendPushNotification(member.userId, {
                             title: `🎯 New pick: "${selectedIdea.description}"`,
                             body: `${session.user.name || 'Someone'} selected this from your jar!`,
