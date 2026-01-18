@@ -6,7 +6,7 @@ const databaseUrl = databaseUrlArg ? databaseUrlArg.split('=')[1] : process.env.
 
 if (!databaseUrl) {
     console.error('❌ ERROR: No database URL provided');
-    console.error('Usage: npx tsx scripts/delete-users.ts --database-url="postgresql://..."');
+    console.error('Usage: npx tsx scripts/delete-users.ts --database-url="postgresql://..." [emails... | --all]');
     process.exit(1);
 }
 
@@ -18,10 +18,27 @@ const prisma = new PrismaClient({
     }
 });
 
-async function deleteUsersByEmail(emails: string[]) {
-    console.log('Starting user deletion process...');
+async function main() {
+    let emailsToDelete: string[] = args.filter(arg => !arg.startsWith('--') && arg !== 'ALL');
+    const isAll = args.includes('--all') || args.includes('ALL');
 
-    for (const email of emails) {
+    if (isAll) {
+        console.log('🔄 Fetching ALL users from database...');
+        const allUsers = await prisma.user.findMany({
+            select: { email: true }
+        });
+        emailsToDelete = allUsers.map(u => u.email);
+        console.log(`Found ${emailsToDelete.length} users to delete.`);
+    }
+
+    if (emailsToDelete.length === 0) {
+        console.error('❌ ERROR: No users specified to delete.');
+        process.exit(1);
+    }
+
+    console.log(`📧 Emails to delete: ${emailsToDelete.length > 10 ? emailsToDelete.slice(0, 10).join(', ') + '...' : emailsToDelete.join(', ')}\n`);
+
+    for (const email of emailsToDelete) {
         console.log(`\n--- Processing: ${email} ---`);
 
         try {
@@ -33,174 +50,114 @@ async function deleteUsersByEmail(emails: string[]) {
                             jar: true
                         }
                     },
-                    createdIdeas: true,
-                    accounts: true,
-                    sessions: true,
-                    ratings: true,
-                    votes: true,
-                    favorites: true,
-                    appReviews: true,
-                    analyticsEvents: true,
-                    pushSubscriptions: true,
                     rateLimit: true
                 }
             });
 
             if (!user) {
-                console.log(`❌ User not found: ${email}`);
+                console.log(`❌ User not found (or already deleted): ${email}`);
                 continue;
             }
 
             console.log(`✓ Found user: ${user.id}`);
-            console.log(`  - Memberships: ${user.memberships.length}`);
-            console.log(`  - Created Ideas: ${user.createdIdeas.length}`);
-            console.log(`  - Accounts: ${user.accounts.length}`);
-            console.log(`  - Sessions: ${user.sessions.length}`);
-            console.log(`  - Ratings: ${user.ratings.length}`);
-            console.log(`  - Votes: ${user.votes.length}`);
-            console.log(`  - Favorites: ${user.favorites.length}`);
-            console.log(`  - App Reviews: ${user.appReviews.length}`);
-            console.log(`  - Analytics Events: ${user.analyticsEvents.length}`);
-            console.log(`  - Push Subscriptions: ${user.pushSubscriptions.length}`);
 
             // Delete in transaction to ensure atomicity
             await prisma.$transaction(async (tx) => {
-                // 1. Delete all ideas created by this user (cascade will handle related data)
-                const deletedIdeas = await tx.idea.deleteMany({
-                    where: { createdById: user.id }
-                });
+                // 1. Delete all ideas created by this user
+                // Note: We use deleteMany which doesn't throw if zero
+                const deletedIdeas = await tx.idea.deleteMany({ where: { createdById: user.id } });
                 console.log(`  ✓ Deleted ${deletedIdeas.count} ideas`);
 
-                // 2. Delete all ratings by this user
-                const deletedRatings = await tx.rating.deleteMany({
-                    where: { userId: user.id }
-                });
-                console.log(`  ✓ Deleted ${deletedRatings.count} ratings`);
+                // 2. Delete all ratings
+                await tx.rating.deleteMany({ where: { userId: user.id } });
 
-                // 3. Delete all votes by this user
-                const deletedVotes = await tx.vote.deleteMany({
-                    where: { userId: user.id }
-                });
-                console.log(`  ✓ Deleted ${deletedVotes.count} votes`);
+                // 3. Delete all votes
+                await tx.vote.deleteMany({ where: { userId: user.id } });
 
-                // 4. Delete all favorites by this user
-                const deletedFavorites = await tx.favoriteVenue.deleteMany({
-                    where: { userId: user.id }
-                });
-                console.log(`  ✓ Deleted ${deletedFavorites.count} favorites`);
+                // 4. Delete all favorites
+                await tx.favoriteVenue.deleteMany({ where: { userId: user.id } });
 
-                // 5. Delete all app reviews by this user
-                const deletedReviews = await tx.appReview.deleteMany({
-                    where: { userId: user.id }
-                });
-                console.log(`  ✓ Deleted ${deletedReviews.count} app reviews`);
+                // 5. Delete all app reviews
+                await tx.appReview.deleteMany({ where: { userId: user.id } });
 
-                // 6. Delete all analytics events by this user
-                const deletedAnalytics = await tx.analyticsEvent.deleteMany({
-                    where: { userId: user.id }
-                });
-                console.log(`  ✓ Deleted ${deletedAnalytics.count} analytics events`);
+                // 6. Delete all analytics events
+                await tx.analyticsEvent.deleteMany({ where: { userId: user.id } });
 
                 // 7. Delete all push subscriptions
-                const deletedPushSubs = await tx.pushSubscription.deleteMany({
-                    where: { userId: user.id }
-                });
-                console.log(`  ✓ Deleted ${deletedPushSubs.count} push subscriptions`);
+                await tx.pushSubscription.deleteMany({ where: { userId: user.id } });
 
-                // 8. Delete rate limit records
+                // 8. Delete Premium Tokens (Created and Used)
+                // Need to update tokens used by this user to null first if we want to keep them? 
+                // Or delete them if getting rid of user data completely.
+                // Reset 'usedBy'
+                await tx.premiumInviteToken.updateMany({
+                    where: { usedById: user.id },
+                    data: { usedById: null, usedAt: null, currentUses: { decrement: 1 } }
+                });
+                // Delete created tokens
+                await tx.premiumInviteToken.deleteMany({ where: { createdById: user.id } });
+
+                // 9. Delete rate limit
                 if (user.rateLimit) {
-                    await tx.rateLimit.delete({
-                        where: { userId: user.id }
-                    });
-                    console.log(`  ✓ Deleted rate limit record`);
+                    await tx.rateLimit.delete({ where: { userId: user.id } });
                 }
 
-                // 9. Handle jars - delete if user is the only admin, otherwise just remove membership
+                // 10. Handle Jars
                 for (const membership of user.memberships) {
-                    const jar = membership.jar;
+                    // Refresh jar status inside transaction just in case
+                    const jar = await tx.jar.findUnique({ where: { id: membership.jarId } });
+
+                    if (!jar) {
+                        console.log(`  ✓ Jar ${membership.jarId} already deleted`);
+                        continue;
+                    }
+
                     const adminCount = await tx.jarMember.count({
-                        where: {
-                            jarId: jar.id,
-                            role: 'ADMIN'
-                        }
+                        where: { jarId: jar.id, role: 'ADMIN' }
                     });
 
-                    if (adminCount === 1 && membership.role === 'ADMIN') {
-                        // User is the only admin, delete the entire jar
-                        console.log(`  ⚠ Deleting jar "${jar.name}" (user is only admin)`);
+                    // If user is the LAST admin, or if we are wiping everything and we want to clean up empty jars...
+                    // The logic "User is only admin" logic is good for specific user deletion.
+                    // If deleting ALL users, eventually the last admin will be processed and the jar deleted.
 
-                        // Delete unlocked achievements first (foreign key)
-                        const deletedAchievements = await tx.unlockedAchievement.deleteMany({
-                            where: { jarId: jar.id }
-                        });
-                        console.log(`    ✓ Deleted ${deletedAchievements.count} achievements`);
+                    if (membership.role === 'ADMIN' && adminCount === 1) {
+                        console.log(`  ⚠ Deleting jar "${jar.name}" (user is only/last admin)`);
 
-                        // Delete deleted logs (foreign key)
-                        const deletedLogs = await tx.deletedLog.deleteMany({
-                            where: { jarId: jar.id }
-                        });
-                        console.log(`    ✓ Deleted ${deletedLogs.count} deleted logs`);
+                        // Delete FK dependencies for Jar
+                        await tx.unlockedAchievement.deleteMany({ where: { jarId: jar.id } });
+                        await tx.favoriteVenue.deleteMany({ where: { jarId: jar.id } }); // Jars can have favorites linked
+                        await tx.deletedLog.deleteMany({ where: { jarId: jar.id } });
+                        await tx.voteSession.deleteMany({ where: { jarId: jar.id } });
+                        await tx.idea.deleteMany({ where: { jarId: jar.id } }); // Delete remaining ideas in jar
 
-                        // Delete all jar members
-                        await tx.jarMember.deleteMany({
-                            where: { jarId: jar.id }
-                        });
-
-                        // Delete the jar (cascade will handle ideas, etc.)
-                        await tx.jar.delete({
-                            where: { id: jar.id }
-                        });
+                        await tx.jarMember.deleteMany({ where: { jarId: jar.id } });
+                        await tx.jar.delete({ where: { id: jar.id } });
+                        console.log(`    ✓ Jar deleted`);
                     } else {
-                        // Just remove the membership
-                        await tx.jarMember.delete({
-                            where: { id: membership.id }
-                        });
-                        console.log(`  ✓ Removed membership from jar "${jar.name}"`);
+                        // User is not the last admin, just leave the jar
+                        await tx.jarMember.delete({ where: { id: membership.id } });
+                        console.log(`  ✓ Left jar "${jar.name}"`);
                     }
                 }
 
-                // 10. Delete OAuth accounts
-                const deletedAccounts = await tx.account.deleteMany({
-                    where: { userId: user.id }
-                });
-                console.log(`  ✓ Deleted ${deletedAccounts.count} OAuth accounts`);
+                // 11. Delete OAuth accounts & Sessions
+                await tx.account.deleteMany({ where: { userId: user.id } });
+                await tx.session.deleteMany({ where: { userId: user.id } });
 
-                // 11. Delete sessions
-                const deletedSessions = await tx.session.deleteMany({
-                    where: { userId: user.id }
-                });
-                console.log(`  ✓ Deleted ${deletedSessions.count} sessions`);
-
-                // 12. Finally, delete the user
-                await tx.user.delete({
-                    where: { id: user.id }
-                });
+                // 12. Delete User
+                await tx.user.delete({ where: { id: user.id } });
                 console.log(`  ✅ User deleted successfully`);
             });
 
-            console.log(`✅ Completed deletion for: ${email}`);
         } catch (error) {
             console.error(`❌ Error deleting user ${email}:`, error);
-            throw error;
         }
     }
 
-    console.log('\n✅ All deletions completed successfully!');
+    console.log('\n✅ Process completed!');
 }
 
-// Run the deletion
-const emailsToDelete = process.argv.slice(2).filter(arg => !arg.startsWith('--'));
-
-if (emailsToDelete.length === 0) {
-    console.error('❌ ERROR: No email addresses provided');
-    console.error('Usage: npx tsx scripts/delete-users.ts <email1> <email2> ...');
-    console.error('   Or: npx tsx scripts/delete-users.ts --database-url="..." <email1> <email2> ...');
-    process.exit(1);
-}
-
-console.log(`📧 Emails to delete: ${emailsToDelete.join(', ')}\n`);
-
-deleteUsersByEmail(emailsToDelete)
+main()
     .catch((error) => {
         console.error('Fatal error:', error);
         process.exit(1);
