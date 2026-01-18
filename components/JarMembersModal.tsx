@@ -1,11 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Users, Loader2, Crown, Shield, Trash2, Copy, Check, UserPlus, Sparkles } from "lucide-react";
+import { X, Users, Loader2, Crown, Shield, Trash2, Copy, Check, UserPlus, Sparkles, MoreVertical } from "lucide-react";
 import { getApiUrl } from "@/lib/utils";
 import { showError, showSuccess, showWarning } from "@/lib/toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/DropdownMenu";
 
 interface Member {
     id: string;
@@ -229,36 +235,26 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
                                     </div>
 
                                     {['OWNER', 'ADMIN'].includes(currentUserRole) && member.role !== 'OWNER' && (
-                                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                onClick={() => handleToggleRole(member)}
-                                                disabled={processingId === member.userId}
-                                                className={`h-9 w-9 rounded-xl transition-all ${member.role === 'ADMIN'
-                                                    ? 'bg-amber-100 text-amber-600 hover:bg-amber-200 dark:bg-amber-500/10 dark:text-amber-400'
-                                                    : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-white/10 dark:text-slate-400'
-                                                    }`}
-                                                aria-label={member.role === 'ADMIN' ? 'Demote to Member' : 'Promote to Admin'}
-                                            >
-                                                {processingId === member.userId ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    <Shield className="w-4 h-4" />
-                                                )}
-                                            </Button>
-
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                onClick={() => handleRemoveMember(member)}
-                                                disabled={processingId === member.userId}
-                                                className="h-9 w-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 transition-colors"
-                                                aria-label="Remove from Jar"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                                                    <MoreVertical className="w-4 h-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handleToggleRole(member)}>
+                                                    <Shield className={`w-4 h-4 mr-2 ${member.role === 'ADMIN' ? 'text-amber-500' : 'text-violet-500'}`} />
+                                                    {member.role === 'ADMIN' ? 'Demote to Member' : 'Promote to Admin'}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => handleRemoveMember(member)}
+                                                    className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:text-red-400 dark:focus:bg-red-900/10"
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Remove from Jar
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     )}
                                 </div>
                             ))
