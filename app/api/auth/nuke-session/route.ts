@@ -30,10 +30,14 @@ export async function GET(request: Request) {
     cookieStore.set('next-auth.csrf-token', '', { ...commonOptions, secure: false });
     cookieStore.set('__Host-next-auth.csrf-token', '', { ...commonOptions, secure: true });
 
-    // ✅ FIX: Redirect to specified target or /login (default)
-    // Using a dynamic target allows escaping redirect loops if a user is at /dashboard with a bad session
+    // 4. Clear any other potential variants
+    cookieStore.set('next-auth.callback-url', '', commonOptions);
+    cookieStore.set('__Secure-next-auth.callback-url', '', { ...commonOptions, secure: true });
+
+    // ✅ FIX: Redirect to specified target or '/' (default to Home instead of Login)
+    // This ensures escaping redirect loops always lands the user back on the home page.
     const { searchParams } = new URL(request.url);
-    const target = searchParams.get('target') || '/login';
+    const target = searchParams.get('target') || '/';
     const url = new URL(target, request.url);
     return NextResponse.redirect(url);
 }
