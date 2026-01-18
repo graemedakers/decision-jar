@@ -35,11 +35,7 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
         // 🚨 Permission Check: Only Admins/Owners can spin
         const currentUserMembership = user.memberships.find(m => m.jarId === currentJarId);
 
-        // OWNER isn't an enum value in MemberRole usually (it's ADMIN), but just in case, we check both.
-        // Actually, schema usually has roles like 'ADMIN', 'MEMBER'.
-        // Let's verify schema...
-        // Assuming role is 'ADMIN' | 'MEMBER'. Owners usually have 'ADMIN' role.
-        const canSpin = currentUserMembership?.role === 'ADMIN';
+        const canSpin = currentUserMembership?.role === 'ADMIN' || currentUserMembership?.role === 'OWNER';
 
         if (!canSpin) {
             return {
