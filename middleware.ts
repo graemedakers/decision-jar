@@ -33,7 +33,8 @@ export default auth(async (req) => {
 
     // 1. Landing Page Redirect (if logged in)
     if (path === '/') {
-        if (isAuthenticated) {
+        const nuked = req.nextUrl.searchParams.get('nuked');
+        if (isAuthenticated && !nuked) {
             return NextResponse.redirect(new URL('/dashboard', req.url));
         }
     }

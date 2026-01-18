@@ -35,9 +35,12 @@ export async function GET(request: Request) {
     cookieStore.set('__Secure-next-auth.callback-url', '', { ...commonOptions, secure: true });
 
     // ✅ FIX: Redirect to specified target or '/' (default to Home instead of Login)
-    // This ensures escaping redirect loops always lands the user back on the home page.
+    // We add ?nuked=true to force middleware to stay on landing page
     const { searchParams } = new URL(request.url);
     const target = searchParams.get('target') || '/';
     const url = new URL(target, request.url);
+    if (target === '/') {
+        url.searchParams.set('nuked', 'true');
+    }
     return NextResponse.redirect(url);
 }
