@@ -26,7 +26,9 @@ export function useIdeas() {
     const query = useQuery({
         queryKey: CacheKeys.ideas(jarId),
         queryFn: fetchIdeasApi,
-        staleTime: STALE_TIME.IDEAS,
+        staleTime: 5000, // Reduced to 5s to keep UI fresh
+        refetchInterval: 4000, // Poll every 4 seconds to ensure multi-window sync even if realtime fails
+        refetchOnWindowFocus: true, // Force refresh when coming back to tab
         enabled: !!userData, // Only fetch if we have user data (to know which jar)
     });
 
