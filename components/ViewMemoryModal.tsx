@@ -108,7 +108,7 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white p-0">
+            <DialogContent variant="raw" className="max-w-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
                 <div className="bg-gradient-to-r from-pink-600 to-purple-600 p-6 relative">
                     <button
                         onClick={onClose}

@@ -89,7 +89,7 @@ export function TrialExpiredModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleDismiss}>
-            <DialogContent className="max-w-lg w-full p-0 overflow-hidden bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-none">
+            <DialogContent variant="raw" className="max-w-lg w-full overflow-hidden bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-none">
                 {/* Header with Gradient */}
                 <div className="relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-8 text-white text-center">
                     {/* Close Button */}
