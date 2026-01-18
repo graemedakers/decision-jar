@@ -6,7 +6,7 @@ import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles, Trash2 } from "lucide-react";
+import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles, Trash2, Move } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { COST_LEVELS, ACTIVITY_LEVELS, TIME_OF_DAY, WEATHER_TYPES } from "@/lib/constants";
 import { exportToPdf } from "@/lib/pdf-export";
@@ -16,6 +16,7 @@ import { TOPIC_CATEGORIES } from "@/lib/categories";
 import { Idea, UserData } from "@/lib/types";
 import { IdeaWizard } from "@/components/wizard/IdeaWizard"; // Import Wizard
 import { trackModalAbandoned } from "@/lib/analytics";
+import { useModalSystem } from "@/components/ModalProvider";
 
 interface AddIdeaModalProps {
     isOpen: boolean;
@@ -28,9 +29,12 @@ interface AddIdeaModalProps {
     currentUser?: UserData | null;
     onSuccess?: () => void;
     initialMode?: 'default' | 'magic';
+    availableJars?: { id: string; name: string }[]; // For "Move to Jar" feature
 }
 
-export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser, onSuccess, initialMode = 'default' }: AddIdeaModalProps) {
+export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser, onSuccess, initialMode = 'default', availableJars = [] }: AddIdeaModalProps) {
+    const { openModal: openGlobalModal } = useModalSystem();
+    
     // Default to wizard for new ideas, form for edits
     const [isWizardMode, setIsWizardMode] = useState(!initialData?.id && initialMode !== 'magic');
     const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('PREVIEW');
@@ -561,6 +565,22 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
                                     <div className="flex flex-col gap-3 pt-2">
                                         <div className="flex gap-2 w-full">
+                                            {/* Move to another jar button (only show if 2+ jars) */}
+                                            {initialData && initialData.id && availableJars.length > 1 && (initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        onClose(); // Close this modal first
+                                                        openGlobalModal('MOVE_IDEA', { idea: initialData });
+                                                    }}
+                                                    disabled={isLoading}
+                                                    className="px-4 py-3 rounded-xl border border-blue-200 dark:border-blue-900/30 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors flex items-center justify-center shrink-0"
+                                                    title="Move to another jar"
+                                                >
+                                                    <Move className="w-5 h-5" />
+                                                </button>
+                                            )}
+                                            {/* Delete button */}
                                             {initialData && initialData.id && (initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)) && (
                                                 <button
                                                     type="button"

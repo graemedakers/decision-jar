@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { X, ArrowRight, Loader2, Check } from "lucide-react";
 import { useState } from "react";
 import { showSuccess } from "@/lib/toast";
+import { trackIdeaMoved } from "@/lib/analytics";
 
 interface MoveIdeaModalProps {
     isOpen: boolean;
@@ -37,6 +38,8 @@ export function MoveIdeaModal({ isOpen, onClose, idea, availableJars, onMoveComp
 
             if (res.ok) {
                 const data = await res.json();
+                // Track the move in analytics
+                trackIdeaMoved(idea?.jarId || '', selectedJarId, idea?.id || '');
                 if (onMoveComplete) onMoveComplete();
                 showSuccess(`✅ ${data.message || "Idea moved successfully!"}`);
                 onClose();

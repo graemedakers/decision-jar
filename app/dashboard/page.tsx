@@ -133,6 +133,15 @@ function DashboardContent() {
     const titleText = labels.jarBranding;
     const isAdminPickMode = jarSelectionMode === 'ADMIN_PICK';
 
+    // Extract available jars for Move Idea feature (only if user has 2+ jars)
+    const availableJars = (userData?.memberships || [])
+        .filter((m: any) => m.jar?.id)
+        .map((m: any) => ({
+            id: m.jar.id,
+            name: m.jar.name || 'Unnamed Jar',
+            topic: m.jar.topic,
+        }));
+
     const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
     const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas && !isFetchingIdeas;
     const showAdminStatus = isAdminPickMode;
@@ -580,6 +589,7 @@ function DashboardContent() {
                 hasPaid={hasPaid}
                 coupleCreatedAt={coupleCreatedAt || ''}
                 isTrialEligible={isTrialEligible}
+                availableJars={availableJars}
 
                 // Callbacks
                 handleContentUpdate={handleContentUpdate}

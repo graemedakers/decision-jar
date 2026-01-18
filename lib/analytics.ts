@@ -320,3 +320,12 @@ export const trackRideShareClicked = (provider: 'uber' | 'lyft', destination: st
         concierge_type: conciergeType,
     });
 };
+
+// Idea move tracking
+export const trackIdeaMoved = (fromJarId: string, toJarId: string, ideaId: string) => {
+    safeCapture('idea_moved', {
+        from_jar_id: fromJarId,
+        to_jar_id: toJarId,
+        idea_id: ideaId,
+    });
+};

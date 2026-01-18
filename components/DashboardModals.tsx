@@ -137,6 +137,7 @@ export function DashboardModals({
                 currentUser={userData}
                 onSuccess={handleContentUpdate}
                 initialMode={modalProps?.initialMode}
+                availableJars={availableJars}
             />
 
             {/* Surprise Me - Using original modal (reverted from WizardFrame) */}
