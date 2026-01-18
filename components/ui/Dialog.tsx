@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,21 +13,24 @@ interface DialogProps {
 }
 
 /**
- * Dialog Component - Mobile-First Bottom Sheet Design
+ * Dialog Component - Mobile-First Bottom Sheet / Desktop Centered
  * 
- * On mobile (< sm breakpoint):
- * - Appears as a bottom sheet that slides up from the bottom
- * - Constrained to max 85vh to ensure it never goes off the top of the screen
- * - Content scrolls within the sheet, header stays visible
- * 
- * On desktop (>= sm breakpoint):
- * - Appears as a centered modal with standard scaling animation
+ * On mobile (< 640px): Slides up from bottom, max 90% height.
+ * On desktop (>= 640px): Centered in viewport, max 85% height.
  */
 export function Dialog({ open, onOpenChange, children }: DialogProps) {
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
     // Prevent body scroll when dialog is open
     React.useEffect(() => {
         if (open) {
             document.body.style.overflow = 'hidden';
+            // Scroll to top of any active timers or layout shifts
+            window.scrollTo(0, 0);
         } else {
             document.body.style.overflow = '';
         }
@@ -35,10 +39,21 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
         };
     }, [open]);
 
-    return (
+    // Handle Escape key
+    React.useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onOpenChange(false);
+        };
+        if (open) window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, [open, onOpenChange]);
+
+    if (!mounted) return null;
+
+    const content = (
         <AnimatePresence>
             {open && (
-                <div className="fixed inset-0 z-50 overflow-y-auto">
+                <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center overflow-hidden">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -47,133 +62,112 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
                         onClick={() => onOpenChange(false)}
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                     />
-                    {/* Content Container - flex wrapper for centering */}
-                    <div className="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
-                        <div className="relative z-50 w-full sm:max-w-lg">
-                            {children}
+                    {/* Modal Content Container */}
+                    <motion.div
+                        initial={{ y: "100%", opacity: 0.5 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: "100%", opacity: 0 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        className={cn(
+                            "relative z-[1001] w-full max-w-lg",
+                            "bg-white dark:bg-slate-900 shadow-2xl overflow-hidden",
+                            "rounded-t-[24px] sm:rounded-[24px]", // Bottom sheet rounded top on mobile, fully rounded on desktop
+                            "max-h-[90vh] sm:max-h-[85vh]", // Taller on mobile to feel like a sheet
+                            "flex flex-col",
+                            "sm:m-4" // Margin on desktop to prevent edge touching
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Drag Handle for Mobile Bottom Sheet */}
+                        <div className="flex sm:hidden justify-center py-2 shrink-0">
+                            <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
                         </div>
-                    </div>
+
+                        {/* The actual modal content */}
+                        {children}
+                    </motion.div>
                 </div>
             )}
         </AnimatePresence>
     );
+
+    return createPortal(content, document.body);
 }
 
 interface DialogContentProps {
     children: React.ReactNode;
     className?: string;
-    /** 
-     * "default" - Standard modal with internal padding and scroll wrapper
-     * "raw" - No internal wrapper, modal handles its own layout/scroll (for complex modals)
+    /**
+     * If true, prevents the default padding and internal scrolling.
+     * Use this when you want to handle layout manually (e.g., custom headers/footers).
      */
-    variant?: 'default' | 'raw';
+    raw?: boolean;
 }
 
-export function DialogContent({ children, className, variant = 'default' }: DialogContentProps) {
+export function DialogContent({ children, className, raw = false }: DialogContentProps) {
     const contentRef = React.useRef<HTMLDivElement>(null);
-    const [isMobile, setIsMobile] = React.useState(false);
 
-    // Detect mobile vs desktop for animation
+    // Scroll to top on mount
     React.useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 640);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        if (contentRef.current) contentRef.current.scrollTop = 0;
     }, []);
 
-    // Scroll content to top when component mounts
-    React.useEffect(() => {
-        if (contentRef.current) {
-            contentRef.current.scrollTop = 0;
-        }
-    }, []);
-
-    // Different animations for mobile (slide up) vs desktop (fade + scale)
-    const mobileAnimation = {
-        initial: { opacity: 0, y: "100%" },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: "100%" },
-    };
-
-    const desktopAnimation = {
-        initial: { opacity: 0, scale: 0.95, y: 20 },
-        animate: { opacity: 1, scale: 1, y: 0 },
-        exit: { opacity: 0, scale: 0.95, y: 20 },
-    };
-
-    const animation = isMobile ? mobileAnimation : desktopAnimation;
-
-    // For "raw" variant, render children directly without wrapper
-    if (variant === 'raw') {
+    if (raw) {
         return (
-            <motion.div
-                {...animation}
-                transition={{ type: "spring", damping: 30, stiffness: 400 }}
-                className={cn(
-                    // Base styles
-                    "relative w-full border border-white/10 bg-slate-900/95 shadow-2xl backdrop-blur-xl",
-                    // Mobile: Bottom sheet with max height constraint
-                    "rounded-t-3xl rounded-b-none max-h-[85vh]",
-                    // Desktop: Centered modal with rounded corners and proper max height
-                    "sm:rounded-2xl sm:max-h-[calc(100vh-4rem)]",
-                    // Flex column layout for complex modals
-                    "flex flex-col",
-                    className
-                )}
-            >
-                {/* Drag handle for mobile (raw variant) */}
-                <div className="flex-shrink-0 pt-3 pb-2 sm:hidden">
-                    <div className="mx-auto w-12 h-1.5 rounded-full bg-slate-700/50" />
-                </div>
+            <div className={cn("flex flex-col flex-1 overflow-hidden", className)}>
                 {children}
-            </motion.div>
+            </div>
         );
     }
 
-    // Default variant with internal scroll wrapper
     return (
-        <motion.div
-            {...animation}
-            transition={{ type: "spring", damping: 30, stiffness: 400 }}
+        <div
+            ref={contentRef}
             className={cn(
-                // Base styles
-                "relative w-full border border-white/10 bg-slate-900/95 shadow-2xl backdrop-blur-xl",
-                // Mobile: Bottom sheet with max height constraint
-                "rounded-t-3xl rounded-b-none max-h-[85vh]",
-                // Desktop: Centered modal with rounded corners and proper max height
-                "sm:rounded-2xl sm:max-h-[calc(100vh-4rem)]",
-                // Flex column layout for proper scrolling
-                "flex flex-col",
+                "flex-1 overflow-y-auto overscroll-contain p-6",
+                "custom-scrollbar",
                 className
             )}
         >
-            {/* Drag handle for mobile */}
-            <div className="flex-shrink-0 pt-3 pb-2 sm:hidden">
-                <div className="mx-auto w-12 h-1.5 rounded-full bg-slate-700/50" />
-            </div>
-
-            {/* Scrollable content area */}
-            <div
-                ref={contentRef}
-                className="flex-1 overflow-y-auto overscroll-contain p-6 pt-2 pb-8 sm:pt-6 sm:pb-6"
-            >
-                {children}
-            </div>
-        </motion.div>
+            {children}
+        </div>
     );
 }
 
-export function DialogHeader({ children, className }: { children: React.ReactNode; className?: string }) {
+export function DialogHeader({
+    children,
+    className,
+    showClose = true,
+    onClose
+}: {
+    children: React.ReactNode;
+    className?: string;
+    showClose?: boolean;
+    onClose?: () => void;
+}) {
     return (
-        <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left mb-4", className)}>
-            {children}
+        <div className={cn(
+            "relative px-6 pt-4 pb-2 border-b border-slate-100 dark:border-slate-800 shrink-0",
+            className
+        )}>
+            <div className="flex flex-col space-y-1.5 text-center sm:text-left">
+                {children}
+            </div>
+            {showClose && (
+                <button
+                    onClick={onClose}
+                    className="absolute right-4 top-4 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+            )}
         </div>
     );
 }
 
 export function DialogTitle({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
-        <h2 className={cn("text-lg font-semibold leading-none tracking-tight text-white", className)}>
+        <h2 className={cn("text-xl font-bold text-slate-900 dark:text-white", className)}>
             {children}
         </h2>
     );
@@ -181,7 +175,7 @@ export function DialogTitle({ children, className }: { children: React.ReactNode
 
 export function DialogDescription({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
-        <p className={cn("text-sm text-slate-400", className)}>
+        <p className={cn("text-sm text-slate-500 dark:text-slate-400", className)}>
             {children}
         </p>
     );
@@ -189,7 +183,11 @@ export function DialogDescription({ children, className }: { children: React.Rea
 
 export function DialogFooter({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
-        <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}>
+        <div className={cn(
+            "px-6 py-4 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-slate-800 shrink-0",
+            "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 sm:gap-0",
+            className
+        )}>
             {children}
         </div>
     );

@@ -11,6 +11,7 @@ import { RichDetailsModal } from "./RichDetailsModal";
 import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
 import { useDemoConcierge } from "@/lib/use-demo-concierge";
 import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog";
 import { trackAIToolUsed, trackConciergeSkillSelected, trackIntentDetectionResult, trackModalAbandoned } from "@/lib/analytics";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { getCurrentLocation } from "@/lib/utils";
@@ -506,308 +507,296 @@ export function GenericConciergeModal({
     };
 
     return (
-        <AnimatePresence mode="wait">
-            {isOpen && (
-                <div key="concierge-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <motion.div
-                        key="concierge-modal-content"
-                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[90vh] rounded-3xl shadow-xl flex flex-col overflow-hidden relative ring-1 ring-white/10"
-                    >
-                        {/* HEADER */}
-                        <div className="p-6 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-gradient-to-r from-transparent via-transparent to-white/5">
-                            <div className="flex items-center gap-3">
-                                {!showSkillPicker && activeConfig && (
-                                    <button
-                                        onClick={handleBackToSkillPicker}
-                                        className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
-                                        aria-label="Back to skill picker"
-                                    >
-                                        <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                                    </button>
-                                )}
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.bg}`}>
-                                    <config.icon className={`w-5 h-5 ${theme.text}`} />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">{config.title}</h2>
-                                        <TrialBadge userData={userData} variant="compact" />
-                                    </div>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">{config.subtitle}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                {/* Premium: Add shortcut button */}
-                                {!showSkillPicker && config && (
-                                    <ConciergeShortcutButton
-                                        toolId={configKey}
-                                        toolName={config.title}
-                                        isPremium={isPremium}
-                                    />
-                                )}
+        <Dialog open={isOpen} onOpenChange={handleClose}>
+            <DialogContent raw className="bg-white dark:bg-slate-900 border-none">
+                {/* HEADER */}
+                <DialogHeader showClose={false} className="pb-4">
+                    <div className="flex justify-between items-center bg-gradient-to-r from-transparent via-transparent to-white/5">
+                        <div className="flex items-center gap-3">
+                            {!showSkillPicker && activeConfig && (
                                 <button
-                                    onClick={handleClose}
-                                    className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
-                                    aria-label="Close"
+                                    onClick={handleBackToSkillPicker}
+                                    className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                                    aria-label="Back to skill picker"
                                 >
-                                    <X className="w-6 h-6" />
+                                    <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                                 </button>
+                            )}
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.bg}`}>
+                                <config.icon className={`w-5 h-5 ${theme.text}`} />
+                            </div>
+                            <div className="flex-1 text-left">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">{config.title}</h2>
+                                    <TrialBadge userData={userData} variant="compact" />
+                                </div>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">{config.subtitle}</p>
                             </div>
                         </div>
-
-                        <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 space-y-6 px-7 custom-scrollbar">
-                            {/* SKILL PICKER VIEW */}
-                            {showSkillPicker ? (
-                                <ConciergeSkillPicker
-                                    onSelectSkill={handleSkillSelect}
-                                    currentSkillId={activeConfig?.id}
-                                    onClose={handleClose}
+                        <div className="flex items-center gap-1">
+                            {/* Premium: Add shortcut button */}
+                            {!showSkillPicker && config && (
+                                <ConciergeShortcutButton
+                                    toolId={configKey}
+                                    toolName={config.title}
+                                    isPremium={isPremium}
                                 />
-                            ) : (
-                                <div className="space-y-6">
-                                    {/* ORIGINAL FORM VIEW */}
-                                    {/* LOCATION */}
-                                    {/* LOCATION */}
-                                    {(config.hasLocation || (config.locationCondition && (selections[config.locationCondition.sectionId] || []).some(v => config.locationCondition?.values.includes(v)))) && (
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-center">
-                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Location to Search</label>
-                                                <button
-                                                    type="button"
-                                                    onClick={async () => {
-                                                        markInteraction('location_gps');
-                                                        try {
-                                                            const currentLoc = await getCurrentLocation();
-                                                            setLocation(currentLoc);
-                                                        } catch (err) {
-                                                            alert("Could not get location. Please check permissions.");
-                                                        }
-                                                    }}
-                                                    className={`text-[10px] uppercase tracking-wider font-bold ${theme.text} hover:opacity-80 transition-colors flex items-center gap-1`}
-                                                >
-                                                    <MapPin className="w-3 h-3" />
-                                                    Use GPS
-                                                </button>
-                                            </div>
-                                            <LocationInput
-                                                value={location}
-                                                onChange={(val) => {
-                                                    markInteraction('location_input');
-                                                    setLocation(val);
-                                                }}
-                                                placeholder="City, Neighborhood, or Zip"
-                                                className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
-                                                updateProfileLocation={true}
-                                            />
-                                        </div>
-                                    )}
+                            )}
+                            <button
+                                onClick={handleClose}
+                                className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors"
+                                aria-label="Close"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                    </div>
+                </DialogHeader>
 
-                                    {/* DYNAMIC SECTIONS */}
-                                    {config.sections.map((section) => {
-                                        // Check visibility condition
-                                        if (section.condition) {
-                                            const triggerValues = selections[section.condition.sectionId] || [];
-                                            const isVisible = triggerValues.some(v => section.condition!.values.includes(v));
-                                            if (!isVisible) return null;
-                                        }
-
-                                        return (
-                                            <div key={section.id} className="space-y-2">
-                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                                    {section.icon && <section.icon className={`w-4 h-4 ${theme.text}`} />}
-                                                    {section.label}
-                                                </label>
-
-                                                {section.type === 'date-range' ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <input
-                                                            type="date"
-                                                            value={dateRanges[section.id]?.start || ''}
-                                                            onChange={(e) => {
-                                                                markInteraction(`date_start_${section.id}`);
-                                                                setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], start: e.target.value } }));
-                                                            }}
-                                                            className={`flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white`}
-                                                            placeholder="Check In"
-                                                        />
-                                                        <span className="text-slate-400">to</span>
-                                                        <input
-                                                            type="date"
-                                                            value={dateRanges[section.id]?.end || ''}
-                                                            onChange={(e) => {
-                                                                markInteraction(`date_end_${section.id}`);
-                                                                setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], end: e.target.value } }));
-                                                            }}
-                                                            className={`flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white`}
-                                                            placeholder="Check Out"
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {(section.options || []).map((option) => {
-                                                            const isActive = (selections[section.id] || []).includes(option);
-                                                            return (
-                                                                <button
-                                                                    key={option}
-                                                                    onClick={() => toggleSelection(option, section.id, section.type as 'multi-select' | 'single-select')}
-                                                                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isActive
-                                                                        ? theme.selected
-                                                                        : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
-                                                                        }`}
-                                                                >
-                                                                    {option}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )}
-
-                                                {section.allowCustom && section.type !== 'date-range' && (
-                                                    <div className="mt-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Other (specify)..."
-                                                            value={customInputs[section.id] || ''}
-                                                            onChange={(e) => {
-                                                                markInteraction(`custom_${section.id}`);
-                                                                setCustomInputs(prev => ({ ...prev, [section.id]: e.target.value }));
-                                                            }}
-                                                            className={`w-full px-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400`}
-                                                            aria-label={`Custom ${section.label}`}
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-
-                                    {/* PRICE */}
-                                    {config.hasPrice && (
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Price Range</label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {['any', 'cheap', 'moderate', 'expensive'].map((p) => (
-                                                    <button
-                                                        key={p}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            markInteraction('price');
-                                                            setPrice(p);
-                                                        }}
-                                                        className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-all ${price === p
-                                                            ? `${theme.lightBg} ${theme.border} ${theme.text}`
-                                                            : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'
-                                                            }`}
-                                                    >
-                                                        {p === 'any' ? 'Any' : p.charAt(0).toUpperCase() + p.slice(1)} {p !== 'any' && `(${p === 'cheap' ? '$' : p === 'moderate' ? '$$' : '$$$'})`}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-
-
-                                    {/* EXTRA INSTRUCTIONS (Unified Support) */}
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Additional Details / Requests</label>
-                                        <textarea
-                                            value={customInputs['extraInstructions'] || ''}
-                                            onChange={(e) => setCustomInputs(prev => ({ ...prev, extraInstructions: e.target.value }))}
-                                            placeholder="e.g. Make it kid frendly, or 'We love spicy food'..."
-                                            className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 min-h-[80px] resize-none`}
-                                        />
-                                    </div>
-
-                                    <div className="py-2">
-                                        <Button
+                <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 px-7 custom-scrollbar">
+                    {/* SKILL PICKER VIEW */}
+                    {showSkillPicker ? (
+                        <ConciergeSkillPicker
+                            onSelectSkill={handleSkillSelect}
+                            currentSkillId={activeConfig?.id}
+                            onClose={handleClose}
+                        />
+                    ) : (
+                        <div className="space-y-6 pb-4">
+                            {/* ORIGINAL FORM VIEW */}
+                            {/* LOCATION */}
+                            {(config.hasLocation || (config.locationCondition && (selections[config.locationCondition.sectionId] || []).some(v => config.locationCondition?.values.includes(v)))) && (
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Location to Search</label>
+                                        <button
                                             type="button"
-                                            onClick={handleGetRecommendations}
-                                            disabled={isLoading}
-                                            className={`w-full text-white shadow-lg ${theme.button}`}
+                                            onClick={async () => {
+                                                markInteraction('location_gps');
+                                                try {
+                                                    const currentLoc = await getCurrentLocation();
+                                                    setLocation(currentLoc);
+                                                } catch (err) {
+                                                    alert("Could not get location. Please check permissions.");
+                                                }
+                                            }}
+                                            className={`text-[10px] uppercase tracking-wider font-bold ${theme.text} hover:opacity-80 transition-colors flex items-center gap-1`}
                                         >
-                                            {isLoading ? (
-                                                <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Thinking...</>
-                                            ) : (
-                                                <><Sparkles className="w-5 h-5 mr-2" /> Recommendations</>
-                                            )}
-                                        </Button>
+                                            <MapPin className="w-3 h-3" />
+                                            Use GPS
+                                        </button>
                                     </div>
+                                    <LocationInput
+                                        value={location}
+                                        onChange={(val) => {
+                                            markInteraction('location_input');
+                                            setLocation(val);
+                                        }}
+                                        placeholder="City, Neighborhood, or Zip"
+                                        className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
+                                        updateProfileLocation={true}
+                                    />
+                                </div>
+                            )}
 
-                                    {/* RESULTS */}
-                                    {recommendations.length > 0 && (
-                                        <div ref={resultsRef} className="space-y-4 pt-4 border-t border-slate-200 dark:border-white/10">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Top Picks for You</h3>
-                                                <button
-                                                    onClick={() => setIsPrivate(!isPrivate)}
-                                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-500'}`}
-                                                    aria-label={isPrivate ? "Switch to Public Mode" : "Switch to Private Mode"}
-                                                >
-                                                    <Lock className="w-3.5 h-3.5" />
-                                                    {isPrivate ? "Secret Mode On" : "Public Mode"}
-                                                </button>
+                            {/* DYNAMIC SECTIONS */}
+                            {config.sections.map((section) => {
+                                // Check visibility condition
+                                if (section.condition) {
+                                    const triggerValues = selections[section.condition.sectionId] || [];
+                                    const isVisible = triggerValues.some(v => section.condition!.values.includes(v));
+                                    if (!isVisible) return null;
+                                }
+
+                                return (
+                                    <div key={section.id} className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                            {section.icon && <section.icon className={`w-4 h-4 ${theme.text}`} />}
+                                            {section.label}
+                                        </label>
+
+                                        {section.type === 'date-range' ? (
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="date"
+                                                    value={dateRanges[section.id]?.start || ''}
+                                                    onChange={(e) => {
+                                                        markInteraction(`date_start_${section.id}`);
+                                                        setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], start: e.target.value } }));
+                                                    }}
+                                                    className={`flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white`}
+                                                    placeholder="Check In"
+                                                />
+                                                <span className="text-slate-400">to</span>
+                                                <input
+                                                    type="date"
+                                                    value={dateRanges[section.id]?.end || ''}
+                                                    onChange={(e) => {
+                                                        markInteraction(`date_end_${section.id}`);
+                                                        setDateRanges(prev => ({ ...prev, [section.id]: { ...prev[section.id], end: e.target.value } }));
+                                                    }}
+                                                    className={`flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white`}
+                                                    placeholder="Check Out"
+                                                />
                                             </div>
-                                            <div className="grid grid-cols-1 gap-4">
-                                                {recommendations.map((rec, index) => {
-                                                    const isHoliday = config.id === 'holiday_concierge';
-                                                    const isExpanded = expandedRecIndex === index;
-
+                                        ) : (
+                                            <div className="flex flex-wrap gap-2">
+                                                {(section.options || []).map((option) => {
+                                                    const isActive = (selections[section.id] || []).includes(option);
                                                     return (
-                                                        <ConciergeResultCard
-                                                            key={index}
-                                                            rec={rec}
-                                                            categoryType={config.categoryType}
-                                                            mainIcon={config.resultCard.mainIcon}
-                                                            subtext={config.resultCard.subtextKey ? rec[config.resultCard.subtextKey] : undefined}
-                                                            secondIcon={config.resultCard.secondIcon}
-                                                            secondSubtext={config.resultCard.secondSubtextKey ? rec[config.resultCard.secondSubtextKey] : undefined}
-                                                            isPrivate={isPrivate}
-                                                            onFavorite={handleFavorite}
-                                                            onAddToJar={handleAddToJar}
-                                                            onGoAction={() => onGoAction(rec)}
-                                                            goActionLabel={config.resultCard.goActionLabel || ACTION_LABELS.DO_THIS}
-                                                            ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
-                                                            isAddingToJar={addingItemName === rec.name}
-
-                                                            // Inline Expansion for Holidays
-                                                            expandable={isHoliday}
-                                                            isExpanded={isExpanded}
-                                                            onToggleExpand={() => setExpandedRecIndex(isExpanded ? null : index)}
-                                                            renderExpandedContent={isHoliday ? (
-                                                                <ItineraryMarkdownRenderer
-                                                                    markdown={rec.details}
-                                                                    configId={config.id}
-                                                                    theme={getThemeClasses(config.colorTheme)}
-                                                                />
-                                                            ) : undefined}
-                                                        />
+                                                        <button
+                                                            key={option}
+                                                            onClick={() => toggleSelection(option, section.id, section.type as 'multi-select' | 'single-select')}
+                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isActive
+                                                                ? theme.selected
+                                                                : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-slate-200'
+                                                                }`}
+                                                        >
+                                                            {option}
+                                                        </button>
                                                     );
                                                 })}
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {showTrialUsedPrompt && demoConcierge && demoConcierge.triesRemaining === 0 && (
-                                        <div className="mt-6">
-                                            <DemoUpgradePrompt
-                                                reason="premium"
-                                                message={`Loved the ${config.title}? Sign up for unlimited access to ALL 11 premium concierge tools!`}
-                                            />
-                                        </div>
+                                        {section.allowCustom && section.type !== 'date-range' && (
+                                            <div className="mt-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Other (specify)..."
+                                                    value={customInputs[section.id] || ''}
+                                                    onChange={(e) => {
+                                                        markInteraction(`custom_${section.id}`);
+                                                        setCustomInputs(prev => ({ ...prev, [section.id]: e.target.value }));
+                                                    }}
+                                                    className={`w-full px-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400`}
+                                                    aria-label={`Custom ${section.label}`}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                            {/* PRICE */}
+                            {config.hasPrice && (
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Price Range</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['any', 'cheap', 'moderate', 'expensive'].map((p) => (
+                                            <button
+                                                key={p}
+                                                type="button"
+                                                onClick={() => {
+                                                    markInteraction('price');
+                                                    setPrice(p);
+                                                }}
+                                                className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-all ${price === p
+                                                    ? `${theme.lightBg} ${theme.border} ${theme.text}`
+                                                    : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'
+                                                    }`}
+                                            >
+                                                {p === 'any' ? 'Any' : p.charAt(0).toUpperCase() + p.slice(1)} {p !== 'any' && `(${p === 'cheap' ? '$' : p === 'moderate' ? '$$' : '$$$'})`}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+
+
+                            {/* EXTRA INSTRUCTIONS (Unified Support) */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Additional Details / Requests</label>
+                                <textarea
+                                    value={customInputs['extraInstructions'] || ''}
+                                    onChange={(e) => setCustomInputs(prev => ({ ...prev, extraInstructions: e.target.value }))}
+                                    placeholder="e.g. Make it kid frendly, or 'We love spicy food'..."
+                                    className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 ${theme.ring} bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 min-h-[80px] resize-none`}
+                                />
+                            </div>
+
+                            <div className="py-2">
+                                <Button
+                                    type="button"
+                                    onClick={handleGetRecommendations}
+                                    disabled={isLoading}
+                                    className={`w-full text-white shadow-lg ${theme.button}`}
+                                >
+                                    {isLoading ? (
+                                        <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Thinking...</>
+                                    ) : (
+                                        <><Sparkles className="w-5 h-5 mr-2" /> Recommendations</>
                                     )}
+                                </Button>
+                            </div>
+
+                            {/* RESULTS */}
+                            {recommendations.length > 0 && (
+                                <div ref={resultsRef} className="space-y-4 pt-4 border-t border-slate-200 dark:border-white/10">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Top Picks for You</h3>
+                                        <button
+                                            onClick={() => setIsPrivate(!isPrivate)}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-500'}`}
+                                            aria-label={isPrivate ? "Switch to Public Mode" : "Switch to Private Mode"}
+                                        >
+                                            <Lock className="w-3.5 h-3.5" />
+                                            {isPrivate ? "Secret Mode On" : "Public Mode"}
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {recommendations.map((rec, index) => {
+                                            const isHoliday = config.id === 'holiday_concierge';
+                                            const isExpanded = expandedRecIndex === index;
+
+                                            return (
+                                                <ConciergeResultCard
+                                                    key={index}
+                                                    rec={rec}
+                                                    categoryType={config.categoryType}
+                                                    mainIcon={config.resultCard.mainIcon}
+                                                    subtext={config.resultCard.subtextKey ? rec[config.resultCard.subtextKey] : undefined}
+                                                    secondIcon={config.resultCard.secondIcon}
+                                                    secondSubtext={config.resultCard.secondSubtextKey ? rec[config.resultCard.secondSubtextKey] : undefined}
+                                                    isPrivate={isPrivate}
+                                                    onFavorite={handleFavorite}
+                                                    onAddToJar={handleAddToJar}
+                                                    onGoAction={() => onGoAction(rec)}
+                                                    goActionLabel={config.resultCard.goActionLabel || ACTION_LABELS.DO_THIS}
+                                                    ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
+                                                    isAddingToJar={addingItemName === rec.name}
+
+                                                    // Inline Expansion for Holidays
+                                                    expandable={isHoliday}
+                                                    isExpanded={isExpanded}
+                                                    onToggleExpand={() => setExpandedRecIndex(isExpanded ? null : index)}
+                                                    renderExpandedContent={isHoliday ? (
+                                                        <ItineraryMarkdownRenderer
+                                                            markdown={rec.details}
+                                                            configId={config.id}
+                                                            theme={getThemeClasses(config.colorTheme)}
+                                                        />
+                                                    ) : undefined}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {showTrialUsedPrompt && demoConcierge && demoConcierge.triesRemaining === 0 && (
+                                <div className="mt-6">
+                                    <DemoUpgradePrompt
+                                        reason="premium"
+                                        message={`Loved the ${config.title}? Sign up for unlimited access to ALL 11 premium concierge tools!`}
+                                    />
                                 </div>
                             )}
                         </div>
-
-                    </motion.div >
-                </div >
-            )
-            }
-
+                    )}
+                </div>
+            </DialogContent>
 
             <RichDetailsModal
                 isOpen={!!viewingItem}
@@ -823,6 +812,6 @@ export function GenericConciergeModal({
                     setViewingItem(null);
                 }}
             />
-        </AnimatePresence >
+        </Dialog>
     );
 }

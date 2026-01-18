@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
 import { useModalSystem } from "@/components/ModalProvider";
@@ -19,27 +19,19 @@ interface CreateJarModalProps {
     onSuccess?: (jarId: string) => void;
 }
 
-// Helper to infer jar type from topic for backward compatibility
-// Note: Type no longer affects functionality - it's just metadata
-// SOCIAL is the most flexible default (works for both solo and group use)
 function inferTypeFromTopic(topic: string): string {
     const romanticTopics = ['Dates', 'Romantic', 'date', 'romantic'];
-
     if (romanticTopics.some(t => topic.toLowerCase().includes(t.toLowerCase()))) {
         return 'ROMANTIC';
     }
-
-    // Default to SOCIAL for all other jars (works for solo or group)
-    // The jar type no longer restricts functionality
     return 'SOCIAL';
 }
 
-export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, currentJarCount, onSuccess }: CreateJarModalProps) {
+export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSuccess }: CreateJarModalProps) {
     const [name, setName] = useState("");
     const [topic, setTopic] = useState("Activities");
     const [selectionMode, setSelectionMode] = useState<string>("RANDOM");
 
-    // Custom Topic State
     const [customTopicName, setCustomTopicName] = useState("");
     const [customCategories, setCustomCategories] = useState(["", "", ""]);
 
@@ -47,7 +39,6 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    // Reset state when modal opens
     useEffect(() => {
         if (isOpen) {
             setSuccess(false);
@@ -58,9 +49,6 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             setCustomCategories(["", "", ""]);
         }
     }, [isOpen]);
-
-    const router = useRouter();
-    const { openModal } = useModalSystem();
 
     const maxJars = isPro ? 50 : 3;
     const isLimitReached = currentJarCount >= maxJars;
@@ -89,7 +77,6 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                 setIsLoading(false);
                 return;
             }
-            // Filter empty
             const validCats = customCategories.filter(c => c.trim() !== "");
             if (validCats.length === 0) {
                 setError("Please add at least one category.");
@@ -101,11 +88,10 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             finalCustomCategories = validCats.map((label, idx) => ({
                 id: `CUSTOM_${idx}_${Date.now()}`,
                 label: label,
-                icon: 'Sparkles' // Default icon
+                icon: 'Sparkles'
             }));
         }
 
-        // Auto-infer type from topic
         const inferredType = inferTypeFromTopic(finalTopic);
 
         try {
@@ -118,18 +104,14 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             if (res.ok) {
                 const data = await res.json();
                 setSuccess(true);
-
-                // Wait briefly for the success animation then handoff
                 setTimeout(() => {
                     onClose();
-                    if (onSuccess) {
-                        onSuccess(data.jar.id);
-                    }
+                    if (onSuccess) onSuccess(data.jar.id);
                 }, 800);
             } else {
                 const data = await res.json();
                 setError(data.error || "Failed to create jar");
-                setIsLoading(false); // Only stop loading on error
+                setIsLoading(false);
             }
         } catch (error) {
             console.error("Error creating jar:", error);
@@ -141,7 +123,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     if (success) {
         return (
             <Dialog open={isOpen} onOpenChange={() => { }}>
-                <DialogContent className="sm:max-w-[425px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white min-h-[300px] flex flex-col items-center justify-center text-center">
+                <DialogContent className="bg-slate-50 dark:bg-slate-900 min-h-[300px] flex flex-col items-center justify-center text-center">
                     <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4 animate-in zoom-in duration-300">
                         <span className="text-3xl">🎉</span>
                     </div>
@@ -158,154 +140,137 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     if (isLimitReached) {
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="sm:max-w-[425px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                            <span>Limit Reached</span>
-                            <span className="text-2xl">🔒</span>
-                        </DialogTitle>
-                        <DialogDescription className="text-slate-600 dark:text-slate-400">
-                            You have reached the maximum number of Jars for your current plan.
-                        </DialogDescription>
-                    </DialogHeader>
+                <DialogHeader onClose={onClose}>
+                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                        <span>Limit Reached</span>
+                        <span className="text-2xl">🔒</span>
+                    </DialogTitle>
+                    <DialogDescription>
+                        You have reached the maximum number of Jars for your current plan.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogContent>
                     <div className="py-6 text-center space-y-4">
-                        <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                            <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">Current Usage</p>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{currentJarCount} / {maxJars} Jars</p>
+                        <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <p className="text-sm text-slate-600 dark:text-slate-300 mb-2 font-medium">Current Usage</p>
+                            <p className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-wider">{currentJarCount} / {maxJars} Jars</p>
                         </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                             To create more jars, please upgrade to Pro or leave an existing jar.
                         </p>
                     </div>
-                    <div className="flex justify-end gap-3">
-                        <Button variant="ghost" onClick={onClose}>
-                            Close
-                        </Button>
-                        <Button
-                            className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white border-0"
-                            onClick={() => onClose()}
-                        >
-                            Got it
-                        </Button>
-                    </div>
                 </DialogContent>
+                <DialogFooter>
+                    <Button variant="ghost" onClick={onClose}>Close</Button>
+                    <Button
+                        className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white border-0 font-bold"
+                        onClick={() => onClose()}
+                    >
+                        Got it
+                    </Button>
+                </DialogFooter>
             </Dialog>
         );
     }
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                        <span>Create Your First Jar</span>
-                        <span className="text-2xl">✨</span>
-                    </DialogTitle>
-                    <DialogDescription className="text-slate-600 dark:text-slate-400">
-                        A jar is a collection of ideas. Let's set up your first one!
-                    </DialogDescription>
-                </DialogHeader>
+            <DialogHeader onClose={onClose}>
+                <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                    <span>Create New Jar</span>
+                    <Sparkles className="w-6 h-6 text-amber-500" />
+                </DialogTitle>
+                <DialogDescription>
+                    A jar is a collection of ideas. Let's set up a new one!
+                </DialogDescription>
+            </DialogHeader>
 
-                <form onSubmit={handleCreate} className="space-y-6 mt-4">
+            <DialogContent>
+                <form id="create-jar-form" onSubmit={handleCreate} className="space-y-6">
                     <div className="space-y-2">
-                        <Label htmlFor="name" className="flex items-center gap-2">
+                        <Label htmlFor="create-jar-name" className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                             Jar Name
-                            <span className="text-xs text-slate-400 font-normal">(What's this jar for?)</span>
                         </Label>
                         <Input
-                            id="name"
-                            placeholder="e.g. Date Night Ideas, Weekend Fun, or Places to Explore"
+                            id="create-jar-name"
+                            placeholder="e.g. Date Night Ideas, Weekend Fun..."
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
-                            className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                            className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 h-12 text-base shadow-sm focus:ring-2 focus:ring-primary/20"
                             aria-label="Jar Name"
-                            aria-invalid={!name && isLoading}
                         />
-                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
-                            <span className="text-sm">💡</span>
-                            <span>Give your jar a descriptive name. You can always change it later!</span>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-[0.05em] flex items-center gap-1.5 pl-1">
+                            <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                            Give your jar a descriptive name.
                         </p>
                         {error && (
-                            <p className="text-sm text-red-400 mt-1">{error}</p>
+                            <p className="text-sm text-red-500 font-bold mt-1 pl-1">{error}</p>
                         )}
                     </div>
 
-                    <div className="space-y-3">
-                        <Label className="flex items-center gap-2">
-                            Mode
-                            <span className="text-xs text-slate-400 font-normal">(How will you pick ideas?)</span>
+                    <div className="space-y-2">
+                        <Label htmlFor="create-jar-mode" className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+                            Selection Mode
                         </Label>
-                        <select
-                            value={selectionMode}
-                            onChange={(e) => setSelectionMode(e.target.value)}
-                            className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                            aria-label="Select Mode"
-                        >
-                            <option value="RANDOM">🎲 Spin (Lucky Dip) - Random surprise</option>
-                            <option value="ADMIN_PICK">👤 Admin Pick (Curated) - You choose what's next</option>
-                            <option value="VOTING">🗳️ Vote (Consensus) - Group decides together</option>
-                            <option value="ALLOCATION">📋 Allocation (Tasks) - Assign to team members</option>
-                        </select>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
-                            <span className="text-sm">💡</span>
-                            <span>
-                                {selectionMode === 'RANDOM' && "Random spin is perfect for spontaneous decisions!"}
-                                {selectionMode === 'ADMIN_PICK' && "You'll manually choose which idea to use next."}
-                                {selectionMode === 'VOTING' && "Great for groups - everyone votes on their favorites!"}
-                                {selectionMode === 'ALLOCATION' && "Ideal for task management and team assignments."}
-                            </span>
-                        </p>
+                        <div className="relative">
+                            <select
+                                id="create-jar-mode"
+                                value={selectionMode}
+                                onChange={(e) => setSelectionMode(e.target.value)}
+                                className="w-full h-12 pl-4 pr-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm appearance-none shadow-sm font-medium"
+                                aria-label="Select Mode"
+                            >
+                                <option value="RANDOM">🎲 Spin (Lucky Dip) - Random surprise</option>
+                                <option value="ADMIN_PICK">👤 Admin Pick (Curated) - You choose what's next</option>
+                                <option value="VOTING">🗳️ Vote (Consensus) - Group decides together</option>
+                                <option value="ALLOCATION">📋 Allocation (Tasks) - Assign to team members</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                <Plus className="w-4 h-4 rotate-45" />
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="space-y-3">
-                        <Label className="flex items-center gap-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="create-jar-topic" className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                             Jar Topic
-                            <span className="text-xs text-slate-400 font-normal">(What kind of ideas?)</span>
                         </Label>
-                        <select
-                            value={topic}
-                            onChange={(e) => setTopic(e.target.value)}
-                            className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
-                            aria-label="Select Jar Topic"
-                        >
-                            {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom' && k !== 'General').map(k => (
-                                <option key={k} value={k}>
-                                    {k}
-                                </option>
-                            ))}
-                            <option value="Custom">Other / Custom...</option>
-                        </select>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
-                            <span className="text-sm">💡</span>
-                            <span>
-                                {topic === 'Activities' && "Great for adventures, outings, and things to do!"}
-                                {topic === 'Dates' && "Perfect for romantic date ideas and couple activities."}
-                                {topic === 'Movies' && "Keep track of movies you want to watch together."}
-                                {topic === 'Food' && "Restaurants to try, recipes to cook, and dining adventures."}
-                                {topic === 'Travel' && "Dream destinations and trip ideas to explore."}
-                                {topic === 'Custom' && "Create your own topic with custom categories!"}
-                                {!['Activities', 'Dates', 'Movies', 'Food', 'Travel', 'Custom'].includes(topic) && "Choose a topic that matches your jar's purpose."}
-                            </span>
-                        </p>
+                        <div className="relative">
+                            <select
+                                id="create-jar-topic"
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                                className="w-full h-12 pl-4 pr-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm appearance-none shadow-sm font-medium"
+                                aria-label="Select Jar Topic"
+                            >
+                                {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom' && k !== 'General').map(k => (
+                                    <option key={k} value={k}>{k}</option>
+                                ))}
+                                <option value="Custom">Other / Custom...</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                <Plus className="w-4 h-4 rotate-45" />
+                            </div>
+                        </div>
                     </div>
 
                     {topic === 'Custom' && (
-                        <div className="space-y-4 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-slate-800/50 animate-in fade-in zoom-in duration-300">
+                        <div className="space-y-4 p-5 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-black/20 animate-in fade-in slide-in-from-top-2 duration-300">
                             <div className="space-y-2">
-                                <Label className="text-xs uppercase text-slate-500">Custom Topic Name</Label>
+                                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Custom Topic Name</Label>
                                 <Input
                                     value={customTopicName}
                                     onChange={(e) => setCustomTopicName(e.target.value)}
                                     placeholder="e.g. Board Games, Work Lunches"
-                                    className="bg-white dark:bg-slate-800"
+                                    className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 h-11"
                                     autoFocus
                                     aria-label="Custom Topic Name"
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label className="text-xs uppercase text-slate-500">Categories</Label>
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Categories</Label>
                                 <div className="space-y-2">
                                     {customCategories.map((cat, idx) => (
                                         <div key={idx} className="flex gap-2">
@@ -313,7 +278,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                                 value={cat}
                                                 onChange={(e) => updateCategory(idx, e.target.value)}
                                                 placeholder={`Category ${idx + 1}`}
-                                                className="bg-white dark:bg-slate-800"
+                                                className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 h-11"
                                                 aria-label={`Category ${idx + 1}`}
                                             />
                                             {customCategories.length > 1 && (
@@ -322,7 +287,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => removeCategory(idx)}
-                                                    className="shrink-0 text-slate-400 hover:text-red-400"
+                                                    className="shrink-0 text-slate-400 hover:text-red-500 h-11 w-11 rounded-xl"
                                                     aria-label={`Remove Category ${idx + 1}`}
                                                 >
                                                     <X className="w-4 h-4" />
@@ -336,7 +301,7 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                                     variant="outline"
                                     size="sm"
                                     onClick={addCategory}
-                                    className="w-full mt-2 border-dashed"
+                                    className="w-full mt-2 border-dashed rounded-xl h-11 font-bold text-slate-500 hover:text-primary transition-all"
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
                                     Add Category
@@ -344,22 +309,23 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
                             </div>
                         </div>
                     )}
-
-                    <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} aria-label="Cancel Jar Creation">
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isLoading}
-                            className="bg-primary hover:bg-primary/90 text-white"
-                        >
-                            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            Create Jar
-                        </Button>
-                    </div>
                 </form>
             </DialogContent>
+
+            <DialogFooter className="bg-slate-50 dark:bg-black/20">
+                <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} className="font-bold">
+                    Cancel
+                </Button>
+                <Button
+                    type="submit"
+                    form="create-jar-form"
+                    disabled={isLoading}
+                    className="bg-primary hover:bg-primary/90 text-white font-bold shadow-lg shadow-primary/20 min-w-[120px] rounded-xl h-12"
+                >
+                    {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2 stroke-[3px]" />}
+                    Create Jar
+                </Button>
+            </DialogFooter>
         </Dialog>
     );
 }

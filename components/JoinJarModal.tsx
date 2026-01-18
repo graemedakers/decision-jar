@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
-import { Users, Loader2 } from "lucide-react";
+import { Users, Loader2, Sparkles } from "lucide-react";
 
 interface JoinJarModalProps {
     isOpen: boolean;
@@ -51,53 +51,59 @@ export function JoinJarModal({ isOpen, onClose, onSuccess }: JoinJarModalProps) 
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                        <span>Join a Jar</span>
-                        <Users className="w-6 h-6 text-blue-500 dark:text-blue-400" />
-                    </DialogTitle>
-                    <DialogDescription className="text-slate-600 dark:text-slate-400">
-                        Enter the invitation code to instantly sync with an existing jar.
-                    </DialogDescription>
-                </DialogHeader>
+            <DialogHeader onClose={onClose}>
+                <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                    <span>Join a Jar</span>
+                    <Users className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                </DialogTitle>
+                <DialogDescription>
+                    Enter the invitation code to instantly sync with an existing jar.
+                </DialogDescription>
+            </DialogHeader>
 
-                <form onSubmit={handleJoin} className="space-y-6 mt-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="code">Jar Code</Label>
+            <DialogContent>
+                <form id="join-jar-form" onSubmit={handleJoin} className="space-y-6">
+                    <div className="space-y-4">
+                        <Label htmlFor="join-code" className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-widest pl-1">
+                            Invitation Code
+                        </Label>
                         <Input
-                            id="code"
-                            placeholder="Enter 6-character code"
+                            id="join-code"
+                            placeholder="E.G. 2AAZ6J"
                             value={code}
                             onChange={(e) => setCode(e.target.value.toUpperCase())}
                             required
                             maxLength={6}
-                            className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 font-mono text-center text-lg tracking-widest uppercase"
+                            className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-300 font-mono text-center text-3xl h-20 tracking-[0.2em] uppercase rounded-2xl shadow-inner focus:ring-4 focus:ring-blue-500/10"
                             aria-label="Enter Jar Code"
-                            aria-invalid={code.length > 0 && code.length < 3}
-                            aria-describedby={error ? "join-error" : undefined}
                         />
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-[0.05em] flex items-center gap-1.5 justify-center">
+                            <Sparkles className="w-3 h-3 text-blue-500 shrink-0" />
+                            Codes are 6 characters long and expire after 24 hours.
+                        </p>
                         {error && (
-                            <p id="join-error" className="text-sm text-red-400 mt-1" role="alert">{error}</p>
+                            <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-3 rounded-xl animate-in fade-in zoom-in duration-200">
+                                <p className="text-sm text-red-500 font-bold text-center" role="alert">{error}</p>
+                            </div>
                         )}
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} aria-label="Cancel Joining Jar">
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isLoading || code.length < 3}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                            aria-label={isLoading ? "Joining Jar..." : "Join Jar"}
-                        >
-                            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            Join Jar
-                        </Button>
                     </div>
                 </form>
             </DialogContent>
+
+            <DialogFooter className="bg-slate-50 dark:bg-black/20">
+                <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} className="font-bold">
+                    Cancel
+                </Button>
+                <Button
+                    type="submit"
+                    form="join-jar-form"
+                    disabled={isLoading || code.length < 3}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/20 min-w-[120px] rounded-xl h-12"
+                >
+                    {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Users className="w-4 h-4 mr-2" />}
+                    Join Jar
+                </Button>
+            </DialogFooter>
         </Dialog>
     );
 }

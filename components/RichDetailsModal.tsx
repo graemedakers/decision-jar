@@ -1,7 +1,9 @@
+"use client";
 import React from "react";
-import { X, ChefHat, ShoppingCart, Clock, Utensils, Check, Share2, Plus, Zap, Star } from "lucide-react";
+import { X, ChefHat, ShoppingCart, Clock, Utensils, Check, Share2, Plus, Zap, Star, Plane, Map, Calendar, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 
 interface RichDetailsModalProps {
     isOpen: boolean;
@@ -12,14 +14,13 @@ interface RichDetailsModalProps {
         details: string; // Markdown content
         price?: string;
         google_rating?: string | number;
+        duration_label?: string;
         [key: string]: any;
     } | null;
     configId?: string; // e.g. 'holiday_concierge' | 'chef_concierge'
     onAddToJar: () => void;
     onGoAction: () => void;
 }
-
-import { Plane, Map, Calendar, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 
 export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, onGoAction }: RichDetailsModalProps) {
     if (!data) return null;
@@ -59,18 +60,22 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
     const theme = getConfigTheme();
     const ThemeIcon = theme.icon;
 
+    const getIconForSection = (title: string) => {
+        const t = title.toLowerCase();
+        if (t.includes('shopping') || t.includes('ingredients')) return <ShoppingCart className="w-5 h-5 text-emerald-500" />;
+        if (t.includes('time') || t.includes('schedule') || t.includes('prep')) return <Clock className="w-5 h-5 text-blue-500" />;
+        if (t.includes('instructions') || t.includes('steps') || t.includes('execution')) return <Utensils className="w-5 h-5 text-orange-500" />;
+        return <Check className="w-5 h-5 text-slate-400" />;
+    };
+
     // --- Enhanced Markdown Parser ---
     const parseMarkdown = (md: string) => {
-        // Special handling for Itineraries (Day 1, Day 2...) to create cards
         const isItinerary = configId === 'holiday_concierge';
-
-        // Split by H3 (###) which we use for Day headers in prompts
         const sections = md.split(/^### /gm);
 
         return sections.map((section, idx) => {
             if (!section.trim()) return null;
 
-            // If it's the first chunk and doesn't start with a header (intro text)
             if (idx === 0 && !md.startsWith('### ')) {
                 return (
                     <div key={idx} className="mb-6 text-slate-600 dark:text-slate-300 italic">
@@ -88,14 +93,12 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
                     if (!trimmed) return <div key={i} className="h-2" />;
 
                     if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-                        // Sub-headers like **Morning:**
                         return <div key={i} className="font-bold text-slate-800 dark:text-slate-100 mt-3 mb-1">{trimmed.replace(/\*\*/g, '')}</div>;
                     }
                     if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
                         return <li key={i} className="ml-4 list-disc pl-1 text-slate-600 dark:text-slate-300">{trimmed.replace(/^[-*] /, '')}</li>;
                     }
 
-                    // Link parsing (e.g. Map links)
                     const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
                     if (linkMatch) {
                         const [full, text, url] = linkMatch;
@@ -115,13 +118,8 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
                 });
             };
 
-            // Itinerary Card Style with Accordion
             if (isItinerary) {
-                // For day 1 (idx 1 usually, as idx 0 is intro), default to open if not set
-                // Actually, let's just use the state directly. The init state {0:false} might need adjustment if idx=0 is intro text.
-                // Let's assume idx 1 is the first real day. 
                 const isOpen = openCards[idx];
-
                 return (
                     <div key={idx} className="mb-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden transition-all duration-300">
                         <button
@@ -154,7 +152,6 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
                 );
             }
 
-            // Default Style (Chef etc)
             return (
                 <div key={idx} className="mb-6">
                     <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 border-b border-slate-100 dark:border-white/10 pb-2 ${theme.sectionHeaderColor}`}>
@@ -169,96 +166,74 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
         });
     };
 
-    const getIconForSection = (title: string) => {
-        const t = title.toLowerCase();
-        if (t.includes('shopping') || t.includes('ingredients')) return <ShoppingCart className="w-5 h-5 text-emerald-500" />;
-        if (t.includes('time') || t.includes('schedule') || t.includes('prep')) return <Clock className="w-5 h-5 text-blue-500" />;
-        if (t.includes('instructions') || t.includes('steps') || t.includes('execution')) return <Utensils className="w-5 h-5 text-orange-500" />;
-        return <Check className="w-5 h-5 text-slate-400" />;
-    };
-
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-md">
-                    <motion.div
-                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="bg-white dark:bg-slate-900 w-full max-w-3xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-white/10"
-                    >
-                        {/* Header */}
-                        <div className={`relative h-32 bg-gradient-to-r ${theme.gradient} flex items-end p-6 shrink-0`}>
-                            <div className="absolute top-4 right-4">
-                                <button onClick={onClose} className="p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-sm">
-                                    <X className="w-6 h-6" />
-                                </button>
-                            </div>
-                            <div className="relative z-10 w-full">
-                                <div className="flex justify-between items-end">
-                                    <div>
-                                        <div className="flex items-center gap-2 text-white/90 mb-1 text-sm font-bold tracking-wider uppercase">
-                                            <ThemeIcon className="w-4 h-4" /> {theme.label}
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent raw className="bg-white dark:bg-slate-900 border-none max-w-3xl">
+                {/* Header */}
+                <DialogHeader onClose={onClose} showClose={false} className="relative h-32 bg-gradient-to-r p-0 overflow-hidden shrink-0 border-none">
+                    <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} flex items-end p-6`}>
+                        <div className="absolute top-4 right-4 z-20">
+                            <button onClick={onClose} className="p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-sm">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <div className="relative z-10 w-full mb-2">
+                            <div className="flex justify-between items-end">
+                                <div>
+                                    <div className="flex items-center gap-2 text-white/90 mb-1 text-sm font-bold tracking-wider uppercase">
+                                        <ThemeIcon className="w-4 h-4" /> {theme.label}
+                                    </div>
+                                    <DialogTitle className="text-2xl sm:text-3xl font-black text-white leading-tight shadow-black/10 drop-shadow-md line-clamp-2">{data.name}</DialogTitle>
+                                </div>
+                                <div className="hidden sm:block text-right whitespace-nowrap pl-4">
+                                    <div className="text-3xl font-bold text-white mb-1">{data.price}</div>
+                                    {data.google_rating && (
+                                        <div className="flex items-center gap-1 text-white/90 bg-black/20 px-2 py-1 rounded-lg backdrop-blur-sm justify-end">
+                                            <Star className="w-4 h-4 fill-current" /> {data.google_rating} / 5
                                         </div>
-                                        <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight shadow-black/10 drop-shadow-md line-clamp-2">{data.name}</h2>
-                                    </div>
-                                    <div className="hidden sm:block text-right whitespace-nowrap pl-4">
-                                        <div className="text-3xl font-bold text-white mb-1">{data.price}</div>
-                                        {data.google_rating && (
-                                            <div className="flex items-center gap-1 text-white/90 bg-black/20 px-2 py-1 rounded-lg backdrop-blur-sm justify-end">
-                                                <Star className="w-4 h-4 fill-current" /> {data.google_rating} / 5
-                                            </div>
-                                        )}
-                                        {data.duration_label && (
-                                            <div className="text-white/80 text-sm font-medium mt-1">
-                                                {data.duration_label}
-                                            </div>
-                                        )}
-                                    </div>
+                                    )}
                                 </div>
                             </div>
-                            {/* Decorative background pattern */}
-                            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: theme.bgPattern, backgroundSize: '20px 20px' }}></div>
                         </div>
+                        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: theme.bgPattern, backgroundSize: '20px 20px' }}></div>
+                    </div>
+                </DialogHeader>
 
-                        {/* Content */}
-                        <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
-                            {/* Mobile Price/Rating */}
-                            <div className="flex sm:hidden justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-white/5">
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-2xl text-slate-700 dark:text-slate-200">{data.price}</span>
-                                    {data.duration_label && <span className="text-xs text-slate-500">{data.duration_label}</span>}
-                                </div>
-                                {data.google_rating && (
-                                    <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded-full">
-                                        <Star className="w-4 h-4 fill-current" /> {data.google_rating} / 5
-                                    </span>
-                                )}
-                            </div>
-
-                            {data.description && (
-                                <p className="text-lg text-slate-600 dark:text-slate-300 mb-6 italic leading-relaxed">
-                                    {data.description}
-                                </p>
-                            )}
-
-                            <div className="prose dark:prose-invert max-w-none">
-                                {parseMarkdown(data.details || "# No details available\nSorry, full details could not be loaded.")}
-                            </div>
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8 custom-scrollbar">
+                    <div className="flex sm:hidden justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-white/5">
+                        <div className="flex flex-col">
+                            <span className="font-bold text-2xl text-slate-700 dark:text-slate-200">{data.price}</span>
+                            {data.duration_label && <span className="text-xs text-slate-500">{data.duration_label}</span>}
                         </div>
+                        {data.google_rating && (
+                            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded-full">
+                                <Star className="w-4 h-4 fill-current" /> {data.google_rating} / 5
+                            </span>
+                        )}
+                    </div>
 
-                        {/* Footer */}
-                        <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/50 flex gap-3 shrink-0">
-                            <Button variant="outline" onClick={onAddToJar} className="flex-1 border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5">
-                                <Plus className="w-4 h-4 mr-2" /> Add to Jar
-                            </Button>
-                            <Button onClick={onGoAction} className={`flex-[2] bg-gradient-to-r text-white font-bold shadow-lg ${configId === 'holiday_concierge' ? 'from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 shadow-blue-500/20' : 'from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-emerald-500/20'}`}>
-                                <Zap className="w-4 h-4 mr-2" /> {theme.buttonLabel}
-                            </Button>
-                        </div>
-                    </motion.div>
+                    {data.description && (
+                        <p className="text-lg text-slate-600 dark:text-slate-300 mb-6 italic leading-relaxed">
+                            {data.description}
+                        </p>
+                    )}
+
+                    <div className="prose dark:prose-invert max-w-none">
+                        {parseMarkdown(data.details || "# No details available\nSorry, full details could not be loaded.")}
+                    </div>
                 </div>
-            )}
-        </AnimatePresence>
+
+                {/* Footer */}
+                <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/50 flex gap-3 shrink-0">
+                    <Button variant="outline" onClick={onAddToJar} className="flex-1 border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 h-12">
+                        <Plus className="w-4 h-4 mr-2" /> <span className="hidden sm:inline">Add to Jar</span><span className="sm:hidden">Add</span>
+                    </Button>
+                    <Button onClick={onGoAction} className={`flex-[2] h-12 bg-gradient-to-r text-white font-bold shadow-lg ${configId === 'holiday_concierge' ? 'from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 shadow-blue-500/20' : 'from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-emerald-500/20'}`}>
+                        <Zap className="w-4 h-4 mr-2" /> {theme.buttonLabel}
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }
