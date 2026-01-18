@@ -323,10 +323,10 @@ export function SignupForm() {
             className="w-full max-w-md"
         >
             <div className="glass-card relative overflow-hidden bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 shadow-xl p-8">
-                {/* Close Button - Clear session when escaping auth screens to prevent middleware redirect loops */}
-                <Link href="/api/auth/nuke-session?target=/" className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors z-10">
+                {/* Close Button - Use native <a> to ensure full refresh and session clearing on mobile */}
+                <a href="/api/auth/nuke-session?target=/" className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors z-10">
                     <X className="w-5 h-5" />
-                </Link>
+                </a>
 
                 {/* Header */}
                 <div className="text-center mb-8">

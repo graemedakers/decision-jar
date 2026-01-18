@@ -14,8 +14,9 @@ export function BottomNav() {
         { name: "Vault", href: "/memories", icon: History },
     ];
 
-    // Hide on landing page
-    if (pathname === "/") return null;
+    // Hide on landing and auth pages
+    const isAuthPage = pathname === "/login" || pathname === "/signup" || pathname === "/forgot-password";
+    if (pathname === "/" || isAuthPage) return null;
 
     return (
         <>
