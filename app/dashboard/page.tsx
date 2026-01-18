@@ -110,6 +110,19 @@ function DashboardContent() {
         openModal
     } = useDashboardLogic();
 
+    // 🔍 DEBUG: Log user data state immediately
+    console.log('[Dashboard] State:', {
+        isLoadingUser,
+        hasUserData: !!userData,
+        activeJarId: userData?.activeJarId,
+        membershipsCount: userData?.memberships?.length,
+        memberships: userData?.memberships?.map((m: any) => ({
+            jarId: m.jarId,
+            jarName: m.jar?.name,
+            isCommunityJar: m.jar?.isCommunityJar
+        }))
+    });
+
     // Initialize session tracking for time-to-first-idea analytics
     useEffect(() => {
         SessionTracker.initSession();
