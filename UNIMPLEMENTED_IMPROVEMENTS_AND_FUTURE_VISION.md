@@ -11,7 +11,7 @@ This document serves as a consolidated master list of features, technical debt, 
 *   **Reusable Wizard Component**: Standardize the multi-step "Wizard" flow used by planners (`BarCrawl`, `Menu`, `WeekendPlanner`). Replace duplicated logic with a `<WizardModal>` component or `useWizard` hook.
 *   **Calendar Integration 2.0**: Refactor `CalendarModal` for better mobile UX and explore merging it into the `DateNightPlanner` to reduce UI fragmentation.
 *   ~~**Idea Transferability**: Implement "Move Idea" UI and API to allow users to transfer ideas between their different jars.~~ ✅ **COMPLETED** (Jan 18, 2026)
-*   **Contextual Jar Auto-Switching**: When adding an idea from a specialized concierge (e.g., Dining), the app should intelligently suggest/switch to the most relevant jar (e.g., "Dining Ideas").
+*   ~~**Contextual Jar Auto-Switching**: When adding an idea from a specialized concierge (e.g., Dining), the app should intelligently suggest/switch to the most relevant jar (e.g., "Dining Ideas").~~ ✅ **COMPLETED** (Jan 18, 2026)
 *   ~~**Digital Item Logic**: Update the `GameConcierge` and `ConciergeResultCard` to detect online/digital items and automatically hide physical map/address indicators.~~ ✅ **COMPLETED** (Jan 17, 2026)
 *   ~~**Global UI Polish**: Conduct a spacing and alignment pass across the Dashboard and Explore grids to ensure 100% visual consistency.~~ ✅ **COMPLETED** (Jan 17, 2026)
 

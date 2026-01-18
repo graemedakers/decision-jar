@@ -78,6 +78,8 @@ interface GenericConciergeModalProps {
     onFavoriteUpdated?: () => void;
     onUpdateUserLocation?: (newLocation: string) => void;
     isPremium?: boolean; // For premium-only features like shortcuts
+    availableJars?: { id: string; name: string; topic?: string }[]; // For contextual jar switching
+    currentJarId?: string | null; // Current active jar
 }
 
 // --- Theme Helper ---
@@ -198,7 +200,9 @@ export function GenericConciergeModal({
     onGoTonight,
     onFavoriteUpdated,
     onUpdateUserLocation,
-    isPremium = false
+    isPremium = false,
+    availableJars = [],
+    currentJarId = null
 }: GenericConciergeModalProps) {
     const demoConcierge = useDemoConcierge();
     const { userData } = useUser({ redirectToLogin: false }); // For trial badge display
@@ -371,7 +375,9 @@ export function GenericConciergeModal({
         onGoTonight,
         onFavoriteUpdated,
         onClose,
-        setRecommendations
+        setRecommendations,
+        availableJars,
+        currentJarId
     });
 
     const onGoAction = (rec: any) => {

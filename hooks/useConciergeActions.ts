@@ -1,10 +1,10 @@
 
-
 import { useState } from "react";
 import { isDemoMode, addDemoIdea } from "@/lib/demo-storage";
 import { trackEvent, trackIdeaAdded } from "@/lib/analytics";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { logger } from "@/lib/logger";
+import { findBestMatchingJar, getSuggestionMessage } from "@/lib/jar-topic-matcher";
 
 interface ConciergeActionProps {
     onIdeaAdded?: () => void;
@@ -12,6 +12,8 @@ interface ConciergeActionProps {
     onFavoriteUpdated?: () => void;
     onClose: () => void;
     setRecommendations: React.Dispatch<React.SetStateAction<any[]>>;
+    availableJars?: { id: string; name: string; topic?: string }[];
+    currentJarId?: string | null;
 }
 
 export function useConciergeActions({
@@ -19,7 +21,9 @@ export function useConciergeActions({
     onGoTonight,
     onFavoriteUpdated,
     onClose,
-    setRecommendations
+    setRecommendations,
+    availableJars = [],
+    currentJarId = null
 }: ConciergeActionProps) {
     // Track which specific item is being added (by name) instead of a single boolean
     const [addingItemName, setAddingItemName] = useState<string | null>(null);
@@ -80,6 +84,38 @@ export function useConciergeActions({
                 }
             }
 
+            // Check for better matching jar (Contextual Jar Auto-Switching)
+            let targetJarId: string | null = null;
+            let targetJarName: string | null = null;
+            
+            if (availableJars.length > 1 && currentJarId) {
+                const match = findBestMatchingJar(category, availableJars, currentJarId);
+                
+                if (match) {
+                    const shouldSwitch = window.confirm(getSuggestionMessage(match, category));
+                    
+                    if (shouldSwitch) {
+                        targetJarId = match.jar.id;
+                        targetJarName = match.jar.name;
+                        
+                        // Switch to the better matching jar
+                        await fetch('/api/auth/switch-jar', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ jarId: targetJarId })
+                        });
+                        
+                        trackEvent('jar_auto_switched', {
+                            from_jar_id: currentJarId,
+                            to_jar_id: targetJarId,
+                            to_jar_name: targetJarName,
+                            category: category,
+                            reason: match.reason
+                        });
+                    }
+                }
+            }
+
             // Regular authenticated mode
             const res = await fetch('/api/ideas', {
                 method: 'POST',
@@ -107,7 +143,13 @@ export function useConciergeActions({
                 ));
 
                 if (onIdeaAdded) onIdeaAdded();
-                showSuccess("✅ Added to jar!");
+                
+                // Show success message with jar name if switched
+                if (targetJarName) {
+                    showSuccess(`✅ Added to "${targetJarName}"!`);
+                } else {
+                    showSuccess("✅ Added to jar!");
+                }
             } else {
                 const err = await res.json();
 

@@ -193,6 +193,8 @@ export function DashboardModals({
                     onClose={closeModal}
                     config={CONCIERGE_CONFIGS.WEEKEND_EVENTS}
                     userLocation={userLocation || undefined}
+                    availableJars={availableJars}
+                    currentJarId={userData?.activeJarId || null}
                     onIdeaAdded={handleContentUpdate}
                     onGoTonight={(idea) => {
                         closeModal();
@@ -217,6 +219,8 @@ export function DashboardModals({
                             userLocation={userLocation || undefined}
                             initialPrompt={modalProps?.initialPrompt}
                             isPremium={isPremium}
+                            availableJars={availableJars}
+                            currentJarId={userData?.activeJarId || null}
                             onIdeaAdded={() => {
                                 fetchIdeas();
                                 refreshUser();
@@ -236,6 +240,8 @@ export function DashboardModals({
                             onClose={closeModal}
                             config={CONCIERGE_CONFIGS.BAR_CRAWL}
                             userLocation={userLocation || undefined}
+                            availableJars={availableJars}
+                            currentJarId={userData?.activeJarId || null}
                             onIdeaAdded={handleContentUpdate}
                             onGoTonight={(idea) => {
                                 closeModal();
@@ -272,6 +278,8 @@ export function DashboardModals({
                     onClose={closeModal}
                     config={CONCIERGE_CONFIGS.DATE_NIGHT}
                     userLocation={userLocation || undefined}
+                    availableJars={availableJars}
+                    currentJarId={userData?.activeJarId || null}
                     onIdeaAdded={handleContentUpdate}
                     onGoTonight={(idea) => {
                         closeModal();
@@ -289,6 +297,8 @@ export function DashboardModals({
                     onClose={closeModal}
                     config={CONCIERGE_CONFIGS.CHEF}
                     userLocation={undefined}
+                    availableJars={availableJars}
+                    currentJarId={userData?.activeJarId || null}
                     onIdeaAdded={handleContentUpdate}
                     onGoTonight={(idea) => {
                         closeModal();
