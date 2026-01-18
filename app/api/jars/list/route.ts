@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
             createdAt: j.createdAt.toISOString(),
             isCommunityJar: j.isCommunityJar,
             topic: j.topic,
-            referenceCode: j.members[0]?.role === "ADMIN" ? j.referenceCode : undefined
+            referenceCode: ["OWNER", "ADMIN"].includes(j.members[0]?.role || "") ? j.referenceCode : undefined
         }));
 
         return NextResponse.json(result);

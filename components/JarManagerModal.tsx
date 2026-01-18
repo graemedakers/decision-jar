@@ -13,7 +13,7 @@ interface JarSummary {
     id: string;
     name: string;
     description?: string;
-    role: "ADMIN" | "MEMBER";
+    role: "OWNER" | "ADMIN" | "MEMBER";
     memberCount: number;
     ideaCount: number;
     createdAt: string;
@@ -225,7 +225,7 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
                                                                     {jar.topic}
                                                                 </span>
                                                             )}
-                                                            {jar.role === 'ADMIN' && (
+                                                            {['OWNER', 'ADMIN'].includes(jar.role) && (
                                                                 <div className="flex items-center gap-2">
                                                                     <button
                                                                         onClick={() => {
@@ -237,9 +237,15 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
                                                                         <Pencil className="w-3.5 h-3.5" />
                                                                         <span className="text-[10px] font-bold uppercase">Rename</span>
                                                                     </button>
-                                                                    <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1">
-                                                                        <Crown className="w-3 h-3" /> Admin
-                                                                    </span>
+                                                                    {jar.role === 'OWNER' ? (
+                                                                        <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1">
+                                                                            <Crown className="w-3 h-3" /> Owner
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-violet-500/20 flex items-center gap-1">
+                                                                            <Check className="w-3 h-3" /> Admin
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                             )}
                                                         </>
@@ -258,7 +264,7 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
                                         </div>
 
                                         <div className="flex items-center gap-2 w-full mt-2 pt-4 border-t border-slate-100 dark:border-white/5">
-                                            {jar.role === 'ADMIN' && jar.referenceCode && (
+                                            {['OWNER', 'ADMIN'].includes(jar.role) && jar.referenceCode && (
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
@@ -269,7 +275,7 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
                                                 </Button>
                                             )}
 
-                                            {jar.role === 'ADMIN' && (
+                                            {['OWNER', 'ADMIN'].includes(jar.role) && (
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
@@ -283,16 +289,16 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => jar.role === 'ADMIN' ? handleDelete(jar.id) : handleLeave(jar.id)}
+                                                onClick={() => ['OWNER', 'ADMIN'].includes(jar.role) ? handleDelete(jar.id) : handleLeave(jar.id)}
                                                 disabled={!!processingId}
-                                                className={jar.role === 'ADMIN'
+                                                className={['OWNER', 'ADMIN'].includes(jar.role)
                                                     ? "flex-1 bg-red-50/50 hover:bg-red-50 dark:bg-red-500/5 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20 h-10 rounded-xl"
                                                     : "flex-1 bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 h-10 rounded-xl"
                                                 }
                                             >
                                                 {processingId === jar.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> :
-                                                    (jar.role === 'ADMIN' ? <Trash2 className="w-4 h-4 mr-2" /> : <LogOut className="w-4 h-4 mr-2" />)}
-                                                {jar.role === 'ADMIN' ? "Delete" : "Leave"}
+                                                    (['OWNER', 'ADMIN'].includes(jar.role) ? <Trash2 className="w-4 h-4 mr-2" /> : <LogOut className="w-4 h-4 mr-2" />)}
+                                                {['OWNER', 'ADMIN'].includes(jar.role) ? "Delete" : "Leave"}
                                             </Button>
                                         </div>
                                     </div>
