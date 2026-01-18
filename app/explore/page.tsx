@@ -131,7 +131,6 @@ export default function ExplorePage() {
 
     const visibleTools = DASHBOARD_TOOLS.filter(t => {
         if (!t.showInExplore) return false;
-        if (userData?.isCommunityJar && !t.communityJarCompatible) return false;
         // In original: return jarType !== 'SOCIAL' || t.title !== 'Date Night Planner';
         // Now using id:
         if (jarType === 'SOCIAL' && t.id === 'date_night_planner') return false;

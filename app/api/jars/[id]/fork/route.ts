@@ -37,11 +37,6 @@ export async function POST(
             return NextResponse.json({ error: "Source jar not found" }, { status: 404 });
         }
 
-        // Optional: Only allow forking of community jars
-        if (!sourceJar.isCommunityJar) {
-            // For now, we allow it if they have the ID, but in future might gate to isPublic
-        }
-
         const userId = session.user.id;
 
         // 2. Check Member Limits

@@ -43,7 +43,6 @@ export async function GET(req: NextRequest) {
             memberCount: j._count.members,
             ideaCount: j._count.ideas,
             createdAt: j.createdAt.toISOString(),
-            isCommunityJar: j.isCommunityJar,
             topic: j.topic,
             referenceCode: ["OWNER", "ADMIN"].includes(j.members[0]?.role || "") ? j.referenceCode : undefined
         }));

@@ -47,13 +47,7 @@ export async function PUT(
             updateData.memberLimit = body.memberLimit === null ? null : parseInt(body.memberLimit);
         }
         if (body.customCategories !== undefined) updateData.customCategories = body.customCategories;
-        if (body.isCommunityJar !== undefined) updateData.isCommunityJar = body.isCommunityJar;
         if (body.selectionMode !== undefined) updateData.selectionMode = body.selectionMode;
-
-        // Auto-detect community jar: if memberLimit is set, it's likely a community jar
-        if (body.memberLimit !== undefined && !membership.jar.isCommunityJar) {
-            updateData.isCommunityJar = true;
-        }
 
         const updatedJar = await prisma.jar.update({
             where: { id },

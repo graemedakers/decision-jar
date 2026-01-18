@@ -63,8 +63,8 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
                 userId_jarId: { userId: session.user.id, jarId: currentJarId }
             }
         });
-        const isAdmin = membership?.role === 'ADMIN';
-        const ideaStatus = (jar.isCommunityJar && !isAdmin) ? 'PENDING' : 'APPROVED';
+        const isAdmin = (membership as any)?.role === 'ADMIN' || (membership as any)?.role === 'OWNER';
+        const ideaStatus = 'APPROVED';
 
         const safeDuration = typeof duration === 'string' ? parseFloat(duration) : Number(duration);
 
