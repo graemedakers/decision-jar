@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import {
     Crown, Sparkles, Check, X, ChevronDown, ChevronUp,
     Zap, Calendar, Users, Lock, Gift, ArrowRight
 } from "lucide-react";
@@ -89,7 +89,7 @@ export function TrialExpiredModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleDismiss}>
-            <DialogContent variant="raw" className="max-w-lg w-full overflow-hidden bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-none">
+            <DialogContent raw className="max-w-lg w-full overflow-hidden bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-none">
                 {/* Header with Gradient */}
                 <div className="relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-8 text-white text-center">
                     {/* Close Button */}
@@ -190,24 +190,21 @@ export function TrialExpiredModal({
                             {PREMIUM_FEATURES.map((feature, i) => (
                                 <div
                                     key={i}
-                                    className={`flex items-center gap-3 p-2 rounded-lg ${
-                                        feature.highlight
+                                    className={`flex items-center gap-3 p-2 rounded-lg ${feature.highlight
                                             ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/20'
                                             : ''
-                                    }`}
+                                        }`}
                                 >
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                        feature.highlight
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${feature.highlight
                                             ? 'bg-emerald-500 text-white'
                                             : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                                    }`}>
+                                        }`}>
                                         <Check className="w-3.5 h-3.5" />
                                     </div>
-                                    <span className={`text-sm ${
-                                        feature.highlight
+                                    <span className={`text-sm ${feature.highlight
                                             ? 'font-bold text-emerald-700 dark:text-emerald-300'
                                             : 'text-slate-600 dark:text-slate-400'
-                                    }`}>
+                                        }`}>
                                         {feature.text}
                                     </span>
                                 </div>

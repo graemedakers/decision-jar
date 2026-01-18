@@ -22,7 +22,7 @@ export function ToolsModal({
 }: ToolsModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent variant="raw" className="max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-slate-50 dark:bg-slate-900 border-none outline-none">
+            <DialogContent raw className="max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-slate-50 dark:bg-slate-900 border-none outline-none">
                 <div className="sticky top-0 z-20 flex items-center justify-between p-4 md:p-6 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-white/5">
                     <div>
                         <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">

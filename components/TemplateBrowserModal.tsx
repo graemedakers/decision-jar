@@ -175,7 +175,7 @@ export function TemplateBrowserModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent variant="raw" className="max-w-5xl max-h-[90vh] overflow-hidden bg-slate-50 dark:bg-slate-900">
+            <DialogContent raw className="max-w-5xl max-h-[90vh] overflow-hidden bg-slate-50 dark:bg-slate-900">
                 {/* Header */}
                 <div className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 p-6">
                     <div className="flex items-center justify-between">
