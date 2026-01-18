@@ -21,7 +21,7 @@ export function BottomNav() {
     return (
         <>
             {/* Desktop Navigation - Top Bar */}
-            <div className="hidden md:block fixed top-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-b border-white/10 z-50">
+            <div className="hidden md:block fixed top-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-b border-white/10 z-40">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex items-center justify-center gap-8 h-14">
                         {tabs.map((tab) => {
@@ -46,7 +46,7 @@ export function BottomNav() {
             </div>
 
             {/* Mobile Navigation - Bottom Bar */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-white/10 z-50 safe-area-pb">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-white/10 z-40 safe-area-pb">
                 <div className="flex items-center justify-around p-3">
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href;

@@ -9,11 +9,12 @@ import { useModalSystem } from "@/components/ModalProvider";
 interface UseSpinProps {
     ideas: Idea[];
     onSpinComplete: () => void;
+    disabled?: boolean;
 }
 
-export function useSpin({ ideas, onSpinComplete }: UseSpinProps) {
+export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
     const [isSpinning, setIsSpinning] = useState(false);
-    const { openModal } = useModalSystem();
+    const { openModal, activeModal } = useModalSystem();
     const tickLoopRef = useRef<NodeJS.Timeout | null>(null);
 
     const startSpinAnimation = () => {
@@ -47,6 +48,8 @@ export function useSpin({ ideas, onSpinComplete }: UseSpinProps) {
         filters: any = {},
         callbacks?: { onBroadcastStart?: () => void; onBroadcastResult?: (idea: any) => void }
     ) => {
+        if (disabled) return;
+
         if (ideas.length === 0) {
             showError("Add some ideas first!");
             return;
@@ -86,6 +89,11 @@ export function useSpin({ ideas, onSpinComplete }: UseSpinProps) {
      * Triggered when ANOTHER user started spinning.
      */
     const handleExternalSpinStart = () => {
+        // Block external spins if:
+        // 1. We are in a disabled state (onboarding/loading)
+        // 2. We have no ideas (shouldn't happen but safe check)
+        // 3. We have a modal open (don't want background spinning/noise distracting from current task)
+        if (disabled || ideas.length === 0 || activeModal !== null) return;
         startSpinAnimation();
     };
 

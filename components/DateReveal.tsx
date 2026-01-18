@@ -138,7 +138,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`fixed inset-0 z-50 flex ${isMobile ? 'items-end' : 'items-center justify-center'} p-0 md:p-4 bg-black/60 backdrop-blur-sm`}
+                    className={`fixed inset-0 z-[100] flex ${isMobile ? 'items-end' : 'items-center justify-center'} p-0 md:p-4 bg-black/60 backdrop-blur-sm`}
                     onClick={onClose} // Click backdrop to close
                 >
                     {!isViewOnly && !isDirectSelection && <Confetti />}
@@ -151,9 +151,9 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                         onClick={(e) => e.stopPropagation()} // Prevent close on card click
                         className={`glass-card w-full relative overflow-hidden flex flex-col bg-white dark:bg-slate-900 
                             ${isMobile
-                                ? 'rounded-t-[2rem] rounded-b-none max-h-[85vh] h-auto pb-safe'
+                                ? 'rounded-t-[2rem] rounded-b-none max-h-[85vh] h-auto pb-safe pb-8'
                                 : 'max-w-lg max-h-[90vh] rounded-2xl'
-                            }`}
+                            } z-[100]`}
                     >
                         {/* Mobile Drag Handle */}
                         {isMobile && (

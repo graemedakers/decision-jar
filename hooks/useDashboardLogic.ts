@@ -68,6 +68,9 @@ export function useDashboardLogic() {
     };
 
     // 3. Feature Composition
+    const { activeModal } = useModalSystem();
+    const showNoJars = !userData?.activeJarId && (userData?.memberships?.length || 0) === 0;
+
     const {
         isSpinning,
         handleSpinJar: _internalSpin,
@@ -75,7 +78,8 @@ export function useDashboardLogic() {
         handleExternalSpinComplete
     } = useSpin({
         ideas,
-        onSpinComplete: handleContentUpdate
+        onSpinComplete: handleContentUpdate,
+        disabled: isLoadingUser || showNoJars
     });
 
     const { broadcastSpinStart, broadcastSpinResult } = useSquadMode(
