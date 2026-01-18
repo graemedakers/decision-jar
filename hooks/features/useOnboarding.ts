@@ -3,7 +3,7 @@ import { trackEvent } from "@/lib/analytics";
 import { UserData } from "@/lib/types";
 import { useModalSystem } from "@/components/ModalProvider";
 
-export function useOnboarding({ userData, isLoadingUser }: { userData: UserData | null, isLoadingUser: boolean }) {
+export function useOnboarding({ userData, isLoadingUser, canStartTour = true }: { userData: UserData | null, isLoadingUser: boolean, canStartTour?: boolean }) {
     const [showOnboarding, setShowOnboarding] = useState(false);
     const { activeModal } = useModalSystem(); // ✅ NEW: Check if modals are open
     const activeModalRef = useRef(activeModal); // ✅ Track current value
@@ -22,9 +22,9 @@ export function useOnboarding({ userData, isLoadingUser }: { userData: UserData 
         const hasCompletedOnboarding = localStorage.getItem(userOnboardingKey);
 
         // ✅ NEW: Skip tour for invite users (they joined an existing jar)
-        const isInviteUser = sessionStorage.getItem('oauth_invite_signup') || 
-                             sessionStorage.getItem('email_invite_signup');
-        
+        const isInviteUser = sessionStorage.getItem('oauth_invite_signup') ||
+            sessionStorage.getItem('email_invite_signup');
+
         if (isInviteUser) {
             // Mark onboarding as completed for invite users (skip tour)
             localStorage.setItem(userOnboardingKey, 'true');
@@ -45,16 +45,17 @@ export function useOnboarding({ userData, isLoadingUser }: { userData: UserData 
         // 4. User has a personal jar (not just community jar membership)
         // 5. ✅ NO MODALS ARE OPEN (don't interrupt other prompts)
         // 6. ✅ NOT an invite user
-        if (!hasCompletedOnboarding && !isLoadingUser && userData && hasPersonalJar && !activeModal) {
+        // 7. ✅ canStartTour (UI is ready, e.g. jar is visible)
+        if (!hasCompletedOnboarding && !isLoadingUser && userData && hasPersonalJar && !activeModal && canStartTour) {
             setTimeout(() => {
                 // ✅ RE-CHECK: Only start tour if STILL no modal open
                 // Use ref to get CURRENT value, not stale closure value
                 if (!activeModalRef.current) {
                     setShowOnboarding(true);
                 }
-            }, 1500); // ✅ Increased delay to 1.5s
+            }, 1000); // ✅ Reduced delay slightly as we now wait for condition
         }
-    }, [isLoadingUser, userData, activeModal]); // ✅ Added activeModal dependency
+    }, [isLoadingUser, userData, activeModal, canStartTour]); // ✅ Added activeModal and canStartTour dependency
 
     const handleCompleteOnboarding = () => {
         const userId = userData?.id;

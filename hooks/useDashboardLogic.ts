@@ -91,9 +91,11 @@ export function useDashboardLogic() {
         });
     };
 
+    const canStartTour = !!userData?.activeJarId && ideas.length > 0 && !isLoadingIdeas && !isFetchingIdeas;
     const { showOnboarding, setShowOnboarding, handleCompleteOnboarding, handleSkipOnboarding } = useOnboarding({
         userData,
-        isLoadingUser
+        isLoadingUser,
+        canStartTour
     });
 
     usePWAHandler({
@@ -116,12 +118,12 @@ export function useDashboardLogic() {
 
     // Trial Expiry Check
     const { shouldShowTrialModal, dismissTrialModal } = useTrialStatus(userData);
-    
+
     useEffect(() => {
         // Don't show trial modal if we just returned from successful checkout
         const params = new URLSearchParams(window.location.search);
         const justUpgraded = params.get('success') === 'true';
-        
+
         // Show trial expired modal after a short delay for better UX
         if (shouldShowTrialModal && !isLoadingUser && userData && !justUpgraded) {
             const timer = setTimeout(() => {
@@ -151,11 +153,11 @@ export function useDashboardLogic() {
         if (success && sessionId && refreshUser) {
             triggerHaptic(50);
             setShowConfetti(true);
-            
+
             // Clear trial modal state since user just upgraded
             localStorage.removeItem('trial_modal_dismissed_at');
             localStorage.removeItem('trial_modal_snoozed_until');
-            
+
             window.history.replaceState({}, '', window.location.pathname);
             refreshUser();
         }
@@ -288,7 +290,7 @@ export function useDashboardLogic() {
                     }
                 } catch (error) {
                     console.error('[OAuth Invite Cleanup] Error during cleanup:', error);
-                    
+
                     // Clear flags to prevent retry loops
                     sessionStorage.removeItem('oauth_invite_signup');
                     sessionStorage.removeItem('pending_invite_code');
@@ -340,11 +342,11 @@ export function useDashboardLogic() {
                 case 'concierge':
                     if (toolId) {
                         // Check if tool requires premium
-                        const tool = DASHBOARD_TOOLS.find(t => 
+                        const tool = DASHBOARD_TOOLS.find(t =>
                             t.conciergeId?.toLowerCase() === toolId.toLowerCase() ||
                             t.id.toLowerCase() === toolId.toLowerCase()
                         );
-                        
+
                         if (tool?.requiresPremium && !isPremium) {
                             // Show premium modal instead of the concierge
                             openModal('PREMIUM');
