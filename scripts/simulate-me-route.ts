@@ -47,8 +47,7 @@ async function main() {
 
         if (activeJar) {
             console.log(`Active Jar: ${activeJar.name}`);
-            console.log(`XP: ${(activeJar as any).xp}`);
-            console.log(`Ideas count: ${activeJar.ideas?.length ?? 'N/A (not fetched here)'}`);
+
         }
 
     } catch (e: any) {
