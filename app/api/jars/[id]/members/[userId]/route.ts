@@ -2,7 +2,7 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 import { NextResponse } from 'next/server';
-import { checkAndPromoteWaitlist } from '@/lib/community';
+
 
 export async function DELETE(
     req: Request,
@@ -62,9 +62,6 @@ export async function DELETE(
         await prisma.jarMember.delete({
             where: { userId_jarId: { userId: targetUserId, jarId } }
         });
-
-        // Trigger Waitlist Promotion if applicable
-        await checkAndPromoteWaitlist(jarId);
 
         return NextResponse.json({ success: true });
 
@@ -193,9 +190,6 @@ export async function PUT(
                 where: { userId_jarId: { userId: targetUserId, jarId } }
             });
 
-            // Trigger Waitlist Promotion
-            await checkAndPromoteWaitlist(jarId);
-
             return NextResponse.json({ success: true, status: 'REJECTED' });
         }
 
@@ -213,13 +207,6 @@ export async function PUT(
 
         // Check limits if moving to Active
         if (status === 'ACTIVE' && member.status !== 'ACTIVE') {
-            const currentCount = await prisma.jarMember.count({
-                where: { jarId, status: 'ACTIVE' }
-            });
-
-            if (member.jar.memberLimit && currentCount >= member.jar.memberLimit) {
-                return NextResponse.json({ error: "Member limit reached. Increase limit or remove members." }, { status: 400 });
-            }
             dataToUpdate.status = 'ACTIVE';
         }
 

@@ -27,10 +27,6 @@ export async function POST(request: Request) {
             return NextResponse.json({ valid: false, error: "Jar not found" });
         }
 
-        if (jar.memberLimit && jar._count.members >= jar.memberLimit) {
-            return NextResponse.json({ valid: false, error: "This jar is full" });
-        }
-
         return NextResponse.json({
             valid: true,
             jarName: jar.name,

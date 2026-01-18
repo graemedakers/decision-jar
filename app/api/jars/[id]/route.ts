@@ -40,12 +40,7 @@ export async function PUT(
         const updateData: any = {};
 
         if (body.name !== undefined) updateData.name = body.name;
-        if (body.description !== undefined) updateData.description = body.description;
-        if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl;
         if (body.topic !== undefined) updateData.topic = body.topic;
-        if (body.memberLimit !== undefined) {
-            updateData.memberLimit = body.memberLimit === null ? null : parseInt(body.memberLimit);
-        }
         if (body.customCategories !== undefined) updateData.customCategories = body.customCategories;
         if (body.selectionMode !== undefined) updateData.selectionMode = body.selectionMode;
 

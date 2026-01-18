@@ -31,7 +31,7 @@ export async function GET(
             where: { jarId, status: 'ACTIVE' }
         });
 
-        const isFull = jar.memberLimit ? activeCount >= jar.memberLimit : false;
+        const isFull = false; // Limits removed
 
         let membershipStatus = 'NONE';
         let isAdmin = false;
@@ -49,11 +49,8 @@ export async function GET(
         return NextResponse.json({
             id: jar.id,
             name: jar.name,
-            description: jar.description,
-            imageUrl: jar.imageUrl,
             memberCount: activeCount,
-            memberLimit: jar.memberLimit,
-            isFull,
+            isFull: false,
             membershipStatus,
             isAdmin
         });

@@ -43,11 +43,8 @@ export async function POST(
             }, { status: 400 });
         }
 
-        // Check Limits
-        let status = 'PENDING';
-        if (jar.memberLimit && jar._count.members >= jar.memberLimit) {
-            status = 'WAITLISTED';
-        }
+        // Create Member (Default to ACTIVE since community jar limits are removed)
+        const status = 'ACTIVE';
 
         // Create Member
         await prisma.jarMember.create({
