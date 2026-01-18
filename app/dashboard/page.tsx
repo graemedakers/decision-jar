@@ -110,19 +110,6 @@ function DashboardContent() {
         openModal
     } = useDashboardLogic();
 
-    // 🔍 DEBUG: Log user data state immediately
-    console.log('[Dashboard] State:', {
-        isLoadingUser,
-        hasUserData: !!userData,
-        activeJarId: userData?.activeJarId,
-        membershipsCount: userData?.memberships?.length,
-        memberships: userData?.memberships?.map((m: any) => ({
-            jarId: m.jarId,
-            jarName: m.jar?.name,
-            isCommunityJar: m.jar?.isCommunityJar
-        }))
-    });
-
     // Initialize session tracking for time-to-first-idea analytics
     useEffect(() => {
         SessionTracker.initSession();
@@ -195,19 +182,8 @@ function DashboardContent() {
         const activeJarIsPersonal = userData.activeJarId &&
             personalJars.some((m: any) => m.jar?.id === userData.activeJarId);
 
-        // Debug logging
-        console.log('[CreateJar Prompt] Checking conditions:', {
-            memberships: memberships.length,
-            personalJars: personalJars.length,
-            hasPersonalJars,
-            activeJarId: userData.activeJarId,
-            activeJarIsPersonal,
-            isCommunityJar
-        });
-
         // If user has NO personal jars, prompt them to create one
         if (!hasPersonalJars) {
-            console.log('[CreateJar Prompt] User has no personal jars - opening CREATE_JAR modal');
             // Use a longer delay to ensure page is fully loaded on mobile
             setTimeout(() => {
                 openModal('CREATE_JAR');

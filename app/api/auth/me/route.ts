@@ -15,7 +15,8 @@ export async function GET() {
         const user = await prisma.user.findFirst({
             where: { email: { equals: session.user.email, mode: 'insensitive' } },
             include: {
-                // Fetch the active jar details
+                // Fetch the active jar details with ALL fields
+                // ✅ CRITICAL: This now includes isCommunityJar for personal vs community detection
                 memberships: {
                     include: {
                         jar: {
