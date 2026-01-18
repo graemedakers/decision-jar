@@ -27,11 +27,6 @@ model Jar {
   isTrialEligible Boolean @default(true)
   
   // Community / Public Jar Fields
-  isCommunityJar Boolean @default(false)
-  description    String? // Public description
-  imageUrl       String? // Public banner/icon
-  memberLimit    Int?    // Max members, null = unlimited
-  
   // Subscription Fields (Platform / Community)
   stripeCustomerId String?
   stripeSubscriptionId String?
