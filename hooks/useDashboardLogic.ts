@@ -92,6 +92,16 @@ export function useDashboardLogic() {
     );
 
     const handleSpinJar = async (filters: any = {}) => {
+        // PERMISSION CHECK: Fail fast if not admin/owner
+        if (userData?.activeJarId) {
+            const membership = userData.memberships?.find((m: any) => m.jarId === userData.activeJarId);
+            const role = membership?.role;
+            if (role !== 'ADMIN' && role !== 'OWNER') {
+                showError("Only the jar owner or admins can spin!");
+                return;
+            }
+        }
+
         await _internalSpin(filters, {
             onBroadcastStart: broadcastSpinStart,
             onBroadcastResult: broadcastSpinResult
