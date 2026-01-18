@@ -140,8 +140,6 @@ export async function GET() {
                 jarTopic: activeJar.topic,
                 jarSelectionMode: (activeJar as any).selectionMode,
                 customCategories: (activeJar as any).customCategories,
-                jarImageUrl: (activeJar as any).imageUrl || null,
-                jarDescription: (activeJar as any).description || null,
                 memberCount: members.length,
                 isCreator,
                 hasPartner,

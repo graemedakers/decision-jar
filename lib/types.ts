@@ -64,7 +64,6 @@ export interface UserData {
     jarName?: string;
     jarTopic?: string;
     jarSelectionMode?: 'RANDOM' | 'ADMIN_PICK' | 'VOTING' | 'ALLOCATION';
-    isCommunityJar?: boolean;
     isCreator?: boolean;
 
     // Partner/Social
@@ -86,7 +85,6 @@ export interface UserData {
 export interface Jar {
     id: string;
     name: string;
-    description?: string | null;
     topic: string;
     type: 'ROMANTIC' | 'SOCIAL';
     selectionMode: 'RANDOM' | 'ADMIN_PICK' | 'VOTING' | 'ALLOCATION';

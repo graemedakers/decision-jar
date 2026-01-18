@@ -38,7 +38,6 @@ export async function GET(req: NextRequest) {
         const result = jars.map(j => ({
             id: j.id,
             name: j.name,
-            description: j.description,
             role: j.members[0]?.role || "MEMBER",
             memberCount: j._count.members,
             ideaCount: j._count.ideas,
