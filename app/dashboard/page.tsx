@@ -165,30 +165,42 @@ function DashboardContent() {
         }
     }, [showEmptyState, userData?.activeJarId, userData?.jarTopic, userData?.memberships, openModal, isCommunityJar]);
 
-    // ✅ CRITICAL FIX: Better handling for users without ANY personal jars
-    // This covers: Email/password users who sign up and get added to community jars only
+    // ✅ CRITICAL: Auto-prompt for users without personal jars
+    // This covers: New users who sign up and only have access to community jars (Bug Reports, etc.)
     useEffect(() => {
-        if (!isLoadingUser && userData) {
-            // Check if user has ANY personal (non-community) jar membership
-            // Community jars (like Bug Reports, Feature Requests) don't count as "personal jars"
-            const hasPersonalJarMembership = userData.memberships && userData.memberships.some((m: any) => !m.jar.isCommunityJar);
+        // Wait for user data to be loaded
+        if (isLoadingUser || !userData) return;
 
-            // Check if user has an active jar set AND it's a personal jar
-            const hasActivePersonalJar = userData.activeJarId && userData.memberships?.some((m: any) =>
-                m.jar.id === userData.activeJarId && !m.jar.isCommunityJar
-            );
+        // Get all memberships
+        const memberships = userData.memberships || [];
 
-            // Only prompt to create jar if user has NO personal jars at all
-            // (Community jars like Bug Reports don't count)
-            if (!hasPersonalJarMembership && !hasActivePersonalJar) {
-                // Small delay to ensure modal system is ready (helps on mobile)
-                setTimeout(() => {
-                    openModal('CREATE_JAR');
-                    console.log('Prompting user to create first jar (no personal jars found)');
-                }, 300);
-            }
+        // Count personal (non-community) jars
+        const personalJars = memberships.filter((m: any) => !m.jar?.isCommunityJar);
+        const hasPersonalJars = personalJars.length > 0;
+
+        // Check if current active jar is a personal jar
+        const activeJarIsPersonal = userData.activeJarId &&
+            personalJars.some((m: any) => m.jar?.id === userData.activeJarId);
+
+        // Debug logging
+        console.log('[CreateJar Prompt] Checking conditions:', {
+            memberships: memberships.length,
+            personalJars: personalJars.length,
+            hasPersonalJars,
+            activeJarId: userData.activeJarId,
+            activeJarIsPersonal,
+            isCommunityJar
+        });
+
+        // If user has NO personal jars, prompt them to create one
+        if (!hasPersonalJars) {
+            console.log('[CreateJar Prompt] User has no personal jars - opening CREATE_JAR modal');
+            // Use a longer delay to ensure page is fully loaded on mobile
+            setTimeout(() => {
+                openModal('CREATE_JAR');
+            }, 500);
         }
-    }, [userData, isLoadingUser, openModal]);
+    }, [userData, isLoadingUser, openModal, isCommunityJar]);
 
     const availableIdeasCount = ideas.filter((i: any) => !i.selectedAt && (!isAllocationMode || !i.isMasked)).length;
     const combinedLocation = userLocation || "";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -48,8 +48,6 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
     const [success, setSuccess] = useState(false);
 
     // Reset state when modal opens
-    const contentRef = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
         if (isOpen) {
             setSuccess(false);
@@ -58,11 +56,6 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
             setName("");
             setCustomTopicName("");
             setCustomCategories(["", "", ""]);
-
-            // Scroll content to top on mobile (ensures name field is visible)
-            setTimeout(() => {
-                contentRef.current?.scrollTo({ top: 0 });
-            }, 100);
         }
     }, [isOpen]);
 
@@ -202,172 +195,170 @@ export function CreateJarModal({ isOpen, onClose, hasRomanticJar, isPro, current
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white max-h-[80vh] flex flex-col">
-                <div ref={contentRef} className="overflow-y-auto flex-1 pb-6">
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                            <span>Create Your First Jar</span>
-                            <span className="text-2xl">✨</span>
-                        </DialogTitle>
-                        <DialogDescription className="text-slate-600 dark:text-slate-400">
-                            A jar is a collection of ideas. Let's set up your first one!
-                        </DialogDescription>
-                    </DialogHeader>
+            <DialogContent className="sm:max-w-[425px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
+                <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                        <span>Create Your First Jar</span>
+                        <span className="text-2xl">✨</span>
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-600 dark:text-slate-400">
+                        A jar is a collection of ideas. Let's set up your first one!
+                    </DialogDescription>
+                </DialogHeader>
 
-                    <form onSubmit={handleCreate} className="space-y-6 mt-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name" className="flex items-center gap-2">
-                                Jar Name
-                                <span className="text-xs text-slate-400 font-normal">(What's this jar for?)</span>
-                            </Label>
-                            <Input
-                                id="name"
-                                placeholder="e.g. Date Night Ideas, Weekend Fun, or Places to Explore"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                                className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                                aria-label="Jar Name"
-                                aria-invalid={!name && isLoading}
-                            />
-                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
-                                <span className="text-sm">💡</span>
-                                <span>Give your jar a descriptive name. You can always change it later!</span>
-                            </p>
-                            {error && (
-                                <p className="text-sm text-red-400 mt-1">{error}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-3">
-                            <Label className="flex items-center gap-2">
-                                Mode
-                                <span className="text-xs text-slate-400 font-normal">(How will you pick ideas?)</span>
-                            </Label>
-                            <select
-                                value={selectionMode}
-                                onChange={(e) => setSelectionMode(e.target.value)}
-                                className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                                aria-label="Select Mode"
-                            >
-                                <option value="RANDOM">🎲 Spin (Lucky Dip) - Random surprise</option>
-                                <option value="ADMIN_PICK">👤 Admin Pick (Curated) - You choose what's next</option>
-                                <option value="VOTING">🗳️ Vote (Consensus) - Group decides together</option>
-                                <option value="ALLOCATION">📋 Allocation (Tasks) - Assign to team members</option>
-                            </select>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
-                                <span className="text-sm">💡</span>
-                                <span>
-                                    {selectionMode === 'RANDOM' && "Random spin is perfect for spontaneous decisions!"}
-                                    {selectionMode === 'ADMIN_PICK' && "You'll manually choose which idea to use next."}
-                                    {selectionMode === 'VOTING' && "Great for groups - everyone votes on their favorites!"}
-                                    {selectionMode === 'ALLOCATION' && "Ideal for task management and team assignments."}
-                                </span>
-                            </p>
-                        </div>
-
-                        <div className="space-y-3">
-                            <Label className="flex items-center gap-2">
-                                Jar Topic
-                                <span className="text-xs text-slate-400 font-normal">(What kind of ideas?)</span>
-                            </Label>
-                            <select
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
-                                className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
-                                aria-label="Select Jar Topic"
-                            >
-                                {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom' && k !== 'General').map(k => (
-                                    <option key={k} value={k}>
-                                        {k}
-                                    </option>
-                                ))}
-                                <option value="Custom">Other / Custom...</option>
-                            </select>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
-                                <span className="text-sm">💡</span>
-                                <span>
-                                    {topic === 'Activities' && "Great for adventures, outings, and things to do!"}
-                                    {topic === 'Dates' && "Perfect for romantic date ideas and couple activities."}
-                                    {topic === 'Movies' && "Keep track of movies you want to watch together."}
-                                    {topic === 'Food' && "Restaurants to try, recipes to cook, and dining adventures."}
-                                    {topic === 'Travel' && "Dream destinations and trip ideas to explore."}
-                                    {topic === 'Custom' && "Create your own topic with custom categories!"}
-                                    {!['Activities', 'Dates', 'Movies', 'Food', 'Travel', 'Custom'].includes(topic) && "Choose a topic that matches your jar's purpose."}
-                                </span>
-                            </p>
-                        </div>
-
-                        {topic === 'Custom' && (
-                            <div className="space-y-4 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-slate-800/50 animate-in fade-in zoom-in duration-300">
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase text-slate-500">Custom Topic Name</Label>
-                                    <Input
-                                        value={customTopicName}
-                                        onChange={(e) => setCustomTopicName(e.target.value)}
-                                        placeholder="e.g. Board Games, Work Lunches"
-                                        className="bg-white dark:bg-slate-800"
-                                        autoFocus
-                                        aria-label="Custom Topic Name"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase text-slate-500">Categories</Label>
-                                    <div className="space-y-2">
-                                        {customCategories.map((cat, idx) => (
-                                            <div key={idx} className="flex gap-2">
-                                                <Input
-                                                    value={cat}
-                                                    onChange={(e) => updateCategory(idx, e.target.value)}
-                                                    placeholder={`Category ${idx + 1}`}
-                                                    className="bg-white dark:bg-slate-800"
-                                                    aria-label={`Category ${idx + 1}`}
-                                                />
-                                                {customCategories.length > 1 && (
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => removeCategory(idx)}
-                                                        className="shrink-0 text-slate-400 hover:text-red-400"
-                                                        aria-label={`Remove Category ${idx + 1}`}
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={addCategory}
-                                        className="w-full mt-2 border-dashed"
-                                    >
-                                        <Plus className="w-4 h-4 mr-2" />
-                                        Add Category
-                                    </Button>
-                                </div>
-                            </div>
+                <form onSubmit={handleCreate} className="space-y-6 mt-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="name" className="flex items-center gap-2">
+                            Jar Name
+                            <span className="text-xs text-slate-400 font-normal">(What's this jar for?)</span>
+                        </Label>
+                        <Input
+                            id="name"
+                            placeholder="e.g. Date Night Ideas, Weekend Fun, or Places to Explore"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                            aria-label="Jar Name"
+                            aria-invalid={!name && isLoading}
+                        />
+                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
+                            <span className="text-sm">💡</span>
+                            <span>Give your jar a descriptive name. You can always change it later!</span>
+                        </p>
+                        {error && (
+                            <p className="text-sm text-red-400 mt-1">{error}</p>
                         )}
+                    </div>
 
-                        <div className="flex justify-end gap-3 pt-4">
-                            <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} aria-label="Cancel Jar Creation">
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={isLoading}
-                                className="bg-primary hover:bg-primary/90 text-white"
-                            >
-                                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                                Create Jar
-                            </Button>
+                    <div className="space-y-3">
+                        <Label className="flex items-center gap-2">
+                            Mode
+                            <span className="text-xs text-slate-400 font-normal">(How will you pick ideas?)</span>
+                        </Label>
+                        <select
+                            value={selectionMode}
+                            onChange={(e) => setSelectionMode(e.target.value)}
+                            className="w-full h-10 pl-2 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            aria-label="Select Mode"
+                        >
+                            <option value="RANDOM">🎲 Spin (Lucky Dip) - Random surprise</option>
+                            <option value="ADMIN_PICK">👤 Admin Pick (Curated) - You choose what's next</option>
+                            <option value="VOTING">🗳️ Vote (Consensus) - Group decides together</option>
+                            <option value="ALLOCATION">📋 Allocation (Tasks) - Assign to team members</option>
+                        </select>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
+                            <span className="text-sm">💡</span>
+                            <span>
+                                {selectionMode === 'RANDOM' && "Random spin is perfect for spontaneous decisions!"}
+                                {selectionMode === 'ADMIN_PICK' && "You'll manually choose which idea to use next."}
+                                {selectionMode === 'VOTING' && "Great for groups - everyone votes on their favorites!"}
+                                {selectionMode === 'ALLOCATION' && "Ideal for task management and team assignments."}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div className="space-y-3">
+                        <Label className="flex items-center gap-2">
+                            Jar Topic
+                            <span className="text-xs text-slate-400 font-normal">(What kind of ideas?)</span>
+                        </Label>
+                        <select
+                            value={topic}
+                            onChange={(e) => setTopic(e.target.value)}
+                            className="w-full h-10 pl-4 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary items-center"
+                            aria-label="Select Jar Topic"
+                        >
+                            {Object.keys(TOPIC_CATEGORIES).filter(k => k !== 'Custom' && k !== 'General').map(k => (
+                                <option key={k} value={k}>
+                                    {k}
+                                </option>
+                            ))}
+                            <option value="Custom">Other / Custom...</option>
+                        </select>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1">
+                            <span className="text-sm">💡</span>
+                            <span>
+                                {topic === 'Activities' && "Great for adventures, outings, and things to do!"}
+                                {topic === 'Dates' && "Perfect for romantic date ideas and couple activities."}
+                                {topic === 'Movies' && "Keep track of movies you want to watch together."}
+                                {topic === 'Food' && "Restaurants to try, recipes to cook, and dining adventures."}
+                                {topic === 'Travel' && "Dream destinations and trip ideas to explore."}
+                                {topic === 'Custom' && "Create your own topic with custom categories!"}
+                                {!['Activities', 'Dates', 'Movies', 'Food', 'Travel', 'Custom'].includes(topic) && "Choose a topic that matches your jar's purpose."}
+                            </span>
+                        </p>
+                    </div>
+
+                    {topic === 'Custom' && (
+                        <div className="space-y-4 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-slate-800/50 animate-in fade-in zoom-in duration-300">
+                            <div className="space-y-2">
+                                <Label className="text-xs uppercase text-slate-500">Custom Topic Name</Label>
+                                <Input
+                                    value={customTopicName}
+                                    onChange={(e) => setCustomTopicName(e.target.value)}
+                                    placeholder="e.g. Board Games, Work Lunches"
+                                    className="bg-white dark:bg-slate-800"
+                                    autoFocus
+                                    aria-label="Custom Topic Name"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs uppercase text-slate-500">Categories</Label>
+                                <div className="space-y-2">
+                                    {customCategories.map((cat, idx) => (
+                                        <div key={idx} className="flex gap-2">
+                                            <Input
+                                                value={cat}
+                                                onChange={(e) => updateCategory(idx, e.target.value)}
+                                                placeholder={`Category ${idx + 1}`}
+                                                className="bg-white dark:bg-slate-800"
+                                                aria-label={`Category ${idx + 1}`}
+                                            />
+                                            {customCategories.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => removeCategory(idx)}
+                                                    className="shrink-0 text-slate-400 hover:text-red-400"
+                                                    aria-label={`Remove Category ${idx + 1}`}
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={addCategory}
+                                    className="w-full mt-2 border-dashed"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Category
+                                </Button>
+                            </div>
                         </div>
-                    </form>
-                </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} aria-label="Cancel Jar Creation">
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isLoading}
+                            className="bg-primary hover:bg-primary/90 text-white"
+                        >
+                            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                            Create Jar
+                        </Button>
+                    </div>
+                </form>
             </DialogContent>
         </Dialog>
     );
