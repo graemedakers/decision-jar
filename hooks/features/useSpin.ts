@@ -92,9 +92,9 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
     const handleExternalSpinStart = () => {
         // Block external spins if:
         // 1. We are in a disabled state (onboarding/loading)
-        // 2. We have no ideas (shouldn't happen but safe check)
-        // 3. We have a modal open (don't want background spinning/noise distracting from current task)
-        if (disabled || ideas.length === 0 || activeModal !== null) return;
+        // 2. We have a modal open (don't want background spinning/noise distracting from current task)
+        // Note: Removed ideas.length check so users can see spin even if their local list isn't fully synced or populated yet.
+        if (disabled || activeModal !== null) return;
         startSpinAnimation();
     };
 
