@@ -47,7 +47,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     const [hadInteraction, setHadInteraction] = useState(false);
     const ideaWasAdded = useRef(false);
 
-    const { formData, setFormData: originalSetFormData, isLoading, handleSubmit, handleDelete, categories, isCommunitySubmission } = useIdeaForm({
+    const { formData, setFormData: originalSetFormData, isLoading, handleSubmit, handleDelete, categories } = useIdeaForm({
         initialData,
         currentUser,
         jarTopic,
@@ -586,11 +586,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         ? "View Only"
                                         : "Save Changes")
                                     : (
-                                        isCommunitySubmission ? (
-                                            <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Suggest to Jar</span>
-                                        ) : (
-                                            <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Add to Jar</span>
-                                        )
+                                        <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Add to Jar</span>
                                     )
                                 }
                             </button>
