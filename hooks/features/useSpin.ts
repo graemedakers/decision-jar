@@ -76,6 +76,7 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
                 callbacks?.onBroadcastResult?.(res.idea);
                 openModal('DATE_REVEAL', { idea: res.idea });
                 onSpinComplete();
+                window.dispatchEvent(new Event('pwa-prompt-ready'));
             } else {
                 showError(res.error || "Failed to pick a date. Try adding more ideas!");
             }

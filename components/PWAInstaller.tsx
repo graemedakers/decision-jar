@@ -44,27 +44,10 @@ export function PWAInstaller() {
                 });
 
             // Listen for install prompt
-            let deferredPrompt: any;
-
+            // Note: We used to have custom UI logic here, but now we use the global <InstallPrompt /> component
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
-                deferredPrompt = e;
-
-                // Show custom install button (you can create a UI for this)
-                const installBtn = document.getElementById('pwa-install-btn');
-                if (installBtn) {
-                    installBtn.style.display = 'block';
-                    installBtn.addEventListener('click', () => {
-                        installBtn.style.display = 'none';
-                        deferredPrompt.prompt();
-                        deferredPrompt.userChoice.then((choiceResult: any) => {
-                            if (choiceResult.outcome === 'accepted') {
-                                console.log('User accepted the install prompt');
-                            }
-                            deferredPrompt = null;
-                        });
-                    });
-                }
+                // We rely on the global listener in hooks/usePWA.ts or components/InstallPrompt.tsx
             });
 
             // Track successful installation

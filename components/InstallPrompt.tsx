@@ -32,17 +32,36 @@ export function InstallPrompt() {
             e.preventDefault();
             setDeferredPrompt(e);
 
-            // Show prompt after 5 seconds of usage (reduced from 15)
-            setTimeout(() => {
+            // Wait for meaningful engagement (e.g. first spin) before showing
+            // We listen for a custom event dispatch
+            const onEngagement = () => {
                 setShowPrompt(true);
-            }, 5000);
+            };
+
+            window.addEventListener('pwa-prompt-ready', onEngagement);
+
+            // Fallback: Show after 30 seconds if they are just browsing around
+            const timer = setTimeout(() => {
+                setShowPrompt(true);
+            }, 30000);
+
+            return () => {
+                window.removeEventListener('pwa-prompt-ready', onEngagement);
+                clearTimeout(timer);
+            };
         };
 
         // Logic for iOS (does NOT support beforeinstallprompt)
         if (ios) {
+            const onEngagementiOS = () => {
+                setShowPrompt(true);
+            };
+            window.addEventListener('pwa-prompt-ready', onEngagementiOS);
+
+            // Fallback for iOS
             setTimeout(() => {
                 setShowPrompt(true);
-            }, 8000); // 8s for iOS
+            }, 30000);
         }
 
         window.addEventListener('beforeinstallprompt', handler);

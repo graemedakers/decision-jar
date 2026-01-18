@@ -26,25 +26,7 @@ export function SignupForm() {
     const [accountExistsError, setAccountExistsError] = useState(false);
     const [existingEmail, setExistingEmail] = useState("");
     const [savedPassword, setSavedPassword] = useState("");
-    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
-    useEffect(() => {
-        const handler = (e: Event) => {
-            e.preventDefault();
-            setDeferredPrompt(e);
-        };
-        window.addEventListener('beforeinstallprompt', handler);
-        return () => window.removeEventListener('beforeinstallprompt', handler);
-    }, []);
-
-    const handleInstallClick = async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            setDeferredPrompt(null);
-        }
-    };
 
     useEffect(() => {
         if (inviteCode) {
@@ -346,27 +328,6 @@ export function SignupForm() {
                     </p>
                 </div>
 
-                {/* PWA Install Banner */}
-                {inviteCode && deferredPrompt && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        className="mb-6 bg-gradient-to-r from-primary to-accent p-4 rounded-xl shadow-lg relative overflow-hidden"
-                    >
-                        <div className="flex items-center gap-4 relative z-10">
-                            <div className="bg-white/20 p-3 rounded-full">
-                                <Download className="w-6 h-6 text-white" />
-                            </div>
-                            <div className="flex-1 text-left">
-                                <h3 className="text-white font-bold text-sm">Install App for Best Experience</h3>
-                                <p className="text-white/80 text-xs">Join the jar seamlessly with the native app.</p>
-                            </div>
-                            <Button onClick={handleInstallClick} size="sm" variant="secondary" className="bg-white text-primary border-none hover:bg-white/90">
-                                Install
-                            </Button>
-                        </div>
-                    </motion.div>
-                )}
 
                 {/* Social Logins */}
                 {process.env.NEXT_PUBLIC_ENABLE_SOCIAL_LOGIN === 'true' && (
