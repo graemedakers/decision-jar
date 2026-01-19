@@ -305,7 +305,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             Your home base for managing your jar and making decisions.
                         </p>
                         <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300">
-                            <li><strong>The Jar:</strong> The 3D jar visualization shows how many ideas you have available</li>
+                            <li><strong>The Jar:</strong> The 3D jar visualization. Click it to view the full list of ideas inside!</li>
                             <li><strong>Favorites:</strong> Access your saved "Go-To" ideas from the heart icon in the header</li>
                             <li><strong>In The Jar:</strong> Browse your complete list of ideas, add new ones, or edit existing entries</li>
                             <li><strong>Spin Button:</strong> The main action — click to randomly select an idea based on your filters</li>

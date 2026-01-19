@@ -11,8 +11,9 @@ A premium, interactive onboarding tutorial has been added to guide new users thr
 3. **Surprise Me** - AI-powered idea generation
 4. **Jar Visual** - Understanding the jar counter
 5. **Spin the Jar** - Random idea selection
-6. **Open Jar** - Browsing all ideas
-7. **Vault** - Viewing completed activities
+6. **Click Jar** - View contents by clicking the 3D jar
+7. **Open Jar** - (Alternative) Browing all ideas via menu
+8. **Vault** - Viewing completed activities
 8. **Gamification** - Leveling up and achievements
 9. **Complete** - Tour completion message
 

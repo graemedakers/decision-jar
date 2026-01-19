@@ -60,7 +60,9 @@ As an administrator, you can click the **"Members"** button next to a jar to:
 ## 4. The Dashboard
 
 The Dashboard is your command center.
-- **The Jar:** A visual representation that fills up as you add more ideas.
+- **The Jar:** Centerpiece of the dashboard.
+    - **Click:** Opens the list of ideas inside ("In the Jar" page).
+    - **Spin Button:** Use the "Spin the Jar!" button below to pick a random activity.
 - **Level Banner:** Shows your rank, XP progress, and earned Trophies.
 - **Jar Tools:** Quick access to "Spin Jar" and "Add Idea".
 - **Explore Tab:** Browse all AI Planners and Concierge Services.
