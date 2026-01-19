@@ -114,6 +114,7 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent raw className="max-w-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
                 <div className="bg-gradient-to-r from-pink-600 to-purple-600 p-6 relative">
+                    <div className="absolute top-2 left-2 text-[10px] text-white/50 font-mono">v1.2-DEBUG</div>
                     <button
                         onClick={onClose}
                         className="absolute right-4 top-4 rounded-full p-2 bg-black/20 hover:bg-black/40 text-white transition-colors"
@@ -141,6 +142,10 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div className="w-full bg-yellow-100 dark:bg-yellow-900/50 p-2 border-b border-yellow-500 text-[10px] font-mono overflow-hidden">
+                    P: {idea.photoUrls?.length || 0} | L: {idea.photoUrl ? 'YES' : 'NO'} | Keys: {Object.keys(idea).filter(k => k.toLowerCase().includes('photo')).join(',')}
                 </div>
 
                 {(() => {
@@ -183,16 +188,7 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
                             </div>
                         );
                     }
-                    return (
-                        <div className="w-full bg-yellow-100 dark:bg-yellow-900 p-4 border-b border-yellow-500">
-                            <p className="text-xs font-mono">
-                                DEBUG: photoUrls length: {idea.photoUrls?.length || 0}<br />
-                                DEBUG: photoUrls: {JSON.stringify(idea.photoUrls)}<br />
-                                DEBUG: validPhotoUrls: {JSON.stringify(validPhotoUrls)}<br />
-                                DEBUG: photoUrl (legacy): {idea.photoUrl || 'undefined'}
-                            </p>
-                        </div>
-                    );
+                    return null;
                 })()}
 
                 <div className="p-6 space-y-6 w-full">
