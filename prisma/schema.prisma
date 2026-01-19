@@ -141,6 +141,7 @@ model User {
   notifyLevelUp         Boolean @default(true)   // Level-up notifications
   notifyIdeaAdded       Boolean @default(true)   // When someone adds an idea to shared jar
   notifyJarSpun         Boolean @default(true)   // When someone spins the jar
+  notifyVoting          Boolean @default(true)   // When a voting session starts or ends
   
   // ✅ NEW: Premium invite tokens created by this user
   createdPremiumTokens  PremiumInviteToken[] @relation("TokenCreator")

@@ -143,7 +143,7 @@ function DashboardContent() {
         }));
 
     const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
-    const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas && !isFetchingIdeas;
+    const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas;
     const showAdminStatus = isAdminPickMode;
     const showStatusSection = showNoJars || showAdminStatus || showEmptyState;
 

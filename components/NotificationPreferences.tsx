@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Bell, Trophy, TrendingUp, Users, Sparkles } from "lucide-react";
+import { ChevronDown, Bell, Trophy, TrendingUp, Users, Sparkles, Gavel } from "lucide-react";
 import { getApiUrl } from "@/lib/utils";
 import { showSuccess, showError } from "@/lib/toast";
 import { trackEvent } from "@/lib/analytics";
@@ -13,6 +13,7 @@ interface NotificationPreferences {
     notifyLevelUp: boolean;
     notifyIdeaAdded: boolean;
     notifyJarSpun: boolean;
+    notifyVoting: boolean;
 }
 
 export function NotificationPreferences({ isSubscribed }: { isSubscribed: boolean }) {
@@ -24,6 +25,7 @@ export function NotificationPreferences({ isSubscribed }: { isSubscribed: boolea
         notifyLevelUp: true,
         notifyIdeaAdded: true,
         notifyJarSpun: true,
+        notifyVoting: true,
     });
 
     useEffect(() => {
@@ -39,6 +41,7 @@ export function NotificationPreferences({ isSubscribed }: { isSubscribed: boolea
                             notifyLevelUp: data.user.notifyLevelUp ?? true,
                             notifyIdeaAdded: data.user.notifyIdeaAdded ?? true,
                             notifyJarSpun: data.user.notifyJarSpun ?? true,
+                            notifyVoting: data.user.notifyVoting ?? true,
                         });
                     }
                 })
@@ -79,6 +82,7 @@ export function NotificationPreferences({ isSubscribed }: { isSubscribed: boolea
     return (
         <div className="mt-2">
             <button
+                type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="flex items-center justify-between w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
             >
@@ -217,6 +221,30 @@ export function NotificationPreferences({ isSubscribed }: { isSubscribed: boolea
                                     type="checkbox"
                                     checked={preferences.notifyJarSpun}
                                     onChange={() => handleToggle('notifyJarSpun')}
+                                    disabled={isLoading}
+                                    className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-primary checked:border-primary disabled:opacity-50"
+                                />
+                            </label>
+
+                            {/* Vote Updates */}
+                            <label className="flex items-center justify-between cursor-pointer group">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
+                                        <Gavel className="w-4 h-4 text-orange-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                            Vote Updates
+                                        </p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            When a voting session starts or ends
+                                        </p>
+                                    </div>
+                                </div>
+                                <input
+                                    type="checkbox"
+                                    checked={preferences.notifyVoting}
+                                    onChange={() => handleToggle('notifyVoting')}
                                     disabled={isLoading}
                                     className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-primary checked:border-primary disabled:opacity-50"
                                 />

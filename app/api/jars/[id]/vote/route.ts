@@ -85,7 +85,7 @@ async function handleStartVote(jarId: string, initiatorId: string, data: any, is
         title: 'New Vote Started!',
         body: 'A new voting session has begun. Cast your vote now!',
         url: `/dashboard?jarId=${jarId}&mode=vote`
-    });
+    }, 'notifyVoting');
 
     return NextResponse.json({ success: true, session });
 }
@@ -230,7 +230,7 @@ async function handleResolveVote(jarId: string) {
             title: 'Vote Complete!',
             body: 'We have a winner! Tap to see the result.',
             url: `/dashboard?jarId=${jarId}`
-        });
+        }, 'notifyVoting');
 
         return NextResponse.json({ success: true, winnerId: winners[0] });
     } else {
@@ -250,7 +250,7 @@ async function handleResolveVote(jarId: string) {
                 title: 'Vote Tie!',
                 body: 'The vote ended in a tie. A random winner was picked.',
                 url: `/dashboard?jarId=${jarId}`
-            });
+            }, 'notifyVoting');
             return NextResponse.json({ success: true, winnerId: randomWinner, method: 'RANDOM_TIEBREAK' });
         } else {
             // RE_VOTE
@@ -277,7 +277,7 @@ async function handleResolveVote(jarId: string) {
                 title: 'Vote Tie - Runoff!',
                 body: 'The vote was a tie! A runoff round has started.',
                 url: `/dashboard?jarId=${jarId}&mode=vote`
-            });
+            }, 'notifyVoting');
             return NextResponse.json({ success: true, nextRound: round2 });
         }
     }

@@ -9,14 +9,32 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { interests, location } = await request.json();
+        const body = await request.json();
+        const {
+            interests,
+            location,
+            notifyStreakReminder,
+            notifyAchievements,
+            notifyLevelUp,
+            notifyIdeaAdded,
+            notifyJarSpun,
+            notifyVoting
+        } = body;
+
+        // Build update object, filtering out undefined
+        const data: any = {};
+        if (interests !== undefined) data.interests = interests;
+        if (location !== undefined) data.homeTown = location;
+        if (notifyStreakReminder !== undefined) data.notifyStreakReminder = notifyStreakReminder;
+        if (notifyAchievements !== undefined) data.notifyAchievements = notifyAchievements;
+        if (notifyLevelUp !== undefined) data.notifyLevelUp = notifyLevelUp;
+        if (notifyIdeaAdded !== undefined) data.notifyIdeaAdded = notifyIdeaAdded;
+        if (notifyJarSpun !== undefined) data.notifyJarSpun = notifyJarSpun;
+        if (notifyVoting !== undefined) data.notifyVoting = notifyVoting;
 
         const updatedUser = await prisma.user.update({
             where: { id: session.user.id },
-            data: {
-                interests,
-                homeTown: location, // Save location to homeTown field
-            },
+            data,
         });
 
         return NextResponse.json({ user: updatedUser });

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/Input";
 import { getApiUrl, isCapacitor, getCurrentLocation } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteLogModal } from "@/components/DeleteLogModal";
-import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown } from "lucide-react";
+import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BASE_DOMAIN } from "@/lib/config";
@@ -447,6 +447,18 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                         >
                                                             Copy Admin Link
                                                         </button>
+
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            className="w-full mt-2 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 h-auto py-2 text-xs"
+                                                            onClick={() => {
+                                                                onClose();
+                                                                router.push('/admin/premium-tokens');
+                                                            }}
+                                                        >
+                                                            <ShieldCheck className="w-3.5 h-3.5 mr-2" /> Manage Premium Tokens
+                                                        </Button>
                                                     </div>
                                                 )}
                                             </div>

@@ -1,13 +1,13 @@
 # Notification System Review - Decision Jar
 
-**Date:** 2026-01-19  
-**Scope:** Review of push notification implementation for shared jar events
+**Date:** 2026-01-19
+**Scope:** Review of notification implementation (Push, Real-time, Email)
 
 ---
 
 ## Executive Summary
 
-The notification system is **partially implemented** with several critical issues that prevent it from working correctly for shared jar events. The infrastructure is in place, but there are implementation gaps and missing preference checks.
+The notification system review has identified and **resolved** key critical issues. The system now includes a robust real-time synchronization engine and improved email deliverability UX. Push notifications for core events (Idea Added, Jar Spun) and voting sessions have been patched to respect user preferences.
 
 ---
 
@@ -33,9 +33,35 @@ The notification system is **partially implemented** with several critical issue
 
 ---
 
+## Recent Implementation Updates (Jan 2026)
+
+### 1. Real-time Synchronization
+Implemented a robust real-time update system to ensure all jar members see changes instantly.
+*   **Architecture:** Hybrid approach using Supabase Realtime broadcasts + Polling fallback.
+*   **Components:**
+    *   `useSquadMode` hook: Manages Supabase channels and listens for `content-update` events.
+    *   `useIdeaMutations`: Dispatches local `decision-jar:broadcast` events upon successful mutations (Add/Update/Delete).
+    *   `useIdeas`: Implements a 4-second polling interval and 5-second stale time to guarantee consistency even if broadcasts fail.
+*   **Fallback:** If real-time sockets fail, the polling mechanism ensures UI updates within 4 seconds.
+
+### 2. Push Notification Fixes
+*   **Idea Added:** Now correctly uses `notifyJarMembers` with the `notifyIdeaAdded` preference key.
+*   **Jar Spun:** Refactored to use `notifyJarMembers` with the `notifyJarSpun` preference key, deduplicating logic.
+
+### 3. Email UX Improvements
+*   Added helpful "Check your spam/junk folder" prompts to Forgot Password and Signup Verification screens.
+*   Configurable Sender Email via `EMAIL_FROM` environment variable to support DKIM-verified custom domains.
+
+### 4. Vote Notification Preferences
+*   Added `notifyVoting` preference to User Schema (default: true).
+*   Updated `lib/notifications.ts` helper and `app/api/jars/[id]/vote/route.ts` to enforce this preference.
+*   Added UI toggle in `NotificationPreferences` component.
+
+---
+
 ## Critical Issues Found
 
-### 🔴 Issue 1: Missing Preference Key in Idea Addition Notifications
+### 🟢 [RESOLVED] Issue 1: Missing Preference Key in Idea Addition Notifications
 
 **Location:** `app/api/ideas/route.ts` (line 126) and `app/actions/ideas.ts` (line 113)
 
@@ -68,7 +94,7 @@ notifyJarMembers(currentJarId, session.user.id, {
 
 ---
 
-### 🔴 Issue 2: Jar Spin Notifications Don't Use Preference System
+### 🟢 [RESOLVED] Issue 2: Jar Spin Notifications Don't Use Preference System
 
 **Location:** `app/actions/spin.ts` (lines 124-131)
 
@@ -108,29 +134,17 @@ await notifyJarMembers(currentJarId, session.user.id, {
 
 ---
 
-### 🟡 Issue 3: Vote Notifications Missing Preference Key
+### � [RESOLVED] Issue 3: Vote Notifications Missing Preference Key
 
 **Location:** `app/api/jars/[id]/vote/route.ts`
 
 **Problem:**
-Vote-related notifications (lines 84, 229, 249, 276) don't specify a preference key:
-```typescript
-await notifyJarMembers(jarId, initiatorId, {
-    title: 'New Vote Started!',
-    body: 'A new voting session has begun. Cast your vote now!',
-    url: `/dashboard?jarId=${jarId}&mode=vote`
-});
-```
+Vote-related notifications were sent to all jar members without checking preferences.
 
-**Impact:**
-- No dedicated preference for voting notifications
-- Users receive all vote notifications with no opt-out
-- Should either:
-  - Add a new `notifyVoting` preference, OR
-  - Use `notifyJarSpun` as it's a similar "jar activity" event
-
-**Recommendation:** 
-Add `notifyVoting` preference to schema and use it for all vote notifications.
+**Resolution:**
+- Added `notifyVoting` boolean to User schema.
+- Updated `notifyJarMembers` to support `notifyVoting` key.
+- Updated all `notifyJarMembers` calls in vote route to pass this key.
 
 ---
 
@@ -219,8 +233,8 @@ To verify fixes, test these scenarios:
 2. ✅ Refactor spin notifications to use `notifyJarMembers` with `'notifyJarSpun'`
 
 ### Medium Priority (Feature Gaps)
-3. Add `notifyVoting` preference to schema
-4. Apply voting preference to all vote notifications
+3. 🟢 [RESOLVED] Add `notifyVoting` preference to schema
+4. 🟢 [RESOLVED] Apply voting preference to all vote notifications
 5. Add notification for jar joins/leaves
 
 ### Low Priority (Nice to Have)

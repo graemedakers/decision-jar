@@ -22,7 +22,7 @@ interface NotificationPayload {
     requireInteraction?: boolean;
 }
 
-type NotificationPreferenceKey = 'notifyStreakReminder' | 'notifyAchievements' | 'notifyLevelUp' | 'notifyIdeaAdded' | 'notifyJarSpun';
+type NotificationPreferenceKey = 'notifyStreakReminder' | 'notifyAchievements' | 'notifyLevelUp' | 'notifyIdeaAdded' | 'notifyJarSpun' | 'notifyVoting';
 
 export async function sendPushNotification(userId: string, payload: NotificationPayload) {
     try {
@@ -42,7 +42,7 @@ export async function sendPushNotification(userId: string, payload: Notification
             console.log(`[Notifications] No subscriptions for user ${userId}`);
             return { sent: 0, failed: 0 };
         }
-        
+
         console.log(`[Notifications] Sending to ${subscriptions.length} subscription(s) for user ${userId}`);
 
         // 2. Prepare payload
@@ -92,14 +92,14 @@ export async function sendPushNotification(userId: string, payload: Notification
 }
 
 export async function notifyJarMembers(
-    jarId: string, 
-    excludeUserId: string | null, 
+    jarId: string,
+    excludeUserId: string | null,
     payload: NotificationPayload,
     preferenceKey?: NotificationPreferenceKey
 ) {
     try {
         console.log(`[Notifications] notifyJarMembers called for jar ${jarId}, excluding user ${excludeUserId}, preference: ${preferenceKey || 'none'}`);
-        
+
         // Find active members of the jar with their notification preferences
         const members = await prisma.jarMember.findMany({
             where: {
@@ -115,7 +115,8 @@ export async function notifyJarMembers(
                         notifyAchievements: true,
                         notifyLevelUp: true,
                         notifyIdeaAdded: true,
-                        notifyJarSpun: true
+                        notifyJarSpun: true,
+                        notifyVoting: true
                     }
                 }
             }
@@ -129,7 +130,7 @@ export async function notifyJarMembers(
         }
 
         // Filter by preference if specified
-        const eligibleMembers = preferenceKey 
+        const eligibleMembers = preferenceKey
             ? members.filter(member => member.user[preferenceKey] === true)
             : members;
 
@@ -147,7 +148,7 @@ export async function notifyJarMembers(
         const results = await Promise.allSettled(promises);
         const sent = results.filter(r => r.status === 'fulfilled').length;
         const failed = results.filter(r => r.status === 'rejected').length;
-        
+
         console.log(`[Notifications] Results: ${sent} sent, ${failed} failed`);
     } catch (error) {
         console.error("[Notifications] Error notifying jar members for " + jarId, error);
