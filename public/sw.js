@@ -1,6 +1,6 @@
 // Service Worker for PWA - Simplified and Safe Version
-const CACHE_NAME = 'decision-jar-v1';
-const RUNTIME_CACHE = 'runtime-v1';
+const CACHE_NAME = 'decision-jar-v2';
+const RUNTIME_CACHE = 'runtime-v2';
 
 // Only cache static assets, not pages
 const PRECACHE_ASSETS = [
@@ -79,8 +79,14 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Skip cross-origin requests
-    if (url.origin !== self.location.origin) {
+    // Allow cross-origin requests for images from trusted domains
+    const isTrustedImageDomain =
+        url.hostname === 'res.cloudinary.com' ||
+        url.hostname === 'lh3.googleusercontent.com' ||
+        url.hostname === 'photos.app.goo.gl';
+
+    // Skip cross-origin requests EXCEPT for trusted image domains
+    if (url.origin !== self.location.origin && !isTrustedImageDomain) {
         return;
     }
 
