@@ -3,11 +3,13 @@
     "short_name": "Decision Jar",
     "description": "Never ask 'what should we do?' again. Perfect for couples, groups, and solo decisions.",
     "start_url": "/",
+    "id": "/",
     "display": "standalone",
     "background_color": "#0f172a",
     "theme_color": "#ec4899",
     "orientation": "portrait",
     "scope": "/",
+    "prefer_related_applications": false,
     "categories": [
         "lifestyle",
         "entertainment",

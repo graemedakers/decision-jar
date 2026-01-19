@@ -14,9 +14,19 @@ self.addEventListener('install', (event) => {
     console.log('[SW] Installing service worker...');
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then((cache) => {
+            .then(async (cache) => {
                 console.log('[SW] Caching static assets');
-                return cache.addAll(PRECACHE_ASSETS);
+                // Cache assets individually to avoid installation failure
+                const cachePromises = PRECACHE_ASSETS.map(async (asset) => {
+                    try {
+                        await cache.add(asset);
+                        console.log('[SW] Cached:', asset);
+                    } catch (error) {
+                        console.warn('[SW] Failed to cache:', asset, error);
+                        // Don't fail the entire installation if one asset fails
+                    }
+                });
+                await Promise.allSettled(cachePromises);
             })
             .then(() => {
                 console.log('[SW] Skip waiting');
@@ -24,6 +34,8 @@ self.addEventListener('install', (event) => {
             })
             .catch((error) => {
                 console.error('[SW] Install failed:', error);
+                // Still skip waiting even if caching failed
+                return self.skipWaiting();
             })
     );
 });
