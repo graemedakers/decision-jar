@@ -142,7 +142,7 @@ export default function Home() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Spin the Jar',
+    name: 'Decision Jar',
     applicationCategory: 'LifestyleApplication',
     operatingSystem: 'Web',
     offers: {

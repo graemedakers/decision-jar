@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     "restaurant finder", "AI concierge", "decision maker for couples", "date night app", "romantic ideas",
     "couples activities", "relationship app", "dinner date ideas", "weekend date planner",
     "eliminate decision fatigue", "AI restaurant recommendations", "date planning assistant",
-    "spin the jar", "random date picker", "couples decision maker"
+    "spin the jar", "random date picker", "couples decision maker", "decision jar"
   ],
   authors: [{ name: "Spin the Jar Team" }],
   creator: "Decision Jar",
