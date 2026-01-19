@@ -144,8 +144,8 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
                     </div>
                 </div>
 
-                <div className="w-full bg-yellow-100 dark:bg-yellow-900/50 p-2 border-b border-yellow-500 text-[10px] font-mono overflow-hidden">
-                    P: {idea.photoUrls?.length || 0} | L: {idea.photoUrl ? 'YES' : 'NO'} | Keys: {Object.keys(idea).filter(k => k.toLowerCase().includes('photo')).join(',')}
+                <div className="w-full bg-yellow-100 dark:bg-yellow-900/50 p-2 border-b border-yellow-500 text-[10px] font-mono overflow-x-auto whitespace-nowrap">
+                    P: {idea.photoUrls?.length || 0} | Data: {JSON.stringify(idea.photoUrls)}
                 </div>
 
                 {(() => {
