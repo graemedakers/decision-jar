@@ -32,6 +32,7 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
     const [topic, setTopic] = useState("Activities");
     const [selectionMode, setSelectionMode] = useState<string>("RANDOM");
     const [voteCandidates, setVoteCandidates] = useState(0);
+    const [defaultIdeaPrivate, setDefaultIdeaPrivate] = useState(false);
 
     const [customTopicName, setCustomTopicName] = useState("");
     const [customCategories, setCustomCategories] = useState(["", "", ""]);
@@ -50,6 +51,7 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
             setCustomTopicName("");
             setCustomCategories(["", "", ""]);
             setVoteCandidates(0);
+            setDefaultIdeaPrivate(false);
         }
     }, [isOpen]);
 
@@ -101,7 +103,15 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
             const res = await fetch('/api/jars', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, type: inferredType, topic: finalTopic, customCategories: finalCustomCategories, selectionMode, voteCandidatesCount: voteCandidates }),
+                body: JSON.stringify({
+                    name,
+                    type: inferredType,
+                    topic: finalTopic,
+                    customCategories: finalCustomCategories,
+                    selectionMode,
+                    voteCandidatesCount: voteCandidates,
+                    defaultIdeaPrivate
+                }),
             });
 
             if (res.ok) {
@@ -233,6 +243,20 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
                                 <Plus className="w-4 h-4 rotate-45" />
                             </div>
                         </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div className="flex flex-col">
+                            <Label htmlFor="default-secret-mode" className="text-sm font-bold text-slate-800 dark:text-gray-200">Default Secret Mode</Label>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400">New ideas added will be private by default</p>
+                        </div>
+                        <input
+                            id="default-secret-mode"
+                            type="checkbox"
+                            checked={defaultIdeaPrivate}
+                            onChange={(e) => setDefaultIdeaPrivate(e.target.checked)}
+                            className="rounded border-slate-300 text-primary focus:ring-primary w-5 h-5 cursor-pointer"
+                        />
                     </div>
 
                     {selectionMode === 'VOTE' && (

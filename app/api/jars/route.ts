@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { name, type, selectionMode, topic, customCategories, voteCandidatesCount } = body;
+        const { name, type, selectionMode, topic, customCategories, voteCandidatesCount, defaultIdeaPrivate } = body;
 
         if (!name) return new NextResponse("Name is required", { status: 400 });
 
@@ -73,9 +73,10 @@ export async function POST(req: Request) {
                 name,
                 type: type || 'SOCIAL', // Default
                 selectionMode: selectionMode || 'RANDOM',
-                voteCandidatesCount: voteCandidatesCount ? Number(voteCandidatesCount) : 0,
                 topic: topic || 'General',
                 customCategories: customCategories ? customCategories : undefined,
+                voteCandidatesCount: voteCandidatesCount ? Number(voteCandidatesCount) : 0,
+                defaultIdeaPrivate: !!defaultIdeaPrivate,
                 referenceCode: code,
                 members: {
                     create: {
