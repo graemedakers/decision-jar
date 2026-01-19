@@ -40,10 +40,10 @@ export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rat
             setRating(idea.rating || 0);
             setNotes(idea.notes || "");
 
-            // Handle Photos
+            // Handle Photos - Filter out empty strings immediately
             if (idea.photoUrls && Array.isArray(idea.photoUrls)) {
-                setPhotoUrls(idea.photoUrls);
-            } else if (idea.photoUrl) {
+                setPhotoUrls(idea.photoUrls.filter((url: string) => url && url.trim() !== ""));
+            } else if (idea.photoUrl && idea.photoUrl.trim() !== "") {
                 // Graceful fallback if migration kept old data
                 setPhotoUrls([idea.photoUrl]);
             } else {
@@ -137,10 +137,13 @@ export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rat
         setIsLoading(true);
 
         try {
+            // Only save valid (non-empty) URLs
+            const validUrls = photoUrls.filter(url => url && url.trim() !== "");
+
             const res = await fetch(`/api/ideas/${idea.id}/rate`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rating, notes, photoUrls }),
+                body: JSON.stringify({ rating, notes, photoUrls: validUrls }),
                 credentials: 'include',
             });
 
