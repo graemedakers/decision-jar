@@ -51,6 +51,10 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
 
     if (!idea) return null;
 
+    // DEBUG: Log photo data
+    console.log('[ViewMemoryModal] idea.photoUrls:', idea.photoUrls);
+    console.log('[ViewMemoryModal] idea.photoUrl (legacy):', idea.photoUrl);
+
     const formattedDate = idea.selectedAt
         ? new Date(idea.selectedAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
         : "Unknown Date";
