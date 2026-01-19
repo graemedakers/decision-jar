@@ -30,10 +30,18 @@ export async function POST(request: Request) {
 
         const id = crypto.randomUUID();
 
+        // Sanitize optional fields to ensure they are null if undefined
+        // This is critical for $executeRaw to handle them as SQL NULLs
+        const safeAddress = address || null;
+        const safeDescription = description || null;
+        const safeWebsiteUrl = websiteUrl || null;
+        const safeGoogleRating = googleRating || null;
+        const safeType = type || 'VENUE';
+
         // Using raw SQL to bypass valid Prisma Client generation issues
         await prisma.$executeRaw`
             INSERT INTO "FavoriteVenue" ("id", "jarId", "userId", "name", "address", "description", "websiteUrl", "googleRating", "type", "createdAt")
-            VALUES (${id}, ${currentJarId}, ${session.user.id}, ${name}, ${address}, ${description}, ${websiteUrl}, ${googleRating}, ${type || 'VENUE'}, NOW())
+            VALUES (${id}, ${currentJarId}, ${session.user.id}, ${name}, ${safeAddress}, ${safeDescription}, ${safeWebsiteUrl}, ${safeGoogleRating}, ${safeType}, NOW())
         `;
 
         return NextResponse.json({ success: true, id });
@@ -107,10 +115,7 @@ export async function GET(request: Request) {
         if (myJarIds.length > 0) {
             favorites = await prisma.$queryRaw<any[]>`
                 SELECT * FROM "FavoriteVenue" 
-                WHERE 
-                    "userId" = ${session.user.id} 
-                    OR 
-                    ("jarId" IN (${Prisma.join(myJarIds)}) AND "isShared" = true)
+                WHERE "userId" = ${session.user.id} 
                 ORDER BY "createdAt" DESC
             `;
         } else {

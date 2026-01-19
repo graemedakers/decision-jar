@@ -140,7 +140,13 @@ export function useUser(options: UseUserOptions = {}) {
                 });
             }
 
-            prevAchievementsRef.current = [...achievements];
+
+            // ✅ CRITICAL FIX: Only update ref if we have MORE achievements than before.
+            // This prevents "downgrading" the ref if stale cache data arrives with fewer achievements,
+            // which would then trigger a false "new achievement" celebration when fresh data arrives.
+            if (achievements.length >= prevAchievementsRef.current.length) {
+                prevAchievementsRef.current = [...achievements];
+            }
         }
     }, [achievements, onAchievementUnlocked, userData?.activeJarId]);
 

@@ -53,18 +53,27 @@ export function FavoritesModal({ isOpen, onClose, topic }: FavoritesModalProps) 
         }
     };
 
-    const handleShare = async (id: string, status: boolean) => {
-        try {
-            const res = await fetch('/api/favorites', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, isShared: status })
-            });
-            if (res.ok) {
-                setFavorites(favorites.map(f => f.id === id ? { ...f, isShared: status } : f));
+    const handleNativeShare = async (fav: any) => {
+        const shareData = {
+            title: fav.name,
+            text: `Check out ${fav.name}: ${fav.description || ''} ${fav.address || ''}`,
+            url: fav.websiteUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fav.name + " " + (fav.address || ""))}`
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.error("Error sharing:", err);
             }
-        } catch (err) {
-            console.error(err);
+        } else {
+            // Fallback to clipboard
+            try {
+                await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+                alert("Link copied to clipboard!");
+            } catch (err) {
+                console.error("Error copying:", err);
+            }
         }
     };
 
@@ -109,11 +118,6 @@ export function FavoritesModal({ isOpen, onClose, topic }: FavoritesModalProps) 
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex items-center gap-2">
                                                         <h4 className="font-bold text-slate-900 dark:text-white text-lg">{fav.name}</h4>
-                                                        {fav.isShared && (
-                                                            <div title={labels.sharedLabel} className="flex items-center gap-1 text-[10px] uppercase font-bold text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-500/20">
-                                                                <Users className="w-3 h-3" />
-                                                            </div>
-                                                        )}
                                                     </div>
                                                     <span className="text-xs font-bold px-2 py-1 bg-slate-200 dark:bg-white/10 rounded text-slate-600 dark:text-slate-300">{fav.type}</span>
                                                 </div>
@@ -137,19 +141,9 @@ export function FavoritesModal({ isOpen, onClose, topic }: FavoritesModalProps) 
                                                     </Button>
                                                 )}
 
-                                                {fav.isOwner && (
-                                                    <Button size="sm" variant="ghost" onClick={() => handleShare(fav.id, !fav.isShared)} className={`text-xs ${fav.isShared ? "text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300" : "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"} hover:bg-slate-200 dark:hover:bg-white/10`}>
-                                                        {fav.isShared ? (
-                                                            <>
-                                                                <Share2 className="w-4 h-4 mr-1 fill-current" /> Unshare
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Share2 className="w-4 h-4 mr-1" /> Share
-                                                            </>
-                                                        )}
-                                                    </Button>
-                                                )}
+                                                <Button size="sm" variant="ghost" onClick={() => handleNativeShare(fav)} className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-slate-200 dark:hover:bg-white/10">
+                                                    <Share2 className="w-4 h-4 mr-1" /> Share
+                                                </Button>
 
                                                 {fav.isOwner && (
                                                     <Button size="sm" variant="ghost" onClick={() => handleDelete(fav.id)} className="text-xs text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10">
