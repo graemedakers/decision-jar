@@ -30,9 +30,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [isLoading, setIsLoading] = useState(false);
     const [isLogModalOpen, setIsLogModalOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [isCreator, setIsCreator] = useState(false);
     const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-    const [hasPartner, setHasPartner] = useState(false);
     const [inviteCode, setInviteCode] = useState("");
     const [isPremium, setIsPremium] = useState(false);
     const [hasPaid, setHasPaid] = useState(false);
@@ -63,17 +61,14 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                     if (data?.user) {
                         setLocation(data.user.homeTown || data.user.location || "");
                         setInterests(data.user.interests || "");
-                        setIsCreator(!!data.user.isCreator);
                         setIsSuperAdmin(!!data.user.isSuperAdmin);
                         setActiveJarId(data.user.activeJarId);
 
                         // Role-based Check
                         const activeMembership = data.user.memberships?.find((m: any) => m.jarId === data.user.activeJarId);
                         const isAdminRole = ['OWNER', 'ADMIN'].includes(activeMembership?.role);
-                        const isSuperAdmin = !!data.user.isSuperAdmin;
-                        setIsAdmin(isAdminRole || !!data.user.isCreator || isSuperAdmin);
+                        setIsAdmin(isAdminRole || !!data.user.isCreator || !!data.user.isSuperAdmin);
 
-                        setHasPartner(!!data.user.hasPartner);
                         setInviteCode(data.user.coupleReferenceCode || "");
                         setIsPremium(!!data.user.isPremium);
                         setHasPaid(!!data.user.hasPaid);
@@ -251,33 +246,6 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
         }
     };
 
-    const handleDeletePartner = async () => {
-        if (!confirm(`Are you sure you want to remove this ${labels.memberLabel.toLowerCase()}? This will remove them from the group, delete ALL ideas they created, and delete ALL related history. This action cannot be undone.`)) return;
-
-        setIsLoading(true);
-        try {
-            const res = await fetch(getApiUrl(`/api/jars/${activeJarId}/remove-partner`), {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                showSuccess(data.message || `${labels.memberLabel} deleted successfully`);
-                onClose();
-                router.refresh();
-                window.location.reload();
-            } else {
-                const data = await res.json();
-                showError(`Failed to delete ${labels.memberLabel.toLowerCase()}: ${data.details || data.error || "Unknown error"}`);
-            }
-        } catch (error) {
-            console.error(error);
-            showError(`Error deleting ${labels.memberLabel.toLowerCase()}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
 
 
@@ -576,39 +544,24 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                 <div className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
                                                     <h3 className="text-sm font-bold text-slate-800 dark:text-white">Access & Members</h3>
 
-                                                    {hasPartner ? (
-                                                        <div className="p-4 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 text-center">
-                                                            <p className="text-sm text-slate-600 dark:text-slate-300">Linked with a {labels.memberLabel.toLowerCase()}.</p>
-                                                            <Button
+                                                    <div className="space-y-3">
+                                                        <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg flex justify-between items-center border border-slate-200 dark:border-white/10">
+                                                            <span className="font-mono font-bold text-lg text-primary">{inviteCode || "Loading..."}</span>
+                                                            <button
                                                                 type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                                onClick={handleDeletePartner}
+                                                                onClick={() => {
+                                                                    navigator.clipboard.writeText(`${window.location.origin}/join?code=${inviteCode || ""}`);
+                                                                    showSuccess("Copied!");
+                                                                }}
+                                                                className="text-xs bg-white dark:bg-white/10 px-2.5 py-1.5 rounded font-bold shadow-sm"
                                                             >
-                                                                Remove Partner
-                                                            </Button>
+                                                                Copy Link
+                                                            </button>
                                                         </div>
-                                                    ) : (
-                                                        <div className="space-y-3">
-                                                            <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg flex justify-between items-center border border-slate-200 dark:border-white/10">
-                                                                <span className="font-mono font-bold text-lg text-primary">{inviteCode || "Loading..."}</span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        navigator.clipboard.writeText(`${window.location.origin}/join?code=${inviteCode || ""}`);
-                                                                        showSuccess("Copied!");
-                                                                    }}
-                                                                    className="text-xs bg-white dark:bg-white/10 px-2.5 py-1.5 rounded font-bold shadow-sm"
-                                                                >
-                                                                    Copy Link
-                                                                </button>
-                                                            </div>
-                                                            <Button type="button" variant="ghost" size="sm" onClick={handleRegenerateCode} className="w-full text-slate-500">
-                                                                <RefreshCw className="w-3 h-3 mr-2" /> Regenerate Code
-                                                            </Button>
-                                                        </div>
-                                                    )}
+                                                        <Button type="button" variant="ghost" size="sm" onClick={handleRegenerateCode} className="w-full text-slate-500">
+                                                            <RefreshCw className="w-3 h-3 mr-2" /> Regenerate Code
+                                                        </Button>
+                                                    </div>
 
 
                                                 </div>
