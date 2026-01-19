@@ -10,7 +10,7 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
 
     try {
         const data = await resend.emails.send({
-            from: 'Decision Jar <onboarding@resend.dev>', // Update this with your verified domain
+            from: process.env.EMAIL_FROM || 'Decision Jar <onboarding@resend.dev>', // Uses env var or defaults to test domain
             to: [to],
             subject: subject,
             html: html,

@@ -74,6 +74,8 @@ export default function ForgotPasswordPage() {
                                 <h3 className="text-xl font-bold text-white">Check your inbox</h3>
                                 <p className="text-slate-400">
                                     If an account exists for <strong>{email}</strong>, we have sent a password reset link.
+                                    <br /><br />
+                                    <span className="text-sm text-slate-500">Please check your spam or junk folder if you don't see it.</span>
                                 </p>
                             </div>
                             <Link href="/login">
@@ -110,6 +112,6 @@ export default function ForgotPasswordPage() {
                     )}
                 </div>
             </motion.div>
-        </main>
+        </main >
     );
 }

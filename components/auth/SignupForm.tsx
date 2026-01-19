@@ -223,6 +223,8 @@ export function SignupForm() {
                     <h2 className="text-2xl font-bold text-white mb-2" id="verification-header">Check your inbox</h2>
                     <p className="text-slate-400 mb-8">
                         We've sent a verification link to your email address. Please click the link to activate your account.
+                        <br /><br />
+                        <span className="text-sm text-slate-500">Please check your spam or junk folder if you don't see it.</span>
                     </p>
                 </div>
             </motion.div>
