@@ -20,6 +20,8 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
     const labels = getJarLabels(topic);
     const [ratings, setRatings] = useState<any[]>([]);
     const [showCalendarOptions, setShowCalendarOptions] = useState(false);
+    const [freshIdea, setFreshIdea] = useState<any>(null);
+    const [isLoadingFresh, setIsLoadingFresh] = useState(false);
 
     // PDF Export
     const contentRef = useRef<HTMLDivElement>(null);
@@ -40,27 +42,41 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
 
     useEffect(() => {
         if (idea && isOpen) {
+            setFreshIdea(null);
+            setIsLoadingFresh(true);
+
+            // 1. Fetch ratings
             fetch(`/api/ideas/${idea.id}/rate`)
                 .then(res => res.json())
                 .then(data => {
                     if (Array.isArray(data)) setRatings(data);
                 })
                 .catch(err => console.error(err));
+
+            // 2. Fetch fresh idea data (to ensure photos are up to date)
+            fetch(`/api/ideas?id=${idea.id}`) // Assuming the API handles getting a single idea if ID provided
+                .then(res => res.json())
+                .then(data => {
+                    if (data && !data.error) {
+                        // If it returns an array of ideas, find our specific one
+                        const found = Array.isArray(data) ? data.find((i: any) => i.id === idea.id) : data;
+                        if (found) setFreshIdea(found);
+                    }
+                })
+                .catch(err => console.error("Error refreshing memory:", err))
+                .finally(() => setIsLoadingFresh(false));
         }
     }, [idea, isOpen]);
 
     if (!idea) return null;
+    const currentIdea = freshIdea || idea;
 
-    // DEBUG: Log photo data
-    console.log('[ViewMemoryModal] idea.photoUrls:', idea.photoUrls);
-    console.log('[ViewMemoryModal] idea.photoUrl (legacy):', idea.photoUrl);
-
-    const formattedDate = idea.selectedAt
-        ? new Date(idea.selectedAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    const formattedDate = currentIdea.selectedAt
+        ? new Date(currentIdea.selectedAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
         : "Unknown Date";
 
-    const itinerary = getItinerary(idea.details);
-    const cateringPlan = getCateringPlan(idea.details);
+    const itinerary = getItinerary(currentIdea.details);
+    const cateringPlan = getCateringPlan(currentIdea.details);
 
     const formatTextWithLinks = (text: string) => {
         const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -144,40 +160,44 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
                 </div>
 
                 {(() => {
-                    // Filter out empty or invalid photo URLs
-                    const validPhotoUrls = idea.photoUrls?.filter((url: string) => url && url.trim() !== '') || [];
+                    const validPhotoUrls = currentIdea.photoUrls?.filter((url: string) => url && url.trim() !== '') || [];
 
                     if (validPhotoUrls.length > 0) {
                         return (
-                            <div className="w-full bg-black/50 border-b border-white/10 overflow-x-auto flex snap-x snap-mandatory">
-                                <div className="flex h-80">
+                            <div className="w-full bg-black relative border-b border-white/10 overflow-hidden flex-shrink-0">
+                                <div className="flex overflow-x-auto snap-x snap-mandatory h-64 md:h-80 w-full">
                                     {validPhotoUrls.map((url: string, i: number) => (
-                                        <div key={i} className="min-w-[80%] md:min-w-[60%] h-full shrink-0 snap-center relative border-r border-white/10 bg-black first:pl-0">
+                                        <div key={i} className="min-w-full md:min-w-[50%] h-full shrink-0 snap-center relative border-r border-white/5 bg-slate-900">
                                             <img
                                                 src={url}
                                                 alt={`Memory ${i + 1}`}
                                                 className="w-full h-full object-cover"
+                                                loading="eager"
                                                 onError={(e) => {
                                                     console.error('Failed to load image:', url);
-                                                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23334155" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" fill="%23cbd5e1" text-anchor="middle" dy=".3em" font-family="Arial"%3EImage Error%3C/text%3E%3C/svg%3E';
+                                                    e.currentTarget.style.display = 'none';
                                                 }}
                                             />
                                         </div>
                                     ))}
                                 </div>
+                                {validPhotoUrls.length > 1 && (
+                                    <div className="absolute bottom-3 right-3 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-[10px] text-white font-bold shadow-lg z-10">
+                                        Swipe for more • {validPhotoUrls.length}
+                                    </div>
+                                )}
                             </div>
                         );
-                    } else if (idea.photoUrl) {
-                        // Fallback for old single photoUrl format
+                    } else if (currentIdea.photoUrl) {
                         return (
-                            <div className="w-full h-64 md:h-80 relative bg-black border-b border-white/10">
+                            <div className="w-full h-64 md:h-80 relative bg-black border-b border-white/10 overflow-hidden flex-shrink-0">
                                 <img
-                                    src={idea.photoUrl}
+                                    src={currentIdea.photoUrl}
                                     alt="Memory"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
-                                        console.error('Failed to load image:', idea.photoUrl);
-                                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23334155" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" fill="%23cbd5e1" text-anchor="middle" dy=".3em" font-family="Arial"%3EImage Error%3C/text%3E%3C/svg%3E';
+                                        console.error('Failed to load image:', currentIdea.photoUrl);
+                                        e.currentTarget.style.display = 'none';
                                     }}
                                 />
                             </div>
