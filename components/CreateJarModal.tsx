@@ -33,6 +33,7 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
     const [selectionMode, setSelectionMode] = useState<string>("RANDOM");
     const [voteCandidates, setVoteCandidates] = useState(0);
     const [defaultIdeaPrivate, setDefaultIdeaPrivate] = useState(false);
+    const [hasManuallySetTopic, setHasManuallySetTopic] = useState(false);
 
     const [customTopicName, setCustomTopicName] = useState("");
     const [customCategories, setCustomCategories] = useState(["", "", ""]);
@@ -52,8 +53,49 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
             setCustomCategories(["", "", ""]);
             setVoteCandidates(0);
             setDefaultIdeaPrivate(false);
+            setHasManuallySetTopic(false);
+            setTopic("Activities");
         }
     }, [isOpen]);
+
+    const deduceTopic = (jarName: string): string | null => {
+        const lowerName = jarName.toLowerCase();
+
+        const mappings: Record<string, string[]> = {
+            "Romantic": ["date", "romantic", "love", "couple", "anniversary", "sweetheart"],
+            "Restaurants": ["food", "dining", "restaurant", "eat", "lunch", "dinner", "brunch", "breakfast", "supper", "snack"],
+            "Bars": ["bar", "drink", "cocktail", "pub", "wine", "beer", "brewery", "alcohol", "liquor"],
+            "Nightclubs": ["club", "dance", "party", "nightlife", "rave", "disco", "techno"],
+            "Movies": ["movie", "film", "cinema", "watch", "show", "series", "netflix", "tv", "binge"],
+            "Wellness": ["wellness", "spa", "health", "yoga", "meditat", "relax", "mindful", "self-care"],
+            "Fitness": ["fit", "gym", "workout", "sport", "exercise", "run", "training", "muscle", "cardio"],
+            "Travel": ["travel", "trip", "vacation", "holiday", "road", "journey", "adventure", "explore"],
+            "Hotel Stays": ["hotel", "stay", "bnb", "resort", "motel", "accommodation"],
+            "System Development": ["code", "dev", "bug", "system", "app", "software", "programming", "project", "sprint"],
+            "Cooking & Recipes": ["cook", "recipe", "bake", "kitchen", "chef", "meal prep"],
+            "Books": ["book", "read", "novel", "story", "library", "literature"],
+            "Activities": ["game", "play", "fun", "board", "activity", "weekend"]
+        };
+
+        for (const [topicKey, keywords] of Object.entries(mappings)) {
+            if (keywords.some(k => lowerName.includes(k))) {
+                return topicKey;
+            }
+        }
+        return null;
+    };
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newName = e.target.value;
+        setName(newName);
+
+        if (!hasManuallySetTopic) {
+            const deduced = deduceTopic(newName);
+            if (deduced) {
+                setTopic(deduced);
+            }
+        }
+    };
 
     const maxJars = isPro ? 50 : 3;
     const isLimitReached = currentJarCount >= maxJars;
@@ -208,7 +250,7 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
                             id="create-jar-name"
                             placeholder="e.g. Date Night Ideas, Weekend Fun..."
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={handleNameChange}
                             required
                             className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 h-12 text-base shadow-sm focus:ring-2 focus:ring-primary/20"
                             aria-label="Jar Name"
@@ -292,7 +334,10 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
                             <select
                                 id="create-jar-topic"
                                 value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
+                                onChange={(e) => {
+                                    setTopic(e.target.value);
+                                    setHasManuallySetTopic(true);
+                                }}
                                 className="w-full h-12 pl-4 pr-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm appearance-none shadow-sm font-medium"
                                 aria-label="Select Jar Topic"
                             >
