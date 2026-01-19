@@ -42,6 +42,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [jarTopic, setJarTopic] = useState("");
     const [jarSelectionMode, setJarSelectionMode] = useState<"RANDOM" | "VOTE" | "ALLOCATION" | "ADMIN_PICK">("RANDOM");
     const [jarVoteCandidates, setJarVoteCandidates] = useState(0);
+    const [defaultIdeaPrivate, setDefaultIdeaPrivate] = useState(false);
 
     // Premium Invite Logic
     const [currentUserEmail, setCurrentUserEmail] = useState("");
@@ -81,6 +82,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         setJarTopic(data.user.jarTopic || "");
                         if (data.user.jarSelectionMode) setJarSelectionMode(data.user.jarSelectionMode);
                         setJarVoteCandidates(data.user.jarVoteCandidatesCount || 0);
+                        setDefaultIdeaPrivate(!!data.user.defaultIdeaPrivate);
                         setCurrentUserEmail(data.user.email || "");
                         setPremiumInviteToken(data.user.premiumInviteToken || "");
                     }
@@ -116,6 +118,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         topic: jarTopic,
                         selectionMode: jarSelectionMode,
                         voteCandidatesCount: Number(jarVoteCandidates),
+                        defaultIdeaPrivate,
                     }),
                     credentials: 'include',
                 });
@@ -476,6 +479,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                         </div>
                                                     )}
                                                 </div>
+
                                             </motion.div>
                                         )}
 
@@ -552,6 +556,19 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                                 </p>
                                                             </div>
                                                         )}
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-100 dark:border-white/10">
+                                                        <div className="flex flex-col">
+                                                            <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Default Secret Mode</label>
+                                                            <p className="text-[10px] text-slate-500 dark:text-slate-400">New ideas added will be private by default</p>
+                                                        </div>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={defaultIdeaPrivate}
+                                                            onChange={(e) => setDefaultIdeaPrivate(e.target.checked)}
+                                                            className="rounded border-slate-300 text-primary focus:ring-primary w-5 h-5 cursor-pointer"
+                                                        />
                                                     </div>
                                                 </div>
 

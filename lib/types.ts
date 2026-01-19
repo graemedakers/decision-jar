@@ -64,6 +64,7 @@ export interface UserData {
     jarName?: string;
     jarTopic?: string;
     jarSelectionMode?: 'RANDOM' | 'ADMIN_PICK' | 'VOTE' | 'ALLOCATION';
+    defaultIdeaPrivate?: boolean;
     isCreator?: boolean;
 
     // Partner/Social

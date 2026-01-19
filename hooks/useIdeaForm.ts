@@ -46,15 +46,18 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 timeOfDay: initialData.timeOfDay || DEFAULT_FORM_DATA.timeOfDay,
                 category: initialData.category || DEFAULT_FORM_DATA.category,
                 suggestedBy: initialData.suggestedBy || "",
-                isPrivate: initialData.isPrivate ?? DEFAULT_FORM_DATA.isPrivate,
+                isPrivate: initialData.isPrivate ?? (currentUser?.defaultIdeaPrivate ?? DEFAULT_FORM_DATA.isPrivate),
                 weather: initialData.weather || DEFAULT_FORM_DATA.weather,
                 requiresTravel: initialData.requiresTravel ?? DEFAULT_FORM_DATA.requiresTravel,
                 photoUrls: initialData.photoUrls || [],
             });
         } else {
-            setFormData(DEFAULT_FORM_DATA); // Reset for new idea
+            setFormData({
+                ...DEFAULT_FORM_DATA,
+                isPrivate: currentUser?.defaultIdeaPrivate ?? DEFAULT_FORM_DATA.isPrivate
+            });
         }
-    }, [initialData]);
+    }, [initialData, currentUser?.defaultIdeaPrivate]);
 
     const categories = getCategoriesForTopic(jarTopic, customCategories);
 

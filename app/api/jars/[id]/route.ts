@@ -44,6 +44,7 @@ export async function PUT(
         if (body.customCategories !== undefined) updateData.customCategories = body.customCategories;
         if (body.selectionMode !== undefined) updateData.selectionMode = body.selectionMode;
         if (body.voteCandidatesCount !== undefined) updateData.voteCandidatesCount = Number(body.voteCandidatesCount);
+        if (body.defaultIdeaPrivate !== undefined) updateData.defaultIdeaPrivate = !!body.defaultIdeaPrivate;
 
         const updatedJar = await prisma.jar.update({
             where: { id },

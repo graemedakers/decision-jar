@@ -139,6 +139,7 @@ export async function GET() {
                 jarType: activeJar.type,
                 jarTopic: activeJar.topic,
                 jarSelectionMode: (activeJar as any).selectionMode,
+                defaultIdeaPrivate: (activeJar as any).defaultIdeaPrivate,
                 customCategories: (activeJar as any).customCategories,
                 jarVoteCandidatesCount: (activeJar as any).voteCandidatesCount || 0,
                 memberCount: members.length,

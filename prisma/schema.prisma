@@ -15,6 +15,7 @@ model Jar {
   selectionMode SelectionMode @default(RANDOM)
   topic         String?  @default("General") // e.g. "Movies", "Food"
   voteCandidatesCount Int @default(0) // 0 = All ideas, >0 = Shortlist/Runoff count
+  defaultIdeaPrivate Boolean @default(false)
 
   customCategories Json? // Array of { id: string, label: string }
   
