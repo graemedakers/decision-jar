@@ -114,7 +114,7 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent raw className="max-w-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
                 <div className="bg-gradient-to-r from-pink-600 to-purple-600 p-6 relative">
-                    <div className="absolute top-2 left-2 text-[10px] text-white/50 font-mono">v1.2-DEBUG</div>
+                    <div className="absolute top-2 left-2 text-[10px] text-white/50 font-mono">v1.3-DATA</div>
                     <button
                         onClick={onClose}
                         className="absolute right-4 top-4 rounded-full p-2 bg-black/20 hover:bg-black/40 text-white transition-colors"
@@ -144,8 +144,8 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
                     </div>
                 </div>
 
-                <div className="w-full bg-yellow-100 dark:bg-yellow-900/50 p-2 border-b border-yellow-500 text-[10px] font-mono overflow-x-auto whitespace-nowrap">
-                    P: {idea.photoUrls?.length || 0} | Data: {JSON.stringify(idea.photoUrls)}
+                <div className="w-full bg-yellow-100 dark:bg-yellow-900/50 p-2 border-b border-yellow-500 text-[10px] font-mono overflow-x-auto">
+                    V: 1.3 | Arr: {Array.isArray(idea.photoUrls) ? 'YES' : 'NO'} | T: {typeof idea.photoUrls} | P: {idea.photoUrls?.length || 0} | Raw: {JSON.stringify(idea.photoUrls)}
                 </div>
 
                 {(() => {

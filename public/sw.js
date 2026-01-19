@@ -1,6 +1,6 @@
 // Service Worker for PWA - Simplified and Safe Version
-const CACHE_NAME = 'decision-jar-v2';
-const RUNTIME_CACHE = 'runtime-v2';
+const CACHE_NAME = 'decision-jar-v3';
+const RUNTIME_CACHE = 'runtime-v3';
 
 // Only cache static assets, not pages
 const PRECACHE_ASSETS = [
