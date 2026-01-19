@@ -183,7 +183,16 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
                             </div>
                         );
                     }
-                    return null;
+                    return (
+                        <div className="w-full bg-yellow-100 dark:bg-yellow-900 p-4 border-b border-yellow-500">
+                            <p className="text-xs font-mono">
+                                DEBUG: photoUrls length: {idea.photoUrls?.length || 0}<br />
+                                DEBUG: photoUrls: {JSON.stringify(idea.photoUrls)}<br />
+                                DEBUG: validPhotoUrls: {JSON.stringify(validPhotoUrls)}<br />
+                                DEBUG: photoUrl (legacy): {idea.photoUrl || 'undefined'}
+                            </p>
+                        </div>
+                    );
                 })()}
 
                 <div className="p-6 space-y-6 w-full">
