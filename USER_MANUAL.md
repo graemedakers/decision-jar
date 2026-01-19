@@ -162,8 +162,14 @@ Perfect for chores or assigning specific responsibilities.
 ### Voting Mode
 Great for group decisions on Movie Night or Dinner.
 1.  **Start Vote:** Admin starts a session with a set of random options.
-2.  **Vote:** Everyone votes "Yes" or "No" on their own device.
-3.  **Result:** The best match is revealed to everyone instantly.
+    - **Smart Shortcuts:** If there's only one logical choice or a guaranteed tie in a 2-person group, the system resolves it immediately to save you time.
+2.  **Cast Your Vote:** Choose your favorite from the shortlist.
+    - **Fair Play:** You cannot vote for your own suggestions.
+    - **Sidelines:** If every option in a round was suggested by you, you'll be placed on the "Sidelines" to watch the real-time progress as others decide.
+3.  **Instant Reveal:** Once all eligible members have voted, the winner is revealed to everyone simultaneously with a high-energy transition. No page refresh required!
+4.  **Tie-Breaking:**
+    - **Random Pick:** The system selects a winner from the top-voted ideas.
+    - **Run-off Round:** A new voting session starts automatically with only the tied ideas.
 
 ---
 

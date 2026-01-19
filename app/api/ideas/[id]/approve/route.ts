@@ -25,7 +25,7 @@ export async function POST(
             return NextResponse.json({ error: "Idea not found" }, { status: 404 });
         }
 
-        const isAdmin = idea.jar.members.some(m => m.userId === session.user.id && m.role === 'ADMIN');
+        const isAdmin = idea.jar.members.some(m => m.userId === session.user.id && (m.role === 'ADMIN' || m.role === 'OWNER'));
 
         if (!isAdmin) {
             return NextResponse.json({ error: "Only admins can approve submissions" }, { status: 403 });

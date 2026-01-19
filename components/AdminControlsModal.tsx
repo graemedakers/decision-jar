@@ -53,7 +53,7 @@ export function AdminControlsModal({ isOpen, onClose, jarId, onAllocated }: Admi
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent raw className="max-w-md w-full bg-slate-900 border border-slate-800 text-white overflow-hidden">
                 <div className="bg-gradient-to-br from-indigo-900/50 to-slate-900 p-6 border-b border-white/10">
-                    <DialogHeader>
+                    <DialogHeader onClose={onClose}>
                         <DialogTitle className="flex items-center gap-2 text-xl font-bold">
                             <Users className="w-5 h-5 text-indigo-400" />
                             Admin Controls

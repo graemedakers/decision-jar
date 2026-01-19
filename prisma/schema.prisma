@@ -14,6 +14,8 @@ model Jar {
   type          JarType  @default(SOCIAL)
   selectionMode SelectionMode @default(RANDOM)
   topic         String?  @default("General") // e.g. "Movies", "Food"
+  voteCandidatesCount Int @default(0) // 0 = All ideas, >0 = Shortlist/Runoff count
+
   customCategories Json? // Array of { id: string, label: string }
   
   members       JarMember[]

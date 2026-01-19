@@ -1,5 +1,5 @@
 # Roadmap Implementation Status
-**Last Updated:** January 17, 2026
+**Last Updated:** January 19, 2026
 
 ## ✅ Phase 1: Security & Mobile (COMPLETE)
 
@@ -230,253 +230,17 @@ The current premium token gifting system has a **critical security inconsistency
 
 **File:** `app/api/user/premium-token/route.ts`
 
-**Current Code (INSECURE):**
-```typescript
-const token = crypto.randomUUID();
-await prisma.user.update({
-    where: { id: session.user.id },
-    data: { premiumInviteToken: token }
-});
-```
-
-**New Code (SECURE):**
-```typescript
-const token = crypto.randomUUID();
-
-// Create token record with security features
-const tokenRecord = await prisma.premiumInviteToken.create({
-    data: {
-        token,
-        createdById: session.user.id,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-        maxUses: 10,
-        isActive: true
-    }
-});
-
-// Also update User field for backward compatibility
-await prisma.user.update({
-    where: { id: session.user.id },
-    data: { premiumInviteToken: token }
-});
-```
-
-**Testing:**
-- [ ] Generate a new token as super admin
-- [ ] Verify entry exists in `PremiumInviteToken` table
-- [ ] Verify `expiresAt` is 30 days from now
-- [ ] Verify `maxUses` is 10
-- [ ] Verify `isActive` is true
-
----
-
-### Phase 9.2: Unify Validation Logic (Medium - 2-3 hours) ✅ COMPLETE
+**Phase 9.2: Unify Validation Logic (Medium - 2-3 hours) ✅ COMPLETE**
 
 **Goal:** Create shared validation utility and update both routes to use consistent logic.
 
-#### Step 9.2.1: Create Shared Validator
-
-**New File:** `lib/premium-token-validator.ts`
-
-```typescript
-import { prisma } from '@/lib/prisma';
-
-export interface TokenValidationResult {
-    isValid: boolean;
-    reason?: 'not_found' | 'expired' | 'inactive' | 'max_uses_reached';
-    tokenRecord?: any;
-}
-
-export async function validatePremiumToken(token: string): Promise<TokenValidationResult> {
-    if (!token) return { isValid: false, reason: 'not_found' };
-
-    const tokenRecord = await prisma.premiumInviteToken.findUnique({
-        where: { token },
-        include: { createdBy: { select: { isSuperAdmin: true } } }
-    });
-
-    if (!tokenRecord) {
-        // FALLBACK: Check legacy User.premiumInviteToken field
-        const legacyUser = await prisma.user.findFirst({
-            where: { premiumInviteToken: token },
-            select: { isSuperAdmin: true }
-        });
-        
-        if (legacyUser?.isSuperAdmin) {
-            return { isValid: true }; // Legacy token, no record to update
-        }
-        return { isValid: false, reason: 'not_found' };
-    }
-
-    if (!tokenRecord.isActive) {
-        return { isValid: false, reason: 'inactive' };
-    }
-
-    if (new Date() > tokenRecord.expiresAt) {
-        return { isValid: false, reason: 'expired' };
-    }
-
-    if (tokenRecord.currentUses >= tokenRecord.maxUses) {
-        return { isValid: false, reason: 'max_uses_reached' };
-    }
-
-    return { isValid: true, tokenRecord };
-}
-
-export async function recordTokenUsage(token: string, userId: string): Promise<void> {
-    try {
-        await prisma.premiumInviteToken.update({
-            where: { token },
-            data: {
-                currentUses: { increment: 1 },
-                usedById: userId,
-                usedAt: new Date()
-            }
-        });
-    } catch (error) {
-        console.log(`Could not update token usage for ${token}:`, error);
-    }
-}
-```
-
-#### Step 9.2.2: Update `/api/jars/join/route.ts`
-
-**Replace lines 55-65:**
-```typescript
-import { validatePremiumToken, recordTokenUsage } from '@/lib/premium-token-validator';
-
-let isPremiumGifted = false;
-if (premiumToken) {
-    const validation = await validatePremiumToken(premiumToken);
-    isPremiumGifted = validation.isValid;
-}
-
-// After user update, add:
-if (isPremiumGifted && premiumToken) {
-    await recordTokenUsage(premiumToken, session.user.id);
-}
-```
-
-#### Step 9.2.3: Update `/api/auth/signup/route.ts`
-
-**Replace lines 120-154:**
-```typescript
-import { validatePremiumToken, recordTokenUsage } from '@/lib/premium-token-validator';
-
-if (premiumToken) {
-    const validation = await validatePremiumToken(premiumToken);
-    isPremiumGifted = validation.isValid;
-    if (!validation.isValid) {
-        console.log(`Premium token rejected: ${validation.reason}`);
-    }
-}
-
-// After user creation:
-if (isPremiumGifted && premiumToken) {
-    await recordTokenUsage(premiumToken, user.id);
-}
-```
-
-**Testing:**
-- [ ] New user signup with valid token → Premium granted
-- [ ] New user signup with expired token → No premium
-- [ ] Existing user join with valid token → Premium granted
-- [ ] Existing user join with max-uses-reached token → No premium
-- [ ] Verify `currentUses` increments correctly
-- [ ] Legacy tokens (pre-migration) still work via fallback
-
----
-
-### Phase 9.3: Usage Tracking Enhancement (Easy - 30 min) ✅ COMPLETE
+**Phase 9.3: Usage Tracking Enhancement (Easy - 30 min) ✅ COMPLETE**
 
 **Goal:** Ensure all token redemptions are tracked properly.
 
-**Note:** Basic tracking is included in Phase 9.2 via `recordTokenUsage()`. This phase adds enhanced logging.
-
-**Add to `lib/premium-token-validator.ts`:**
-```typescript
-export async function logTokenRedemption(
-    token: string, 
-    userId: string, 
-    method: 'signup' | 'join'
-): Promise<void> {
-    console.log(`[PREMIUM_TOKEN] Redeemed: token=${token.substring(0,8)}... user=${userId} method=${method}`);
-    
-    // Optional: Track in analytics
-    // captureEvent('premium_token_redeemed', { method });
-}
-```
-
-**Testing:**
-- [ ] Check server logs show token redemptions
-- [ ] Verify distinct tracking for signup vs join flows
-
----
-
-### Phase 9.4: Admin UI for Token Management (COMPLETE - Jan 19, 2026) ✅
+**Phase 9.4: Admin UI for Token Management (COMPLETE - Jan 19, 2026) ✅**
 
 **Goal:** Create admin interface to view, create, and manage tokens.
-
-#### Step 9.4.1: API Routes
-
-**New File:** `app/api/admin/premium-tokens/route.ts`
-
-```typescript
-// GET  - List all tokens created by admin
-// POST - Create token with custom settings (expiration, maxUses, notes)
-```
-
-**New File:** `app/api/admin/premium-tokens/[id]/route.ts`
-
-```typescript
-// PATCH  - Update token (deactivate, change maxUses)
-// DELETE - Soft delete (set isActive=false)
-```
-
-#### Step 9.4.2: Admin Page
-
-**New File:** `app/admin/premium-tokens/page.tsx`
-
-**Features:**
-- [ ] List all tokens with status (active, expired, used up)
-- [ ] Show usage count and last redemption date
-- [ ] Create new token form:
-  - Expiration date picker (default: 30 days)
-  - Max uses input (default: 10)
-  - Notes field (e.g., "Black Friday promo")
-- [ ] Deactivate/reactivate toggle per token
-- [ ] Copy token link button
-
-#### Step 9.4.3: Link from Settings
-
-**Update:** `components/SettingsModal.tsx`
-
-Add link to `/admin/premium-tokens` in the Super Admin section.
-
-**Testing:**
-- [ ] Admin can view all their tokens
-- [ ] Admin can create new token with custom settings
-- [ ] Admin can deactivate a token
-- [ ] Deactivated tokens fail validation
-- [ ] Token link copies correctly
-
----
-
-### Implementation Order
-
-```
-Phase 9.1 (1 hour)     → Fix Token Generation        ✅ COMPLETE
-        ↓
-Phase 9.2 (2-3 hours)  → Unify Validation Logic      ✅ COMPLETE
-        ↓
-Phase 9.3 (30 min)     → Usage Tracking              ✅ COMPLETE
-        ↓
-Phase 9.4 (3-4 hours)  → Admin UI                    ✅ COMPLETE
-```
-
-### Quick Win Path (Phases 9.1 + 9.2 only = 3-4 hours)
-
-Addresses the security gap immediately without the admin UI.
 
 ### Files to Create/Modify
 
@@ -493,7 +257,26 @@ Addresses the security gap immediately without the admin UI.
 
 ---
 
-## �📋 Future Considerations (Phase 10+)
+## ✅ Phase 10: Squad Mode - Runoff Voting & Resolution (COMPLETE - Jan 19, 2026)
+**Last Updated:** January 19, 2026
+
+### Goal
+Enhance group decision-making by allowing jars to spin a shortlist of options (e.g., 3) which the group then votes on, with robust auto-resolution logic.
+
+### Implementation
+- ✅ **Shortlist Logic:** Added `voteCandidatesCount` to Jar model (0 = All, >0 = Runoff).
+- ✅ **Dynamic Candidates:** Updated API to select random candidates for the voting session if a shortlist is configured.
+- ✅ **Auto-Resolution:** System automatically resolves a vote as soon as the last eligible member submits their choice.
+- ✅ **Pointless Vote Detection:** Immediate resolution if only 1 idea is eligible or if a 2-person vote is a guaranteed tie.
+- ✅ **"Sidelines" Handling:** Detects users who cannot vote (because all ideas are theirs) and excludes them from the required vote count.
+- ✅ **Instant Reveal:** Removed page reloads; winners are broadcasted via `spin-result` to trigger the "Date Reveal" modal for all users instantly.
+- ✅ **Tie-Breakers:** Sophisticated handling for Random Tie-break vs. Run-off Rounds (Round 2+).
+- ✅ **Configuration:** Updated Admin Jar Settings and Create Jar modals to manage Runoff Candidates.
+- ✅ **Real-time Sync:** Polling fallback + Supabase broadcast for rock-solid consistency across devices.
+
+---
+
+## 📋 Future Considerations (Phase 11+)
 
 1. **Community Jars** - Public jar discovery and forking
 2. **Performance** - React Query caching optimization

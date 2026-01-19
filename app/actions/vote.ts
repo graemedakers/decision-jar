@@ -14,7 +14,7 @@ async function checkAuth(jarId: string) {
     });
 
     if (!membership) return { error: "Not a member", status: 403 };
-    return { session, membership, isAdmin: membership.role === 'ADMIN' };
+    return { session, membership, isAdmin: membership.role === 'ADMIN' || membership.role === 'OWNER' };
 }
 
 export async function startVote(jarId: string, options: any) {
@@ -30,6 +30,27 @@ export async function startVote(jarId: string, options: any) {
 
     if (active) return { error: "A vote is already in progress", status: 400 };
 
+    // Fetch Jar and Ideas to determine eligibility
+    const jar = await prisma.jar.findUnique({
+        where: { id: jarId },
+        include: { ideas: { where: { status: 'APPROVED', selectedAt: null } } }
+    });
+
+    if (!jar) return { error: "Jar not found", status: 404 };
+    if (jar.ideas.length === 0) return { error: "Jar is empty! Add ideas first.", status: 400 };
+
+    // Determine eligible ideas (Runoff / Shortlist Logic)
+    let eligibleIdeaIds: string[] = [];
+    const candidatesCount = (jar as any).voteCandidatesCount || 0;
+
+    if (candidatesCount > 0) {
+        const shuffled = [...jar.ideas].sort(() => 0.5 - Math.random());
+        const count = Math.min(candidatesCount, jar.ideas.length);
+        eligibleIdeaIds = shuffled.slice(0, count).map(i => i.id);
+    } else {
+        eligibleIdeaIds = jar.ideas.map(i => i.id);
+    }
+
     let endTime = null;
     if (timeLimitMinutes) {
         endTime = new Date(Date.now() + timeLimitMinutes * 60000);
@@ -41,8 +62,55 @@ export async function startVote(jarId: string, options: any) {
             status: 'ACTIVE',
             tieBreakerMode: tieBreakerMode || 'RANDOM_PICK',
             endTime,
+            eligibleIdeaIds: eligibleIdeaIds.length > 0 ? eligibleIdeaIds : undefined
         }
     });
+
+    // POINTLESS VOTE DETECTION:
+    // 1. Only 1 idea eligible? Immediate win.
+    // 2. 2 people, 2 ideas, each suggested 1? Guaranteed tie, resolve now.
+    const activeMembers = await prisma.jarMember.findMany({
+        where: { jarId, status: 'ACTIVE' }
+    });
+
+    let autoResolveReason = null;
+    let finalWinnerId = null;
+
+    if (eligibleIdeaIds.length === 1) {
+        autoResolveReason = "Only one choice available.";
+        finalWinnerId = eligibleIdeaIds[0];
+    } else if (eligibleIdeaIds.length === 2 && activeMembers.length === 2) {
+        // Fetch ideas to check authors
+        const ideas = await prisma.idea.findMany({
+            where: { id: { in: eligibleIdeaIds } }
+        });
+        const authors = new Set(ideas.map(i => i.createdById));
+        if (authors.size === 2) {
+            autoResolveReason = "Guaranteed tie in 2-person jar. Picking at random.";
+            finalWinnerId = eligibleIdeaIds[Math.floor(Math.random() * 2)];
+        }
+    }
+
+    if (finalWinnerId) {
+        console.log(`[Vote] Pointless scenario detected: ${autoResolveReason}`);
+        await prisma.voteSession.update({
+            where: { id: session.id },
+            data: { status: 'COMPLETED', winnerId: finalWinnerId }
+        });
+        await prisma.idea.update({
+            where: { id: finalWinnerId },
+            data: { selectedAt: new Date() }
+        });
+        await notifyJarMembers(jarId, null, {
+            title: 'Quick Result!',
+            body: `${autoResolveReason} Winner: Selected automatically.`,
+            url: `/dashboard?jarId=${jarId}`
+        }, 'notifyVoting');
+
+        revalidatePath('/dashboard');
+        const winnerIdea = await prisma.idea.findUnique({ where: { id: finalWinnerId } });
+        return { success: true, winnerId: finalWinnerId, idea: winnerIdea, note: autoResolveReason };
+    }
 
     revalidatePath('/dashboard');
     return { success: true, session };
@@ -90,7 +158,23 @@ export async function castVote(jarId: string, ideaId: string) {
         }
     });
 
-    revalidatePath('/dashboard');
+    // AUTO-RESOLVE LOGIC:
+    // Fetch updated session with all votes to check if everyone is done
+    const updatedSession = await prisma.voteSession.findUnique({
+        where: { id: session.id },
+        include: { votes: true }
+    });
+
+    const totalEligibleVoters = await getEligibleVoterCount(jarId, session.eligibleIdeaIds || []);
+
+    if (updatedSession && updatedSession.votes.length >= totalEligibleVoters) {
+        console.log(`[Vote] Auto-resolving session ${session.id} as all ${totalEligibleVoters} eligible members voted.`);
+        const resolution = await resolveVote(jarId);
+        return resolution;
+    } else {
+        revalidatePath('/dashboard');
+    }
+
     return { success: true };
 }
 
@@ -128,19 +212,21 @@ export async function extendVote(jarId: string) {
 
     await prisma.voteSession.update({
         where: { id: session.id },
-        data: { endTime: new Date(session.endTime.getTime() + 60 * 60000) }
+        data: {
+            endTime: new Date(session.endTime.getTime() + 60 * 60000),
+            status: 'ACTIVE' // In case it was somehow marked as something else
+        }
     });
 
     revalidatePath('/dashboard');
     return { success: true };
 }
 
+import { notifyJarMembers } from '@/lib/notifications';
+
 export async function resolveVote(jarId: string) {
     const auth = await checkAuth(jarId);
     if ('error' in auth) return auth;
-    // Anyone can trigger resolve if authorized (lazy resolution)? Or logic restricted?
-    // Route said: "Usually triggered automatically or by admin if stuck".
-    // We allow any member to trigger lazy resolution indirectly via GET, so direct calls are fine if Auth'd.
 
     const session = await prisma.voteSession.findFirst({
         where: { jarId, status: 'ACTIVE' },
@@ -149,7 +235,6 @@ export async function resolveVote(jarId: string) {
 
     if (!session) return { error: "No active vote", status: 404 };
 
-    // ... Logic copied from route ...
     const voteCounts: Record<string, number> = {};
     session.votes.forEach(v => {
         voteCounts[v.ideaId] = (voteCounts[v.ideaId] || 0) + 1;
@@ -178,8 +263,17 @@ export async function resolveVote(jarId: string) {
             where: { id: winners[0] },
             data: { selectedAt: new Date() }
         });
+
+        await notifyJarMembers(jarId, null, {
+            title: 'Vote Complete!',
+            body: 'We have a winner! Tap to see the result.',
+            url: `/dashboard?jarId=${jarId}`
+        }, 'notifyVoting');
+
+        const winnerIdea = await prisma.idea.findUnique({ where: { id: winners[0] } });
+
         revalidatePath('/dashboard');
-        return { success: true, winnerId: winners[0] };
+        return { success: true, winnerId: winners[0], idea: winnerIdea };
     } else {
         // Tie
         if (session.tieBreakerMode === 'RANDOM_PICK') {
@@ -192,8 +286,17 @@ export async function resolveVote(jarId: string) {
                 where: { id: randomWinner },
                 data: { selectedAt: new Date() }
             });
+
+            await notifyJarMembers(jarId, null, {
+                title: 'Vote Tie Result',
+                body: 'The vote was a tie! A random winner was selected.',
+                url: `/dashboard?jarId=${jarId}`
+            }, 'notifyVoting');
+
+            const winnerIdea = await prisma.idea.findUnique({ where: { id: randomWinner } });
+
             revalidatePath('/dashboard');
-            return { success: true, winnerId: randomWinner, method: 'RANDOM_TIEBREAK' };
+            return { success: true, winnerId: randomWinner, method: 'RANDOM_TIEBREAK', idea: winnerIdea };
         } else {
             // RE_VOTE
             await prisma.voteSession.update({
@@ -211,8 +314,45 @@ export async function resolveVote(jarId: string) {
                     eligibleIdeaIds: winners
                 }
             });
+
+            await notifyJarMembers(jarId, null, {
+                title: 'Vote Tie - Runoff Round!',
+                body: 'The vote was a tie! A runoff round has started with the top choices.',
+                url: `/dashboard?jarId=${jarId}&mode=vote`
+            }, 'notifyVoting');
+
             revalidatePath('/dashboard');
             return { success: true, nextRound: round2 };
         }
     }
+}
+
+async function getEligibleVoterCount(jarId: string, eligibleIdeaIds: string[]) {
+    // If pool is empty, get all available
+    let poolIds = eligibleIdeaIds;
+    if (poolIds.length === 0) {
+        const ideas = await prisma.idea.findMany({
+            where: { jarId, status: 'APPROVED', selectedAt: null },
+            select: { id: true }
+        });
+        poolIds = ideas.map(i => i.id);
+    }
+
+    const poolIdeas = await prisma.idea.findMany({
+        where: { id: { in: poolIds } },
+        select: { createdById: true }
+    });
+
+    const members = await prisma.jarMember.findMany({
+        where: { jarId, status: 'ACTIVE' },
+        select: { userId: true }
+    });
+
+    let eligibleCount = 0;
+    for (const member of members) {
+        if (poolIdeas.some(idea => idea.createdById !== member.userId)) {
+            eligibleCount++;
+        }
+    }
+    return eligibleCount || 1; // Always at least 1 person or it shouldn't have started
 }

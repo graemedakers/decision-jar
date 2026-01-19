@@ -140,6 +140,7 @@ export async function GET() {
                 jarTopic: activeJar.topic,
                 jarSelectionMode: (activeJar as any).selectionMode,
                 customCategories: (activeJar as any).customCategories,
+                jarVoteCandidatesCount: (activeJar as any).voteCandidatesCount || 0,
                 memberCount: members.length,
                 isCreator,
                 hasPartner,

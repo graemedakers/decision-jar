@@ -40,7 +40,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [jarType, setJarType] = useState<"ROMANTIC" | "SOCIAL">("ROMANTIC");
     const [jarName, setJarName] = useState("");
     const [jarTopic, setJarTopic] = useState("");
-    const [jarSelectionMode, setJarSelectionMode] = useState<"RANDOM" | "VOTING" | "ALLOCATION" | "ADMIN_PICK">("RANDOM");
+    const [jarSelectionMode, setJarSelectionMode] = useState<"RANDOM" | "VOTE" | "ALLOCATION" | "ADMIN_PICK">("RANDOM");
+    const [jarVoteCandidates, setJarVoteCandidates] = useState(0);
 
     // Premium Invite Logic
     const [currentUserEmail, setCurrentUserEmail] = useState("");
@@ -79,6 +80,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         setJarName(data.user.jarName || "");
                         setJarTopic(data.user.jarTopic || "");
                         if (data.user.jarSelectionMode) setJarSelectionMode(data.user.jarSelectionMode);
+                        setJarVoteCandidates(data.user.jarVoteCandidatesCount || 0);
                         setCurrentUserEmail(data.user.email || "");
                         setPremiumInviteToken(data.user.premiumInviteToken || "");
                     }
@@ -113,12 +115,20 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         name: jarName,
                         topic: jarTopic,
                         selectionMode: jarSelectionMode,
+                        voteCandidatesCount: Number(jarVoteCandidates),
                     }),
                     credentials: 'include',
                 });
             }
 
             if (userRes.ok) {
+                // Real-time Sync: Notify other members in this jar to refresh their view
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('decision-jar:broadcast', {
+                        detail: { jarId: activeJarId, event: 'content-update' }
+                    }));
+                }
+
                 showSuccess("Settings updated successfully!");
                 onSettingsChanged?.();
                 onClose();
@@ -281,307 +291,339 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className="glass-card w-full max-w-md relative max-h-[90vh] flex flex-col bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10"
+                            className="glass-card w-full max-w-md relative max-h-[90vh] flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl"
                         >
-                            <div className="p-6 border-b border-slate-200 dark:border-white/10 flex items-center justify-between shrink-0">
-                                <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <MapPin className="w-6 h-6 text-primary" />
-                                    Settings
-                                </h2>
-                                <button
-                                    onClick={onClose}
-                                    className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5"
-                                    aria-label="Close Settings"
-                                >
-                                    <X className="w-6 h-6" />
-                                </button>
-                            </div>
-
-                            <div className="flex border-b border-slate-200 dark:border-white/10 shrink-0">
-                                <button
-                                    onClick={() => setActiveTab('PERSONAL')}
-                                    className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'PERSONAL' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
-                                >
-                                    My Preferences
-                                </button>
-                                {isAdmin && (
+                            <form onSubmit={handleSubmit} className="flex flex-col max-h-[90vh]">
+                                <div className="p-6 border-b border-slate-200 dark:border-white/10 flex items-center justify-between shrink-0 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md z-10">
+                                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <MapPin className="w-6 h-6 text-primary" />
+                                        Settings
+                                    </h2>
                                     <button
-                                        onClick={() => setActiveTab('JAR')}
-                                        className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'JAR' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
+                                        type="button"
+                                        onClick={onClose}
+                                        className="p-2 text-slate-400 hover:text-slate-600 dark:text-white/50 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5"
+                                        aria-label="Close Settings"
                                     >
-                                        Jar Settings
+                                        <X className="w-6 h-6" />
                                     </button>
-                                )}
-                            </div>
+                                </div>
 
-                            <div className="overflow-y-auto p-6 space-y-8 pb-32">
-                                <form onSubmit={handleSubmit} className="space-y-8">
-                                    {activeTab === 'PERSONAL' && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            className="space-y-6"
+                                <div className="flex border-b border-slate-200 dark:border-white/10 shrink-0 bg-white dark:bg-slate-900 z-10">
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab('PERSONAL')}
+                                        className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'PERSONAL' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
+                                    >
+                                        My Preferences
+                                    </button>
+                                    {isAdmin && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveTab('JAR')}
+                                            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'JAR' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
                                         >
-                                            {/* PERSONAL SETTINGS */}
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between items-center ml-1">
-                                                    <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Default Location</label>
-                                                    <button
-                                                        type="button"
-                                                        onClick={async () => {
-                                                            try {
-                                                                const currentLoc = await getCurrentLocation();
-                                                                setLocation(currentLoc);
-                                                                showSuccess("Location detected!");
-                                                            } catch (err) {
-                                                                showError("Could not get location. Check permissions.");
-                                                            }
-                                                        }}
-                                                        className="text-[10px] uppercase tracking-wider font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
-                                                    >
-                                                        <MapPin className="w-3 h-3" /> Locate Me
-                                                    </button>
+                                            Jar Settings
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto p-6 space-y-8 min-h-0 custom-scrollbar">
+                                    <div className="space-y-8">
+                                        {activeTab === 'PERSONAL' && (
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                className="space-y-6"
+                                            >
+                                                {/* PERSONAL SETTINGS */}
+                                                <div className="space-y-3">
+                                                    <div className="flex justify-between items-center ml-1">
+                                                        <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Default Location</label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const currentLoc = await getCurrentLocation();
+                                                                    setLocation(currentLoc);
+                                                                    showSuccess("Location detected!");
+                                                                } catch (err) {
+                                                                    showError("Could not get location. Check permissions.");
+                                                                }
+                                                            }}
+                                                            className="text-[10px] uppercase tracking-wider font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                                        >
+                                                            <MapPin className="w-3 h-3" /> Locate Me
+                                                        </button>
+                                                    </div>
+                                                    <LocationInput
+                                                        value={location}
+                                                        onChange={setLocation}
+                                                        placeholder="e.g. New York, NY"
+                                                    />
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                        Your base for smart suggestions.
+                                                    </p>
                                                 </div>
-                                                <LocationInput
-                                                    value={location}
-                                                    onChange={setLocation}
-                                                    placeholder="e.g. New York, NY"
-                                                />
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                    Your base for smart suggestions.
-                                                </p>
-                                            </div>
 
-                                            <div className="space-y-3">
-                                                <label htmlFor="interests-input" className="block text-sm font-bold text-slate-800 dark:text-gray-200 ml-1">Your Interests</label>
-                                                <Input
-                                                    id="interests-input"
-                                                    value={interests}
-                                                    onChange={(e) => setInterests(e.target.value)}
-                                                    placeholder="Hiking, Sushi, Jazz..."
-                                                    className="text-slate-900 dark:text-white"
-                                                />
-                                            </div>
+                                                <div className="space-y-3">
+                                                    <label htmlFor="interests-input" className="block text-sm font-bold text-slate-800 dark:text-gray-200 ml-1">Your Interests</label>
+                                                    <Input
+                                                        id="interests-input"
+                                                        value={interests}
+                                                        onChange={(e) => setInterests(e.target.value)}
+                                                        placeholder="Hiking, Sushi, Jazz..."
+                                                        className="text-slate-900 dark:text-white"
+                                                    />
+                                                </div>
 
-                                            {/* Subscription & Utility Section (Moved to Personal Tab) */}
-                                            <div className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-3">
-                                                <h3 className="text-xs font-bold uppercase text-slate-400 tracking-widest mb-2">Account & App</h3>
+                                                {/* Subscription & Utility Section (Moved to Personal Tab) */}
+                                                <div className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-3">
+                                                    <h3 className="text-xs font-bold uppercase text-slate-400 tracking-widest mb-2">Account & App</h3>
 
-                                                {onRestartTour && (
+                                                    {onRestartTour && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            className="w-full justify-start text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white"
+                                                            onClick={() => { onRestartTour(); onClose(); }}
+                                                        >
+                                                            <Sparkles className="w-4 h-4 mr-2" /> Restart Tour
+                                                        </Button>
+                                                    )}
+
                                                     <Button
                                                         type="button"
                                                         variant="ghost"
                                                         className="w-full justify-start text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white"
-                                                        onClick={() => { onRestartTour(); onClose(); }}
+                                                        onClick={() => setIsLogModalOpen(true)}
                                                     >
-                                                        <Sparkles className="w-4 h-4 mr-2" /> Restart Tour
+                                                        <History className="w-4 h-4 mr-2" /> View History
                                                     </Button>
-                                                )}
 
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    className="w-full justify-start text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white"
-                                                    onClick={() => setIsLogModalOpen(true)}
-                                                >
-                                                    <History className="w-4 h-4 mr-2" /> View History
-                                                </Button>
-
-                                                {/* Push Notifications */}
-                                                <div className="py-2">
-                                                    <NotificationToggle />
-                                                </div>
+                                                    {/* Push Notifications */}
+                                                    <div className="py-2">
+                                                        <NotificationToggle />
+                                                    </div>
 
 
-                                                {hasPaid ? (
-                                                    isNative ? (
-                                                        <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg text-xs text-slate-500">
-                                                            Manage Subscription: Visit <strong>{BASE_DOMAIN}</strong>
-                                                        </div>
+                                                    {hasPaid ? (
+                                                        isNative ? (
+                                                            <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg text-xs text-slate-500">
+                                                                Manage Subscription: Visit <strong>{BASE_DOMAIN}</strong>
+                                                            </div>
+                                                        ) : (
+                                                            <Button
+                                                                type="button"
+                                                                variant="secondary"
+                                                                className="w-full justify-start text-slate-600 dark:text-slate-300"
+                                                                onClick={handleManageSubscription}
+                                                                disabled={isLoading}
+                                                            >
+                                                                <CreditCard className="w-4 h-4 mr-2" /> Manage Subscription
+                                                            </Button>
+                                                        )
                                                     ) : (
                                                         <Button
                                                             type="button"
-                                                            variant="secondary"
-                                                            className="w-full justify-start text-slate-600 dark:text-slate-300"
-                                                            onClick={handleManageSubscription}
-                                                            disabled={isLoading}
+                                                            className="w-full justify-start bg-gradient-to-r from-primary to-accent text-white border-0"
+                                                            onClick={() => router.push('/premium')}
                                                         >
-                                                            <CreditCard className="w-4 h-4 mr-2" /> Manage Subscription
+                                                            <Sparkles className="w-4 h-4 mr-2" /> Upgrade to Pro
                                                         </Button>
-                                                    )
-                                                ) : (
-                                                    <Button
-                                                        type="button"
-                                                        className="w-full justify-start bg-gradient-to-r from-primary to-accent text-white border-0"
-                                                        onClick={() => router.push('/premium')}
-                                                    >
-                                                        <Sparkles className="w-4 h-4 mr-2" /> Upgrade to Pro
-                                                    </Button>
-                                                )}
+                                                    )}
 
-                                                {/* ADMIN OVERRIDE (For Super Admin) */}
-                                                {isSuperAdmin && (
-                                                    <div className="pt-4 mt-2 border-t border-dashed border-slate-200 dark:border-white/10">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <span className="text-[10px] uppercase font-bold text-purple-500">Admin Override</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={includePremiumToken}
-                                                                onChange={(e) => setIncludePremiumToken(e.target.checked)}
-                                                                className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 w-4 h-4"
-                                                            />
-                                                            <span className="text-xs text-slate-500">Gift Premium?</span>
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                const params = new URLSearchParams();
-                                                                if (inviteCode) params.set('code', inviteCode);
-                                                                if (includePremiumToken && premiumInviteToken) params.set('pt', premiumInviteToken);
-                                                                navigator.clipboard.writeText(`${window.location.origin}/join?${params.toString()}`);
-                                                                showSuccess("Admin Link Copied");
-                                                            }}
-                                                            className="mt-2 w-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 py-2 rounded font-mono"
-                                                        >
-                                                            Copy Admin Link
-                                                        </button>
-
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            className="w-full mt-2 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 h-auto py-2 text-xs"
-                                                            onClick={() => {
-                                                                onClose();
-                                                                router.push('/admin/premium-tokens');
-                                                            }}
-                                                        >
-                                                            <ShieldCheck className="w-3.5 h-3.5 mr-2" /> Manage Premium Tokens
-                                                        </Button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    )}
-
-                                    {activeTab === 'JAR' && isAdmin && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            className="space-y-8"
-                                        >
-                                            {/* JAR CONFIGURATION */}
-                                            <div className="space-y-4">
-                                                <div className="space-y-2">
-                                                    <label htmlFor="jar-name" className="text-sm font-bold text-slate-800 dark:text-gray-200">Jar Name</label>
-                                                    <Input
-                                                        id="jar-name"
-                                                        value={jarName}
-                                                        onChange={(e) => setJarName(e.target.value)}
-                                                        placeholder="Our Jar"
-                                                    />
-                                                </div>
-
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div className="space-y-2">
-                                                        <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Topic</label>
-                                                        <div className="relative">
-                                                            <select
-                                                                value={jarTopic}
-                                                                onChange={(e) => setJarTopic(e.target.value)}
-                                                                className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm appearance-none focus:outline-none focus:border-primary"
-                                                            >
-                                                                {['General', 'Romantic', 'Restaurants', 'Bars', 'Nightclubs', 'Movies', 'Wellness', 'Fitness', 'Travel', 'System Development'].map(t => (
-                                                                    <option key={t} value={t} className="bg-white dark:bg-slate-900">{t}</option>
-                                                                ))}
-                                                            </select>
-                                                            <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Mode</label>
-                                                        <div className="relative">
-                                                            <select
-                                                                value={jarSelectionMode}
-                                                                onChange={(e) => setJarSelectionMode(e.target.value as any)}
-                                                                className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm appearance-none focus:outline-none focus:border-primary"
-                                                            >
-                                                                <option value="RANDOM">Random Spin</option>
-                                                                <option value="ADMIN_PICK">Admin Pick</option>
-                                                                <option value="VOTING">Group Voting</option>
-                                                            </select>
-                                                            <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* MEMBERS / INVITES */}
-                                            <div className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
-                                                <h3 className="text-sm font-bold text-slate-800 dark:text-white">Access & Members</h3>
-
-                                                {hasPartner ? (
-                                                    <div className="p-4 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 text-center">
-                                                        <p className="text-sm text-slate-600 dark:text-slate-300">Linked with a {labels.memberLabel.toLowerCase()}.</p>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                            onClick={handleDeletePartner}
-                                                        >
-                                                            Remove Partner
-                                                        </Button>
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-3">
-                                                        <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg flex justify-between items-center border border-slate-200 dark:border-white/10">
-                                                            <span className="font-mono font-bold text-lg text-primary">{inviteCode || "Loading..."}</span>
+                                                    {/* ADMIN OVERRIDE (For Super Admin) */}
+                                                    {isSuperAdmin && (
+                                                        <div className="pt-4 mt-2 border-t border-dashed border-slate-200 dark:border-white/10">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <span className="text-[10px] uppercase font-bold text-purple-500">Admin Override</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={includePremiumToken}
+                                                                    onChange={(e) => setIncludePremiumToken(e.target.checked)}
+                                                                    className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 w-4 h-4"
+                                                                />
+                                                                <span className="text-xs text-slate-500">Gift Premium?</span>
+                                                            </div>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
-                                                                    navigator.clipboard.writeText(`${window.location.origin}/join?code=${inviteCode || ""}`);
-                                                                    showSuccess("Copied!");
+                                                                    const params = new URLSearchParams();
+                                                                    if (inviteCode) params.set('code', inviteCode);
+                                                                    if (includePremiumToken && premiumInviteToken) params.set('pt', premiumInviteToken);
+                                                                    navigator.clipboard.writeText(`${window.location.origin}/join?${params.toString()}`);
+                                                                    showSuccess("Admin Link Copied");
                                                                 }}
-                                                                className="text-xs bg-white dark:bg-white/10 px-2.5 py-1.5 rounded font-bold shadow-sm"
+                                                                className="mt-2 w-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 py-2 rounded font-mono"
                                                             >
-                                                                Copy Link
+                                                                Copy Admin Link
                                                             </button>
+
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                className="w-full mt-2 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 h-auto py-2 text-xs"
+                                                                onClick={() => {
+                                                                    onClose();
+                                                                    router.push('/admin/premium-tokens');
+                                                                }}
+                                                            >
+                                                                <ShieldCheck className="w-3.5 h-3.5 mr-2" /> Manage Premium Tokens
+                                                            </Button>
                                                         </div>
-                                                        <Button type="button" variant="ghost" size="sm" onClick={handleRegenerateCode} className="w-full text-slate-500">
-                                                            <RefreshCw className="w-3 h-3 mr-2" /> Regenerate Code
-                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+
+                                        {activeTab === 'JAR' && isAdmin && (
+                                            <motion.div
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                className="space-y-8"
+                                            >
+                                                {/* JAR CONFIGURATION */}
+                                                <div className="space-y-4">
+                                                    <div className="space-y-2">
+                                                        <label htmlFor="jar-name" className="text-sm font-bold text-slate-800 dark:text-gray-200">Jar Name</label>
+                                                        <Input
+                                                            id="jar-name"
+                                                            value={jarName}
+                                                            onChange={(e) => setJarName(e.target.value)}
+                                                            placeholder="Our Jar"
+                                                        />
                                                     </div>
-                                                )}
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Topic</label>
+                                                            <div className="relative">
+                                                                <select
+                                                                    value={jarTopic}
+                                                                    onChange={(e) => setJarTopic(e.target.value)}
+                                                                    className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm appearance-none focus:outline-none focus:border-primary"
+                                                                >
+                                                                    {['General', 'Romantic', 'Restaurants', 'Bars', 'Nightclubs', 'Movies', 'Wellness', 'Fitness', 'Travel', 'System Development'].map(t => (
+                                                                        <option key={t} value={t} className="bg-white dark:bg-slate-900">{t}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Mode</label>
+                                                            <div className="relative">
+                                                                <select
+                                                                    value={jarSelectionMode}
+                                                                    onChange={(e) => setJarSelectionMode(e.target.value as any)}
+                                                                    className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm appearance-none focus:outline-none focus:border-primary"
+                                                                >
+                                                                    <option value="RANDOM">Random Spin</option>
+                                                                    <option value="ADMIN_PICK">Admin Pick</option>
+                                                                    <option value="VOTE">Group Voting</option>
+                                                                </select>
+                                                                <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                                                            </div>
+                                                        </div>
+
+                                                        {jarSelectionMode === 'VOTE' && (
+                                                            <div className="space-y-2 col-span-1 md:col-span-2 mt-2 bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/10">
+                                                                <div className="flex justify-between items-center mb-1">
+                                                                    <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Runoff Candidates</label>
+                                                                    <span className="text-[10px] font-mono bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">
+                                                                        {jarVoteCandidates === 0 ? "ALL IDEAS" : `TOP ${jarVoteCandidates}`}
+                                                                    </span>
+                                                                </div>
+                                                                <Input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    max="50"
+                                                                    value={jarVoteCandidates}
+                                                                    onChange={(e) => setJarVoteCandidates(parseInt(e.target.value) || 0)}
+                                                                    className="bg-white dark:bg-slate-900"
+                                                                />
+                                                                <p className="text-[10px] text-slate-500 mt-1 dark:text-slate-400">
+                                                                    Set to 0 to vote on all ideas.<br />
+                                                                    Set to &gt;0 to let the spin pick a random shortlist (e.g. 3) for the group to vote on.
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* MEMBERS / INVITES */}
+                                                <div className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
+                                                    <h3 className="text-sm font-bold text-slate-800 dark:text-white">Access & Members</h3>
+
+                                                    {hasPartner ? (
+                                                        <div className="p-4 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 text-center">
+                                                            <p className="text-sm text-slate-600 dark:text-slate-300">Linked with a {labels.memberLabel.toLowerCase()}.</p>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                                onClick={handleDeletePartner}
+                                                            >
+                                                                Remove Partner
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg flex justify-between items-center border border-slate-200 dark:border-white/10">
+                                                                <span className="font-mono font-bold text-lg text-primary">{inviteCode || "Loading..."}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        navigator.clipboard.writeText(`${window.location.origin}/join?code=${inviteCode || ""}`);
+                                                                        showSuccess("Copied!");
+                                                                    }}
+                                                                    className="text-xs bg-white dark:bg-white/10 px-2.5 py-1.5 rounded font-bold shadow-sm"
+                                                                >
+                                                                    Copy Link
+                                                                </button>
+                                                            </div>
+                                                            <Button type="button" variant="ghost" size="sm" onClick={handleRegenerateCode} className="w-full text-slate-500">
+                                                                <RefreshCw className="w-3 h-3 mr-2" /> Regenerate Code
+                                                            </Button>
+                                                        </div>
+                                                    )}
 
 
-                                            </div>
+                                                </div>
 
-                                            {/* DANGER ZONE */}
-                                            <div className="pt-6 border-t border-slate-200 dark:border-white/10">
-                                                <h3 className="text-xs font-bold uppercase text-red-500 tracking-widest mb-3">Danger Zone</h3>
-                                                <Button
-                                                    type="button"
-                                                    variant="secondary"
-                                                    className="w-full border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400"
-                                                    onClick={handleEmptyJar}
-                                                >
-                                                    {labels.emptyJarAction}
-                                                </Button>
-                                                <p className="text-[10px] text-slate-400 mt-2 text-center">Irreversible. Deletes all ideas.</p>
-                                            </div>
-                                        </motion.div>
-                                    )}
+                                                {/* DANGER ZONE */}
+                                                <div className="pt-6 border-t border-slate-200 dark:border-white/10">
+                                                    <h3 className="text-xs font-bold uppercase text-red-500 tracking-widest mb-3">Danger Zone</h3>
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        className="w-full border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400"
+                                                        onClick={handleEmptyJar}
+                                                    >
+                                                        {labels.emptyJarAction}
+                                                    </Button>
+                                                    <p className="text-[10px] text-slate-400 mt-2 text-center">Irreversible. Deletes all ideas.</p>
+                                                </div>
+                                            </motion.div>
+                                        )}
 
-                                    <div className="pt-4 sticky bottom-0 bg-white/0 backdrop-blur-md pb-4 -mx-6 px-6 border-t border-transparent">
-                                        <Button type="submit" className="w-full shadow-lg" isLoading={isLoading}>
-                                            Save Changes
-                                        </Button>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
+
+                                <div className="p-6 border-t border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-lg shrink-0 z-10">
+                                    <Button type="submit" className="w-full shadow-xl shadow-primary/10 py-6 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:opacity-90" isLoading={isLoading}>
+                                        Save Changes
+                                    </Button>
+                                    <p className="text-[10px] text-center text-slate-400 dark:text-slate-500 mt-3 font-medium tracking-wide uppercase">
+                                        All changes are synced across devices
+                                    </p>
+                                </div>
+                            </form>
                         </motion.div>
                     </div>
                 )}

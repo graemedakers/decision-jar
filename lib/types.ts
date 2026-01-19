@@ -63,7 +63,7 @@ export interface UserData {
     jarType?: 'ROMANTIC' | 'SOCIAL';
     jarName?: string;
     jarTopic?: string;
-    jarSelectionMode?: 'RANDOM' | 'ADMIN_PICK' | 'VOTING' | 'ALLOCATION';
+    jarSelectionMode?: 'RANDOM' | 'ADMIN_PICK' | 'VOTE' | 'ALLOCATION';
     isCreator?: boolean;
 
     // Partner/Social
@@ -87,7 +87,7 @@ export interface Jar {
     name: string;
     topic: string;
     type: 'ROMANTIC' | 'SOCIAL';
-    selectionMode: 'RANDOM' | 'ADMIN_PICK' | 'VOTING' | 'ALLOCATION';
+    selectionMode: 'RANDOM' | 'ADMIN_PICK' | 'VOTE' | 'ALLOCATION';
     ownerId: string;
     members?: any[];
     ideas?: Idea[];
@@ -102,7 +102,7 @@ export const JAR_TYPES = {
 export const SELECTION_MODES = {
     RANDOM: 'RANDOM',
     ADMIN_PICK: 'ADMIN_PICK',
-    VOTING: 'VOTING',
+    VOTING: 'VOTE',
     ALLOCATION: 'ALLOCATION'
 } as const;
 

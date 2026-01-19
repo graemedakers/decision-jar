@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { name, type, selectionMode, topic, customCategories } = body;
+        const { name, type, selectionMode, topic, customCategories, voteCandidatesCount } = body;
 
         if (!name) return new NextResponse("Name is required", { status: 400 });
 
@@ -72,7 +72,8 @@ export async function POST(req: Request) {
             data: {
                 name,
                 type: type || 'SOCIAL', // Default
-                selectionMode: selectionMode === 'VOTING' ? 'VOTE' : (selectionMode || 'RANDOM'), // Map VOTING to VOTE
+                selectionMode: selectionMode || 'RANDOM',
+                voteCandidatesCount: voteCandidatesCount ? Number(voteCandidatesCount) : 0,
                 topic: topic || 'General',
                 customCategories: customCategories ? customCategories : undefined,
                 referenceCode: code,

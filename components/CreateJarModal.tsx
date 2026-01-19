@@ -31,6 +31,7 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
     const [name, setName] = useState("");
     const [topic, setTopic] = useState("Activities");
     const [selectionMode, setSelectionMode] = useState<string>("RANDOM");
+    const [voteCandidates, setVoteCandidates] = useState(0);
 
     const [customTopicName, setCustomTopicName] = useState("");
     const [customCategories, setCustomCategories] = useState(["", "", ""]);
@@ -46,7 +47,9 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
             setError(null);
             setName("");
             setCustomTopicName("");
+            setCustomTopicName("");
             setCustomCategories(["", "", ""]);
+            setVoteCandidates(0);
         }
     }, [isOpen]);
 
@@ -98,7 +101,7 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
             const res = await fetch('/api/jars', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, type: inferredType, topic: finalTopic, customCategories: finalCustomCategories, selectionMode }),
+                body: JSON.stringify({ name, type: inferredType, topic: finalTopic, customCategories: finalCustomCategories, selectionMode, voteCandidatesCount: voteCandidates }),
             });
 
             if (res.ok) {
@@ -223,7 +226,7 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
                             >
                                 <option value="RANDOM">🎲 Spin (Lucky Dip) - Random surprise</option>
                                 <option value="ADMIN_PICK">👤 Admin Pick (Curated) - You choose what's next</option>
-                                <option value="VOTING">🗳️ Vote (Consensus) - Group decides together</option>
+                                <option value="VOTE">🗳️ Vote (Consensus) - Group decides together</option>
                                 <option value="ALLOCATION">📋 Allocation (Tasks) - Assign to team members</option>
                             </select>
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
@@ -231,6 +234,31 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
                             </div>
                         </div>
                     </div>
+
+                    {selectionMode === 'VOTE' && (
+                        <div className="space-y-2 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Runoff Candidates (Optional)</Label>
+                            <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="20"
+                                        value={voteCandidates}
+                                        onChange={(e) => setVoteCandidates(parseInt(e.target.value) || 0)}
+                                        className="w-20 bg-white dark:bg-black/20 h-9"
+                                    />
+                                    <div className="text-xs text-slate-500">
+                                        {voteCandidates === 0 ? (
+                                            <span>Include <strong>ALL ideas</strong> in vote</span>
+                                        ) : (
+                                            <span>Pick <strong>{voteCandidates} random</strong> ideas for runoff</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="space-y-2">
                         <Label htmlFor="create-jar-topic" className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
@@ -310,7 +338,7 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
                         </div>
                     )}
                 </form>
-            </DialogContent>
+            </DialogContent >
 
             <DialogFooter className="bg-slate-50 dark:bg-black/20">
                 <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} className="font-bold">
@@ -326,6 +354,6 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
                     Create Jar
                 </Button>
             </DialogFooter>
-        </Dialog>
+        </Dialog >
     );
 }

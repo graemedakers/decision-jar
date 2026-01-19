@@ -104,8 +104,8 @@ const ADMIN_PICK_MODE_STEP: OnboardingStep = {
 
 const VOTING_MODE_STEP: OnboardingStep = {
     id: 'voting',
-    title: '🗳️ Voting Mode',
-    description: 'Everyone in your jar can vote on ideas! Start a voting round to let the group decide together what to do next.',
+    title: '🗳️ Voting Mode (Squad Mode)',
+    description: 'Let the group decide! Start a session with a shortlist of ideas. Everyone votes in real-time, and winners are broadcasted instantly to all screens. Plus, you can\'t vote for your own ideas – keeps it fair!',
     targetElement: '[data-tour="admin-controls"], [data-tour="voting-button"]',
     position: 'top'
 };
@@ -137,7 +137,7 @@ export function getOnboardingSteps(mode?: string): OnboardingStep[] {
         case 'ADMIN_PICK':
             modeStep = ADMIN_PICK_MODE_STEP;
             break;
-        case 'VOTING':
+        case 'VOTE':
             modeStep = VOTING_MODE_STEP;
             break;
         case 'ALLOCATION':

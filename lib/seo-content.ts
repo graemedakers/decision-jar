@@ -37,7 +37,11 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 question: "Why is it so hard to make decisions with friends?",
-                answer: "Decision fatigue and the 'Paradox of Choice' often lead to groups never meeting. Structured random selection or voting sessions solve this instantly."
+                answer: "Decision fatigue and the 'Paradox of Choice' often lead to groups never meeting. Structured voting sessions solve this by filtering ideas through the group's real-time consensus."
+            },
+            {
+                question: "What happens if we can't agree?",
+                answer: "The Voting Mode includes built-in tie-breaking logic. If a clear winner isn't found, the system can automatically pick a random winner from the top choices or start an immediate runoff round."
             }
         ],
         sections: [
@@ -81,7 +85,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 title: "Outsourcing the 'What's Next?'",
-                content: "Using an Allocation Mode or Random Spin allows you to offload the decision-making process. It’s the difference between asking 'What do you want to do?' and having the Jar say 'Tonight is Jazz & Sushi night.' One requires effort; the other provides excitement."
+                content: "Using an Allocation Mode or Random Spin allows you to offload the decision-making process. For larger groups, Voting Mode turns personal preferences into a collective choice instantly. It’s the difference between asking 'What do you want to do?' and having the Jar say 'Tonight is Jazz & Sushi night.' One requires effort; the other provides excitement."
             }
         ]
     },
@@ -387,7 +391,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 title: "Solution: The 4 Essential Jars",
-                content: "To regain balance, we recommend creating four distinct Jars, each with a specific emotional purpose:\n\n1. **The Romantic Jar (Couples)**: This is sacred ground. It only contains fun, connecting activities. No chores, no 'taxes,' no obligations. When you open this jar, you know you are choosing joy.\n\n2. **The Admin Jar (Household)**: This is for the business of life. Use 'Allocation Mode' here to fairly distribute chores like 'Clean the Kitchen' or 'Pay Bills.' It keeps the necessary work visible but contained.\n\n3. **The Solo Jar (Self)**: Often neglected, this jar is for YOU. Fill it with books you want to read, hobbies you want to practice, or self-care rituals. It's a reminder that you are an individual outside of your relationships.\n\n4. **The Social Jar (Community)**: For your wider circle. Use this for 'Board Game Nights,' 'Bar Crawls,' or 'Group Hikes.' Share the invite link with your friends so they can add ideas too."
+                content: "To regain balance, we recommend creating four distinct Jars, each with a specific emotional purpose:\n\n1. **The Romantic Jar (Couples)**: This is sacred ground. It only contains fun, connecting activities. No chores, no 'taxes,' no obligations. When you open this jar, you know you are choosing joy.\n\n2. **The Admin Jar (Household)**: This is for the business of life. Use 'Allocation Mode' here to fairly distribute chores like 'Clean the Kitchen' or 'Pay Bills.' It keeps the necessary work visible but contained.\n\n3. **The Solo Jar (Self)**: Often neglected, this jar is for YOU. Fill it with books you want to read, hobbies you want to practice, or self-care rituals. It's a reminder that you are an individual outside of your relationships.\n\n4. **The Social Jar (Community)**: For your wider circle. Use this for 'Board Game Nights,' 'Bar Crawls,' or 'Group Hikes.' Share the invite link with your friends so they can add ideas too. When indecision strikes, use **Voting Mode** to let the squad pick the next activity democratically."
             },
             {
                 title: "Advanced Strategy: The Sunday Workflow",
@@ -568,6 +572,44 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             {
                 title: "Privacy & Control",
                 content: "Your privacy matters. Notifications are opt-in only—we never enable them without your permission. You can disable notifications anytime in Settings. We don't track your location through notifications. Notification data is encrypted and never shared with third parties. You're always in control of your notification preferences."
+            }
+        ]
+    },
+    {
+        slug: "group-decision-making-consensus",
+        category: "Social",
+        title: "The Consensus Engine: Solving Group Indecision Forever",
+        description: "How Voting Mode and Squad Dynamics turn the 'Where should we go?' argument into an instant win.",
+        icon: Users,
+        readTime: "6 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Group Decision Making and Consensus with Decision Jar",
+            "description": "A guide on using collaborative tools and voting sessions to reach faster group decisions."
+        },
+        faqs: [
+            {
+                question: "How does Voting Mode work for groups?",
+                answer: "An admin starts a session with a shortlist of ideas. Everyone gets a notification and can vote on their own device. The system combines the results and reveals the winner to everyone at once."
+            },
+            {
+                question: "What if someone isn't eligible to vote?",
+                answer: "To keep things fair, the system prevents users from voting for their own ideas. If a round only contains your ideas, you'll be moved to the 'Sidelines' where you can watch the results come in live."
+            }
+        ],
+        sections: [
+            {
+                title: "The Tyranny of 'I Don't Care'",
+                content: "In every group, decision-making often falls into a trap where everyone politely defers to everyone else. This performance of politeness actually increases the mental load for everyone involved. Voting Mode cuts through this by providing a private, low-friction way for everyone to voice their true preference."
+            },
+            {
+                title: "Real-Time Squad Sync",
+                content: "Old-school methods like group texts lead to 'fragmented consensus' where bits of the decision are scattered across dozens of messages. Decision Jar uses a real-time broadcast engine that keeps everyone's screen in sync. When the final vote is cast, the 'Winner Reveal' pops up for every member simultaneously, creating a moment of shared excitement instead of a chore."
+            },
+            {
+                title: "Handling Tie-Breakers & Edge Cases",
+                content: "What happens if the group is perfectly split? Decision Jar's consensus engine handles ties intelligently. Depending on your jar's settings, it will either flip a digital coin between the top winners or trigger an immediate 'Runoff Round' to narrow the focus until a winner emerges."
             }
         ]
     }

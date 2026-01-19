@@ -55,7 +55,7 @@ export function JarQuickStartModal({ isOpen, onClose, jarId, jarName, jarTopic }
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-lg bg-white dark:bg-slate-900">
-                <DialogHeader>
+                <DialogHeader onClose={onClose}>
                     <DialogTitle className="text-2xl font-bold text-center mb-2">
                         🎉 Your "{jarName}" jar is ready!
                     </DialogTitle>

@@ -1,5 +1,5 @@
 # Unimplemented Improvements & Future Vision
-**Last Updated:** January 18, 2026
+**Last Updated:** January 19, 2026
 
 This document serves as a consolidated master list of features, technical debt, and strategic opportunities identified during architectural reviews but **not yet implemented**. It is intended to guide future agents and developers in prioritizing roadmap items.
 
@@ -22,7 +22,7 @@ This document serves as a consolidated master list of features, technical debt, 
 
 *   **Consensus Tools**:
     *   **Veto Power**: Limited "Veto" cards for members to force a re-spin on results they dislike.
-    *   **Runoff Voting**: A spin mode that picks 3 candidates and allows the group to vote on the final winner.
+    *   ~~**Runoff Voting**: A spin mode that picks 3 candidates and allows the group to vote on the final winner.~~ ✅ **COMPLETED** (Jan 19, 2026)
     *   **Host's Choice**: Spin 3 options, but leave the final decision to the Jar Admin.
 *   **Logistics & Planning**:
     *   **Availability Heatmap**: Sync (Google/Apple) calendars to visually show when most members are free.
@@ -52,9 +52,9 @@ This document serves as a consolidated master list of features, technical debt, 
     *   ~~**Contextual Trial Status**: "X days left" badges inside Concierge tool headers.~~ ✅ **COMPLETED** (Jan 18, 2026)
 *   **Email Lifecycle Automation**: (Requires Postmark/Resend/SendGrid)
     *   Nurture sequence for trial users (Welcome -> Halfway -> Expiry Warning -> Special Offer).
-*   **Admin Control (Phase 9.4)**:
-    *   Full UI for Managing Premium Gifting Links.
-    *   Token revocation and usage auditing dashboard.
+*   ~~**Admin Control (Phase 9.4)**:~~
+    *   ~~Full UI for Managing Premium Gifting Links.~~
+    *   ~~Token revocation and usage auditing dashboard.~~ ✅ **COMPLETED** (Jan 19, 2026)
 *   **Dynamic PWA Personalization**: Server-generated manifests to allow Pro users to choose custom app icons or home screen shortcuts.
 
 ---

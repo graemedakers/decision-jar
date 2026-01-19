@@ -135,7 +135,7 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
         const membership = await prisma.jarMember.findUnique({
             where: { userId_jarId: { userId: session.user.id, jarId: currentJarId } }
         });
-        const isAdmin = membership?.role === 'ADMIN';
+        const isAdmin = membership?.role === 'ADMIN' || membership?.role === 'OWNER';
 
         revalidatePath('/dashboard');
         revalidatePath('/jar');

@@ -190,14 +190,15 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                 <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
                                     <strong>How it works:</strong>
                                 </p>
-                                <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300 ml-2">
-                                    <li>Admin creates a vote session with selected ideas</li>
-                                    <li>All members receive notification to vote</li>
-                                    <li>Each member ranks their preferences</li>
-                                    <li>System tallies votes and announces the winner</li>
-                                </ol>
-                                <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">
-                                    Great for settling "where should we eat?" debates democratically!
+                                <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300 ml-2">
+                                    <li><strong>Shortlist:</strong> Admin starts a vote session with up to 5 random ideas (configurable in Jar Settings).</li>
+                                    <li><strong>Cast Vote:</strong> Everyone votes on their favorite. For fairness, you cannot vote for ideas you suggested!</li>
+                                    <li><strong>Sidelines:</strong> If a round only has your ideas, you'll be placed on the sidelines to watch the live progress.</li>
+                                    <li><strong>Instant Reveal:</strong> Once the final vote is cast, the winner's card pops up for everyone simultaneously.</li>
+                                    <li><strong>Settling Ties:</strong> If votes are split, the system will trigger a Random Tie-break or a new Runoff Round.</li>
+                                </ul>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">
+                                    🎉 Featuring <strong>Real-time Broadcast</strong> sync! No page reloads required.
                                 </p>
                             </div>
 

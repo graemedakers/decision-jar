@@ -42,7 +42,7 @@ export async function GET(
             });
             if (member) {
                 membershipStatus = member.status;
-                isAdmin = member.role === 'ADMIN';
+                isAdmin = member.role === 'ADMIN' || member.role === 'OWNER';
             }
         }
 

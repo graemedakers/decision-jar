@@ -73,11 +73,11 @@ export async function deleteUserCompletely(prisma: any, userId: string) {
         const adminCount = await prisma.jarMember.count({
             where: {
                 jarId: jar.id,
-                role: 'ADMIN'
+                role: { in: ['ADMIN', 'OWNER'] }
             }
         });
 
-        if (adminCount === 1 && membership.role === 'ADMIN') {
+        if (adminCount === 1 && (membership.role === 'ADMIN' || membership.role === 'OWNER')) {
             // User is the only admin, delete the entire jar
 
             // Delete unlocked achievements (foreign key)

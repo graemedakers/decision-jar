@@ -95,7 +95,7 @@ export async function POST(request: Request) {
                 try {
                     // Send push notifications to other jar members (not the person who picked)
                     const members = await prisma.jarMember.findMany({
-                        where: { 
+                        where: {
                             jarId: currentJarId,
                             userId: { not: session.user.id } // Exclude the person who picked
                         },
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
                     });
 
                     // Send push notification to each member
-                    const notificationPromises = members.map(member => 
+                    const notificationPromises = members.map(member =>
                         sendPushNotification(member.userId, {
                             title: `🎯 New pick: "${selectedIdea.description}"`,
                             body: `${session.user.name || 'Someone'} selected this from your jar!`,
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
         const membership = await prisma.jarMember.findUnique({
             where: { userId_jarId: { userId: session.user.id, jarId: currentJarId } }
         });
-        const isAdmin = membership?.role === 'ADMIN';
+        const isAdmin = membership?.role === 'ADMIN' || membership?.role === 'OWNER';
 
         return NextResponse.json({
             ...selectedIdea,

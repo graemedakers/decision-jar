@@ -468,7 +468,7 @@ export function SignupForm() {
                                         defaultValue="RANDOM"
                                     >
                                         <option value="RANDOM">Random Spin (Classic)</option>
-                                        <option value="VOTING">Voting Session</option>
+                                        <option value="VOTE">Voting Session</option>
                                         <option value="ALLOCATION">Task Allocation (System)</option>
                                     </select>
                                 </div>

@@ -56,8 +56,8 @@ export async function POST(request: Request) {
             }
 
             const modeInput = selectionMode as string;
-            const validSelectionMode = (modeInput === 'VOTING' || modeInput === 'VOTE' || modeInput === 'ALLOCATION')
-                ? (modeInput === 'VOTING' ? 'VOTE' : modeInput)
+            const validSelectionMode = (modeInput === 'VOTE' || modeInput === 'ALLOCATION' || modeInput === 'ADMIN_PICK' || modeInput === 'WHEEL')
+                ? modeInput
                 : 'RANDOM';
 
             // Auto-infer type from topic

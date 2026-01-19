@@ -170,7 +170,16 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'You are not a member of this jar' }, { status: 403 });
         }
 
-        const isAdmin = membership.role === 'ADMIN';
+        const isAdmin = membership.role === 'ADMIN' || membership.role === 'OWNER';
+
+        // Check for active voting session to potentially reveal secret ideas
+        const activeVoteSession = await prisma.voteSession.findFirst({
+            where: {
+                jarId: currentJarId,
+                status: 'ACTIVE'
+            }
+        });
+        const isVoteActive = !!activeVoteSession;
 
         // Use standard Prisma findMany with relations
         const ideas = await prisma.idea.findMany({
@@ -215,9 +224,9 @@ export async function GET(request: Request) {
                 createdBy: idea.createdBy // Kept as object
             };
 
-            // Apply Masking Logic (Skip for Admin in Admin Pick Mode)
+            // Apply Masking Logic (Skip for Admin in Admin Pick Mode OR during an active Vote)
             const isAdminPick = idea.jar.selectionMode === 'ADMIN_PICK';
-            if (!isSelected && !isMyIdea && !(isAdmin && isAdminPick)) {
+            if (!isSelected && !isMyIdea && !(isAdmin && isAdminPick) && !isVoteActive) {
                 // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
                 if (isVotingJar && (isSurprise || isPrivate)) {
                     processedIdea = {

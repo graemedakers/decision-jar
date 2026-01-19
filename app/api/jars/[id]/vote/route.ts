@@ -3,6 +3,8 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { notifyJarMembers } from '@/lib/notifications';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -28,14 +30,14 @@ export async function POST(
     try {
         switch (action) {
             case 'START':
-                return handleStartVote(jarId, session.user.id, json, membership.role === 'ADMIN');
+                return handleStartVote(jarId, session.user.id, json, membership.role === 'ADMIN' || membership.role === 'OWNER');
             case 'CAST':
                 return handleCastVote(jarId, session.user.id, json);
             case 'CANCEL':
-                if (membership.role !== 'ADMIN') return NextResponse.json({ error: "Admin only" }, { status: 403 });
+                if (membership.role !== 'ADMIN' && membership.role !== 'OWNER') return NextResponse.json({ error: "Admin only" }, { status: 403 });
                 return handleCancelVote(jarId);
             case 'EXTEND':
-                if (membership.role !== 'ADMIN') return NextResponse.json({ error: "Admin only" }, { status: 403 });
+                if (membership.role !== 'ADMIN' && membership.role !== 'OWNER') return NextResponse.json({ error: "Admin only" }, { status: 403 });
                 return handleExtendVote(jarId);
             case 'RESOLVE':
                 // Usually triggered automatically or by admin if stuck
@@ -52,7 +54,16 @@ export async function POST(
 async function handleStartVote(jarId: string, initiatorId: string, data: any, isAdmin: boolean) {
     if (!isAdmin) return NextResponse.json({ error: "Admin only" }, { status: 403 });
 
-    const { tieBreakerMode, timeLimitMinutes, mandatory } = data; // mandatory not fully used in logic yet but stored? Schema doesn't have it.
+    // Fetch Jar Settings
+    const jar = await prisma.jar.findUnique({
+        where: { id: jarId },
+        include: { ideas: { where: { status: 'APPROVED', selectedAt: null } } }
+    });
+
+    if (!jar) return NextResponse.json({ error: "Jar not found" }, { status: 404 });
+    if (jar.ideas.length === 0) return NextResponse.json({ error: "Jar is empty! Add ideas first." }, { status: 400 });
+
+    const { tieBreakerMode, timeLimitMinutes } = data;
 
     // Check if active session exists
     const active = await prisma.voteSession.findFirst({
@@ -63,8 +74,21 @@ async function handleStartVote(jarId: string, initiatorId: string, data: any, is
         return NextResponse.json({ error: "A vote is already in progress" }, { status: 400 });
     }
 
-    // Default 24 hours if no time limit? Or infinite?
-    // User requested "Time limit for users to cast their votes can be set".
+    // Determine eligible ideas (Runoff / Shortlist Logic)
+    let eligibleIdeaIds: string[] = [];
+    const candidatesCount = (jar as any).voteCandidatesCount || 0;
+
+    if (candidatesCount > 0) {
+        // Shuffle ideas
+        const shuffled = [...jar.ideas].sort(() => 0.5 - Math.random());
+        // Take a random subset of size candidatesCount
+        const count = Math.min(candidatesCount, jar.ideas.length);
+        eligibleIdeaIds = shuffled.slice(0, count).map(i => i.id);
+    } else {
+        // Default: All ideas are eligible
+        eligibleIdeaIds = jar.ideas.map(i => i.id);
+    }
+
     let endTime = null;
     if (timeLimitMinutes) {
         endTime = new Date(Date.now() + timeLimitMinutes * 60000);
@@ -76,7 +100,7 @@ async function handleStartVote(jarId: string, initiatorId: string, data: any, is
             status: 'ACTIVE', // @ts-ignore
             tieBreakerMode: tieBreakerMode || 'RANDOM_PICK',
             endTime,
-            // round: 1
+            eligibleIdeaIds
         }
     });
 
@@ -142,6 +166,19 @@ async function handleCastVote(jarId: string, userId: string, data: any) {
             ideaId
         }
     });
+
+    // Auto-resolve if everyone has voted
+    const totalMembers = await prisma.jarMember.count({
+        where: { jarId, status: 'ACTIVE' }
+    });
+    const currentVotes = await prisma.vote.count({
+        where: { sessionId: session.id }
+    });
+
+    if (currentVotes >= totalMembers) {
+        console.log(`[API Vote] Auto-resolving session ${session.id}`);
+        await handleResolveVote(jarId);
+    }
 
     return NextResponse.json({ success: true });
 }
@@ -313,7 +350,11 @@ export async function GET(
 
         // Get Jar Name and Admin Name for "Waiting" screen
         const adminMember = await prisma.jarMember.findFirst({
-            where: { jarId, role: 'ADMIN' },
+            where: {
+                jarId,
+                role: { in: ['ADMIN', 'OWNER'] }
+            },
+            orderBy: { joinedAt: 'asc' }, // Owner usually created first
             include: { user: true }
         });
 
@@ -329,15 +370,41 @@ export async function GET(
 
     // Admin info: who hasn't voted
     // Need list of all jar members
+    // 1. Identify which ideas are in play for this round
+    const poolIdeaIds = activeSession.eligibleIdeaIds || (await prisma.idea.findMany({
+        where: { jarId, status: 'APPROVED', selectedAt: null },
+        select: { id: true }
+    })).map(i => i.id);
+
+    const poolIdeas = await prisma.idea.findMany({
+        where: { id: { in: poolIdeaIds } },
+        select: { createdById: true }
+    });
+
+    // 2. Identify all voters and their eligibility
     const allMembers = await prisma.jarMember.findMany({
         where: { jarId },
         include: { user: true }
     });
 
+    const eligibleVoterIds = allMembers
+        .filter(m => poolIdeas.some(idea => idea.createdById !== m.userId))
+        .map(m => m.userId);
+
     const votedUserIds = new Set(activeSession.votes.map(v => v.userId));
     const pendingVoters = allMembers
-        .filter(m => !votedUserIds.has(m.userId))
+        .filter(m => eligibleVoterIds.includes(m.userId) && !votedUserIds.has(m.userId))
         .map(m => ({ id: m.userId, name: m.user.name }));
+
+    const isEligible = poolIdeas.some(i => i.createdById !== userId);
+
+    // Calculate total eligible voters for the progress bar
+    let totalEligibleVoters = 0;
+    for (const member of allMembers) {
+        if (poolIdeas.some(idea => idea.createdById !== member.userId)) {
+            totalEligibleVoters++;
+        }
+    }
 
     return NextResponse.json({
         active: true,
@@ -349,8 +416,9 @@ export async function GET(
             eligibleIdeaIds: activeSession.eligibleIdeaIds,
         },
         hasVoted,
+        isEligible,
         votesCast: activeSession.votes.length,
-        totalMembers: allMembers.length,
-        pendingVoters // Frontend should only show this if isAdmin (handled in UI, or filter here if strict)
+        totalMembers: totalEligibleVoters || allMembers.length,
+        pendingVoters
     });
 }

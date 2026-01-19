@@ -138,7 +138,7 @@ export async function updateIdea(id: string, data: any): Promise<ActionResponse<
     const membership = await prisma.jarMember.findUnique({
         where: { userId_jarId: { userId: session.user.id, jarId: idea.jarId! } }
     });
-    const isAdmin = membership?.role === 'ADMIN';
+    const isAdmin = membership?.role === 'ADMIN' || membership?.role === 'OWNER';
     if (idea.createdById !== session.user.id && !isAdmin) {
         return { success: false, error: 'Forbidden', status: 403 };
     }
@@ -183,7 +183,7 @@ export async function deleteIdea(id: string): Promise<ActionResponse> {
     const membership = await prisma.jarMember.findUnique({
         where: { userId_jarId: { userId: session.user.id, jarId: idea.jarId! } }
     });
-    const isAdmin = membership?.role === 'ADMIN';
+    const isAdmin = membership?.role === 'ADMIN' || membership?.role === 'OWNER';
     if (idea.createdById !== session.user.id && !isAdmin) {
         return { success: false, error: 'Forbidden', status: 403 };
     }

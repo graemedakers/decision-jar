@@ -503,9 +503,19 @@ function DashboardContent() {
                                     </div>
                                 </motion.div>
 
-                                {/* Main Spin Action */}
-                                {!isVotingMode && !isAdminPickMode && (
-                                    <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
+                                {isVotingMode && userData ? (
+                                    <div className="w-full max-w-2xl animate-in zoom-in-95 duration-500 mb-8">
+                                        <VotingManager
+                                            jarId={userData.activeJarId || ''}
+                                            userId={userData.id}
+                                            isAdmin={!!userData.isCreator}
+                                            onVoteComplete={handleContentUpdate}
+                                            onAddIdea={() => openModal('ADD_IDEA')}
+                                            voteCandidatesCount={userData.jarVoteCandidatesCount}
+                                        />
+                                    </div>
+                                ) : !isAdminPickMode && (
+                                    <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300 mb-8">
                                         <Button
                                             size="lg"
                                             className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
@@ -534,35 +544,21 @@ function DashboardContent() {
                                     </div>
                                 )}
 
-                                {!isVotingMode && (
-                                    <div className="mt-8 w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col items-center gap-6">
-                                        <SmartInputBar />
+                                <div className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col items-center gap-6">
+                                    <SmartInputBar />
 
-                                        <div className="w-full">
-                                            <UnifiedConciergeButton isPremium={isPremium} />
-                                        </div>
-
-                                        <button
-                                            onClick={() => openModal('TOOLS')}
-                                            className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 py-2"
-                                        >
-                                            <Dices className="w-3.5 h-3.5" />
-                                            View all AI concierge tools
-                                        </button>
+                                    <div className="w-full">
+                                        <UnifiedConciergeButton isPremium={isPremium} />
                                     </div>
-                                )}
 
-                                {isVotingMode && userData && (
-                                    <div className="w-full max-w-2xl animate-in zoom-in-95 duration-500">
-                                        <VotingManager
-                                            jarId={userData.activeJarId || ''}
-                                            userId={userData.id}
-                                            isAdmin={userData.memberships?.[0]?.role === 'ADMIN'}
-                                            onVoteComplete={handleContentUpdate}
-                                            onAddIdea={() => openModal('ADD_IDEA')}
-                                        />
-                                    </div>
-                                )}
+                                    <button
+                                        onClick={() => openModal('TOOLS')}
+                                        className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 py-2"
+                                    >
+                                        <Dices className="w-3.5 h-3.5" />
+                                        View all AI concierge tools
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

@@ -28,14 +28,17 @@ export function useSquadMode(
             .on('broadcast', { event: 'spin-start' }, () => {
                 logger.info('Squad: Received spin-start');
                 if (onSpinStartRef.current) onSpinStartRef.current();
+                window.dispatchEvent(new CustomEvent('decision-jar:refresh-all'));
             })
             .on('broadcast', { event: 'spin-result' }, (payload) => {
                 logger.info('Squad: Received spin-result', payload);
                 if (onSpinResultRef.current) onSpinResultRef.current(payload.payload.idea);
+                window.dispatchEvent(new CustomEvent('decision-jar:refresh-all'));
             })
             .on('broadcast', { event: 'content-update' }, () => {
                 logger.info('Squad: Received content-update');
                 if (onContentUpdateRef.current) onContentUpdateRef.current();
+                window.dispatchEvent(new CustomEvent('decision-jar:refresh-all'));
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') setIsConnected(true);

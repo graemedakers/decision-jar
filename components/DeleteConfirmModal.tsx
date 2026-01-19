@@ -15,7 +15,7 @@ export function DeleteConfirmModal({ isOpen, onClose, onConfirm, title = "Delete
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md bg-slate-900 border-slate-800 text-white">
-                <DialogHeader>
+                <DialogHeader onClose={onClose}>
                     <DialogTitle className="flex items-center gap-2 text-xl text-red-400">
                         <Trash2 className="w-5 h-5" />
                         {title}

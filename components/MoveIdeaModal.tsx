@@ -61,16 +61,7 @@ export function MoveIdeaModal({ isOpen, onClose, idea, availableJars, onMoveComp
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-4 top-4 w-8 h-8 p-0 text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10"
-                    onClick={onClose}
-                >
-                    <X className="w-4 h-4" />
-                </Button>
-
-                <DialogHeader>
+                <DialogHeader onClose={onClose}>
                     <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">Move Idea</DialogTitle>
                 </DialogHeader>
 
