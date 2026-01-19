@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -90,6 +91,7 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
+    const router = useRouter();
     const {
         // State
         userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
@@ -486,7 +488,11 @@ function DashboardContent() {
                                     className="relative mb-8 md:mb-12"
                                     data-tour="jar-visual"
                                 >
-                                    <div className="scale-110 md:scale-[1.35] transform transition-transform duration-700 ease-out">
+                                    <div
+                                        onClick={() => router.push('/jar')}
+                                        className={`scale-110 md:scale-[1.35] transform transition-transform duration-700 ease-out cursor-pointer hover:scale-[1.2] md:hover:scale-[1.45] active:scale-105 md:active:scale-[1.3]`}
+                                        title="View Ideas in Jar"
+                                    >
                                         <Jar3D />
                                     </div>
 
