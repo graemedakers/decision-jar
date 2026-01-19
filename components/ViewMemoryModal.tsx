@@ -139,26 +139,48 @@ export function ViewMemoryModal({ isOpen, onClose, idea, topic }: ViewMemoryModa
                     </div>
                 </div>
 
-                {idea.photoUrls && idea.photoUrls.length > 0 ? (
-                    <div className="w-full bg-black/50 border-b border-white/10 overflow-x-auto flex snap-x snap-mandatory">
-                        <div className="flex h-80">
-                            {idea.photoUrls.map((url: string, i: number) => (
-                                <div key={i} className="min-w-[80%] md:min-w-[60%] h-full shrink-0 snap-center relative border-r border-white/10 bg-black first:pl-0">
-                                    <img
-                                        src={url}
-                                        alt={`Memory ${i}`}
-                                        className="w-full h-full object-cover"
-                                    />
+                {(() => {
+                    // Filter out empty or invalid photo URLs
+                    const validPhotoUrls = idea.photoUrls?.filter((url: string) => url && url.trim() !== '') || [];
+
+                    if (validPhotoUrls.length > 0) {
+                        return (
+                            <div className="w-full bg-black/50 border-b border-white/10 overflow-x-auto flex snap-x snap-mandatory">
+                                <div className="flex h-80">
+                                    {validPhotoUrls.map((url: string, i: number) => (
+                                        <div key={i} className="min-w-[80%] md:min-w-[60%] h-full shrink-0 snap-center relative border-r border-white/10 bg-black first:pl-0">
+                                            <img
+                                                src={url}
+                                                alt={`Memory ${i + 1}`}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    console.error('Failed to load image:', url);
+                                                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23334155" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" fill="%23cbd5e1" text-anchor="middle" dy=".3em" font-family="Arial"%3EImage Error%3C/text%3E%3C/svg%3E';
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                ) : idea.photoUrl ? (
-                    // Fallback for old data
-                    <div className="w-full h-64 md:h-80 relative bg-black border-b border-white/10">
-                        <img src={idea.photoUrl} alt="Memory" className="w-full h-full object-cover" />
-                    </div>
-                ) : null}
+                            </div>
+                        );
+                    } else if (idea.photoUrl) {
+                        // Fallback for old single photoUrl format
+                        return (
+                            <div className="w-full h-64 md:h-80 relative bg-black border-b border-white/10">
+                                <img
+                                    src={idea.photoUrl}
+                                    alt="Memory"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        console.error('Failed to load image:', idea.photoUrl);
+                                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23334155" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" fill="%23cbd5e1" text-anchor="middle" dy=".3em" font-family="Arial"%3EImage Error%3C/text%3E%3C/svg%3E';
+                                    }}
+                                />
+                            </div>
+                        );
+                    }
+                    return null;
+                })()}
 
                 <div className="p-6 space-y-6 w-full">
                     {/* Dining Details Section - Consistent with DateReveal */}
