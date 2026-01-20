@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "google-site-verification-id", // TODO: Add your Google Site Verification ID
+    // google: "google-site-verification-id", // TODO: Add your Google Site Verification ID
   },
   openGraph: {
     type: "website",

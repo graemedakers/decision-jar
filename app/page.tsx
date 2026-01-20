@@ -139,7 +139,46 @@ export default function Home() {
     : '4.9';
   const ratingCount = reviews.length > 0 ? reviews.length.toString() : '120';
 
-  const jsonLd = {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com';
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Decision Jar",
+    "url": baseUrl,
+    "logo": `${baseUrl}/icon-512.png`,
+    "description": "AI-powered collective decision maker for dating and group activities.",
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Decision Jar",
+    "url": baseUrl,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${baseUrl}/explore?q={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": baseUrl
+      }
+    ]
+  };
+
+  const softwareSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Decision Jar',
@@ -150,7 +189,7 @@ export default function Home() {
       price: '0',
       priceCurrency: PRICING.CURRENCY,
     },
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com',
+    url: baseUrl,
     description: 'A fun, interactive way for couples and friends to decide on their next date or hangout.',
     aggregateRating: {
       '@type': 'AggregateRating',
@@ -160,7 +199,7 @@ export default function Home() {
     featureList: 'AI Date Planner, Group Decision Making, Shared Jars, Random Activity Picker, Weekend Itinerary Builder, Restaurant Finder, Event Scout',
     applicationSubCategory: 'Social Networking',
     permissions: 'internet',
-    screenshot: `${process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'}/og-image.jpg`,
+    screenshot: `${baseUrl}/opengraph-image.png`,
     availableOnDevice: ['iOS', 'Android', 'Desktop'],
     mainEntity: {
       '@type': 'FAQPage',
@@ -221,7 +260,19 @@ export default function Home() {
     <main ref={containerRef} className="min-h-screen relative overflow-hidden bg-background w-full">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
 
       {/* ... existing background ... */}
