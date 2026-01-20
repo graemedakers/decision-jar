@@ -1,7 +1,9 @@
 
+
 import { useState, useRef } from "react";
 import { SoundEffects, triggerHaptic } from "@/lib/feedback";
 import { spinJar } from "@/app/actions/spin";
+import { unselectIdea } from "@/app/actions/unselect";
 import { showError } from "@/lib/toast";
 import { Idea } from "@/lib/types";
 import { useModalSystem } from "@/components/ModalProvider";
@@ -16,6 +18,8 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
     const [isSpinning, setIsSpinning] = useState(false);
     const { openModal, activeModal } = useModalSystem();
     const tickLoopRef = useRef<NodeJS.Timeout | null>(null);
+
+    const [skippedIds, setSkippedIds] = useState<string[]>([]);
 
     const startSpinAnimation = () => {
         setIsSpinning(true);
@@ -38,6 +42,26 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
         setIsSpinning(false);
         triggerHaptic([50, 50, 50]);
         SoundEffects.playFanfare();
+    };
+
+    /**
+     * Skip an idea and block it from future spins this session.
+     * Also unselects it in the database so it's available for future sessions.
+     */
+    const skipIdea = async (id: string) => {
+        // Add to session exclusion list
+        setSkippedIds(prev => {
+            if (prev.includes(id)) return prev;
+            return [...prev, id];
+        });
+
+        // Unselect in database (async, non-blocking)
+        try {
+            await unselectIdea(id);
+        } catch (error) {
+            console.error('Failed to unselect idea:', error);
+            // Non-critical error, idea is still excluded from this session
+        }
     };
 
     /**
@@ -65,8 +89,12 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
             // 3. Wait minimum time for effect
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // 4. Fetch Result
-            const res = await spinJar(filters);
+            // 4. Fetch Result - Inject excluded IDs
+            const spinFilters = {
+                ...filters,
+                excludeIds: [...(filters.excludeIds || []), ...skippedIds]
+            };
+            const res = await spinJar(spinFilters);
 
             // 5. Stop Animation
             stopSpinAnimation();
@@ -74,7 +102,10 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
             if (res.success) {
                 // 6. Broadcast Result & Show Local
                 callbacks?.onBroadcastResult?.(res.idea);
-                openModal('DATE_REVEAL', { idea: res.idea });
+                openModal('DATE_REVEAL', {
+                    idea: res.idea,
+                    onSkip: () => skipIdea(res.idea.id)
+                });
                 onSpinComplete();
                 window.dispatchEvent(new Event('pwa-prompt-ready'));
             } else {
@@ -110,6 +141,8 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
         isSpinning,
         handleSpinJar,
         handleExternalSpinStart,
-        handleExternalSpinComplete
+        handleExternalSpinComplete,
+        skipIdea,
+        skippedIds
     };
 }

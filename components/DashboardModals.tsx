@@ -309,7 +309,9 @@ export function DashboardModals({
                 idea={activeModal === 'DATE_REVEAL' ? modalProps?.idea : null}
                 onClose={closeModal}
                 userLocation={userLocation ?? undefined}
+                jarTopic={jarTopic}
                 isViewOnly={modalProps?.viewOnly}
+                onSkip={modalProps?.onSkip}
                 onFindDining={(location) => {
                     if (location) setUserLocation(location);
                     // Open Concierge Dining

@@ -62,6 +62,11 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
 
         // 3. Apply Multi-dimensional Filters
         const filteredIdeas = candidateIdeas.filter(idea => {
+            // excludeIds
+            if (filters.excludeIds && Array.isArray(filters.excludeIds) && filters.excludeIds.includes(idea.id)) {
+                return false;
+            }
+
             // Duration
             if (maxDuration !== undefined && idea.duration > maxDuration) return false;
 

@@ -29,6 +29,7 @@ import { DashboardModals } from "@/components/DashboardModals";
 import { useDashboardLogic } from "@/hooks/useDashboardLogic";
 import { getOnboardingSteps } from "@/lib/onboarding-steps";
 import { getJarLabels } from "@/lib/labels";
+import { COST_VALUES, ACTIVITY_VALUES } from "@/lib/constants";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import React from "react";
 import { SmartInputBar } from "@/components/SmartInputBar";
@@ -78,6 +79,33 @@ function InviteCodeDisplay({ code, topic }: { code: string | null; topic?: strin
                 {copied ? <><Check className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-2" /> Copied</> : <><Copy className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-2" /> Copy</>}
             </Button>
         </div>
+    );
+}
+
+function QuickFilterChip({ label, icon, onClick, variant = "primary" }: {
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+    variant?: "orange" | "indigo" | "red" | "amber" | "primary"
+}) {
+    const themes = {
+        primary: "border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-primary/50 hover:bg-primary/5 shadow-sm",
+        orange: "border-orange-200 dark:border-orange-500/20 bg-orange-50/50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 hover:border-orange-400 shadow-orange-500/5",
+        indigo: "border-indigo-200 dark:border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:border-indigo-400 shadow-indigo-500/5",
+        red: "border-red-200 dark:border-red-500/20 bg-red-50/50 dark:bg-red-500/10 text-red-700 dark:text-red-300 hover:border-red-400 shadow-red-500/5",
+        amber: "border-amber-200 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:border-amber-400 shadow-amber-500/5",
+    };
+
+    return (
+        <motion.button
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onClick}
+            className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all text-[11px] md:text-xs font-black uppercase tracking-tight shrink-0 shadow-lg whitespace-nowrap ${themes[variant]}`}
+        >
+            <span className="shrink-0">{icon}</span>
+            <span>{label}</span>
+        </motion.button>
     );
 }
 
@@ -226,6 +254,40 @@ function DashboardContent() {
         userData,
         ideas
     });
+
+    // --- Quick Filter Chips Logic ---
+    const allQuickChips = [
+        {
+            label: "Quick Bite",
+            variant: "orange" as const,
+            icon: <Utensils className="w-3.5 h-3.5" />,
+            filter: { category: 'MEAL', maxDuration: 2 },
+            match: (i: any) => i.category === 'MEAL' && i.duration <= 2
+        },
+        {
+            label: "Night Out",
+            variant: "indigo" as const,
+            icon: <Moon className="w-3.5 h-3.5" />,
+            filter: { timeOfDay: 'EVENING' },
+            match: (i: any) => i.timeOfDay === 'EVENING' || i.timeOfDay === 'ANY'
+        },
+        {
+            label: "Adventure",
+            variant: "red" as const,
+            icon: <Activity className="w-3.5 h-3.5" />,
+            filter: { maxActivityLevel: 'HIGH', minDuration: 3 },
+            match: (i: any) => (ACTIVITY_VALUES[i.activityLevel] || 0) >= 2 || i.duration >= 3
+        },
+        {
+            label: "Free/Cheap",
+            variant: "amber" as const,
+            icon: <Sparkles className="w-3.5 h-3.5" />,
+            filter: { maxCost: '$' },
+            match: (i: any) => (COST_VALUES[i.cost] || 0) <= 1
+        }
+    ];
+
+    const activeQuickChips = allQuickChips.filter(chip => ideas.some(chip.match)).slice(0, 4);
 
     if (isLoading) {
         return (
@@ -527,7 +589,7 @@ function DashboardContent() {
                                         : { rotate: 0, scale: 1 }
                                     }
                                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className="relative mb-8 md:mb-12"
+                                    className="relative mb-12 md:mb-20"
                                     data-tour="jar-visual"
                                 >
                                     <div
@@ -563,32 +625,57 @@ function DashboardContent() {
                                         />
                                     </div>
                                 ) : !isAdminPickMode && (
-                                    <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300 mb-8">
-                                        <Button
-                                            size="lg"
-                                            className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
-                                            onClick={() => handleSpinJar()}
-                                            disabled={ideas.length === 0 || isSpinning}
-                                            data-tour="spin-button-desktop"
-                                        >
-                                            {isSpinning ? (
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                                                    <span>Spinning...</span>
+                                    <div className="flex flex-col items-center gap-4 w-full animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300 mb-8 relative z-20">
+                                        {/* Quick Filter Chips */}
+                                        {activeQuickChips.length > 0 && (
+                                            <div className="relative w-full max-w-[100vw] overflow-hidden">
+                                                <div
+                                                    className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-6 pt-2 w-full justify-start md:justify-center px-10 md:px-4"
+                                                    style={{
+                                                        WebkitMaskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)',
+                                                        maskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)'
+                                                    }}
+                                                >
+                                                    {activeQuickChips.map((chip, idx) => (
+                                                        <QuickFilterChip
+                                                            key={idx}
+                                                            label={chip.label}
+                                                            variant={chip.variant}
+                                                            icon={chip.icon}
+                                                            onClick={() => handleSpinJar(chip.filter)}
+                                                        />
+                                                    ))}
                                                 </div>
-                                            ) : "Spin the Jar!"}
-                                        </Button>
+                                            </div>
+                                        )}
 
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-14 w-14 md:h-16 md:w-16 border-2 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
-                                            onClick={() => openModal('SPIN_FILTERS')}
-                                            title="Filter Spin"
-                                            aria-label="Filter Spin"
-                                        >
-                                            <Filter className="w-6 h-6 md:w-7 md:h-7" />
-                                        </Button>
+                                        <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md px-4 md:px-0">
+                                            <Button
+                                                size="lg"
+                                                className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
+                                                onClick={() => handleSpinJar()}
+                                                disabled={ideas.length === 0 || isSpinning}
+                                                data-tour="spin-button-desktop"
+                                            >
+                                                {isSpinning ? (
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                                                        <span>Spinning...</span>
+                                                    </div>
+                                                ) : "Spin the Jar!"}
+                                            </Button>
+
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-14 w-14 md:h-16 md:w-16 border-2 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
+                                                onClick={() => openModal('SPIN_FILTERS')}
+                                                title="Filter Spin"
+                                                aria-label="Filter Spin"
+                                            >
+                                                <Filter className="w-6 h-6 md:w-7 md:h-7" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
 
