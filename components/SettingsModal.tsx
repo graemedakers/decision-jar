@@ -13,6 +13,7 @@ import { LocationInput } from "./LocationInput";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { getJarLabels } from "@/lib/labels";
 import { NotificationToggle } from "./NotificationToggle";
+import { VerifyEmailGate } from "./VerifyEmailGate";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -47,6 +48,10 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [premiumInviteToken, setPremiumInviteToken] = useState("");
     const [includePremiumToken, setIncludePremiumToken] = useState(true);
 
+    // Email Verification
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [showVerifyGate, setShowVerifyGate] = useState(false);
+
     useEffect(() => {
         setIsNative(isCapacitor());
     }, []);
@@ -80,6 +85,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         setDefaultIdeaPrivate(!!data.user.defaultIdeaPrivate);
                         setCurrentUserEmail(data.user.email || "");
                         setPremiumInviteToken(data.user.premiumInviteToken || "");
+                        setIsEmailVerified(!!data.user.emailVerified);
                     }
                 });
         }
@@ -398,7 +404,13 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                         <Button
                                                             type="button"
                                                             className="w-full justify-start bg-gradient-to-r from-primary to-accent text-white border-0"
-                                                            onClick={() => router.push('/premium')}
+                                                            onClick={() => {
+                                                                if (!isEmailVerified) {
+                                                                    setShowVerifyGate(true);
+                                                                } else {
+                                                                    router.push('/premium');
+                                                                }
+                                                            }}
                                                         >
                                                             <Sparkles className="w-4 h-4 mr-2" /> Upgrade to Pro
                                                         </Button>
@@ -599,6 +611,15 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                 )}
             </AnimatePresence>
             <DeleteLogModal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} />
+
+            {/* Email Verification Gate */}
+            <VerifyEmailGate
+                isOpen={showVerifyGate}
+                onClose={() => setShowVerifyGate(false)}
+                email={currentUserEmail}
+                featureName="Pro Upgrade"
+                description="Verify your email to upgrade to Pro and unlock unlimited AI tools, custom jars, and premium features."
+            />
         </>
     );
 }

@@ -102,6 +102,11 @@ export function NotificationPreferences({ isSubscribed }: { isSubscribed: boolea
                         className="overflow-hidden"
                     >
                         <div className="space-y-3 px-3 py-2 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-2 mb-3">
+                                <p className="text-[10px] text-blue-700 dark:text-blue-300 font-medium">
+                                    📧 Email notifications require a verified email address. Web push notifications work regardless.
+                                </p>
+                            </div>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
                                 Choose which notifications you'd like to receive:
                             </p>

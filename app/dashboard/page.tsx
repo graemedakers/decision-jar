@@ -35,6 +35,7 @@ import { SmartInputBar } from "@/components/SmartInputBar";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { usePWA } from "@/hooks/usePWA";
 import { UnifiedConciergeButton } from "@/components/UnifiedConciergeButton";
+import { VerificationBanner } from "@/components/VerificationBanner";
 
 // Lazy Loading
 const PreferenceQuizModal = dynamic(() => import("@/components/PreferenceQuizModal").then(m => m.PreferenceQuizModal), { ssr: false });
@@ -431,6 +432,16 @@ function DashboardContent() {
                     <div className="animate-in fade-in slide-in-from-top-4 duration-700">
                         <InviteCodeDisplay code={inviteCode} topic={jarTopic} />
                     </div>
+
+                    {/* Email Verification Banner */}
+                    {userData?.email && (
+                        <div className="animate-in fade-in slide-in-from-top-4 duration-700 delay-150">
+                            <VerificationBanner
+                                email={userData.email}
+                                isVerified={!!userData.emailVerified}
+                            />
+                        </div>
+                    )}
 
                     {/* JAR VISUALIZATION SECTION */}
                     <div className="flex flex-col items-center">

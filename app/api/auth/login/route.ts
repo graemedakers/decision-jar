@@ -35,10 +35,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
-        // Check if email is verified
-        if (!user.emailVerified && user.verificationToken) {
-            return NextResponse.json({ error: 'Please verify your email address before logging in.' }, { status: 403 });
-        }
+        // Note: Email verification is now optional for login
+        // Unverified users can use the app, but certain features (Pro upgrade, email notifications)
+        // will require verification through UI prompts
 
         // Login
         await login({

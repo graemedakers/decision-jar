@@ -143,8 +143,31 @@ export function SignupForm() {
                     alert("Account created, but the Premium link was invalid or expired. You are on the Free plan.");
                 }
 
+
                 if (data.requiresVerification) {
-                    setIsVerificationSent(true);
+                    // With conditional verification, we auto-login and redirect to dashboard
+                    // They'll see a friendly verification banner there instead of being blocked
+                    try {
+                        const loginRes = await fetch("/api/auth/login", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email, password }),
+                            credentials: 'include',
+                        });
+
+                        if (loginRes.ok) {
+                            const dashboardUrl = inviteCode
+                                ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}`
+                                : "/dashboard";
+                            window.location.href = dashboardUrl;
+                        } else {
+                            // Fallback: show verification screen if auto-login fails
+                            setIsVerificationSent(true);
+                        }
+                    } catch (loginError) {
+                        console.error("Auto-login error:", loginError);
+                        setIsVerificationSent(true);
+                    }
                 } else if (data.checkoutUrl) {
                     window.location.href = data.checkoutUrl;
                 } else {
@@ -216,16 +239,26 @@ export function SignupForm() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="w-full max-w-md"
             >
-                <div className="glass-card p-8 text-center">
+                <div className="glass-card p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10">
                     <div className="w-16 h-16 mx-auto bg-green-500/20 rounded-full flex items-center justify-center mb-6">
                         <Mail className="w-8 h-8 text-green-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2" id="verification-header">Check your inbox</h2>
-                    <p className="text-slate-400 mb-8">
-                        We've sent a verification link to your email address. Please click the link to activate your account.
-                        <br /><br />
-                        <span className="text-sm text-slate-500">Please check your spam or junk folder if you don't see it.</span>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2" id="verification-header">Account Created!</h2>
+                    <p className="text-slate-600 dark:text-slate-400 mb-4">
+                        We've sent a verification link to your email address.
                     </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                        You can start using the app now, but some features like Pro upgrade will require verification.
+                        <br /><br />
+                        <span className="text-xs">Check your spam folder if you don't see the email.</span>
+                    </p>
+
+                    <Button
+                        onClick={() => router.push('/login')}
+                        className="w-full h-12 text-lg font-bold shadow-lg shadow-primary/20"
+                    >
+                        Continue to App <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
                 </div>
             </motion.div>
         );
