@@ -62,7 +62,8 @@ export function useDashboardLogic() {
     const [showConfetti, setShowConfetti] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
 
-    // Prevent double execution of OAuth cleanup
+    // Prevent double execution of join logic
+    const joinProcessedRef = useRef<string | null>(null);
     const oauthCleanupRef = useRef(false);
 
     const handleContentUpdate = useCallback(() => {
@@ -188,7 +189,8 @@ export function useDashboardLogic() {
         const code = searchParams?.get('code');
         const premiumToken = searchParams?.get('pt');
 
-        if (code) {
+        if (code && joinProcessedRef.current !== code) {
+            joinProcessedRef.current = code;
             const handleJoin = async () => {
                 // Check if we should clean up "My First Jar"
                 // Only if it's "My First Jar" and it's empty
@@ -265,7 +267,8 @@ export function useDashboardLogic() {
         const pendingCode = sessionStorage.getItem('pending_invite_code');
         const pendingToken = sessionStorage.getItem('pending_premium_token');
 
-        if (isOAuthInviteSignup && pendingCode) {
+        // Only run if we don't have a code in the URL (which is handled by the other Effect)
+        if (isOAuthInviteSignup && pendingCode && !searchParams?.get('code')) {
             if (oauthCleanupRef.current) return;
             oauthCleanupRef.current = true;
 
@@ -309,7 +312,7 @@ export function useDashboardLogic() {
                         // Show success message
                         if (joinData.premiumGifted) {
                             showSuccess("Welcome! You've joined the jar and upgraded to Premium!");
-                        } else {
+                        } else if (joinData.message !== "Already a member, switched to jar.") {
                             showSuccess("Successfully joined the jar!");
                         }
 

@@ -8,6 +8,21 @@ const { PrismaClient } = require('@prisma/client');
 // Use DATABASE_URL from environment or fallback to the provided dev URL
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_2wMQpZiD6WOa@ep-cold-glade-a7ckfc7e-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
+// --- PRODUCTION SAFETY LOCK ---
+const IS_PROD_URL = DATABASE_URL.includes('ep-weathered-sun') ||
+    (DATABASE_URL.includes('pooler') && !DATABASE_URL.includes('cold-glade'));
+
+if (IS_PROD_URL && process.env.PRODUCTION_LOCK !== 'OFF') {
+    console.error('\n❌ PRODUCTION SAFETY LOCK ACTIVE');
+    console.error('This script is attempting to run against a production or pooled database instance.');
+    console.error('Hostname:', DATABASE_URL.split('@')[1]?.split('/')[0] || 'Unknown');
+    console.error('\nTo bypass this safety lock, set the environment variable:');
+    console.error('  PRODUCTION_LOCK=OFF');
+    console.error('\nDeletion aborted for safety.\n');
+    process.exit(1);
+}
+// ------------------------------
+
 const prisma = new PrismaClient({
     datasources: {
         db: {
@@ -18,9 +33,10 @@ const prisma = new PrismaClient({
 
 // Users to delete
 const USERS_TO_DELETE = [
-    'graeme@letmebefree.com',
     'graeme_dakers@hotmail.com',
-    'graeme@spinthejar.com'
+    'graeme@letmebefree.com',
+    'graeme@spinthejar.com',
+    'graemedakers@gmail.com'
 ];
 
 async function deleteUsers() {
@@ -217,9 +233,15 @@ async function deleteUsers() {
                     });
                 }
 
-                // Delete ideas assigned to them
-                await tx.idea.deleteMany({
-                    where: { assignedToId: user.id }
+                // Delete premium tokens created by this user
+                await tx.premiumInviteToken.deleteMany({
+                    where: { createdById: user.id }
+                });
+
+                // Reset premium tokens used by this user
+                await tx.premiumInviteToken.updateMany({
+                    where: { usedById: user.id },
+                    data: { usedById: null, usedAt: null, currentUses: { decrement: 1 } }
                 });
 
                 // Finally, delete the user

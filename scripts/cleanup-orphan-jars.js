@@ -8,6 +8,21 @@ const { PrismaClient } = require('@prisma/client');
 // Use DATABASE_URL from environment or fallback to the provided dev URL
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_2wMQpZiD6WOa@ep-cold-glade-a7ckfc7e-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
+// --- PRODUCTION SAFETY LOCK ---
+const IS_PROD_URL = DATABASE_URL.includes('ep-weathered-sun') ||
+    (DATABASE_URL.includes('pooler') && !DATABASE_URL.includes('cold-glade'));
+
+if (IS_PROD_URL && process.env.PRODUCTION_LOCK !== 'OFF') {
+    console.error('\n❌ PRODUCTION SAFETY LOCK ACTIVE');
+    console.error('This script is attempting to run against a production or pooled database instance.');
+    console.error('Hostname:', DATABASE_URL.split('@')[1]?.split('/')[0] || 'Unknown');
+    console.error('\nTo bypass this safety lock, set the environment variable:');
+    console.error('  PRODUCTION_LOCK=OFF');
+    console.error('\nOperation aborted for safety.\n');
+    process.exit(1);
+}
+// ------------------------------
+
 const prisma = new PrismaClient({
     datasources: {
         db: {

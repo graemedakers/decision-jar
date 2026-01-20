@@ -28,7 +28,8 @@ export const getConciergePromptAndMock = (
     toolKey: string,
     inputs: Record<string, any>,
     targetLocation: string,
-    extraInstructions: string
+    extraInstructions: string,
+    isSecretMode?: boolean
 ): PromptGeneratorResponse => {
     switch (toolKey) {
         case 'DINING':
@@ -311,8 +312,8 @@ you MUST include that exact movie as the FIRST recommendation, regardless of whe
                 Fields: name (Title), description (Plot summary - 2-3 sentences), year, rating (IMDb or Rotten Tomatoes score), genre, director, cast (top 3 actors)
                 ${isCinema ? `Also include: 
                 - website: Google showtimes search URL in format https://www.google.com/search?q=[URL+Encoded+Movie+Title]+showtimes+near+${encodedLocation}
-                - status: "Now Showing", "Coming Soon", or "Check Availability" (for older movies user specifically requested)` 
-                : 'Also include: streaming_service (e.g. Netflix, Prime Video), website (direct link to watch on that service)'}
+                - status: "Now Showing", "Coming Soon", or "Check Availability" (for older movies user specifically requested)`
+                        : 'Also include: streaming_service (e.g. Netflix, Prime Video), website (direct link to watch on that service)'}
                 `,
                 mockResponse: {
                     recommendations: [

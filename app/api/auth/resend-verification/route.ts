@@ -1,6 +1,8 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { sendVerificationEmail } from '@/lib/mailer';
+import { sendVerificationEmail } from "@/lib/mailer"; // HEARTBEAT: Forced refresh to resolve Turbopack build cache
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     console.log("Resend verification API called");

@@ -261,6 +261,11 @@ export function GenericConciergeModal({
     // React key pattern ensures this component remounts when tool changes
     useEffect(() => {
         if (isOpen) {
+            // Sync private mode with jar default
+            if (userData?.defaultIdeaPrivate !== undefined) {
+                setIsPrivate(userData.defaultIdeaPrivate);
+            }
+
             // Fill location if not already set
             if (!location && userLocation) {
                 setLocation(userLocation);
@@ -476,7 +481,8 @@ export function GenericConciergeModal({
                 location: isLocationRelevant ? location : undefined,
                 price: config.hasPrice ? price : undefined,
                 extraInstructions: customInputs['extraInstructions'], // Support for extra instructions if added later
-                isDemo: !!demoConcierge // ✅ FIX: Signal demo mode to backend
+                isDemo: !!demoConcierge, // ✅ FIX: Signal demo mode to backend
+                isPrivate: isPrivate // Pass secret mode context to AI
             };
 
             const res = await fetch('/api/concierge', { // New Unified Endpoint
@@ -707,7 +713,20 @@ export function GenericConciergeModal({
 
                             {/* EXTRA INSTRUCTIONS (Unified Support) */}
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Additional Details / Requests</label>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Additional Details / Requests</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            markInteraction('is_private_toggle');
+                                            setIsPrivate(!isPrivate);
+                                        }}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isPrivate ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-100 dark:bg-black/20 text-slate-500 border border-slate-200 dark:border-white/10'}`}
+                                    >
+                                        <Lock className="w-3.5 h-3.5" />
+                                        {isPrivate ? "Secret Mode On" : "Public Mode"}
+                                    </button>
+                                </div>
                                 <textarea
                                     value={customInputs['extraInstructions'] || ''}
                                     onChange={(e) => setCustomInputs(prev => ({ ...prev, extraInstructions: e.target.value }))}

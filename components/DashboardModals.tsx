@@ -133,6 +133,7 @@ export function DashboardModals({
                 initialLocation={userLocation || ""}
                 jarTopic={jarTopic}
                 customCategories={userData?.customCategories}
+                defaultIdeaPrivate={userData?.defaultIdeaPrivate}
             />
 
             <SpinFiltersModal

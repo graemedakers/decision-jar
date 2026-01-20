@@ -9,9 +9,9 @@
     "lint": "next lint",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
-    "db:generate": "prisma generate",
+    "db:migrate": "node scripts/safe-prisma.js migrate dev",
+    "db:push": "node scripts/safe-prisma.js db push",
+    "db:generate": "node scripts/safe-prisma.js generate",
     "postinstall": "prisma generate"
   },
   "dependencies": {

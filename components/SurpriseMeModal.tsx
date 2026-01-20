@@ -17,9 +17,10 @@ interface SurpriseMeModalProps {
     initialLocation?: string;
     jarTopic?: string | null;
     customCategories?: any[];
+    defaultIdeaPrivate?: boolean;
 }
 
-export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation, jarTopic, customCategories }: SurpriseMeModalProps) {
+export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation, jarTopic, customCategories, defaultIdeaPrivate }: SurpriseMeModalProps) {
     const categories = getCategoriesForTopic(jarTopic, customCategories);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -28,7 +29,7 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
         cost: "$",
         timeOfDay: "ANY",
         category: categories.length > 0 ? categories[0].id : "", // Default to first valid category or empty
-        isPrivate: true,
+        isPrivate: defaultIdeaPrivate ?? true,
     });
 
     useEffect(() => {
@@ -37,10 +38,10 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                 ...prev,
                 location: initialLocation || prev.location || "",
                 category: categories.find(c => c.id === prev.category) ? prev.category : categories[0].id,
-                isPrivate: true
+                isPrivate: defaultIdeaPrivate ?? true
             }));
         }
-    }, [isOpen, initialLocation, jarTopic]);
+    }, [isOpen, initialLocation, jarTopic, defaultIdeaPrivate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

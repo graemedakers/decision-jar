@@ -27,6 +27,21 @@ if (!databaseUrl) {
     process.exit(1);
 }
 
+// --- PRODUCTION SAFETY LOCK ---
+const IS_PROD_URL = databaseUrl.includes('ep-weathered-sun') ||
+    (databaseUrl.includes('pooler') && !databaseUrl.includes('cold-glade'));
+
+if (IS_PROD_URL && process.env.PRODUCTION_LOCK !== 'OFF') {
+    console.error('\n❌ PRODUCTION SAFETY LOCK ACTIVE');
+    console.error('This script is attempting to run against a production or pooled database instance.');
+    console.error('Hostname:', databaseUrl.split('@')[1]?.split('/')[0] || 'Unknown');
+    console.error('\nTo bypass this safety lock, set the environment variable:');
+    console.error('  PRODUCTION_LOCK=OFF');
+    console.error('\nOperation aborted for safety.\n');
+    process.exit(1);
+}
+// ------------------------------
+
 const prisma = new PrismaClient({
     datasources: {
         db: {

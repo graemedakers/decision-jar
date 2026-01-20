@@ -39,7 +39,7 @@ function validateRecommendation(
     const recName = (recommendation.name || '').toLowerCase();
     const recDesc = (recommendation.description || '').toLowerCase();
     const recType = (recommendation.cuisine || recommendation.category || recommendation.type || recommendation.speciality || recommendation.genre || recommendation.activity_type || recommendation.theme_type || recommendation.sport || recommendation.music || '').toLowerCase();
-    
+
     // Combine all text fields for searching
     const allText = `${recName} ${recDesc} ${recType}`.toLowerCase();
 
@@ -55,7 +55,7 @@ function validateRecommendation(
         if (/\b(cafe|coffee shop|brunch|breakfast)\b/i.test(requestLower)) {
             const hasCafeBrunchKeywords = /\b(cafe|coffee|brunch|breakfast|bakery)\b/i.test(allText);
             const isDinnerHeavy = /\b(pizzeria|pizza|japanese|sushi|indian|thai|chinese|fine.dining|dinner.only)\b/i.test(recType);
-            
+
             if (!hasCafeBrunchKeywords || isDinnerHeavy) {
                 console.log(`  ❌ REJECT: Non-cafe type`);
                 return false;
@@ -317,8 +317,8 @@ export async function POST(req: NextRequest) {
     try {
         // 1. Parse Request Body
         const body = await req.json();
-        const { configId, inputs, location: cachedLocation, useMockData, isDemo } = body;
-        
+        const { configId, inputs, location: cachedLocation, useMockData, isDemo, isPrivate } = body;
+
         // ✅ CRITICAL FIX: Capture extraInstructions from root body, not from inputs
         const rawExtraInstructions = body.extraInstructions || inputs?.extraInstructions || "";
 
@@ -376,18 +376,19 @@ export async function POST(req: NextRequest) {
                 toolKey,
                 inputs,
                 targetLocation,
-                query
+                query,
+                isPrivate
             );
 
             console.log(`[Concierge] Attempt ${attempt} for query: "${query}"`);
             const jsonResponse = await reliableGeminiCall(prompt, { jsonMode: true }) as { recommendations?: any[] };
-            
+
             if (query && jsonResponse.recommendations && Array.isArray(jsonResponse.recommendations)) {
                 // Validate each recommendation
                 const filteredRecommendations = jsonResponse.recommendations.filter(
                     (rec: any) => validateRecommendation(rec, query, toolKey)
                 );
-                
+
                 // ✅ RADICAL: If filtering removed more than 60% of results, and it's attempt 1, 
                 // try again with an even more aggressive prompt.
                 if (filteredRecommendations.length < 2 && attempt < 2) {
@@ -408,7 +409,7 @@ export async function POST(req: NextRequest) {
             }
 
             const encodedLocation = encodeURIComponent(targetLocation);
-            
+
             // Define which concierges need URL normalization and their search suffix
             const urlNormalizationRules: Record<string, string> = {
                 'MOVIE': 'showtimes+near',      // Cinema mode only (handled separately)
@@ -423,7 +424,7 @@ export async function POST(req: NextRequest) {
                 'HOTEL': 'hotel+booking',
                 'NIGHTCLUB': 'nightclub',
             };
-            
+
             // Special handling for cinema mode
             if (toolKey === 'MOVIE' && inputs.watchMode === 'Cinema') {
                 result.recommendations = result.recommendations.map((rec: any) => {
@@ -437,32 +438,32 @@ export async function POST(req: NextRequest) {
                 });
                 return result;
             }
-            
+
             // General URL normalization for other location-based concierges
             const searchSuffix = urlNormalizationRules[toolKey];
             if (searchSuffix) {
                 result.recommendations = result.recommendations.map((rec: any) => {
                     const currentUrl = rec.website || '';
-                    
+
                     // Only replace if URL looks suspicious (not google, not major platforms)
                     const trustedDomains = ['google.com', 'facebook.com', 'instagram.com', 'yelp.com', 'tripadvisor.com', 'booking.com', 'airbnb.com'];
                     const isTrusted = trustedDomains.some(domain => currentUrl.includes(domain));
-                    
+
                     if (currentUrl && !isTrusted && !currentUrl.includes('google.com/search')) {
                         const encodedName = encodeURIComponent(rec.name || '');
                         rec.website = `https://www.google.com/search?q=${encodedName}+${encodedLocation}+${searchSuffix}`;
                         console.log(`[URL Fix] ${toolKey}: Replaced suspicious URL with Google search`);
                     }
-                    
+
                     return rec;
                 });
             }
-            
+
             return result;
         };
 
         if (useMockData) {
-            const { mockResponse } = getConciergePromptAndMock(toolKey, inputs, targetLocation, rawExtraInstructions);
+            const { mockResponse } = getConciergePromptAndMock(toolKey, inputs, targetLocation, rawExtraInstructions, isPrivate);
             return NextResponse.json(normalizeVenueUrls(mockResponse));
         }
 

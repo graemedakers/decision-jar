@@ -1,3 +1,7 @@
+// 🛑 ATTENTION AGENTS: NEVER run "npx prisma db push" or "npx prisma migrate" directly.
+// ALWAYS use "npm run db:push" or "npm run db:migrate".
+// These commands use a custom safety wrapper (scripts/safe-prisma.js) that prevents accidental production data loss.
+
 generator client {
   provider = "prisma-client-js"
 }

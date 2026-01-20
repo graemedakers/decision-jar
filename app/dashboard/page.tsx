@@ -438,7 +438,7 @@ function DashboardContent() {
                         <div className="animate-in fade-in slide-in-from-top-4 duration-700 delay-150">
                             <VerificationBanner
                                 email={userData.email}
-                                isVerified={!!userData.emailVerified}
+                                isVerified={!!userData.emailVerified || !userData.verificationToken}
                             />
                         </div>
                     )}
