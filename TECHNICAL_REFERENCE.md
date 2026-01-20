@@ -59,7 +59,6 @@ All major interactions occur in overlays. Key Types:
 - **`ADD_IDEA`**: Uses `AddIdeaModal`. Modes: Create, Edit, Magic Fill.
 - **`CONCIERGE`**: Uses `GenericConciergeModal`. Dynamically configured by `concierge-configs.ts` (Dining, Movies, etc.).
 - **Planners**: Specialized heavy modals:
-    - `MenyPlannerModal`: Weekly meal planning.
     - `DateNightPlannerModal`: Complex multi-step date creation.
 - **`SpinFilters`**: Configures the selection algorithm (Cost, Time, etc.).
 
@@ -87,7 +86,6 @@ All major interactions occur in overlays. Key Types:
 - **Pattern**: Client -> API Route -> Database Cache (HIT?) -> AI Service -> Database Cache (SAVE) -> Client.
 - **Endpoints**:
     - `/api/concierge`: Generic tools.
-    - `/api/menu-planner`: Meal plans.
     - `/api/magic-idea`: "Surprise Me" single idea generation.
 
 ---
@@ -101,16 +99,6 @@ All major interactions occur in overlays. Key Types:
 4. **Backend**: Fetches eligible ideas -> Filters -> Random Pick -> Updates `idea.selectedAt` -> Returns Idea.
 5. **Frontend**: Receives Idea -> Opens `DATE_REVEAL` modal -> Plays Animation -> Shows Result.
 6. **Post-Action**: User clicks "Go Tonight!" -> Idea marked as "Memory" (Date set).
-
-### 2. Using a Planner (e.g., Menu)
-1. User opens `MenuPlanner`.
-2. Input: Days, Diet, People.
-3. Click "Generate".
-4. **API Call**: `POST /api/menu-planner`.
-5. **Backend**: Check Cache -> Call Gemini/OpenAI -> Return JSON.
-6. **frontend**: Render List.
-7. User clicks "Add to Jar" on a specific meal.
-8. **Action**: `useConciergeActions` calls `POST /api/ideas` with pre-filled Title/Description.
 
 ### 3. Moving an Idea
 1. User clicks "Move" icon on idea card (`JarPage`).

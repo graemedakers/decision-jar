@@ -20,7 +20,7 @@ export interface DashboardTool {
     // Action Logic
     actionType: ToolActionType;
     conciergeId?: string; // Maps to keys in CONCIERGE_CONFIGS
-    modalId?: 'weekend_planner' | 'catering' | 'bar_crawl' | 'date_night' | 'menu_planner' | 'surprise_me';
+    modalId?: 'weekend_planner' | 'catering' | 'bar_crawl' | 'date_night' | 'surprise_me';
     linkHref?: string;
 
     // Visibility / Filtering Logic
@@ -218,18 +218,7 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         showInDashboard: true,
         showInExplore: true
     },
-    {
-        id: 'menu_planner',
-        title: 'Menu Planner',
-        description: 'Plan your weekly meals with personalized recipes.',
-        icon: Calendar,
-        color: 'green',
-        requiresPremium: true,
-        actionType: 'modal',
-        modalId: 'menu_planner',
-        showInDashboard: false, // Hidden - doesn't fit social/wellbeing focus
-        showInExplore: false    // Hidden - doesn't fit social/wellbeing focus
-    },
+
     {
         id: 'escape_room_scout',
         title: 'Escape Room Scout',

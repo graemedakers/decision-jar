@@ -133,9 +133,7 @@ export function SmartToolsGrid({
                 case 'bar_crawl':
                     openModal('BAR_CRAWL_PLANNER');
                     break;
-                case 'menu_planner':
-                    openModal('MENU_PLANNER');
-                    break;
+
                 case 'surprise_me':
                     openModal('SURPRISE_ME');
                     break;

@@ -343,10 +343,6 @@ function DashboardContent() {
                                 <HelpCircle className="w-5 h-5" />
                             </Button>
 
-                            <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Quick Tools">
-                                <Dices className="w-5 h-5" />
-                            </Button>
-
                             <Button variant="outline" size="icon" onClick={() => openModal('SETTINGS')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Settings">
                                 <Settings className="w-5 h-5" />
                             </Button>
@@ -405,10 +401,6 @@ function DashboardContent() {
                             </Link>
 
 
-
-                            <Button variant="outline" size="icon" onClick={() => openModal('QUICK_TOOLS')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Quick Tools">
-                                <Dices className="w-5 h-5 text-slate-500" />
-                            </Button>
 
                             <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shrink-0" aria-label="Help">
                                 <HelpCircle className="w-5 h-5 text-slate-500" />
@@ -572,7 +564,7 @@ function DashboardContent() {
                                         onClick={() => openModal('TOOLS')}
                                         className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 py-2"
                                     >
-                                        <Dices className="w-3.5 h-3.5" />
+                                        <Sparkles className="w-3.5 h-3.5" />
                                         View all AI concierge tools
                                     </button>
                                 </div>

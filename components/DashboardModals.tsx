@@ -19,7 +19,7 @@ const AdminControlsModal = dynamic(() => import("@/components/AdminControlsModal
 const TemplateBrowserModal = dynamic(() => import("@/components/TemplateBrowserModal").then(m => m.TemplateBrowserModal), { ssr: false });
 
 
-const MenuPlannerModal = dynamic(() => import("@/components/MenuPlannerModal").then(m => m.MenuPlannerModal), { ssr: false });
+
 const RateDateModal = dynamic(() => import("@/components/RateDateModal").then(m => m.RateDateModal), { ssr: false });
 const DateReveal = dynamic(() => import("@/components/DateReveal").then(m => m.DateReveal), { ssr: false });
 const FavoritesModal = dynamic(() => import("@/components/FavoritesModal").then(m => m.FavoritesModal), { ssr: false });
@@ -28,7 +28,6 @@ const SurpriseMeModal = dynamic(() => import("@/components/SurpriseMeModal").the
 const SpinFiltersModal = dynamic(() => import("@/components/SpinFiltersModal").then(m => m.SpinFiltersModal), { ssr: false });
 // ... (imports)
 const SettingsModal = dynamic(() => import("@/components/SettingsModal").then(m => m.SettingsModal), { ssr: false });
-const QuickDecisionsModal = dynamic(() => import("@/components/QuickDecisionsModal").then(m => m.QuickDecisionsModal), { ssr: false });
 
 const JarMembersModal = dynamic(() => import("@/components/JarMembersModal").then(m => m.JarMembersModal), { ssr: false });
 const JarQuickStartModal = dynamic(() => import("@/components/JarQuickStartModal").then(m => m.JarQuickStartModal), { ssr: false });
@@ -162,10 +161,7 @@ export function DashboardModals({
                 customCategories={userData?.customCategories}
             />
 
-            <QuickDecisionsModal
-                isOpen={activeModal === 'QUICK_TOOLS'}
-                onClose={closeModal}
-            />
+
 
             {activeModal === 'WEEKEND_PLANNER' && (
                 <GenericConciergeModal
@@ -285,13 +281,7 @@ export function DashboardModals({
                 />
             )}
 
-            {activeModal === 'MENU_PLANNER' && (
-                <MenuPlannerModal
-                    isOpen={true}
-                    onClose={closeModal}
-                    onIdeaAdded={handleContentUpdate}
-                />
-            )}
+
 
             <RateDateModal
                 isOpen={activeModal === 'RATE_DATE'}
