@@ -9,7 +9,7 @@ import Link from "next/link";
 import {
     Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar,
     Activity, Utensils, Check, Star, ArrowRight, History, Layers,
-    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2, Download
+    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2, Download, Gift
 } from "lucide-react";
 import { SessionTracker } from "@/lib/session-tracker";
 
@@ -319,6 +319,22 @@ function DashboardContent() {
                                 </Button>
                             )}
 
+                            {userData?.activeJarId && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openModal('GIFT_JAR', {
+                                        jarId: userData.activeJarId,
+                                        jarName: userData.jarName || 'My Jar',
+                                        ideaCount: ideas.filter((i: any) => i.status === 'APPROVED').length
+                                    })}
+                                    className="hidden md:flex gap-2 rounded-full border-slate-200 dark:border-white/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors px-4 h-11"
+                                >
+                                    <Gift className="w-4 h-4" />
+                                    <span className="text-sm font-bold">Gift Jar</span>
+                                </Button>
+                            )}
+
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -375,6 +391,22 @@ function DashboardContent() {
                         </div>
 
                         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 h-12">
+                            {userData?.activeJarId && (
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => openModal('GIFT_JAR', {
+                                        jarId: userData.activeJarId,
+                                        jarName: userData.jarName || 'My Jar',
+                                        ideaCount: ideas.filter((i: any) => i.status === 'APPROVED').length
+                                    })}
+                                    className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-500/30 shrink-0 text-indigo-600 dark:text-indigo-400"
+                                    aria-label="Gift Jar"
+                                >
+                                    <Gift className="w-5 h-5" />
+                                </Button>
+                            )}
+
                             {installPrompt && (
                                 <Button
                                     variant="outline"

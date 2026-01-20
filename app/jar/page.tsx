@@ -179,10 +179,10 @@ export default function JarPage() {
                                 ideaCount: ideas.filter(i => i.status === 'APPROVED').length
                             })}
                             variant="outline"
-                            className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 hidden sm:flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                            className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                         >
                             <Gift className="w-4 h-4" />
-                            <span>Gift Jar</span>
+                            <span className="hidden sm:inline">Gift Jar</span>
                         </Button>
                     )}
 
