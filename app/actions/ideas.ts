@@ -197,3 +197,70 @@ export async function deleteIdea(id: string): Promise<ActionResponse> {
         return { success: false, error: e.message || 'Error deleting', status: 500 };
     }
 }
+
+export async function duplicateIdea(id: string, targetJarId?: string): Promise<ActionResponse<{ idea: Idea }>> {
+    const session = await getSession();
+    if (!session?.user?.id) return { success: false, error: 'Unauthorized', status: 401 };
+
+    try {
+        const sourceIdea = await prisma.idea.findUnique({ where: { id } });
+        if (!sourceIdea) return { success: false, error: 'Source idea not found', status: 404 };
+
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            include: { memberships: true }
+        });
+
+        if (!user) return { success: false, error: 'User not found', status: 404 };
+
+        // Determine target jar: Provided ID -> Source Jar (if member) -> Active Jar -> First available
+        let finalTargetJarId = targetJarId;
+
+        if (!finalTargetJarId) {
+            // Check if user is member of source jar
+            const sourceJarMembership = user.memberships.find(m => m.jarId === sourceIdea.jarId);
+            if (sourceJarMembership) {
+                finalTargetJarId = sourceIdea.jarId;
+            } else {
+                finalTargetJarId = user.activeJarId || user.memberships[0]?.jarId;
+            }
+        }
+
+        if (!finalTargetJarId) return { success: false, error: 'No target jar found', status: 400 };
+
+        // Verify membership in target jar
+        const targetMembership = user.memberships.find(m => m.jarId === finalTargetJarId);
+        if (!targetMembership) return { success: false, error: 'Not a member of target jar', status: 403 };
+
+        // Clone the data, resetting completion fields
+        const { id: _, createdAt: __, updatedAt: ___, selectedAt: ____, selectedDate: _____, rating: ______, notes: _______, createdById: ________, jarId: _________, ...cloneData } = sourceIdea;
+
+        const duplicated = await prisma.idea.create({
+            data: {
+                ...cloneData,
+                jarId: finalTargetJarId,
+                createdById: session.user.id,
+                status: 'APPROVED', // Ensure it's approved in the target jar
+                selectedAt: null,
+                selectedDate: null,
+                rating: null,
+                notes: null,
+                isSurprise: false, // Reset surprise status for new copy
+            }
+        });
+
+        // Gamification for adding (similar to createIdea)
+        try {
+            await awardXp(finalTargetJarId, 10); // Slightly less XP for duplication
+        } catch (e) { console.error("Duplication XP error:", e); }
+
+        revalidatePath('/dashboard');
+        revalidatePath('/jar');
+        revalidatePath('/memories');
+
+        return { success: true, idea: duplicated as any };
+    } catch (e: any) {
+        console.error('Error duplicating idea:', e);
+        return { success: false, error: e.message || 'Error duplicating', status: 500 };
+    }
+}

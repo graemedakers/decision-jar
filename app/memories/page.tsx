@@ -2,19 +2,26 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Star, Copy, Trash2, Eye, Camera, Plus, Heart, Pencil } from "lucide-react";
+import { ArrowLeft, Check, Star, Copy, Trash2, Eye, Camera, Plus, Heart, Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { RateDateModal } from "@/components/RateDateModal";
-import { AddIdeaModal } from "@/components/AddIdeaModal";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { ViewMemoryModal } from "@/components/ViewMemoryModal";
 import { CalendarButton } from "@/components/CalendarButton";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+} from "@/components/ui/DropdownMenu";
 import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
 import { useFavorites } from "@/hooks/useFavorites";
-import { deleteIdea } from "@/app/actions/ideas";
+import { deleteIdea, duplicateIdea } from "@/app/actions/ideas";
 import { toggleFavorite } from "@/app/actions/favorites";
+import { showSuccess, showError } from "@/lib/toast";
 
 export default function MemoriesPage() {
     const router = useRouter();
@@ -27,7 +34,7 @@ export default function MemoriesPage() {
     const [ratingIdea, setRatingIdea] = useState<any>(null);
     const [ratingMode, setRatingMode] = useState<'rate' | 'photos'>('rate');
     const [viewingIdea, setViewingIdea] = useState<any>(null);
-    const [duplicatingIdea, setDuplicatingIdea] = useState<any>(null);
+    const [isDuplicating, setIsDuplicating] = useState<string | null>(null);
     const [ideaToDelete, setIdeaToDelete] = useState<string | null>(null);
     const [addingMemory, setAddingMemory] = useState(false);
     const [editingMemory, setEditingMemory] = useState<any>(null);
@@ -78,9 +85,22 @@ export default function MemoriesPage() {
         }
     };
 
-    const handleDuplicate = (idea: any) => {
-        const { id, selectedAt, selectedDate, createdBy, createdAt, updatedAt, ...ideaData } = idea;
-        setDuplicatingIdea(ideaData);
+    const handleDuplicate = async (idea: any, targetJarId?: string) => {
+        setIsDuplicating(idea.id);
+        try {
+            const res = await duplicateIdea(idea.id, targetJarId);
+            if (res.success) {
+                showSuccess("Idea added back to jar!");
+                fetchIdeas();
+            } else {
+                showError(res.error || "Failed to duplicate");
+            }
+        } catch (error) {
+            console.error("Error duplicating idea:", error);
+            showError("An error occurred");
+        } finally {
+            setIsDuplicating(null);
+        }
     };
 
     const memories = ideas
@@ -206,13 +226,43 @@ export default function MemoriesPage() {
                                 >
                                     <Camera className="w-5 h-5" />
                                 </button>
-                                <button
-                                    onClick={() => handleDuplicate(idea)}
-                                    className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-                                    title="Add Again"
-                                >
-                                    <Copy className="w-5 h-5" />
-                                </button>
+                                {userData?.memberships && userData.memberships.length > 1 ? (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <button
+                                                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                                                title="Add Again"
+                                                disabled={isDuplicating === idea.id}
+                                            >
+                                                {isDuplicating === idea.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Copy className="w-5 h-5" />}
+                                            </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                                            <DropdownMenuLabel className="text-xs uppercase tracking-wider text-slate-500">Duplicate to Jar</DropdownMenuLabel>
+                                            {userData.memberships.map((m: any) => (
+                                                <DropdownMenuItem
+                                                    key={m.jarId}
+                                                    onClick={() => handleDuplicate(idea, m.jarId)}
+                                                    className="cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5"
+                                                >
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium text-sm">{m.jar.name || "My Jar"}</span>
+                                                        <span className="text-[10px] text-slate-500">{m.jar.topic || m.jar.type}</span>
+                                                    </div>
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                ) : (
+                                    <button
+                                        onClick={() => handleDuplicate(idea)}
+                                        className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                                        title="Add Again"
+                                        disabled={isDuplicating === idea.id}
+                                    >
+                                        {isDuplicating === idea.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Copy className="w-5 h-5" />}
+                                    </button>
+                                )}
                                 <CalendarButton idea={idea} />
                                 {idea.canEdit && (
                                     <button
@@ -256,16 +306,6 @@ export default function MemoriesPage() {
                 initialMode={ratingMode}
             />
 
-            <AddIdeaModal
-                isOpen={!!duplicatingIdea}
-                onClose={() => {
-                    setDuplicatingIdea(null);
-                    fetchIdeas();
-                }}
-                initialData={duplicatingIdea}
-                isPremium={isPremium}
-                onUpgrade={() => { }}
-            />
 
             <DeleteConfirmModal
                 isOpen={!!ideaToDelete}
