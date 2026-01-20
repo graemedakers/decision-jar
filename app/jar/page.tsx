@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
@@ -16,6 +16,7 @@ import React from "react";
 
 export default function JarPage() {
     const router = useRouter();
+    const [searchParams] = useState(new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''));
 
     // Custom Hooks
     const { userData, isPremium, refreshUser, isLoading: isLoadingUser, level, hasPaid, coupleCreatedAt, isTrialEligible } = useUser();
@@ -64,7 +65,20 @@ export default function JarPage() {
             }
         };
         fetchAvailableJars();
+        fetchAvailableJars();
     }, []);
+
+    // Check for Gift Acceptance
+    useEffect(() => {
+        const newGift = searchParams.get('newGift');
+        if (newGift) {
+            setShowConfetti(true);
+            // Clean URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('newGift');
+            window.history.replaceState({}, '', url);
+        }
+    }, [searchParams]);
 
     const handleContentUpdate = () => {
         fetchIdeas();
@@ -157,6 +171,21 @@ export default function JarPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    {userData?.activeJarId && isAdmin && (
+                        <Button
+                            onClick={() => openModal('GIFT_JAR', {
+                                jarId: userData.activeJarId,
+                                jarName: userData.jarName || 'My Jar',
+                                ideaCount: ideas.filter(i => i.status === 'APPROVED').length
+                            })}
+                            variant="outline"
+                            className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 hidden sm:flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                        >
+                            <Gift className="w-4 h-4" />
+                            <span>Gift Jar</span>
+                        </Button>
+                    )}
+
                     <Button
                         onClick={() => openModal('ADD_IDEA')}
                         className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-6 h-11 shadow-lg shadow-primary/20 flex items-center gap-2"

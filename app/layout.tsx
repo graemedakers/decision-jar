@@ -11,6 +11,7 @@ import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { ModalProvider } from "@/components/ModalProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { Toaster } from "sonner";
 
@@ -161,17 +162,19 @@ export default function RootLayout({
         />
         <PostHogProvider>
           <QueryProvider>
-            <ModalProvider>
-              <ServiceWorkerRegistration />
-              <Toaster position="top-center" expand={true} richColors />
-              {children}
-              <PWAInstaller />
-              <InstallPrompt />
-              <BottomNav />
-              <UserStatus />
-              <HelpButton />
-              <AnalyticsProvider />
-            </ModalProvider>
+            <AuthProvider>
+              <ModalProvider>
+                <ServiceWorkerRegistration />
+                <Toaster position="top-center" expand={true} richColors />
+                {children}
+                <PWAInstaller />
+                <InstallPrompt />
+                <BottomNav />
+                <UserStatus />
+                <HelpButton />
+                <AnalyticsProvider />
+              </ModalProvider>
+            </AuthProvider>
           </QueryProvider>
         </PostHogProvider>
       </body>

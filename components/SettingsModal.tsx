@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/Input";
 import { getApiUrl, isCapacitor, getCurrentLocation } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteLogModal } from "@/components/DeleteLogModal";
-import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown, ShieldCheck } from "lucide-react";
+import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown, ShieldCheck, Gift } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BASE_DOMAIN } from "@/lib/config";
@@ -14,6 +14,7 @@ import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { getJarLabels } from "@/lib/labels";
 import { NotificationToggle } from "./NotificationToggle";
 import { VerifyEmailGate } from "./VerifyEmailGate";
+import { useModalSystem } from "./ModalProvider";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -26,6 +27,7 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour, onSettingsChanged }: SettingsModalProps) {
     const router = useRouter();
+    const { openModal } = useModalSystem();
     const [location, setLocation] = useState(currentLocation || "");
     const [interests, setInterests] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +44,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [jarSelectionMode, setJarSelectionMode] = useState<"RANDOM" | "VOTE" | "ALLOCATION" | "ADMIN_PICK">("RANDOM");
     const [jarVoteCandidates, setJarVoteCandidates] = useState(0);
     const [defaultIdeaPrivate, setDefaultIdeaPrivate] = useState(false);
+    const [isGiftable, setIsGiftable] = useState(true);
 
     // Premium Invite Logic
     const [currentUserEmail, setCurrentUserEmail] = useState("");
@@ -83,6 +86,14 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         if (data.user.jarSelectionMode) setJarSelectionMode(data.user.jarSelectionMode);
                         setJarVoteCandidates(data.user.jarVoteCandidatesCount || 0);
                         setDefaultIdeaPrivate(!!data.user.defaultIdeaPrivate);
+
+                        // New Gifting settings
+                        if (data.user.activeJarId) {
+                            fetch(getApiUrl(`/api/jars/${data.user.activeJarId}`))
+                                .then(r => r.json())
+                                .then(jar => setIsGiftable(jar.isGiftable ?? true));
+                        }
+
                         setCurrentUserEmail(data.user.email || "");
                         setPremiumInviteToken(data.user.premiumInviteToken || "");
                         setIsEmailVerified(!!data.user.emailVerified);
@@ -120,6 +131,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         selectionMode: jarSelectionMode,
                         voteCandidatesCount: Number(jarVoteCandidates),
                         defaultIdeaPrivate,
+                        isGiftable
                     }),
                     credentials: 'include',
                 });
@@ -286,11 +298,12 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                     </button>
                                 </div>
 
-                                <div className="flex border-b border-slate-200 dark:border-white/10 shrink-0 bg-white dark:bg-slate-900 z-10">
+                                {/* TABS HEADER */}
+                                <div className="flex border-b border-slate-200 dark:border-white/10 shrink-0 bg-white dark:bg-slate-900 z-10 transition-colors duration-300">
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab('PERSONAL')}
-                                        className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'PERSONAL' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
+                                        className={`flex-1 py-3 text-sm font-bold border-b-2 transition-all duration-300 ${activeTab === 'PERSONAL' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
                                     >
                                         My Preferences
                                     </button>
@@ -298,7 +311,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                         <button
                                             type="button"
                                             onClick={() => setActiveTab('JAR')}
-                                            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'JAR' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
+                                            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-all duration-300 ${activeTab === 'JAR' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}
                                         >
                                             Jar Settings
                                         </button>
@@ -368,6 +381,21 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                             <Sparkles className="w-4 h-4 mr-2" /> Restart Tour
                                                         </Button>
                                                     )}
+
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => { onClose(); openModal('GIFT_MANAGER'); }}
+                                                        className="w-full justify-start h-12 gap-3 border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-900/10 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+                                                    >
+                                                        <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                                            <Gift className="w-3.5 h-3.5" />
+                                                        </div>
+                                                        <div className="flex flex-col items-start leading-none gap-1">
+                                                            <span className="font-semibold text-indigo-900 dark:text-indigo-300">My Gifts</span>
+                                                            <span className="text-[10px] text-indigo-600/80 dark:text-indigo-400/80">Manage jars sent & received</span>
+                                                        </div>
+                                                    </Button>
 
                                                     <Button
                                                         type="button"
@@ -550,6 +578,19 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                             className="rounded border-slate-300 text-primary focus:ring-primary w-5 h-5 cursor-pointer"
                                                         />
                                                     </div>
+
+                                                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-100 dark:border-white/10">
+                                                        <div className="flex flex-col">
+                                                            <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Allow Gifting</label>
+                                                            <p className="text-[10px] text-slate-500 dark:text-slate-400">Allow others to create a gift copy of this jar</p>
+                                                        </div>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isGiftable}
+                                                            onChange={(e) => setIsGiftable(e.target.checked)}
+                                                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-5 h-5 cursor-pointer"
+                                                        />
+                                                    </div>
                                                 </div>
 
                                                 {/* MEMBERS / INVITES */}
@@ -609,7 +650,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         </motion.div>
                     </div>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
             <DeleteLogModal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} />
 
             {/* Email Verification Gate */}

@@ -197,6 +197,13 @@ function DashboardContent() {
 
         // If user has NO personal jars, prompt them to create one
         if (!hasPersonalJars) {
+            // Check for pending gift FIRST
+            const pendingGift = sessionStorage.getItem('pending_gift_token');
+            if (pendingGift) {
+                router.push(`/gift/${pendingGift}`);
+                return;
+            }
+
             // Use a longer delay to ensure page is fully loaded on mobile
             setTimeout(() => {
                 openModal('CREATE_JAR');

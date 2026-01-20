@@ -5,7 +5,7 @@ import webpush from 'web-push';
 const vapidConfigured = !!(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
 if (vapidConfigured) {
     webpush.setVapidDetails(
-        process.env.VAPID_SUBJECT || 'mailto:admin@decisionjar.com',
+        process.env.VAPID_SUBJECT || 'mailto:admin@spinthejar.com',
         process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
         process.env.VAPID_PRIVATE_KEY!
     );

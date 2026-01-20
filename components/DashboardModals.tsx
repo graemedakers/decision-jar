@@ -36,6 +36,8 @@ const ToolsModal = dynamic(() => import("@/components/ToolsModal").then(m => m.T
 const AddMemoryModal = dynamic(() => import("@/components/AddMemoryModal").then(m => m.AddMemoryModal), { ssr: false });
 const CreateJarModal = dynamic(() => import("@/components/CreateJarModal").then(m => m.CreateJarModal), { ssr: false });
 const JoinJarModal = dynamic(() => import("@/components/JoinJarModal").then(m => m.JoinJarModal), { ssr: false });
+const GiftJarModal = dynamic(() => import("@/components/GiftJarModal").then(m => m.GiftJarModal), { ssr: false });
+const GiftManagerModal = dynamic(() => import("@/components/GiftManagerModal").then(m => m.GiftManagerModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
@@ -86,6 +88,18 @@ export function DashboardModals({
                 isOpen={activeModal === 'PREMIUM'}
                 onClose={closeModal}
             />
+
+            {activeModal === 'GIFT_JAR' && modalProps && (
+                <GiftJarModal
+                    jarId={modalProps.jarId}
+                    jarName={modalProps.jarName}
+                    ideaCount={modalProps.ideaCount}
+                />
+            )}
+
+            {activeModal === 'GIFT_MANAGER' && (
+                <GiftManagerModal />
+            )}
 
             <ReviewAppModal
                 isOpen={activeModal === 'REVIEW_APP'}

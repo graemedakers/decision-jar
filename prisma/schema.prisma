@@ -20,8 +20,13 @@ model Jar {
   topic         String?  @default("General") // e.g. "Movies", "Food"
   voteCandidatesCount Int @default(0) // 0 = All ideas, >0 = Shortlist/Runoff count
   defaultIdeaPrivate Boolean @default(false)
+  isGiftable    Boolean  @default(true) 
 
   customCategories Json? // Array of { id: string, label: string }
+
+  sourceGiftId  String?
+  sourceGift    GiftToken? @relation("ClonedFromGift", fields: [sourceGiftId], references: [id])
+  giftsCreated  GiftToken[] @relation("GiftedJar")
   
   members       JarMember[]
   ideas         Idea[]
@@ -153,6 +158,45 @@ model User {
   // ✅ NEW: Premium invite tokens created by this user
   createdPremiumTokens  PremiumInviteToken[] @relation("TokenCreator")
   usedPremiumToken      PremiumInviteToken?  @relation("TokenUser")
+
+  // Gifting
+  giftsSent             GiftToken[]      @relation("GiftCreator")
+  giftsReceived         GiftToken[]      @relation("GiftRecipient")
+  giftsThisMonth        Int              @default(0)
+  lastGiftSentAt        DateTime?
+}
+
+model GiftToken {
+  id            String   @id @default(uuid())
+  token         String   @unique
+  
+  // Source
+  sourceJarId   String
+  sourceJar     Jar      @relation("GiftedJar", fields: [sourceJarId], references: [id])
+  giftedById    String
+  giftedBy      User     @relation("GiftCreator", fields: [giftedById], references: [id])
+  
+  // Metadata
+  personalMessage String? 
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime?
+  
+  // Usage Tracking
+  viewCount     Int      @default(0)
+  acceptCount   Int      @default(0)
+  acceptedById  String?
+  acceptedBy    User?    @relation("GiftRecipient", fields: [acceptedById], references: [id])
+  acceptedAt    DateTime?
+  
+  // Downstream Jars (Clones)
+  clonedJars    Jar[]    @relation("ClonedFromGift")
+  
+  // Status
+  isActive      Boolean  @default(true)
+  
+  @@index([token])
+  @@index([sourceJarId])
+  @@index([giftedById])
 }
 
 // ✅ HIGH PRIORITY FIX: Secure premium token system
