@@ -37,6 +37,7 @@ export type ModalType =
     | 'TRIAL_EXPIRED'
     | 'GIFT_JAR'
     | 'GIFT_MANAGER'
+    | 'MY_GIFTS'
     | null;
 
 interface ModalContextType {

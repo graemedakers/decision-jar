@@ -44,7 +44,20 @@ export async function GET(req: Request) {
             orderBy: { createdAt: 'desc' }
         });
 
-        // 3. Format Response
+        // 3. Simple Stats
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                giftsThisMonth: true,
+                isLifetimePro: true,
+                subscriptionStatus: true
+            }
+        });
+
+        const isPro = user?.isLifetimePro || user?.subscriptionStatus === 'active';
+        const monthlyLimit = isPro ? 9999 : 2; // 2 gifts/month for free users
+
+        // 4. Format Response
         const formattedSent = sentGifts.map(g => ({
             token: g.token,
             jarName: g.sourceJar?.name || "Unknown Jar",
@@ -60,12 +73,20 @@ export async function GET(req: Request) {
             jarName: j.name,
             receivedAt: j.createdAt, // Approximate acceptance time
             from: j.sourceGift?.giftedBy?.name || "Anonymous",
-            message: j.sourceGift?.personalMessage
+            message: j.sourceGift?.personalMessage,
+            senderImage: j.sourceGift?.giftedBy?.image
         }));
 
         return NextResponse.json({
             sent: formattedSent,
-            received: formattedReceived
+            received: formattedReceived,
+            stats: {
+                sentCount: sentGifts.length,
+                receivedCount: receivedJars.length,
+                monthlySent: user?.giftsThisMonth || 0,
+                monthlyLimit: monthlyLimit,
+                canSendMore: (user?.giftsThisMonth || 0) < monthlyLimit
+            }
         });
 
     } catch (error) {

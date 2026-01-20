@@ -385,7 +385,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                     <Button
                                                         type="button"
                                                         variant="outline"
-                                                        onClick={() => { onClose(); openModal('GIFT_MANAGER'); }}
+                                                        onClick={() => { onClose(); openModal('MY_GIFTS'); }}
                                                         className="w-full justify-start h-12 gap-3 border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-900/10 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
                                                     >
                                                         <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
