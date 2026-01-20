@@ -30,6 +30,12 @@ function validateRecommendation(
     userRequest: string,
     toolType: string
 ): boolean {
+    // Non-location tools or tools without strict filtering rules yet should skip validation
+    const skipValidationTools = ['CHEF', 'HOLIDAY', 'DATE_NIGHT', 'WEEKEND_PLANNER', 'WEEKEND_EVENTS'];
+    if (skipValidationTools.includes(toolType)) {
+        return true;
+    }
+
     // If no specific request, accept all recommendations
     if (!userRequest || userRequest.trim().length === 0) {
         return true;
@@ -377,11 +383,12 @@ export async function POST(req: NextRequest) {
                 inputs,
                 targetLocation,
                 query,
-                isPrivate
+                isPrivate === true
             );
 
             console.log(`[Concierge] Attempt ${attempt} for query: "${query}"`);
             const jsonResponse = await reliableGeminiCall(prompt, { jsonMode: true }) as { recommendations?: any[] };
+            console.log(`[Concierge] Received response from model for ${toolKey}. Total recs: ${jsonResponse.recommendations?.length || 0}`);
 
             if (query && jsonResponse.recommendations && Array.isArray(jsonResponse.recommendations)) {
                 // Validate each recommendation
@@ -398,6 +405,15 @@ export async function POST(req: NextRequest) {
 
                 return { ...jsonResponse, recommendations: filteredRecommendations };
             }
+
+            // Fallback: If AI returned empty or ill-formatted, and it's attempt 2, return mock data
+            // This prevents a "dead" experience for the user.
+            if ((!jsonResponse.recommendations || jsonResponse.recommendations.length === 0) && attempt >= 2) {
+                console.log(`[Concierge] AI failed twice. Falling back to mock data for ${toolKey}`);
+                const { mockResponse } = getConciergePromptAndMock(toolKey, inputs, targetLocation, query, isPrivate === true);
+                return mockResponse;
+            }
+
             return jsonResponse;
         };
 

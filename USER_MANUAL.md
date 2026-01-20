@@ -218,7 +218,7 @@ Creates a cohesive timeline for an evening, typically including Drinks, Dinner, 
 ### Weekend Planner
 Generates a curated list of 5 activity ideas for the upcoming (or current) weekend, tailored to your location and the weather.
 
-### Catering Planner (Premium)
+### Dinner Party Chef (Premium)
 Plan professional-grade dinner parties or group events with ease. 
 - Input people count, age groups, and desired themes.
 - Choose complexity levels from "Simple" to "Michelin Star".

@@ -313,7 +313,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 question: "How can AI help with catering?",
-                answer: "The Catering Planner tool can scale ingredients perfectly for any group size and design a cohesive menu theme that flows from appetizer to dessert."
+                answer: "The Dinner Party Chef tool can scale ingredients perfectly for any group size and design a cohesive menu theme that flows from appetizer to dessert."
             }
         ],
         sections: [
@@ -323,7 +323,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 title: "The 'Mise en Place' Strategy",
-                content: "Professional chefs use 'Mise en Place'—everything in its place. Our Catering Planner provides a unified 'Prep & Timing Strategy' that breaks your tasks into manageable blocks. By front-loading the work according to the AI's timeline, you can be present at your own party."
+                content: "Professional chefs use 'Mise en Place'—everything in its place. Our Dinner Party Chef provides a unified 'Prep & Timing Strategy' that breaks your tasks into manageable blocks. By front-loading the work according to the AI's timeline, you can be present at your own party."
             }
         ]
     },
@@ -343,10 +343,10 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
         faqs: [
             {
                 question: "I'm stuck cooking the same 5 meals. How do I start?",
-                answer: "Switch your jar topic to 'Cooking & Recipes' and use the Catering Planner. Ask for a specific theme like 'Tokyo Street Food' or 'Greek Island Summer' to get instant inspiration."
+                answer: "Switch your jar topic to 'Cooking & Recipes' and use the Dinner Party Chef. Ask for a specific theme like 'Tokyo Street Food' or 'Greek Island Summer' to get instant inspiration."
             },
             {
-                question: "Can I use the Catering Planner for simple weeknight meals?",
+                question: "Can I use the Dinner Party Chef for simple weeknight meals?",
                 answer: "Absolutely. Simply set the complexity to 'Simple' and the audience to 'Adults' or 'Children' to get efficient, high-quality meal ideas that fit your schedule."
             }
         ],

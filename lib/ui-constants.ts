@@ -15,21 +15,23 @@
 export const ACTION_LABELS = {
   // Primary action - selecting an idea to do
   DO_THIS: "I'll do this!",
-  
+
   // Jar actions
   ADD_TO_JAR: "Add to Jar",
   JAR: "Jar",
-  
+
   // Sharing
   SHARE: "Share",
-  
+
   // View actions
   VIEW_DETAILS: "View Details",
   VIEW_MAP: "View Map",
   VIEW_ON_MAP: "View on Map",
   VISIT_WEBSITE: "Visit Website",
   VIEW_WEB: "View Web",
-  
+  VIEW_MENU: "View Menu",
+  VIEW_ITINERARY: "View Itinerary",
+
   // Loading/State labels
   ADDING: "Adding...",
   ADDED: "Added",
@@ -37,7 +39,7 @@ export const ACTION_LABELS = {
   SAVED: "Saved",
   LOADING: "Loading...",
   DELETING: "Deleting...",
-  
+
   // Navigation
   CANCEL: "Cancel",
   CLOSE: "Close",
@@ -45,7 +47,7 @@ export const ACTION_LABELS = {
   NEXT: "Next",
   DONE: "Done",
   CONTINUE: "Continue",
-  
+
   // CRUD operations
   DELETE: "Delete",
   REMOVE: "Remove",
@@ -53,7 +55,7 @@ export const ACTION_LABELS = {
   SAVE: "Save",
   CREATE: "Create",
   UPDATE: "Update",
-  
+
   // Confirmation
   CONFIRM: "Confirm",
   YES: "Yes",

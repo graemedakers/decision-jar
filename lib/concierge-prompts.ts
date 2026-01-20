@@ -551,19 +551,19 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
         case 'CHEF':
             return {
                 prompt: `
-                Act as a professional chef planning a menu.
-                Create 3 DISTINCT, complete menu concepts.
+                Act as a professional Executive Chef and Menu Planner.
+                Create 3 DISTINCT, premium, and complete dinner party menu concepts.
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                "${extraInstructions}"
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                Preference:
+                USER PREFERENCES:
                 - Occasion: ${inputs.occasion || "Any"}
                 - Guests: ${inputs.guests || "Any"}
                 - Cuisine: ${inputs.cuisine || "Any"}
@@ -571,43 +571,62 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 - Effort: ${inputs.complexity || "Any"}
                 - Dietary: ${inputs.dietary || "None"}
                 
-                INSTRUCTIONS:
-                1. Provide a cohesive menu with courses that complement each other.
-                2. Include a brief shopping list summary or key ingredients.
-                3. Outline a basic timing strategy for the cook.
-                
+                ${isSecretMode ? `
+                🤫 SECRET MODE ACTIVE:
+                The user wants to keep these ideas a complete surprise. 
+                Do NOT include the specific names of dishes or ingredients in the high-level 'name' and 'description' fields if they would give away the surprise too easily. 
+                Focus on the VIBE and THEME in the name/description, and keep the specific menu details inside the 'details' field.
+                ` : ''}
+
+                YOUR MISSION:
+                1. Design a cohesive, restaurant-quality menu that can be executed at home.
+                2. Provide a FULL list of ingredients with estimated quantities suitable for the guest count.
+                3. Include detailed cooking instructions for each course.
+                4. Create a "Chef's Prep Strategy" including timing (what to do 1 day before, day of, and just before serving).
+                5. Ensure the complexity matches the user's requested effort level.
+
                 Return JSON with "recommendations" array (size 3).
+                Each item represents a FULL DINNER PLAN.
+
                 Fields:
-                - name: Menu Title
-                - description: Brief theme overview
+                - name: Creative Menu Title (e.g. "Parisian Bistro Night")
+                - description: Compelling 1-2 sentence overview of the theme and flavor profile.
                 - price: Estimated Cost Level ($, $$, $$$)
-                - google_rating: Complexity Rating (1-5, keep as number)
-                - details: A formatted string containing the Menu & Guide.
+                - google_rating: Complexity Rating (1: Easy, 3: Intermediate, 5: Professional)
+                - details: A formatted string containing the FULL GUIDE in Markdown.
                   **IMPORTANT FORMATTING FOR 'details':**
-                  Use Markdown.
-                  Format as:
-                  ### The Menu
-                  **Entree:** [Dish Name] - [Description]
-                  **Main:** [Dish Name] - [Description]
-                  **Dessert:** [Dish Name] - [Description]
+                  Use Markdown headers (###) for clear navigation.
                   
-                  ### Key Ingredients
-                  - [List key complex items...]
+                  Follow this structure:
+                  ### 🍽️ The Menu
+                  (Include only the specific courses requested: ${inputs.courses || "Main Only"})
+                  **Entree:** [Dish Name] - [Brief summary]
+                  **Main:** [Dish Name] - [Brief summary]
+                  **Dessert:** [Dish Name] - [Brief summary]
                   
-                  ### Chef's Strategy
-                  - [Step 1: Prep ahead...]
-                  - [Step 2: Cooking order...]
+                  ### 🛒 Shopping List
+                  (Categorize items for easier shopping. Include quantities for ${inputs.guests || "the party"}.)
+                  - [Section header, e.g. Produce, Meat, Dairy]
+                  - [Quantity] [Item Name]
+                  
+                  ### 👨‍🍳 Cooking Instructions
+                  (Step-by-step for all courses)
+                  1. [Instruction]
+                  2. ...
+                  
+                  ### ⏱️ Prep & Timing Strategy
+                  - **1 Day Before:** [What can be prepped?]
+                  - **Day Of:** [Early prep]
+                  - **T-Minus 1 Hour:** [Final assembly/cooking]
+                  - **During Dinner:** [Serving tips]
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Italian Romance", description: "A classic 3-course Italian dinner.", price: "$$", google_rating: 3, details: "### The Menu\n**Entree:** Caprese Salad\n**Main:** Risotto\n..." },
-                        { name: "Taco Fiesta", description: "Fun and easy DIY tacos.", price: "$", google_rating: 1, details: "### The Menu\n**Main:** Tacos..." }
+                        { name: "Italian Romance", description: "A classic 3-course Italian dinner featuring handmade pasta and rich flavors.", price: "$$", google_rating: 3, details: "### 🍽️ The Menu\n**Entree:** Caprese Skewers\n**Main:** Truffle Mushroom Risotto\n**Dessert:** Classic Tiramisu\n\n### 🛒 Shopping List\n- **Produce:** Basil, Mushrooms, Garlic\n- **Dairy:** Mascarpone, Butter, Parmesan\n\n### 👨‍🍳 Cooking Instructions\n1. Prepare the Tiramisu first...\n\n### ⏱️ Prep & Timing Strategy\n- **1 Day Before:** Bake the ladyfingers..." },
+                        { name: "Taco Fiesta", description: "High-energy, interactive DIY taco bar with fresh salsas and slow-cooked meats.", price: "$", google_rating: 1, details: "### 🍽️ The Menu\n**Main:** Braised Chicken Tacos..." }
                     ]
                 }
             };
-
-
-
 
         case 'DATE_NIGHT':
             return {
@@ -681,11 +700,15 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 - Budget: ${inputs.price || "Any"}
                 
                 INSTRUCTIONS:
-                1. PRIMARY GOAL: Find events scheduled for a SHORT TIME PERIOD only (e.g. happening specifically this weekend, this week, or this month).
-                   - Look for: Pop-up markets, festivals, live music gigs, theatre shows, limited-run exhibitions, sports matches, community events.
+                1. PRIORITY HIERARCHY (CRITICAL): You MUST prioritize events based on their scarcity:
+                   - TIER 1 (TOP PRIORITY): Ultra-short-term events (e.g., a 2-day festival, a weekend carnival, a one-night-only concert).
+                   - TIER 2: Medium-term limited events (e.g., a 6-week theatre show, a season-specific market).
+                   - TIER 3 (LOWEST PRIORITY): Recurring year-round events (e.g., an exhibition on every Saturday).
+                2. PRIMARY GOAL: Find events scheduled for a SHORT TIME PERIOD only. 
+                   - Prioritize Tier 1 > Tier 2 > Tier 3.
                    - Do NOT suggest "always open" places like standard museums, parks, or cinemas UNLESS they have a specific special event on.
-                2. FALLBACK: Only if you cannot find 5 high-quality time-limited events, fill the remaining spots with exceptional "evergreen" activities that perfectly match the requested vibe.
-                3. Ensure venues are confirmed open on the requested days.
+                3. FALLBACK: Only if you cannot find 5 high-quality time-limited events, fill the remaining spots with TIER 3 recurring events or exceptional "evergreen" activities that perfectly match the requested vibe.
+                4. Ensure venues are confirmed open on the requested days.
                 
                 🔗 CRITICAL - WEBSITE FIELD:
                 DO NOT guess or invent website URLs. Instead, use this Google Search format:

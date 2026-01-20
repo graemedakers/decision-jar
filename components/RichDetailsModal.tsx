@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
-import { X, ChefHat, ShoppingCart, Clock, Utensils, Check, Share2, Plus, Zap, Star, Plane, Map, Calendar, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { X, ChefHat, ShoppingCart, Clock, Utensils, Check, Share2, Plus, Zap, Star, Plane, Map, Calendar, ArrowRight, ChevronDown, ChevronUp, Download } from "lucide-react";
+import { downloadShoppingListPdf } from "@/lib/pdf-utils";
+
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
@@ -225,11 +227,22 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/50 flex gap-3 shrink-0">
-                    <Button variant="outline" onClick={onAddToJar} className="flex-1 border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 h-12">
+                <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/50 flex flex-wrap gap-3 shrink-0">
+                    <Button variant="outline" onClick={onAddToJar} className="flex-1 border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 h-12 min-w-[120px]">
                         <Plus className="w-4 h-4 mr-2" /> <span className="hidden sm:inline">Add to Jar</span><span className="sm:hidden">Add</span>
                     </Button>
-                    <Button onClick={onGoAction} className={`flex-[2] h-12 bg-gradient-to-r text-white font-bold shadow-lg ${configId === 'holiday_concierge' ? 'from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 shadow-blue-500/20' : 'from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-emerald-500/20'}`}>
+
+                    {configId === 'chef_concierge' && (
+                        <Button
+                            variant="outline"
+                            onClick={() => downloadShoppingListPdf(data.details, data.name)}
+                            className="flex-1 border-emerald-300 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 h-12 min-w-[120px]"
+                        >
+                            <Download className="w-4 h-4 mr-2" /> <span className="hidden sm:inline">Shopping List</span><span className="sm:hidden">List</span>
+                        </Button>
+                    )}
+
+                    <Button onClick={onGoAction} className={`flex-[2] h-12 bg-gradient-to-r text-white font-bold shadow-lg min-w-[160px] ${configId === 'holiday_concierge' ? 'from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 shadow-blue-500/20' : 'from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-emerald-500/20'}`}>
                         <Zap className="w-4 h-4 mr-2" /> {theme.buttonLabel}
                     </Button>
                 </div>

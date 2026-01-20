@@ -3,10 +3,11 @@ import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
 import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Clock, Sparkles, Loader2, MapPin, ExternalLink, Star, Utensils, Check, Popcorn, Download } from "lucide-react";
+import { X, Calendar, Clock, Sparkles, Loader2, MapPin, ExternalLink, Star, Utensils, Check, Popcorn, Download, ShoppingCart } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useState, useRef } from "react";
 import { Confetti } from "./Confetti";
+import { ShoppingListPreview } from "./ShoppingListPreview";
 import { exportToPdf } from "@/lib/pdf-export";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -37,6 +38,8 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
     // PDF Export State
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
+    const [isExportingShopping, setIsExportingShopping] = useState(false);
+    const shoppingRef = useRef<HTMLDivElement>(null);
 
     const handleExportPdf = async () => {
         if (!contentRef.current || !idea) return;
@@ -48,6 +51,18 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
             alert("Failed to export PDF");
         } finally {
             setIsExporting(false);
+        }
+    };
+
+    const handleExportShoppingPdf = async () => {
+        if (!shoppingRef.current || !idea) return;
+        setIsExportingShopping(true);
+        try {
+            await exportToPdf(shoppingRef.current, `shopping-list-${idea.description || 'menu'}`);
+        } catch (error) {
+            console.error("Shopping PDF Export failed", error);
+        } finally {
+            setIsExportingShopping(false);
         }
     };
 
@@ -304,22 +319,29 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                                 <ItineraryPreview itinerary={itinerary} />
                                             </div>
                                         </div>
-                                    ) : cateringPlan ? (
+                                    ) : (cateringPlan || idea.details?.includes('Shopping List')) ? (
                                         <div className="space-y-2">
                                             <div className="flex justify-end">
                                                 <Button
-                                                    onClick={handleExportPdf}
+                                                    onClick={handleExportShoppingPdf}
                                                     variant="ghost"
                                                     size="sm"
                                                     className="text-xs text-slate-500 hover:text-orange-600 h-8"
-                                                    disabled={isExporting}
+                                                    disabled={isExportingShopping}
                                                 >
-                                                    {isExporting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Download className="w-3 h-3 mr-1" />}
-                                                    Export Menu PDF
+                                                    {isExportingShopping ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <ShoppingCart className="w-3 h-3 mr-1" />}
+                                                    Shopping List
                                                 </Button>
                                             </div>
                                             <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl">
                                                 <CateringPreview plan={cateringPlan} />
+                                            </div>
+
+                                            {/* Hidden component for shopping list PDF export */}
+                                            <div className="absolute left-[-9999px] top-0 pointer-events-none overflow-hidden h-0">
+                                                <div ref={shoppingRef} className="w-[794px] bg-white text-slate-900 p-8">
+                                                    <ShoppingListPreview plan={cateringPlan} title={idea.description} markdown={idea.details} />
+                                                </div>
                                             </div>
                                         </div>
                                     ) : (

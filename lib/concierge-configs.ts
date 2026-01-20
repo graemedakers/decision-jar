@@ -531,7 +531,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
                 id: 'courses',
                 label: 'Menu Structure',
                 type: 'single-select',
-                options: ["Main Dish Only", "2 Courses (Entree + Main)", "3 Courses (Entree + Main + Dessert)", "Shared Plates / Tapas Style", "Degustation (5+ Small Plates)"]
+                options: ["Main Dish Only", "2 Courses (Entree + Main)", "2 Courses (Main + Dessert)", "3 Courses (Entree + Main + Dessert)", "Shared Plates / Tapas Style", "Degustation (5+ Small Plates)"]
             },
             {
                 id: 'complexity',
@@ -549,7 +549,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: ChefHat,
             subtextKey: 'occasion',
-            goActionLabel: ACTION_LABELS.DO_THIS
+            goActionLabel: ACTION_LABELS.VIEW_MENU
         }
     },
 
@@ -676,7 +676,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         resultCard: {
             mainIcon: Calendar,
             subtextKey: 'duration_label',
-            goActionLabel: ACTION_LABELS.DO_THIS
+            goActionLabel: ACTION_LABELS.VIEW_ITINERARY
         }
     }
 };

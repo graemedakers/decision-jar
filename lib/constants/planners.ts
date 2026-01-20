@@ -84,7 +84,7 @@ export const SURPRISE_ME_CONFIG: WizardConfig = {
             defaultValue: true,
             onLabel: 'Secret Mode On',
             offLabel: 'Public Mode',
-            helpText: 'Secret ideas are hidden until spun.',
+            helpText: 'Secret ideas are hidden from other members until spun.',
         },
     ],
 

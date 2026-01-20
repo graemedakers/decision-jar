@@ -57,6 +57,13 @@ export async function POST(request: Request) {
         const validCategories = getCategoriesForTopic(jarTopic, (activeJar as any).customCategories);
         const validCategoryIds = validCategories.map(c => c.id).join(', ');
 
+        // Lookup the semantic label for better context (e.g. INDOOR -> "Chill/Home")
+        const selectedCategoryDef = validCategories.find(c => c.id === category);
+        const categoryLabel = selectedCategoryDef ? selectedCategoryDef.label : category;
+
+        // Determine if this is strictly an At-Home category
+        const isHomeCategory = category === 'INDOOR' || category === 'STAYCATION' || category === 'STREAMING' || (categoryLabel && (categoryLabel.includes('Home') || categoryLabel.includes('Chill')));
+
         const prompt = `
         Generate a random, creative idea for a jar with topic "${jarTopic || 'General'}".
         
@@ -67,13 +74,15 @@ export async function POST(request: Request) {
         
         CRITICAL:
         - Must be valid JSON.
-        - If possible, find a REAL venue or event in ${location}.
+        ${isHomeCategory
+                ? '- Location: MUST be done AT HOME. Do NOT suggest going out to a venue. Focus on activities to do in the house.'
+                : `- If possible, find a REAL venue or event in ${location}.`}
         
-        CONSTRAINTS:
-        - Category: Must be one of: [${validCategoryIds}]. Requested: ${category || 'Any'}
-        ${amountToCost(cost) ? `- Max Cost: ${amountToCost(cost)}` : ''}
-        ${activityLevel ? `- Activity Level: ${activityLevel}` : ''}
-        ${timeOfDay ? `- Time of Day: ${timeOfDay}` : ''}
+        CONSTRAINTS (MUST FOLLOW STRICTLY):
+        - Category: MUST match specific type "${categoryLabel}" (ID: ${category || 'Any'}).
+        ${amountToCost(cost) ? `- Cost: MUST be ${amountToCost(cost)} or cheaper.` : ''}
+        ${activityLevel ? `- Energy: MUST matches ${activityLevel} energy.` : ''}
+        ${timeOfDay ? `- Time: MUST be suitable for ${timeOfDay}.` : ''}
         
         Return JSON with:
         - description (string)

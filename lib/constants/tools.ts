@@ -29,7 +29,7 @@ export interface DashboardTool {
     communityJarCompatible?: boolean; // If true, shows in community jars (usually false for most)
 
     // Dynamic Display Logic (handled by consumer, but flagged here)
-    // For example, "Date Night Planner" vs "Catering Planner" swap based on topic
+    // For example, "Night Out Planner" vs "Dinner Party Chef" swap based on topic
     topicSpecific?: {
         topic: string; // e.g., 'Cooking & Recipes'
         showInsteadOf?: string; // ID of tool to replace, or just logic handle
@@ -119,12 +119,12 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         requiresPremium: true,
         actionType: 'modal',
         modalId: 'date_night',
-        showInDashboard: true, // Special handling: swapped with Catering if topic is Cooking
+        showInDashboard: true, // Special handling: swapped with Dinner Party Chef if topic is Cooking
         showInExplore: true
     },
     {
         id: 'catering_planner',
-        title: 'Catering Planner',
+        title: 'Dinner Party Chef',
         description: 'Professional menus for any occasion.',
         icon: ChefHat,
         color: 'red', // Explore uses red, Grid used Orange. Going with Red for distinction.

@@ -48,7 +48,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "premium-shortcuts", title: "Premium Shortcuts", icon: Share2 },
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
         { id: "weekend-planner", title: "Weekend Planner", icon: Calendar },
-        { id: "catering-planner", title: "Catering Planner", icon: Utensils },
+        { id: "catering-planner", title: "Dinner Party Chef", icon: Utensils },
         { id: "spinning", title: "Spinning the Jar", icon: Sparkles },
 
         { id: "history", title: "Archive & History", icon: History },
@@ -284,7 +284,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                 <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300 mt-2">
                                     <li><strong>Weekend Planner:</strong> Get a 5-item itinerary for the weekend</li>
                                     <li><strong>Night Out Planner:</strong> Plan a complete evening with drinks, dinner, and events</li>
-                                    <li><strong>Catering Planner:</strong> Design menus for groups and parties</li>
+                                    <li><strong>Dinner Party Chef:</strong> Design menus for groups and parties</li>
                                     <li><strong>Bar Crawl Planner:</strong> Map out a route of top bars in your area</li>
                                 </ul>
                             </div>
@@ -684,9 +684,9 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
             case "catering-planner":
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Catering Planner</h3>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Dinner Party Chef</h3>
                         <p className="text-slate-600 dark:text-slate-300">
-                            Professional menu planning for groups.
+                            Expert menu planning for any occasion.
                         </p>
                         <div className="space-y-2">
                             <h4 className="font-bold text-slate-800 dark:text-white text-sm">International Support</h4>

@@ -263,7 +263,7 @@ export function DashboardModals({
                 />
             )}
 
-            {activeModal === 'CATERING_PLANNER' && (
+            {activeModal === 'DINNER_PARTY_CHEF' && (
                 <GenericConciergeModal
                     isOpen={true}
                     onClose={closeModal}
@@ -373,7 +373,7 @@ export function DashboardModals({
                     onClose={closeModal}
                     isPremium={isPremium}
                     jarTopic={jarTopic}
-                    activityPlannerTitle={jarTopic === 'Cooking & Recipes' ? 'Catering Planner' : 'Night Out Planner'}
+                    activityPlannerTitle={jarTopic === 'Cooking & Recipes' ? 'Dinner Party Chef' : 'Night Out Planner'}
                 />
             )}
 

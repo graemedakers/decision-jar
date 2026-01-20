@@ -3,10 +3,11 @@ import { getItinerary, getCateringPlan } from "@/lib/utils";
 import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
 import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
+import { ShoppingListPreview } from "./ShoppingListPreview";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles, Trash2, Move } from "lucide-react";
+import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles, Trash2, Move, ShoppingCart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { COST_LEVELS, ACTIVITY_LEVELS, TIME_OF_DAY, WEATHER_TYPES } from "@/lib/constants";
 import { exportToPdf } from "@/lib/pdf-export";
@@ -41,6 +42,8 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('PREVIEW');
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
+    const [isExportingShopping, setIsExportingShopping] = useState(false);
+    const shoppingRef = useRef<HTMLDivElement>(null);
 
     // Abandonment tracking
     const [modalOpenTime, setModalOpenTime] = useState<number | null>(null);
@@ -93,6 +96,18 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         }
     };
 
+    const handleExportShoppingPdf = async () => {
+        if (!shoppingRef.current) return;
+        setIsExportingShopping(true);
+        try {
+            await exportToPdf(shoppingRef.current, `shopping-list-${formData.description || 'menu'}`);
+        } catch (error) {
+            console.error("Shopping PDF Export failed", error);
+        } finally {
+            setIsExportingShopping(false);
+        }
+    };
+
     useEffect(() => {
         if (isOpen) {
             setViewMode('PREVIEW');
@@ -142,7 +157,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
             <DialogContent raw className="bg-slate-50 dark:bg-slate-900 border-none">
                 <DialogHeader onClose={handleClose} className="border-none pb-0">
                     <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                        {viewMode === 'PREVIEW' && showPreviewToggle ? (itinerary ? "Itinerary Preview" : cateringPlan ? "Catering Plan" : "Plan Preview") :
+                        {viewMode === 'PREVIEW' && showPreviewToggle ? (itinerary ? "Itinerary Preview" : (cateringPlan || formData.details?.includes('Shopping List')) ? "Menu Preview" : "Plan Preview") :
                             (initialData && initialData.id ? "Edit Idea" : "Add New Idea")}
                         {(!initialData || !initialData.id) && !showPreviewToggle && (
                             <button
@@ -177,14 +192,14 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                 </button>
                             </div>
 
-                            {cateringPlan && viewMode === 'PREVIEW' && (
+                            {(cateringPlan || formData.details?.includes('Shopping List')) && viewMode === 'PREVIEW' && (
                                 <button
-                                    onClick={handleExportPdf}
-                                    disabled={isExporting}
+                                    onClick={handleExportShoppingPdf}
+                                    disabled={isExportingShopping}
                                     className="text-xs font-bold text-slate-500 hover:text-orange-600 flex items-center gap-1 transition-colors disabled:opacity-50"
-                                    aria-label="Export as PDF"
+                                    aria-label="Export Shopping List"
                                 >
-                                    {isExporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <ExternalLink className="w-3 h-3" />} Export PDF
+                                    {isExportingShopping ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShoppingCart className="w-3 h-3" />} Shopping List
                                 </button>
                             )}
                         </div>
@@ -213,17 +228,28 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
                 <div className="flex-1 overflow-y-auto overscroll-contain px-4 md:px-6 py-4 custom-scrollbar">
                     {showPreviewToggle && viewMode === 'PREVIEW' ? (
-                        <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl">
-                            {itinerary ? (
-                                <ItineraryPreview itinerary={itinerary} />
-                            ) : cateringPlan ? (
-                                <CateringPreview plan={cateringPlan} />
-                            ) : (
-                                <ItineraryMarkdownRenderer
-                                    markdown={formData.details}
-                                    variant={formData.details.includes('### Day') ? 'accordion' : 'sections'}
-                                    theme={{ sectionHeaderColor: 'text-secondary' }}
-                                />
+                        <div className="space-y-4">
+                            <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl">
+                                {itinerary ? (
+                                    <ItineraryPreview itinerary={itinerary} />
+                                ) : cateringPlan ? (
+                                    <CateringPreview plan={cateringPlan} />
+                                ) : (
+                                    <ItineraryMarkdownRenderer
+                                        markdown={formData.details}
+                                        variant={formData.details.includes('### Day') ? 'accordion' : 'sections'}
+                                        theme={{ sectionHeaderColor: 'text-secondary' }}
+                                    />
+                                )}
+                            </div>
+
+                            {/* Hidden component for shopping list PDF export */}
+                            {(cateringPlan || formData.details?.includes('Shopping List')) && (
+                                <div className="absolute left-[-9999px] top-0 pointer-events-none overflow-hidden h-0">
+                                    <div ref={shoppingRef} className="w-[794px] bg-white text-slate-900 p-8">
+                                        <ShoppingListPreview plan={cateringPlan} title={formData.description} markdown={formData.details} />
+                                    </div>
+                                </div>
                             )}
                         </div>
                     ) : isWizardMode && !initialData?.id ? (
@@ -594,6 +620,6 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     </DialogFooter>
                 )}
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 }

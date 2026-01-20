@@ -98,7 +98,7 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                             </div>
 
                             <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
-                                Set your preferences and we'll generate a secret jar idea. It will remain hidden in your jar until you spin it!
+                                Set your preferences and we'll generate a secret jar idea. It will remain hidden from other members until you spin it!
                             </p>
                         </div>
 
@@ -218,7 +218,7 @@ export function SurpriseMeModal({ isOpen, onClose, onIdeaAdded, initialLocation,
                                     </div>
                                     <p className="text-[10px] text-slate-500 leading-tight">
                                         {formData.isPrivate
-                                            ? "The generated idea will be hidden until it's spun."
+                                            ? "Hidden from other members until it's spun."
                                             : "The generated idea will be visible to everyone in the jar."}
                                     </p>
                                 </div>

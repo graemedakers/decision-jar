@@ -14,7 +14,7 @@ export type ModalType =
     | 'QUICK_TOOLS'
     | 'WEEKEND_PLANNER'
     | 'DATE_NIGHT_PLANNER'
-    | 'CATERING_PLANNER'
+    | 'DINNER_PARTY_CHEF'
     | 'MENU_PLANNER'
     | 'BAR_CRAWL_PLANNER'
     | 'ADMIN_CONTROLS'

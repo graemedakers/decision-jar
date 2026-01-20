@@ -128,7 +128,7 @@ export function SmartToolsGrid({
                     openModal('WEEKEND_PLANNER');
                     break;
                 case 'catering':
-                    openModal('CATERING_PLANNER');
+                    openModal('DINNER_PARTY_CHEF');
                     break;
                 case 'bar_crawl':
                     openModal('BAR_CRAWL_PLANNER');
@@ -139,7 +139,7 @@ export function SmartToolsGrid({
                     break;
                 case 'date_night':
                     if (jarTopic === 'Cooking & Recipes') {
-                        openModal('CATERING_PLANNER');
+                        openModal('DINNER_PARTY_CHEF');
                     } else {
                         openModal('DATE_NIGHT_PLANNER');
                     }

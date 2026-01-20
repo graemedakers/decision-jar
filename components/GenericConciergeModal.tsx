@@ -416,6 +416,7 @@ export function GenericConciergeModal({
             demoConcierge.onUse();
         }
 
+        setRecommendations([]);
         setIsLoading(true);
 
         // Auto-save location preference if it has changed/is set
@@ -493,7 +494,12 @@ export function GenericConciergeModal({
 
             if (res.ok) {
                 const data = await res.json();
-                setRecommendations(data.recommendations || []);
+                const recs = data.recommendations || [];
+                setRecommendations(recs);
+
+                if (recs.length === 0) {
+                    console.warn(`[Concierge] API returned 0 results for ${config.id}`);
+                }
 
                 if (demoConcierge && demoConcierge.triesRemaining === 0) {
                     setTimeout(() => {
@@ -514,7 +520,7 @@ export function GenericConciergeModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent raw className="bg-white dark:bg-slate-900 border-none">
+            <DialogContent raw className="bg-white dark:bg-slate-900 border-none max-h-[90vh] flex flex-col overflow-hidden">
                 {/* HEADER */}
                 <DialogHeader showClose={false} className="pb-4">
                     <div className="flex justify-between items-center bg-gradient-to-r from-transparent via-transparent to-white/5">
@@ -740,7 +746,7 @@ export function GenericConciergeModal({
                                     type="button"
                                     onClick={handleGetRecommendations}
                                     disabled={isLoading}
-                                    className={`w-full text-white shadow-lg ${theme.button}`}
+                                    className={`w-full text-white shadow-lg transition-all duration-300 ${theme.button} border-none ring-offset-0 !bg-gradient-to-r`}
                                 >
                                     {isLoading ? (
                                         <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Thinking...</>
@@ -767,6 +773,7 @@ export function GenericConciergeModal({
                                     <div className="grid grid-cols-1 gap-4">
                                         {recommendations.map((rec, index) => {
                                             const isHoliday = config.id === 'holiday_concierge';
+                                            const isChef = config.id === 'chef_concierge';
                                             const isExpanded = expandedRecIndex === index;
 
                                             return (
@@ -786,11 +793,11 @@ export function GenericConciergeModal({
                                                     ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
                                                     isAddingToJar={addingItemName === rec.name}
 
-                                                    // Inline Expansion for Holidays
-                                                    expandable={isHoliday}
+                                                    // Inline Expansion for Holidays & Chef
+                                                    expandable={isHoliday || isChef}
                                                     isExpanded={isExpanded}
                                                     onToggleExpand={() => setExpandedRecIndex(isExpanded ? null : index)}
-                                                    renderExpandedContent={isHoliday ? (
+                                                    renderExpandedContent={(isHoliday || isChef) ? (
                                                         <ItineraryMarkdownRenderer
                                                             markdown={rec.details}
                                                             configId={config.id}
@@ -810,6 +817,15 @@ export function GenericConciergeModal({
                                         reason="premium"
                                         message={`Loved the ${config.title}? Sign up for unlimited access to ALL 11 premium concierge tools!`}
                                     />
+                                </div>
+                            )}
+
+                            {/* EMPTY STATE FOR RESULTS */}
+                            {!isLoading && recommendations.length === 0 && (Object.keys(selections).length > 0 || customInputs.extraInstructions) && (
+                                <div className="text-center py-8 px-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-dashed border-slate-200 dark:border-white/10">
+                                    <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">No perfectly matched results found.</p>
+                                    <p className="text-xs text-slate-400 mt-1">Try broadening your preferences or checking your connection.</p>
                                 </div>
                             )}
                         </div>

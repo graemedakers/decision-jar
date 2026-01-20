@@ -95,7 +95,7 @@ export default function ExplorePage() {
                     openModal('WEEKEND_PLANNER');
                     break;
                 case 'catering':
-                    openModal('CATERING_PLANNER');
+                    openModal('DINNER_PARTY_CHEF');
                     break;
                 case 'bar_crawl':
                     openModal('BAR_CRAWL_PLANNER');

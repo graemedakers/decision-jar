@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Calendar, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Calendar, ArrowRight, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { downloadShoppingListPdf } from "@/lib/pdf-utils";
 
 interface ItineraryMarkdownRendererProps {
     markdown: string;
@@ -22,8 +23,23 @@ export function ItineraryMarkdownRenderer({ markdown, configId, theme, variant }
     // Split by H3 (###) which we use for Day headers in prompts
     const sections = markdown.split(/^### /gm);
 
+    const handleDownloadShoppingList = () => {
+        downloadShoppingListPdf(markdown);
+    };
+
     return (
         <div className="space-y-4">
+            {configId === 'chef_concierge' && (
+                <div className="flex justify-end mb-2">
+                    <button
+                        onClick={handleDownloadShoppingList}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm"
+                    >
+                        <Download className="w-3.5 h-3.5" />
+                        Download Shopping List (PDF)
+                    </button>
+                </div>
+            )}
             {sections.map((section, idx) => {
                 if (!section.trim()) return null;
 
