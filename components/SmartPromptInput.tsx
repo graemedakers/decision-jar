@@ -336,16 +336,16 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
                         <div className="text-[10px] font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                             <Sparkles className="w-3 h-3 text-purple-400" />
                             <span>
-                                {aiUsage.remaining === 0 ? (
+                                {aiUsage?.remaining === 0 ? (
                                     <span className="text-red-500 dark:text-red-400">Limit reached</span>
                                 ) : (
                                     <span>
                                         <span className={cn(
-                                            aiUsage.remaining === 1 ? "text-amber-500 dark:text-amber-400" : "text-slate-600 dark:text-slate-300"
+                                            aiUsage?.remaining === 1 ? "text-amber-500 dark:text-amber-400" : "text-slate-600 dark:text-slate-300"
                                         )}>
-                                            {aiUsage.remaining}
+                                            {aiUsage?.remaining ?? 0}
                                         </span>
-                                        <span className="opacity-70"> / {aiUsage.dailyLimit} left today</span>
+                                        <span className="opacity-70"> / {aiUsage?.dailyLimit ?? 0} left today</span>
                                     </span>
                                 )}
                             </span>
