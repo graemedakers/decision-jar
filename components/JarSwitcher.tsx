@@ -300,6 +300,23 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                     >
                                         <LogOut className="w-3.5 h-3.5" />
                                     </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            // Scroll to smart prompt
+                                            const el = document.getElementById('smart-prompt-input');
+                                            if (el) {
+                                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                const input = el.querySelector('input');
+                                                if (input) input.focus();
+                                            }
+                                        }}
+                                        className="p-1 hover:bg-purple-500/20 rounded text-slate-500 hover:text-purple-500 transition-colors opacity-0 group-hover:opacity-100 ml-1"
+                                        title="Smart Fill (AI)"
+                                        aria-label="Smart Fill (AI)"
+                                    >
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                    </button>
                                 </DropdownMenuItem>
                             </div>
                         )}

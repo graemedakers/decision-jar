@@ -164,6 +164,8 @@ model User {
   giftsReceived         GiftToken[]      @relation("GiftRecipient")
   giftsThisMonth        Int              @default(0)
   lastGiftSentAt        DateTime?
+  
+  generationHistory     GenerationHistory[]
 }
 
 model GiftToken {
@@ -443,6 +445,18 @@ model AnalyticsEvent {
   
   @@index([createdAt])
   @@index([type, name])
+}
+
+model GenerationHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  apiCalled String   // 'bulk-generate', 'concierge'
+  prompt    String?  // Optional: store the user's prompt for analysis
+  count     Int      // Number of ideas generated
+  createdAt DateTime @default(now())
+  
+  @@index([userId, createdAt])
 }
 
 

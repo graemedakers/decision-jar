@@ -38,6 +38,7 @@ const CreateJarModal = dynamic(() => import("@/components/CreateJarModal").then(
 const JoinJarModal = dynamic(() => import("@/components/JoinJarModal").then(m => m.JoinJarModal), { ssr: false });
 const GiftJarModal = dynamic(() => import("@/components/GiftJarModal").then(m => m.GiftJarModal), { ssr: false });
 const MyGiftsModal = dynamic(() => import("@/components/MyGiftsModal").then(m => m.MyGiftsModal), { ssr: false });
+const BulkIdeaPreviewModal = dynamic(() => import("@/components/BulkIdeaPreviewModal").then(m => m.BulkIdeaPreviewModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
@@ -78,40 +79,40 @@ export function DashboardModals({
     showConfetti, setShowConfetti, onRestartTour, onCloseLevelUp
 }: DashboardModalsProps) {
 
-    const { activeModal, modalProps, closeModal, openModal } = useModalSystem();
+    const { activeModal, modalProps, closeModal, openModal, isModalOpen, getModalProps } = useModalSystem();
 
     // ... helper functions
 
     return (
         <>
             <PremiumModal
-                isOpen={activeModal === 'PREMIUM'}
+                isOpen={isModalOpen('PREMIUM')}
                 onClose={closeModal}
             />
 
-            {activeModal === 'GIFT_JAR' && modalProps && (
+            {isModalOpen('GIFT_JAR') && (
                 <GiftJarModal
-                    jarId={modalProps.jarId}
-                    jarName={modalProps.jarName}
-                    ideaCount={modalProps.ideaCount}
+                    jarId={getModalProps('GIFT_JAR').jarId}
+                    jarName={getModalProps('GIFT_JAR').jarName}
+                    ideaCount={getModalProps('GIFT_JAR').ideaCount}
                 />
             )}
 
-            {activeModal === 'MY_GIFTS' && <MyGiftsModal />}
+            {isModalOpen('MY_GIFTS') && <MyGiftsModal />}
 
             <ReviewAppModal
-                isOpen={activeModal === 'REVIEW_APP'}
+                isOpen={isModalOpen('REVIEW_APP')}
                 onClose={closeModal}
             />
 
             <HelpModal
-                isOpen={activeModal === 'HELP'}
+                isOpen={isModalOpen('HELP')}
                 onClose={closeModal}
                 initialSection="dashboard"
             />
 
             <FavoritesModal
-                isOpen={activeModal === 'FAVORITES'}
+                isOpen={isModalOpen('FAVORITES')}
                 topic={jarTopic}
                 onClose={() => {
                     closeModal();
@@ -120,11 +121,11 @@ export function DashboardModals({
             />
 
             <AddIdeaModal
-                isOpen={activeModal === 'ADD_IDEA'}
+                isOpen={isModalOpen('ADD_IDEA')}
                 jarTopic={jarTopic}
                 customCategories={userData?.customCategories}
                 onClose={closeModal}
-                initialData={modalProps?.initialData}
+                initialData={getModalProps('ADD_IDEA')?.initialData}
                 isPremium={isPremium}
                 onUpgrade={() => {
                     closeModal();
@@ -132,13 +133,13 @@ export function DashboardModals({
                 }}
                 currentUser={userData}
                 onSuccess={handleContentUpdate}
-                initialMode={modalProps?.initialMode}
+                initialMode={getModalProps('ADD_IDEA')?.initialMode}
                 availableJars={availableJars}
             />
 
             {/* Surprise Me - Using original modal (reverted from WizardFrame) */}
             <SurpriseMeModal
-                isOpen={activeModal === 'SURPRISE_ME'}
+                isOpen={isModalOpen('SURPRISE_ME')}
                 onClose={closeModal}
                 onIdeaAdded={fetchIdeas}
                 initialLocation={userLocation || ""}
@@ -148,7 +149,7 @@ export function DashboardModals({
             />
 
             <SpinFiltersModal
-                isOpen={activeModal === 'FILTERS'}
+                isOpen={isModalOpen('FILTERS')}
                 onClose={closeModal}
                 onSpin={handleSpinJar}
                 jarTopic={jarTopic}
@@ -157,7 +158,7 @@ export function DashboardModals({
             />
 
             <SettingsModal
-                isOpen={activeModal === 'SETTINGS'}
+                isOpen={isModalOpen('SETTINGS')}
                 onClose={closeModal}
                 currentLocation={userLocation ?? undefined}
                 onRestartTour={onRestartTour}
@@ -165,7 +166,7 @@ export function DashboardModals({
             />
 
             <SpinFiltersModal
-                isOpen={activeModal === 'SPIN_FILTERS'}
+                isOpen={isModalOpen('SPIN_FILTERS')}
                 onClose={closeModal}
                 onSpin={handleSpinJar}
                 jarTopic={jarTopic}
@@ -175,7 +176,7 @@ export function DashboardModals({
 
 
 
-            {activeModal === 'WEEKEND_PLANNER' && (
+            {isModalOpen('WEEKEND_PLANNER') && (
                 <GenericConciergeModal
                     isOpen={true}
                     onClose={closeModal}
@@ -195,15 +196,15 @@ export function DashboardModals({
             )}
 
             {/* Generic Concierge Modal - Now supports skill picker when no toolId */}
-            {activeModal === 'CONCIERGE' && (
+            {isModalOpen('CONCIERGE') && (
                 <GenericConciergeModal
-                    key={modalProps?.toolId || 'unified'}
+                    key={getModalProps('CONCIERGE')?.toolId || 'unified'}
                     isOpen={true}
                     onClose={closeModal}
-                    config={modalProps?.toolId ? CONCIERGE_CONFIGS[modalProps.toolId] : undefined}
-                    skillId={modalProps?.toolId}
+                    config={getModalProps('CONCIERGE')?.toolId ? CONCIERGE_CONFIGS[getModalProps('CONCIERGE').toolId] : undefined}
+                    skillId={getModalProps('CONCIERGE')?.toolId}
                     userLocation={userLocation || undefined}
-                    initialPrompt={modalProps?.initialPrompt}
+                    initialPrompt={getModalProps('CONCIERGE')?.initialPrompt}
                     isPremium={isPremium}
                     availableJars={availableJars}
                     currentJarId={userData?.activeJarId || null}
@@ -220,7 +221,7 @@ export function DashboardModals({
                 />
             )}
 
-            {activeModal === 'BAR_CRAWL_PLANNER' && (
+            {isModalOpen('BAR_CRAWL_PLANNER') && (
                 <GenericConciergeModal
                     isOpen={true}
                     onClose={closeModal}
@@ -240,14 +241,14 @@ export function DashboardModals({
             )}
 
             <AdminControlsModal
-                isOpen={activeModal === 'ADMIN_CONTROLS'}
+                isOpen={isModalOpen('ADMIN_CONTROLS')}
                 onClose={closeModal}
                 jarId={userData?.activeJarId || ""}
                 onAllocated={handleContentUpdate}
             />
 
             <TemplateBrowserModal
-                isOpen={activeModal === 'TEMPLATE_BROWSER'}
+                isOpen={isModalOpen('TEMPLATE_BROWSER')}
                 onClose={closeModal}
                 currentJarId={userData?.activeJarId}
                 currentJarName={userData?.jarName || null}
@@ -256,7 +257,7 @@ export function DashboardModals({
                 onSuccess={handleContentUpdate}
             />
 
-            {activeModal === 'DATE_NIGHT_PLANNER' && (
+            {isModalOpen('DATE_NIGHT_PLANNER') && (
                 <GenericConciergeModal
                     isOpen={true}
                     onClose={closeModal}
@@ -275,7 +276,7 @@ export function DashboardModals({
                 />
             )}
 
-            {activeModal === 'DINNER_PARTY_CHEF' && (
+            {isModalOpen('DINNER_PARTY_CHEF') && (
                 <GenericConciergeModal
                     isOpen={true}
                     onClose={closeModal}
@@ -296,22 +297,22 @@ export function DashboardModals({
 
 
             <RateDateModal
-                isOpen={activeModal === 'RATE_DATE'}
+                isOpen={isModalOpen('RATE_DATE')}
                 onClose={() => {
                     closeModal();
                     handleContentUpdate();
                 }}
-                idea={activeModal === 'RATE_DATE' ? modalProps?.idea : null}
+                idea={isModalOpen('RATE_DATE') ? getModalProps('RATE_DATE')?.idea : null}
                 isPro={isPremium}
             />
 
             <DateReveal
-                idea={activeModal === 'DATE_REVEAL' ? modalProps?.idea : null}
+                idea={isModalOpen('DATE_REVEAL') ? getModalProps('DATE_REVEAL')?.idea : null}
                 onClose={closeModal}
                 userLocation={userLocation ?? undefined}
                 jarTopic={jarTopic}
-                isViewOnly={modalProps?.viewOnly}
-                onSkip={modalProps?.onSkip}
+                isViewOnly={getModalProps('DATE_REVEAL')?.viewOnly}
+                onSkip={getModalProps('DATE_REVEAL')?.onSkip}
                 onFindDining={(location) => {
                     if (location) setUserLocation(location);
                     // Open Concierge Dining
@@ -320,14 +321,14 @@ export function DashboardModals({
             />
 
             <DeleteConfirmModal
-                isOpen={activeModal === 'DELETE_CONFIRM'}
+                isOpen={isModalOpen('DELETE_CONFIRM')}
                 onClose={closeModal}
-                onConfirm={modalProps?.onConfirm}
+                onConfirm={getModalProps('DELETE_CONFIRM')?.onConfirm}
             />
 
             {/* Trial Expired Modal - triggered via modal system */}
             <TrialExpiredModal
-                isOpen={activeModal === 'TRIAL_EXPIRED'}
+                isOpen={isModalOpen('TRIAL_EXPIRED')}
                 onClose={closeModal}
                 onUpgrade={() => {
                     closeModal();
@@ -337,8 +338,8 @@ export function DashboardModals({
             />
 
             <LevelUpModal
-                isOpen={activeModal === 'LEVEL_UP'}
-                level={modalProps?.level || level}
+                isOpen={isModalOpen('LEVEL_UP')}
+                level={getModalProps('LEVEL_UP')?.level || level}
                 onClose={() => {
                     closeModal();
                     onCloseLevelUp?.();
@@ -346,13 +347,13 @@ export function DashboardModals({
             />
 
             <PremiumWelcomeTip
-                show={modalProps?.showPremiumTip || false}
+                show={getModalProps('PREMIUM_WELCOME_TIP')?.showPremiumTip || false}
                 onClose={closeModal}
             />
 
             {userData?.activeJarId && (
                 <JarMembersModal
-                    isOpen={activeModal === 'JAR_MEMBERS'}
+                    isOpen={isModalOpen('JAR_MEMBERS')}
                     onClose={closeModal}
                     jarId={userData.activeJarId}
                     jarName={userData.jarName || "Your Jar"}
@@ -361,27 +362,27 @@ export function DashboardModals({
                 />
             )}
 
-            {activeModal === 'JAR_QUICKSTART' && (
+            {isModalOpen('JAR_QUICKSTART') && (
                 <JarQuickStartModal
                     isOpen={true}
                     onClose={closeModal}
-                    jarId={modalProps?.jarId || ''}
-                    jarName={modalProps?.jarName || ''}
-                    jarTopic={modalProps?.jarTopic || 'General'}
+                    jarId={getModalProps('JAR_QUICKSTART')?.jarId || ''}
+                    jarName={getModalProps('JAR_QUICKSTART')?.jarName || ''}
+                    jarTopic={getModalProps('JAR_QUICKSTART')?.jarTopic || 'General'}
                 />
             )}
 
-            {activeModal === 'MOVE_IDEA' && (
+            {isModalOpen('MOVE_IDEA') && (
                 <MoveIdeaModal
                     isOpen={true}
                     onClose={closeModal}
-                    idea={modalProps?.idea}
+                    idea={getModalProps('MOVE_IDEA')?.idea}
                     availableJars={availableJars}
                     onMoveComplete={handleContentUpdate}
                 />
             )}
 
-            {activeModal === 'TOOLS' && (
+            {isModalOpen('TOOLS') && (
                 <ToolsModal
                     isOpen={true}
                     onClose={closeModal}
@@ -391,17 +392,17 @@ export function DashboardModals({
                 />
             )}
 
-            {activeModal === 'ADD_MEMORY' && (
+            {isModalOpen('ADD_MEMORY') && (
                 <AddMemoryModal
                     isOpen={true}
                     onClose={closeModal}
-                    initialData={modalProps?.initialData}
+                    initialData={getModalProps('ADD_MEMORY')?.initialData}
                     isPro={isPremium}
                     onSuccess={handleContentUpdate}
                 />
             )}
 
-            {activeModal === 'CREATE_JAR' && (
+            {isModalOpen('CREATE_JAR') && (
                 <CreateJarModal
                     isOpen={true}
                     onClose={closeModal}
@@ -415,7 +416,7 @@ export function DashboardModals({
                 />
             )}
 
-            {activeModal === 'JOIN_JAR' && (
+            {isModalOpen('JOIN_JAR') && (
                 <JoinJarModal
                     isOpen={true}
                     onClose={closeModal}
@@ -423,6 +424,18 @@ export function DashboardModals({
                         closeModal();
                         refreshUser();
                     }}
+                />
+            )}
+
+            {isModalOpen('BULK_IDEA_PREVIEW') && (
+                <BulkIdeaPreviewModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    ideas={getModalProps('BULK_IDEA_PREVIEW')?.ideas || []}
+                    onConfirm={getModalProps('BULK_IDEA_PREVIEW')?.onConfirm}
+                    onRegenerate={getModalProps('BULK_IDEA_PREVIEW')?.onRegenerate}
+                    isRegenerating={getModalProps('BULK_IDEA_PREVIEW')?.isRegenerating}
+                    isSaving={getModalProps('BULK_IDEA_PREVIEW')?.isSaving}
                 />
             )}
 

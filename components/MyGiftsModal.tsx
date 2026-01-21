@@ -36,8 +36,8 @@ interface GiftData {
 }
 
 export function MyGiftsModal() {
-    const { activeModal, closeModal, openModal } = useModalSystem();
-    const isOpen = activeModal === 'MY_GIFTS';
+    const { isModalOpen, closeModal, openModal } = useModalSystem();
+    const isOpen = isModalOpen('MY_GIFTS');
     const [data, setData] = useState<GiftData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -73,7 +73,7 @@ export function MyGiftsModal() {
         <Dialog open={isOpen} onOpenChange={closeModal}>
             <DialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col p-0 gap-0 overflow-hidden bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
                 <div className="p-6 pb-2 shrink-0">
-                    <DialogHeader>
+                    <DialogHeader onClose={closeModal}>
                         <DialogTitle className="flex items-center gap-2 text-2xl font-black">
                             <Gift className="w-6 h-6 text-indigo-500" />
                             My Gifts

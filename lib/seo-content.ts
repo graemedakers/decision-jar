@@ -85,7 +85,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 title: "Outsourcing the 'What's Next?'",
-                content: "Using an Allocation Mode or Random Spin allows you to offload the decision-making process. For larger groups, Voting Mode turns personal preferences into a collective choice instantly. It’s the difference between asking 'What do you want to do?' and having the Jar say 'Tonight is Jazz & Sushi night.' One requires effort; the other provides excitement."
+                content: "Using an Allocation Mode or Random Spin allows you to offload the decision-making process. For larger groups, Voting Mode turns personal preferences into a collective choice instantly. You can even use **Task Allocation** for chores or **Admin Pick** for curated events. It’s the difference between asking 'What do you want to do?' and having the Jar say 'Tonight is Jazz & Sushi night.' One requires effort; the other provides excitement."
             }
         ]
     },
@@ -245,7 +245,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 question: "How do I earn XP in Decision Jar?",
-                answer: "You earn XP for adding ideas, spinning the jar, and most importantly, completing and rating activities. It's a system designed to reward 'doing'."
+                answer: "You earn XP for adding ideas, spinning the jar, using AI Voice input, and most importantly, completing and rating activities. It's a system designed to reward 'doing'."
             }
         ],
         sections: [
@@ -313,7 +313,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 question: "How can AI help with catering?",
-                answer: "The Dinner Party Chef tool can scale ingredients perfectly for any group size and design a cohesive menu theme that flows from appetizer to dessert."
+                answer: "The Dinner Party Chef tool can scale ingredients perfectly for any group size and design a cohesive menu theme. It can even generate full step-by-step recipes with ingredients and cooking methods."
             }
         ],
         sections: [
@@ -391,7 +391,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 title: "Solution: The 4 Essential Jars",
-                content: "To regain balance, we recommend creating four distinct Jars, each with a specific emotional purpose:\n\n1. **The Romantic Jar (Couples)**: This is sacred ground. It only contains fun, connecting activities. No chores, no 'taxes,' no obligations. When you open this jar, you know you are choosing joy.\n\n2. **The Admin Jar (Household)**: This is for the business of life. Use 'Allocation Mode' here to fairly distribute chores like 'Clean the Kitchen' or 'Pay Bills.' It keeps the necessary work visible but contained.\n\n3. **The Solo Jar (Self)**: Often neglected, this jar is for YOU. Fill it with books you want to read, hobbies you want to practice, or self-care rituals. It's a reminder that you are an individual outside of your relationships.\n\n4. **The Social Jar (Community)**: For your wider circle. Use this for 'Board Game Nights,' 'Bar Crawls,' or 'Group Hikes.' Share the invite link with your friends so they can add ideas too. When indecision strikes, use **Voting Mode** to let the squad pick the next activity democratically."
+                content: "To regain balance, we recommend creating four distinct Jars, each with a specific emotional purpose:\n\n1. **The Romantic Jar (Couples)**: This is sacred ground. It only contains fun, connecting activities. No chores, no 'taxes,' no obligations. When you open this jar, you know you are choosing joy.\n\n2. **The Admin Jar (Household)**: This is for the business of life. Use 'Allocation Mode' here to fairly distribute chores like 'Clean the Kitchen' or 'Pay Bills.' It keeps the necessary work visible but contained.\n\n3. **The Solo Jar (Self)**: Often neglected, this jar is for YOU. Fill it with books you want to read, hobbies you want to practice, or self-care rituals. It's a reminder that you are an individual outside of your relationships.\n\n4. **The Social Jar (Community)**: For your wider circle. Use this for 'Board Game Nights,' 'Bar Crawls,' or 'Group Hikes.' Share the invite link with your friends so they can add ideas too. You can also **Gift a Copy** of your curated social jar to other groups! When indecision strikes, use **Voting Mode** to let the squad pick the next activity democratically."
             },
             {
                 title: "Advanced Strategy: The Sunday Workflow",

@@ -24,8 +24,8 @@ export async function POST(
             }
         });
 
-        if (!membership || membership.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Only admins can remove partners' }, { status: 403 });
+        if (!membership || !['OWNER', 'ADMIN'].includes(membership.role)) {
+            return NextResponse.json({ error: 'Only jar owners or admins can remove partners' }, { status: 403 });
         }
 
         // 2. Find the "Partner" (any other member)

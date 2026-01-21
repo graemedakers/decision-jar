@@ -8,7 +8,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { trackEvent } from "@/lib/analytics";
 import { triggerHaptic } from "@/lib/feedback";
 import { signOut } from "next-auth/react";
-import { getApiUrl } from "@/lib/utils";
+import { getApiUrl, getCurrentLocation } from "@/lib/utils";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { DASHBOARD_TOOLS } from "@/lib/constants/tools";
 import { showAchievementToast } from "@/components/Gamification/AchievementToast";
@@ -24,7 +24,7 @@ import { useIdeaMutations } from "@/hooks/mutations/useIdeaMutations";
 import { useSquadMode } from "@/hooks/features/useSquadMode";
 
 export function useDashboardLogic() {
-    const { openModal } = useModalSystem();
+    const { openModal, closeModal } = useModalSystem();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -61,6 +61,7 @@ export function useDashboardLogic() {
     const [userLocation, setUserLocation] = useState<string | null>(null);
     const [showConfetti, setShowConfetti] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
+    const [isGeneratingSmartIdeas, setIsGeneratingSmartIdeas] = useState(false);
 
     // Prevent double execution of join logic
     const joinProcessedRef = useRef<string | null>(null);
@@ -72,7 +73,6 @@ export function useDashboardLogic() {
     }, [fetchIdeas, refreshUser]);
 
     // 3. Feature Composition
-    const { activeModal } = useModalSystem();
     const showNoJars = !userData?.activeJarId && (userData?.memberships?.length || 0) === 0;
 
     const {
@@ -110,6 +110,8 @@ export function useDashboardLogic() {
         });
     };
 
+
+
     const canStartTour = !!userData?.activeJarId && ideas.length > 0 && !isLoadingIdeas && !isFetchingIdeas;
     const { showOnboarding, setShowOnboarding, handleCompleteOnboarding, handleSkipOnboarding } = useOnboarding({
         userData,
@@ -128,6 +130,37 @@ export function useDashboardLogic() {
         userData,
         onJarSwitched: handleContentUpdate
     });
+
+    // AI Usage State
+    const [aiUsage, setAiUsage] = useState<{
+        remaining: number | null;
+        dailyLimit: number | null;
+        isPro: boolean;
+    }>({
+        remaining: null,
+        dailyLimit: null,
+        isPro: false
+    });
+
+    const fetchAIUsage = async () => {
+        try {
+            const res = await fetch('/api/user/ai-usage');
+            if (res.ok) {
+                const data = await res.json();
+                setAiUsage({
+                    remaining: data.remaining,
+                    dailyLimit: data.dailyLimit,
+                    isPro: data.isPro || false
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch AI usage:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAIUsage();
+    }, []);
 
     useEffect(() => {
         if (userData?.location) {
@@ -493,6 +526,65 @@ export function useDashboardLogic() {
         }
     };
 
+
+    const handleSmartPrompt = async (prompt: string) => {
+        setIsGeneratingSmartIdeas(true);
+        try {
+            // Attempt to get client location (fails gracefully)
+            let userLocation: string | undefined = undefined;
+            try {
+                userLocation = await getCurrentLocation();
+            } catch (ignore) {
+                console.log("Could not get client location:", ignore);
+            }
+
+            const response = await fetch('/api/ideas/bulk-generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt,
+                    location: userLocation, // Pass client location
+                    jarId: userData?.activeJarId
+                })
+            });
+
+            if (response.status === 403) {
+                const error = await response.json();
+                if (error.code === 'UPGRADE_REQUIRED') {
+                    setIsGeneratingSmartIdeas(false);
+                    openModal('PREMIUM');
+                    return;
+                }
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+
+                await fetchAIUsage(); // Refresh usage limits
+
+                if (data.success) {
+                    if (data.preview) {
+                        openModal('BULK_IDEA_PREVIEW', {
+                            ideas: data.ideas,
+                            jarId: data.jarId,
+                            originalPrompt: prompt
+                        });
+                    } else {
+                        await fetchIdeas();
+                        showSuccess(`✨ ${data.count} ideas added to your jar!`);
+                    }
+                }
+            } else {
+                showError('Failed to generate ideas. Please try again.');
+            }
+        } catch (error) {
+            console.error('Smart prompt error:', error);
+            showError('An error occurred.');
+        } finally {
+            setIsGeneratingSmartIdeas(false);
+        }
+    };
+
     return {
         // State
         userData, isLoadingUser, isPremium, xp, level, achievements, hasPaid, coupleCreatedAt, isTrialEligible,
@@ -519,6 +611,12 @@ export function useDashboardLogic() {
         handleAddIdeaClick: () => openModal('ADD_IDEA'),
 
         // Utils
-        openModal
+        openModal,
+        dismissTrialModal,
+
+        // Smart Prompt
+        isGeneratingSmartIdeas,
+        handleSmartPrompt,
+        aiUsage
     };
 }

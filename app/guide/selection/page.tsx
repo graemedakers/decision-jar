@@ -64,10 +64,16 @@ export default function GuideSelection() {
 
             <div className="bg-blue-100 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 mb-8">
                 <h3 className="font-bold mb-2">📅 Committing to a Date</h3>
-                <p className="text-sm">
+                <p className="text-sm mb-4">
                     Once a winner is chosen, you can select the <strong>Date and Time</strong>. This moves the idea from your "Jar pool" into your
                     <strong>Memories</strong> list, so you don't pick the same thing twice next week!
                 </p>
+                <div className="bg-white/50 dark:bg-black/20 p-4 rounded-lg border border-primary/20">
+                    <h4 className="font-bold text-sm mb-1">👨‍🍳 AI Recipes (New)</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                        Planning a meal? Pro users can now generate full AI recipes for any food-related idea, complete with ingredients and cooking methods.
+                    </p>
+                </div>
             </div>
 
             <div className="flex justify-between pt-12 border-t border-slate-200 dark:border-white/10">

@@ -143,6 +143,24 @@ export default function GuidePro() {
                 </div>
             </div>
 
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Crown className="text-amber-500" /> Membership Tiers
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4 mb-12">
+                <div className="p-6 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30">
+                    <h3 className="font-bold text-amber-700 dark:text-amber-400 mb-2">Lifetime Access</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                        The ultimate choice for power users. Pay once, and enjoy Pro features forever across all your jars. No recurring subscriptions.
+                    </p>
+                </div>
+                <div className="p-6 rounded-2xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30">
+                    <h3 className="font-bold text-blue-700 dark:text-blue-400 mb-2">14-Day Free Trial</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Every new account and every new jar starts with a 14-day Pro grace period. Explore all premium features risk-free before deciding.
+                    </p>
+                </div>
+            </div>
+
             <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 p-8 rounded-3xl border border-yellow-500/20 text-center">
                 <h3 className="text-2xl font-bold mb-4">Ready to upgrade?</h3>
                 <p className="mb-6 text-slate-600 dark:text-slate-400">

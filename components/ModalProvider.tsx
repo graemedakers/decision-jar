@@ -38,33 +38,69 @@ export type ModalType =
     | 'GIFT_JAR'
     | 'GIFT_MANAGER'
     | 'MY_GIFTS'
+    | 'BULK_IDEA_PREVIEW'
     | null;
 
+interface ModalInstance {
+    type: ModalType;
+    props: any;
+}
+
 interface ModalContextType {
-    activeModal: ModalType;
-    modalProps: any;
+    modalStack: ModalInstance[];
+    activeModal: ModalType; // Top of the stack
+    modalProps: any; // Props for the top of the stack
     openModal: (type: ModalType, props?: any) => void;
     closeModal: () => void;
+    closeAllModals: () => void;
+    isModalOpen: (type: ModalType) => boolean;
+    getModalProps: (type: ModalType) => any;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export function ModalProvider({ children }: { children: ReactNode }) {
-    const [activeModal, setActiveModal] = useState<ModalType>(null);
-    const [modalProps, setModalProps] = useState<any>({});
+    const [modalStack, setModalStack] = useState<ModalInstance[]>([]);
 
     const openModal = useCallback((type: ModalType, props: any = {}) => {
-        setModalProps(props);
-        setActiveModal(type);
+        setModalStack(prev => {
+            // Prevent duplicate modals of the same type in the stack if it's already there?
+            // For now, let's just push. If it's already at the top, ignore.
+            if (prev.length > 0 && prev[prev.length - 1].type === type) return prev;
+            return [...prev, { type, props }];
+        });
     }, []);
 
     const closeModal = useCallback(() => {
-        setActiveModal(null);
-        setModalProps({});
+        setModalStack(prev => prev.slice(0, -1));
     }, []);
 
+    const closeAllModals = useCallback(() => {
+        setModalStack([]);
+    }, []);
+
+    const isModalOpen = useCallback((type: ModalType) => {
+        return modalStack.some(m => m.type === type);
+    }, [modalStack]);
+
+    const getModalProps = useCallback((type: ModalType) => {
+        return modalStack.find(m => m.type === type)?.props || {};
+    }, [modalStack]);
+
+    const activeModal = modalStack.length > 0 ? modalStack[modalStack.length - 1].type : null;
+    const modalProps = modalStack.length > 0 ? modalStack[modalStack.length - 1].props : {};
+
     return (
-        <ModalContext.Provider value={{ activeModal, modalProps, openModal, closeModal }}>
+        <ModalContext.Provider value={{
+            modalStack,
+            activeModal,
+            modalProps,
+            openModal,
+            closeModal,
+            closeAllModals,
+            isModalOpen,
+            getModalProps
+        }}>
             {children}
         </ModalContext.Provider>
     );

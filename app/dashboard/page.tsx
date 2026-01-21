@@ -9,7 +9,7 @@ import Link from "next/link";
 import {
     Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar,
     Activity, Utensils, Check, Star, ArrowRight, History, Layers,
-    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2, Download, Gift
+    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2, Download, Gift, Wand2
 } from "lucide-react";
 import { SessionTracker } from "@/lib/session-tracker";
 
@@ -32,7 +32,8 @@ import { getJarLabels } from "@/lib/labels";
 import { COST_VALUES, ACTIVITY_VALUES } from "@/lib/constants";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import React from "react";
-import { SmartInputBar } from "@/components/SmartInputBar";
+// import { SmartInputBar } from "@/components/SmartInputBar"; // Replaced by SmartPromptInput
+import { SmartPromptInput } from "@/components/SmartPromptInput";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { usePWA } from "@/hooks/usePWA";
 import { UnifiedConciergeButton } from "@/components/UnifiedConciergeButton";
@@ -61,22 +62,23 @@ function InviteCodeDisplay({ code, topic }: { code: string | null; topic?: strin
     if (!code) return null;
 
     return (
-        <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 flex items-center justify-between shadow-sm group hover:border-primary/30 transition-all">
-            <div className="flex items-center gap-3 md:gap-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 transition-transform">
-                    <Users className="w-5 h-5 md:w-6 md:h-6" />
+        <div className="w-full bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-[1.75rem] p-4 flex items-center justify-between shadow-lg ring-1 ring-black/5 group hover:border-primary/30 transition-all">
+            <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 transition-transform">
+                    <Users className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                    <span className="block text-[9px] md:text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] md:tracking-[0.2em] mb-0.5 md:mb-1 leading-tight">{labels.connectionAction}</span>
-                    <code className="text-lg md:text-xl font-mono font-black text-primary tracking-[0.15em] md:tracking-[0.2em]">{code}</code>
+                    <span className="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-0.5 leading-tight">{labels.connectionAction}</span>
+                    <code className="text-base font-mono font-black text-primary tracking-widest">{code}</code>
                 </div>
             </div>
             <Button
                 variant="outline"
+                size="sm"
                 onClick={handleInvite}
-                className="rounded-xl md:rounded-2xl border-primary/20 text-primary hover:bg-primary/5 px-4 md:px-6 h-9 md:h-12 text-xs md:text-sm font-bold shadow-sm"
+                className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 px-4 h-8 text-[10px] font-black uppercase tracking-wider shadow-sm"
             >
-                {copied ? <><Check className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-2" /> Copied</> : <><Copy className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-2" /> Copy</>}
+                {copied ? <><Check className="w-3 h-3 mr-1.5" /> Copied</> : <><Copy className="w-3 h-3 mr-1.5" /> Copy</>}
             </Button>
         </div>
     );
@@ -136,6 +138,9 @@ function DashboardContent() {
         handleAddIdeaClick, handleContentUpdate, handleLogout,
         refreshUser, fetchIdeas, fetchFavorites,
         handleCompleteOnboarding, handleSkipOnboarding,
+        handleSmartPrompt, // Newly exposed action
+        isGeneratingSmartIdeas, // Loading state
+        aiUsage, // Usage stats for counter
 
         // Utils
         openModal
@@ -357,15 +362,8 @@ function DashboardContent() {
                             </div>
                         </div>
 
-                        {/* Center: XP Progress Bar & Trophy Case - Desktop Only (Wide) */}
-                        <div className="hidden lg:flex flex-col items-center justify-center flex-1 px-4 lg:px-8 gap-3" data-tour="trophy-case">
-                            <MiniProgressBar xp={xp || 0} level={level} />
-                            <CollapsibleTrophyCase
-                                xp={xp || 0}
-                                level={level}
-                                unlockedIds={achievements || []}
-                            />
-                        </div>
+                        {/* Center: Removed redundancy as stats are now in the sidebar */}
+                        <div className="hidden xl:flex flex-1" />
 
                         {/* Right: Utility Tools - Desktop Only (Wide) */}
                         <div className="hidden lg:flex items-center justify-end gap-2 shrink-0">
@@ -378,6 +376,26 @@ function DashboardContent() {
                                 >
                                     <Download className="w-4 h-4" />
                                     <span className="text-sm font-bold">Install App</span>
+                                </Button>
+                            )}
+
+                            {userData?.activeJarId && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        const el = document.getElementById('smart-prompt-input');
+                                        if (el) {
+                                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            // Focus input if possible
+                                            const input = el.querySelector('input');
+                                            if (input) input.focus();
+                                        }
+                                    }}
+                                    className="hidden md:flex gap-2 rounded-full border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors px-4 h-11"
+                                >
+                                    <Wand2 className="w-4 h-4 text-purple-500" />
+                                    <span className="text-sm font-bold">Smart Fill</span>
                                 </Button>
                             )}
 
@@ -518,184 +536,259 @@ function DashboardContent() {
                     </div>
                 </header>
 
-                {/* MAIN DASHBOARD CONTAINER: Centered Single Column */}
-                <div className="max-w-4xl mx-auto space-y-8 pb-12">
+                {/* MAIN DASHBOARD CONTAINER: Responsive Grid */}
+                <div className="max-w-7xl mx-auto pb-12">
+                    <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12">
 
-                    {/* Invite Code Banner */}
-                    <div className="animate-in fade-in slide-in-from-top-4 duration-700">
-                        <InviteCodeDisplay code={inviteCode} topic={jarTopic} />
-                    </div>
+                        {/* LEFT COLUMN/TOP: Core Jar Actions */}
+                        <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-8">
 
-                    {/* Email Verification Banner */}
-                    {userData?.email && (
-                        <div className="animate-in fade-in slide-in-from-top-4 duration-700 delay-150">
-                            <VerificationBanner
-                                email={userData.email}
-                                isVerified={!!userData.emailVerified || !userData.verificationToken}
-                            />
-                        </div>
-                    )}
-
-                    {/* JAR VISUALIZATION SECTION */}
-                    <div className="flex flex-col items-center">
-                        {/* Premium Info / Alerts */}
-                        <div className="w-full max-w-2xl mb-6">
-                            {!isPremium && !isLoadingUser && !hasPaid && (
-                                <PremiumBanner
-                                    hasPaid={hasPaid}
-                                    coupleCreatedAt={coupleCreatedAt || ''}
-                                    isTrialEligible={isTrialEligible}
-                                    isPremium={isPremium}
-                                />
-                            )}
-
-                            {showStatusSection && (
-                                <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                                    {showNoJars && (
-                                        <OnboardingWizard onComplete={handleContentUpdate} userName={userData?.name} />
-                                    )}
-                                    {showEmptyState && (
-                                        <EnhancedEmptyState
-                                            jarTopic={userData?.jarTopic || 'General'}
-                                            jarName={userData?.jarName || 'Your Jar'}
-                                            jarId={userData?.activeJarId || ''}
-                                            inviteCode={inviteCode}
-                                            onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
-                                            onAddIdeaClick={() => openModal('ADD_IDEA')}
+                            {/* JAR VISUALIZATION SECTION */}
+                            <div className="flex flex-col items-center">
+                                {/* Premium Info / Alerts - Centered on main action */}
+                                <div className="w-full max-w-2xl">
+                                    {!isPremium && !isLoadingUser && !hasPaid && (
+                                        <PremiumBanner
+                                            hasPaid={hasPaid}
+                                            coupleCreatedAt={coupleCreatedAt || ''}
+                                            isTrialEligible={isTrialEligible}
+                                            isPremium={isPremium}
                                         />
                                     )}
-                                    {showAdminStatus && (
-                                        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 rounded-[2.5rem] flex items-start gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
-                                                <Shield className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-black text-amber-900 dark:text-amber-100 uppercase tracking-wider text-sm">Admin Pick Mode</h3>
-                                                <p className="text-sm text-amber-700 dark:text-amber-300/80 mt-1 font-medium">
-                                                    An admin is manually selecting the next {labels.plannerTitle.includes('Date') ? 'date' : 'idea'}. Spinning is disabled.
-                                                </p>
-                                            </div>
+
+                                    {showStatusSection && (
+                                        <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            {showNoJars && (
+                                                <OnboardingWizard onComplete={handleContentUpdate} userName={userData?.name} />
+                                            )}
+                                            {showEmptyState && (
+                                                <div className="space-y-6">
+                                                    <SmartPromptInput
+                                                        jarTopic={userData?.jarTopic || 'General'}
+                                                        onGenerate={handleSmartPrompt}
+                                                        isGenerating={isGeneratingSmartIdeas}
+                                                        aiUsage={aiUsage}
+                                                        className="w-full"
+                                                    />
+                                                    <EnhancedEmptyState
+                                                        jarTopic={userData?.jarTopic || 'General'}
+                                                        jarName={userData?.jarName || 'Your Jar'}
+                                                        jarId={userData?.activeJarId || ''}
+                                                        inviteCode={inviteCode}
+                                                        onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
+                                                        onAddIdeaClick={() => openModal('ADD_IDEA')}
+                                                    />
+                                                </div>
+                                            )}
+                                            {showAdminStatus && (
+                                                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 rounded-[2.5rem] flex items-start gap-4">
+                                                    <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
+                                                        <Shield className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-black text-amber-900 dark:text-amber-100 uppercase tracking-wider text-sm">Admin Pick Mode</h3>
+                                                        <p className="text-sm text-amber-700 dark:text-amber-300/80 mt-1 font-medium">
+                                                            An admin is manually selecting the next {labels.plannerTitle.includes('Date') ? 'date' : 'idea'}. Spinning is disabled.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
-                            )}
-                        </div>
 
-                        {!showEmptyState && !showNoJars && (
-                            <div className="relative z-10 w-full flex flex-col items-center py-4 md:py-8 animate-in fade-in zoom-in duration-1000">
-                                <motion.div
-                                    animate={isSpinning
-                                        ? { rotate: [0, -8, 8, -8, 8, 0], scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 0.5 } }
-                                        : { rotate: 0, scale: 1 }
-                                    }
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className="relative mb-12 md:mb-20"
-                                    data-tour="jar-visual"
-                                >
-                                    <div
-                                        onClick={() => router.push('/jar')}
-                                        className={`scale-110 md:scale-[1.35] transform transition-transform duration-700 ease-out cursor-pointer hover:scale-[1.2] md:hover:scale-[1.45] active:scale-105 md:active:scale-[1.3]`}
-                                        title="View Ideas in Jar"
-                                    >
-                                        <Jar3D />
-                                    </div>
+                                {!showEmptyState && !showNoJars && (
+                                    <div className="relative z-10 w-full flex flex-col items-center py-4 lg:py-8 animate-in fade-in zoom-in duration-1000 bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl rounded-[3rem] border border-white/40 dark:border-white/10 shadow-2xl ring-1 ring-black/5">
+                                        <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-center w-full gap-8 lg:gap-16 px-6">
 
-                                    <div className="absolute top-8 md:top-10 right-4 md:right-0 z-20">
-                                        <motion.div
-                                            initial={{ scale: 0, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            transition={{ delay: 0.5, type: "spring" }}
-                                            className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 py-2 rounded-2xl text-[10px] md:text-xs font-black shadow-2xl border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white flex items-center gap-2 ring-4 ring-white/10"
-                                        >
-                                            <Layers className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
-                                            {availableIdeasCount} Ideas
-                                        </motion.div>
-                                    </div>
-                                </motion.div>
-
-                                {isVotingMode && userData ? (
-                                    <div className="w-full max-w-2xl animate-in zoom-in-95 duration-500 mb-8">
-                                        <VotingManager
-                                            jarId={userData.activeJarId || ''}
-                                            userId={userData.id}
-                                            isAdmin={!!userData.isCreator}
-                                            onVoteComplete={handleContentUpdate}
-                                            onAddIdea={() => openModal('ADD_IDEA')}
-                                            voteCandidatesCount={userData.jarVoteCandidatesCount}
-                                        />
-                                    </div>
-                                ) : !isAdminPickMode && (
-                                    <div className="flex flex-col items-center gap-4 w-full animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300 mb-8 relative z-20">
-                                        {/* Quick Filter Chips */}
-                                        {activeQuickChips.length > 0 && (
-                                            <div className="relative w-full max-w-[100vw] overflow-hidden">
+                                            {/* Left side: Jar Visual */}
+                                            <motion.div
+                                                animate={isSpinning
+                                                    ? { rotate: [0, -8, 8, -8, 8, 0], scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 0.5 } }
+                                                    : { rotate: 0, scale: 1 }
+                                                }
+                                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                                className="relative shrink-0 flex items-center justify-center"
+                                                data-tour="jar-visual"
+                                            >
                                                 <div
-                                                    className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-6 pt-2 w-full justify-start md:justify-center px-10 md:px-4"
-                                                    style={{
-                                                        WebkitMaskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)',
-                                                        maskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)'
-                                                    }}
+                                                    onClick={() => router.push('/jar')}
+                                                    className={`scale-[1.1] md:scale-[1.3] lg:scale-[1.1] xl:scale-[1.3] transform transition-transform duration-700 ease-out cursor-pointer hover:scale-[1.2] md:hover:scale-[1.4] lg:hover:scale-[1.2] xl:hover:scale-[1.4] active:scale-110`}
+                                                    title="View Ideas in Jar"
                                                 >
-                                                    {activeQuickChips.map((chip, idx) => (
-                                                        <QuickFilterChip
-                                                            key={idx}
-                                                            label={chip.label}
-                                                            variant={chip.variant}
-                                                            icon={chip.icon}
-                                                            onClick={() => handleSpinJar(chip.filter)}
-                                                        />
-                                                    ))}
+                                                    <Jar3D />
                                                 </div>
-                                            </div>
-                                        )}
 
-                                        <div className="flex items-center gap-4 w-full max-w-sm md:max-w-md px-4 md:px-0">
-                                            <Button
-                                                size="lg"
-                                                className="flex-1 h-14 md:h-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_50px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] text-lg md:text-xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20"
-                                                onClick={() => handleSpinJar()}
-                                                disabled={ideas.length === 0 || isSpinning}
-                                                data-tour="spin-button-desktop"
-                                            >
-                                                {isSpinning ? (
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                                                        <span>Spinning...</span>
+                                                <div className="absolute top-2 md:top-8 -right-4 md:right-0 lg:-right-6 xl:-right-10 z-20">
+                                                    <motion.div
+                                                        initial={{ scale: 0, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        transition={{ delay: 0.5, type: "spring" }}
+                                                        className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-2.5 py-1 rounded-xl text-[9px] md:text-xs font-black shadow-2xl border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white flex items-center gap-1.5 ring-4 ring-white/10"
+                                                    >
+                                                        <Layers className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+                                                        {availableIdeasCount}
+                                                    </motion.div>
+                                                </div>
+                                            </motion.div>
+
+                                            {/* Right side: Spin Controls (Side-by-side on desktop) */}
+                                            {isVotingMode && userData ? (
+                                                <div className="w-full max-w-lg lg:max-w-md animate-in zoom-in-95 duration-500">
+                                                    <VotingManager
+                                                        jarId={userData.activeJarId || ''}
+                                                        userId={userData.id}
+                                                        isAdmin={!!userData.isCreator}
+                                                        onVoteComplete={handleContentUpdate}
+                                                        onAddIdea={() => openModal('ADD_IDEA')}
+                                                        voteCandidatesCount={userData.jarVoteCandidatesCount}
+                                                    />
+                                                </div>
+                                            ) : !isAdminPickMode && (
+                                                <div className="flex flex-col items-center lg:items-start gap-4 w-full max-w-lg lg:max-w-[400px] animate-in fade-in slide-in-from-right-6 duration-1000 delay-300 relative z-20">
+
+                                                    <div className="flex items-center gap-3 w-full">
+                                                        <Button
+                                                            size="lg"
+                                                            className="flex-1 h-14 md:h-16 lg:h-16 xl:h-20 rounded-2xl md:rounded-[1.75rem] bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_40px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_40px_rgba(236,72,153,0.5)] text-lg md:text-xl xl:text-2xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20 px-8"
+                                                            onClick={() => handleSpinJar()}
+                                                            disabled={ideas.length === 0 || isSpinning}
+                                                            data-tour="spin-button-desktop"
+                                                        >
+                                                            {isSpinning ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                                    <span>...</span>
+                                                                </div>
+                                                            ) : "Spin the Jar!"}
+                                                        </Button>
+
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className="h-14 w-14 md:h-16 md:w-16 lg:h-16 lg:w-16 xl:h-20 xl:w-20 border-2 rounded-2xl md:rounded-[1.75rem] bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
+                                                            onClick={() => openModal('SPIN_FILTERS')}
+                                                            title="Filter Spin"
+                                                            aria-label="Filter Spin"
+                                                        >
+                                                            <Filter className="w-6 h-6 md:w-8 md:h-8" />
+                                                        </Button>
                                                     </div>
-                                                ) : "Spin the Jar!"}
-                                            </Button>
 
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-14 w-14 md:h-16 md:w-16 border-2 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-xl text-slate-500 hover:text-primary transition-all hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5"
-                                                onClick={() => openModal('SPIN_FILTERS')}
-                                                title="Filter Spin"
-                                                aria-label="Filter Spin"
-                                            >
-                                                <Filter className="w-6 h-6 md:w-7 md:h-7" />
-                                            </Button>
+                                                    {/* Quick Filter Chips (Wrapping on desktop for better visibility) */}
+                                                    {activeQuickChips.length > 0 && (
+                                                        <div className="w-full">
+                                                            <div
+                                                                className="flex items-center gap-2 flex-wrap pb-2 pt-1 w-full justify-center lg:justify-start"
+                                                            >
+                                                                {activeQuickChips.map((chip, idx) => (
+                                                                    <QuickFilterChip
+                                                                        key={idx}
+                                                                        label={chip.label}
+                                                                        variant={chip.variant}
+                                                                        icon={chip.icon}
+                                                                        onClick={() => handleSpinJar(chip.filter)}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
+                            </div>
 
-                                <div className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col items-center gap-6">
-                                    <SmartInputBar />
-
-                                    <div className="w-full">
-                                        <UnifiedConciergeButton isPremium={isPremium} />
+                            {/* EXTRA TOOLS SECTION */}
+                            {!showEmptyState && !showNoJars && (
+                                <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col gap-6" id="smart-prompt-input">
+                                    <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl rounded-[2.5rem] p-6 lg:p-8 border border-white/40 dark:border-white/10 shadow-xl ring-1 ring-black/5">
+                                        <div className="flex items-center gap-2 mb-4 ml-2">
+                                            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Smart Assistant</h3>
+                                        </div>
+                                        <SmartPromptInput
+                                            jarTopic={jarTopic || 'General'}
+                                            onGenerate={handleSmartPrompt}
+                                            isGenerating={isGeneratingSmartIdeas}
+                                            aiUsage={aiUsage}
+                                            className="w-full"
+                                        />
                                     </div>
 
-                                    <button
-                                        onClick={() => openModal('TOOLS')}
-                                        className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 py-2"
-                                    >
-                                        <Sparkles className="w-3.5 h-3.5" />
-                                        View all AI concierge tools
-                                    </button>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+                                        <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl rounded-[2rem] p-4 lg:p-6 border border-white/40 dark:border-white/10 shadow-lg ring-1 ring-black/5 flex flex-col justify-center transform transition-all hover:scale-[1.01]">
+                                            <UnifiedConciergeButton isPremium={isPremium} />
+                                        </div>
+                                        <div className="bg-indigo-50/60 dark:bg-indigo-950/20 backdrop-blur-2xl rounded-[2rem] p-4 lg:p-6 border border-indigo-200/50 dark:border-indigo-500/10 shadow-lg ring-1 ring-black/5 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-indigo-100/70 dark:hover:bg-indigo-950/40 transition-all hover:scale-[1.01]" onClick={() => openModal('TOOLS')}>
+                                            <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                <Sparkles className="w-5 h-5 text-indigo-500" />
+                                            </div>
+                                            <span className="text-[10px] font-black text-indigo-900 dark:text-indigo-300 uppercase tracking-widest">All AI Tools</span>
+                                            <p className="text-[10px] text-indigo-600/70 dark:text-indigo-400/70 mt-1 font-medium italic">Explore all planners</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* RIGHT SIDEBAR: Stats & Secondary Actions */}
+                        <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-8 order-last lg:order-none">
+
+                            {/* XP & Trophies - Moved to Sidebar on Desktop */}
+                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-6 border border-white/20 dark:border-white/10 shadow-xl space-y-6">
+                                <MiniProgressBar xp={xp || 0} level={level} />
+                                <div className="pt-2">
+                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Your Progress</h3>
+                                    <CollapsibleTrophyCase
+                                        xp={xp || 0}
+                                        level={level}
+                                        unlockedIds={achievements || []}
+                                        compact={true}
+                                    />
                                 </div>
                             </div>
-                        )}
+
+                            {/* Invite Code Display */}
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-700">
+                                <InviteCodeDisplay code={inviteCode} topic={jarTopic} />
+                            </div>
+
+                            {/* Email Verification Banner */}
+                            {userData?.email && (
+                                <div className="animate-in fade-in slide-in-from-right-4 duration-700 delay-150">
+                                    <VerificationBanner
+                                        email={userData.email}
+                                        isVerified={!!userData.emailVerified || !userData.verificationToken}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Jar Summary Info (Optional) */}
+                            {!showEmptyState && !showNoJars && (
+                                <div className="bg-gradient-to-br from-indigo-500/5 to-purple-600/5 dark:from-indigo-400/10 dark:to-purple-500/10 rounded-[2rem] p-6 border border-indigo-500/10 dark:border-indigo-400/10 shadow-inner">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-1.5 h-4 bg-indigo-500 rounded-full" />
+                                        <h3 className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em]">Jar Insights</h3>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center group">
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider">Topic</span>
+                                            <span className="text-xs text-slate-900 dark:text-white font-bold px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg shadow-sm">{jarTopic}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center group">
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider">Total Ideas</span>
+                                            <span className="text-xs text-slate-900 dark:text-white font-bold px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg shadow-sm">{ideas.length} ideas</span>
+                                        </div>
+                                        <div className="flex justify-between items-center group">
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider">Spin Mode</span>
+                                            <span className="text-xs text-slate-900 dark:text-white font-bold px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg shadow-sm capitalize">{jarSelectionMode?.toLowerCase()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </aside>
                     </div>
                 </div>
             </div>

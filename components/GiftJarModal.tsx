@@ -32,7 +32,7 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
         return (
             <Dialog open={true} onOpenChange={() => closeModal()}>
                 <DialogContent>
-                    <DialogHeader>
+                    <DialogHeader onClose={closeModal}>
                         <DialogTitle className="flex items-center gap-2 text-amber-500">
                             <AlertCircle className="w-5 h-5" /> Cannot Gift Jar Yet
                         </DialogTitle>
@@ -114,7 +114,7 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
     return (
         <Dialog open={true} onOpenChange={() => closeModal()}>
             <DialogContent className="sm:max-w-md">
-                <DialogHeader>
+                <DialogHeader onClose={closeModal}>
                     <div className="mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 text-primary">
                         <Gift className="w-6 h-6" />
                     </div>

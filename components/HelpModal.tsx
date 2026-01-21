@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers, Key, Share2, MousePointer2, Bell } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers, Key, Share2, MousePointer2, Bell, Gift } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -49,6 +49,8 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
         { id: "weekend-planner", title: "Weekend Planner", icon: Calendar },
         { id: "catering-planner", title: "Dinner Party Chef", icon: Utensils },
+        { id: "jar-gifting", title: "Jar Gifting", icon: Gift },
+        { id: "premium-status", title: "Premium & Support", icon: Sparkles },
         { id: "spinning", title: "Spinning the Jar", icon: Sparkles },
 
         { id: "history", title: "Archive & History", icon: History },
@@ -505,6 +507,14 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                             <li>Preview appears before saving</li>
                                         </ul>
                                     </div>
+                                    <div className="bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-primary/20">
+                                        <h5 className="font-semibold text-slate-800 dark:text-white text-sm mb-1 flex items-center gap-2">
+                                            <Disc className="w-4 h-4 text-primary animate-pulse" /> Voice Input (AI)
+                                        </h5>
+                                        <p className="text-xs text-slate-600 dark:text-slate-300">
+                                            Tap the 🎤 icon and speak naturally. The AI will transcribe and intelligently categorize your idea automatically!
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -699,7 +709,62 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
                                 <li>Scale ingredients for 10-100+ people.</li>
                                 <li>Get timed prep instructions (24h before, 4h before, etc.).</li>
+                                <li><strong>AI Recipes:</strong> Generate full Markdown recipes including ingredients and cooking methods.</li>
                             </ul>
+                        </div>
+                    </div>
+                );
+            case "jar-gifting":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Jar Gifting <span className="text-xs bg-gradient-to-r from-pink-500 to-rose-500 text-white px-2 py-0.5 rounded-full ml-2">NEW</span></h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Want to share your carefully curated list of ideas with someone else? Jar Gifting allows you to give an independent copy of your jar to a friend or partner.
+                        </p>
+                        <div className="space-y-4">
+                            <div className="bg-pink-50 dark:bg-pink-900/10 p-4 rounded-xl border border-pink-200 dark:border-pink-800/30">
+                                <h4 className="font-bold text-pink-700 dark:text-pink-300 mb-1 flex items-center gap-2">
+                                    <Gift className="w-4 h-4" /> How to Gift
+                                </h4>
+                                <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                    <li>Open your Jar settings.</li>
+                                    <li>Click the <strong>Gift Jar</strong> icon (🎁).</li>
+                                    <li>Copy the generated link and send it to a friend.</li>
+                                    <li>When they open the link, a fresh copy of your ideas will be added to their account!</li>
+                                </ol>
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                💡 Gifting creates a *cloned* copy. Future changes to your jar will not affect their gifted copy, and vice versa.
+                            </p>
+                        </div>
+                    </div>
+                );
+            case "premium-status":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Premium & Status</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Decision Jar offers various membership tiers and special access statuses.
+                        </p>
+                        <div className="grid gap-3">
+                            <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-800/30">
+                                <h4 className="font-bold text-amber-700 dark:text-amber-400 text-sm mb-1 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4" /> Lifetime Access
+                                </h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">A one-time payment for permanent Pro features across all your jars. No recurring subscription needed!</p>
+                            </div>
+                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800/30">
+                                <h4 className="font-bold text-blue-700 dark:text-blue-400 text-sm mb-1 flex items-center gap-2">
+                                    <Settings className="w-4 h-4" /> Trial Access
+                                </h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">New accounts and jars enjoy a 14-day grace period with all Pro features enabled automatically.</p>
+                            </div>
+                            <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-200 dark:border-purple-800/30">
+                                <h4 className="font-bold text-purple-700 dark:text-purple-400 text-sm mb-1 flex items-center gap-2">
+                                    <Shield className="w-4 h-4" /> Super Admin
+                                </h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300">Restricted to developers and platform admins. Provides full override permissions for support.</p>
+                            </div>
                         </div>
                     </div>
                 );
@@ -727,6 +792,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                 <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">
                                     <li><strong>Accept Selection:</strong> Marks the idea as "Selected" and moves it to your Vault.</li>
                                     <li><strong>Schedule:</strong> Click <strong>"Set Date for Record"</strong> to schedule the session/item in your calendar/vault.</li>
+                                    <li><strong>Smart Location:</strong> The app uses your **GPS (with permission)** to find the most relevant venues nearby. If GPS is unavailable, it falls back to your profile city.</li>
                                     <li><strong>Find Places:</strong> For generic ideas (e.g., "Go Bowling"), click <strong>"Find Specific Places"</strong> to find top-rated venues near you.</li>
                                     <li><strong>Find Food:</strong> Planning an activity? Use the <strong>"Find food nearby"</strong> button to instantly search for restaurants near that location using the Dining Concierge.</li>
                                 </ul>

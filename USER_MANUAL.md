@@ -31,6 +31,8 @@ Decision Jar allows you to create shared collections of activity ideas with your
 2.  Click the **"Get Started"** button.
 3.  Enter your name and email.
 4.  **Location:** Enter your city (e.g., "New York, NY"). This helps our Concierge tools suggest relevant venues nearby.
+    - **Smart Detection:** On mobile and supported browsers, the app will ask for permission to use your **GPS**. This ensures "nearby" searches are pinpoint accurate to your current location.
+    - **Fallback:** If GPS is disabled, the app uses your Profile Location, then your Jar Location, then a general "local" context.
 5.  **Create Jar:**
     - Choose a **Name** and **Topic** (e.g., "Dates", "Movies", "Food", "Activities").
     - Select a **Selection Mode** (Random spin, Voting Session, or Task Allocation).
@@ -47,6 +49,7 @@ Click the **Jar Name** in the dashboard header to open the Jar Switcher. From th
 #### Jar Actions
 *   **Rename (Admin Only):** Click the **Pencil icon** next to a jar name to rename it.
 *   **Delete (Admin Only):** Click the **Trash icon** to permanently delete a jar and all its contents. This requires double confirmation.
+*   **Jar Gifting:** Want to share your curated list of ideas with a friend? Click the **Gift icon** (🎁) to generate a "Gift Copy" link. When they open it, a new independent copy of your jar will be created for them.
 *   **Leave (Member Only):** If you are not the administrator, you can leave a jar at any time.
 
 #### Member Management (Admin Only)
@@ -79,9 +82,9 @@ There are multiple ways to add ideas to your jar. Choose the method that works b
 ### Smart Input Bar (Recommended)
 The Smart Input Bar is the fastest way to add ideas. Located prominently on your dashboard, it automatically detects what type of content you're adding and handles it intelligently.
 
-#### Three Input Methods:
+#### Four Input Methods:
 
-**1. Type Text**
+**1. Type Text****
 - Simply type your idea and press Enter
 - Example: "Visit the local art museum"
 - The idea is added with default settings that you can edit later
@@ -97,6 +100,12 @@ The Smart Input Bar is the fastest way to add ideas. Located prominently on your
 - Supported formats: JPG, PNG, GIF, WebP
 - Images are automatically compressed for fast loading
 - Preview appears before saving
+
+**4. Voice Input (AI-Powered)**
+- Tap the **Microphone icon** (🎤) in the Smart Input Bar
+- Speak your idea or request naturally (e.g., "Find a romantic Italian place for dinner tonight")
+- The AI will transcribe your voice and automatically categorize the idea
+- Works on both Desktop and Mobile!
 
 ### Manual Entry (Detailed Control)
 For more control over your idea's attributes:
@@ -192,6 +201,11 @@ Decision Jar Premium unlocks a suite of AI-powered scouts and planners:
 - **Concierge Services:** Scouts for Dining, Bars, Clubs, Movies, Theatre, and more.
 - **Advanced Planners:** Weekend and Night Out schedules.
 - **Google Photos:** Attach memories directly from your cloud storage.
+- **Status Badges:** 
+    - **Super Admin:** Developer level access (full permissions).
+    - **Lifetime Access:** A one-time purchase for permanent Pro features.
+    - **Trial Active:** New jars and users get a 14-day grace period to try all features.
+- **Unlimited Jars:** Manage up to 50 jars (vs 3 for free users).
 
 ---
 
@@ -231,6 +245,9 @@ Plan professional-grade dinner parties or group events with ease.
 - **Holiday Feast:** Plan Christmas or Thanksgiving for 20+ people. The tool handles the ingredient scaling and tells you exactly what to prep 24 hours in advance to avoid kitchen chaos.
 - **Game Day Snacks:** Choose "Mixed" audience and "Super Bowl" theme for hearty, easy-to-eat comfort food perfect for a group.
 - **Micro-Wedding / Engagement:** Professional-grade menus for small, meaningful gatherings where you want the food to be the star.
+
+### AI Recipe Generator
+When adding food ideas, the AI can generate full recipes in Markdown format, including ingredients and step-by-step instructions. Perfect for "Cooking Date" jars!
 
 ---
 

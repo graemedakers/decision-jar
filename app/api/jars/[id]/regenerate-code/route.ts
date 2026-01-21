@@ -33,8 +33,8 @@ export async function POST(
             }
         });
 
-        if (!membership || membership.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Only admins can regenerate the invite code' }, { status: 403 });
+        if (!membership || !['OWNER', 'ADMIN'].includes(membership.role)) {
+            return NextResponse.json({ error: 'Only jar owners or admins can regenerate the invite code' }, { status: 403 });
         }
 
         const newCode = generateCode();

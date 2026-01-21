@@ -2,7 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Wand2, Plus, Ghost } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Wand2, Plus, Ghost, Mic } from 'lucide-react';
 
 export default function GuideIdeas() {
     return (
@@ -44,6 +44,14 @@ export default function GuideIdeas() {
                     className="w-full"
                 />
             </div>
+
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <Mic className="text-pink-500" /> Voice Input (AI-Powered)
+            </h2>
+            <p className="mb-6">
+                Don't want to type? Use your voice. Tap the <strong>microphone</strong> icon in the input bar and speak naturally.
+                Our AI will transcribe your words and automatically categorize the idea—setting the location, price, and duration for you!
+            </p>
 
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                 <Ghost className="text-slate-400" /> Ghost Ideas (Surprises)

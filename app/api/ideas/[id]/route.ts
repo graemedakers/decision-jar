@@ -54,7 +54,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         // 2. User is an admin in the jar
         if (idea.createdById !== session.user.id) {
             // Already fetched membership above
-            if (membership.role !== 'ADMIN') {
+            if (!['OWNER', 'ADMIN'].includes(membership.role)) {
                 return NextResponse.json({ error: 'Forbidden: You do not have permission to delete this idea' }, { status: 403 });
             }
         }
@@ -133,7 +133,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         // 1. User is the author
         // 2. User is an admin in the jar
         if (idea.createdById !== session.user.id) {
-            if (membership.role !== 'ADMIN') {
+            if (!['OWNER', 'ADMIN'].includes(membership.role)) {
                 return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this idea. Only the creator or an admin can edit ideas.' }, { status: 403 });
             }
         }
@@ -224,7 +224,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         // 2. It is a memory (selected) and the user is in the same jar
         // 3. User is an admin in the jar
         if (idea.createdById !== session.user.id && !idea.selectedAt) {
-            if (membership.role !== 'ADMIN') {
+            if (!['OWNER', 'ADMIN'].includes(membership.role)) {
                 return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this idea' }, { status: 403 });
             }
         }

@@ -60,6 +60,47 @@ export async function PUT(
     }
 }
 
+export async function GET(
+    req: Request,
+    context: { params: Promise<{ id: string }> }
+) {
+    const session = await getSession();
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await context.params;
+
+    try {
+        const jar = await prisma.jar.findUnique({
+            where: { id },
+            include: {
+                members: {
+                    select: { userId: true, role: true }
+                },
+                _count: {
+                    select: { ideas: true }
+                }
+            }
+        });
+
+        if (!jar) {
+            return NextResponse.json({ error: "Jar not found" }, { status: 404 });
+        }
+
+        // Verify membership access
+        const isMember = jar.members.some(m => m.userId === session.user?.id);
+        if (!isMember) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        return NextResponse.json(jar);
+    } catch (error: any) {
+        console.error("[JAR_GET_ERROR]", error);
+        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    }
+}
+
 export async function DELETE(
     req: Request,
     { params }: { params: Promise<{ id: string }> }

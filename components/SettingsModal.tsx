@@ -37,6 +37,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [inviteCode, setInviteCode] = useState("");
     const [isPremium, setIsPremium] = useState(false);
     const [hasPaid, setHasPaid] = useState(false);
+    const [isLifetimePro, setIsLifetimePro] = useState(false);
     const [isNative, setIsNative] = useState(false);
     const [jarType, setJarType] = useState<"ROMANTIC" | "SOCIAL">("ROMANTIC");
     const [jarName, setJarName] = useState("");
@@ -45,6 +46,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [jarVoteCandidates, setJarVoteCandidates] = useState(0);
     const [defaultIdeaPrivate, setDefaultIdeaPrivate] = useState(false);
     const [isGiftable, setIsGiftable] = useState(true);
+    const [ideaCount, setIdeaCount] = useState(0);
 
     // Premium Invite Logic
     const [currentUserEmail, setCurrentUserEmail] = useState("");
@@ -79,6 +81,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
 
                         setInviteCode(data.user.coupleReferenceCode || "");
                         setIsPremium(!!data.user.isPremium);
+                        setIsLifetimePro(!!data.user.isLifetimePro);
                         setHasPaid(!!data.user.hasPaid);
                         if (data.user.jarType) setJarType(data.user.jarType);
                         setJarName(data.user.jarName || "");
@@ -91,7 +94,10 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                         if (data.user.activeJarId) {
                             fetch(getApiUrl(`/api/jars/${data.user.activeJarId}`))
                                 .then(r => r.json())
-                                .then(jar => setIsGiftable(jar.isGiftable ?? true));
+                                .then(jar => {
+                                    setIsGiftable(jar.isGiftable ?? true);
+                                    setIdeaCount(jar._count?.ideas || 0);
+                                });
                         }
 
                         setCurrentUserEmail(data.user.email || "");
@@ -101,6 +107,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                 });
         }
     }, [isOpen, currentLocation]);
+
+    const [activeJarId, setActiveJarId] = useState("");
 
     const labels = getJarLabels(jarTopic);
 
@@ -160,31 +168,40 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
         }
     };
 
-    const [activeJarId, setActiveJarId] = useState("");
-
     const handleEmptyJar = async () => {
         if (!confirm(`Are you sure you want to ${labels.emptyJarAction.toLowerCase()}? This will delete ALL ideas, including your history of past sessions. This action cannot be undone.`)) return;
 
         setIsLoading(true);
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${activeJarId}/reset`), {
+            const url = getApiUrl(`/api/jars/${activeJarId}/reset`);
+            console.log("Emptying jar at:", url);
+
+            const res = await fetch(url, {
                 method: 'POST',
                 credentials: 'include',
             });
 
+            const contentType = res.headers.get("content-type");
             if (res.ok) {
-                const data = await res.json();
+                const data = contentType?.includes("application/json") ? await res.json() : {};
                 showSuccess(data.message || "Jar emptied successfully!");
                 onClose();
                 router.refresh();
                 window.location.reload();
             } else {
-                const data = await res.json();
-                showError(`Failed to empty jar: ${data.details || "Unknown error"}`);
+                let errorMessage = "Unknown error";
+                if (contentType?.includes("application/json")) {
+                    const data = await res.json();
+                    errorMessage = data.details || data.error || JSON.stringify(data);
+                } else {
+                    errorMessage = await res.text();
+                }
+                console.error("Empty jar failed:", errorMessage);
+                showError(`Failed to empty jar: ${errorMessage}`);
             }
-        } catch (error) {
-            console.error(error);
-            showError("Error emptying jar");
+        } catch (error: any) {
+            console.error("Handle empty jar error:", error);
+            showError(`Error emptying jar: ${error?.message || "Check console"}`);
         } finally {
             setIsLoading(false);
         }
@@ -385,7 +402,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                     <Button
                                                         type="button"
                                                         variant="outline"
-                                                        onClick={() => { onClose(); openModal('MY_GIFTS'); }}
+                                                        onClick={() => { openModal('MY_GIFTS'); }}
                                                         className="w-full justify-start h-12 gap-3 border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-900/10 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
                                                     >
                                                         <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
@@ -412,7 +429,17 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                     </div>
 
 
-                                                    {hasPaid ? (
+                                                    {isSuperAdmin ? (
+                                                        <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg text-xs font-bold text-purple-600 dark:text-purple-300 flex items-center gap-2 border border-purple-200 dark:border-purple-800/30">
+                                                            <ShieldCheck className="w-4 h-4" />
+                                                            Super Admin Access Active
+                                                        </div>
+                                                    ) : isLifetimePro ? (
+                                                        <div className="p-3 bg-amber-100 dark:bg-amber-900/20 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-2 border border-amber-200 dark:border-amber-800/30">
+                                                            <Sparkles className="w-4 h-4" />
+                                                            Lifetime Access Active
+                                                        </div>
+                                                    ) : hasPaid ? (
                                                         isNative ? (
                                                             <div className="p-3 bg-slate-100 dark:bg-white/5 rounded-lg text-xs text-slate-500">
                                                                 Manage Subscription: Visit <strong>{BASE_DOMAIN}</strong>
@@ -440,7 +467,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                                 }
                                                             }}
                                                         >
-                                                            <Sparkles className="w-4 h-4 mr-2" /> Upgrade to Pro
+                                                            <Sparkles className="w-4 h-4 mr-2" />
+                                                            {isPremium ? "Premium Active (Subscribe)" : "Upgrade to Pro"}
                                                         </Button>
                                                     )}
 
@@ -579,17 +607,37 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                         />
                                                     </div>
 
-                                                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-100 dark:border-white/10">
-                                                        <div className="flex flex-col">
-                                                            <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Allow Gifting</label>
-                                                            <p className="text-[10px] text-slate-500 dark:text-slate-400">Allow others to create a gift copy of this jar</p>
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-100 dark:border-white/10">
+                                                            <div className="flex flex-col">
+                                                                <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Allow Gifting</label>
+                                                                <p className="text-[10px] text-slate-500 dark:text-slate-400">Allow others to create a gift copy of this jar</p>
+                                                            </div>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isGiftable}
+                                                                onChange={(e) => setIsGiftable(e.target.checked)}
+                                                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-5 h-5 cursor-pointer"
+                                                            />
                                                         </div>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={isGiftable}
-                                                            onChange={(e) => setIsGiftable(e.target.checked)}
-                                                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-5 h-5 cursor-pointer"
-                                                        />
+
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                openModal('GIFT_JAR', { jarId: activeJarId, jarName, ideaCount });
+                                                            }}
+                                                            className="w-full justify-start h-12 gap-3 border-indigo-200 dark:border-indigo-900/50 bg-white dark:bg-slate-900/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 text-indigo-600 dark:text-indigo-400 group"
+                                                        >
+                                                            <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
+                                                                <Gift className="w-4 h-4" />
+                                                            </div>
+                                                            <div className="flex flex-col items-start leading-tight">
+                                                                <span className="font-bold text-sm">Gift This Jar</span>
+                                                                <span className="text-[10px] opacity-70">Share a copy of your curated ideas</span>
+                                                            </div>
+                                                        </Button>
                                                     </div>
                                                 </div>
 

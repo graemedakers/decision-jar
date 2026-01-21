@@ -30,8 +30,8 @@ export async function POST(
             }
         });
 
-        if (!membership || membership.role !== 'ADMIN') {
-            return NextResponse.json({ error: "Only admins can allocate tasks" }, { status: 403 });
+        if (!membership || !['OWNER', 'ADMIN'].includes(membership.role)) {
+            return NextResponse.json({ error: "Only jar owners or admins can allocate tasks" }, { status: 403 });
         }
 
         // 2. Get all active members

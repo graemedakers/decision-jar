@@ -27,13 +27,13 @@ export async function POST(
             return NextResponse.json({ error: "Not a member" }, { status: 400 });
         }
 
-        // Prevent last admin from leaving? (Optional, but good practice)
-        if (membership.role === 'ADMIN') {
+        // Prevent last admin/owner from leaving
+        if (['ADMIN', 'OWNER'].includes(membership.role)) {
             const adminCount = await prisma.jarMember.count({
-                where: { jarId, role: 'ADMIN', status: 'ACTIVE' }
+                where: { jarId, role: { in: ['ADMIN', 'OWNER'] }, status: 'ACTIVE' }
             });
             if (adminCount <= 1) {
-                return NextResponse.json({ error: "You are the only admin. Assign another admin before leaving or delete the jar." }, { status: 400 });
+                return NextResponse.json({ error: "You are the only admin/owner. Assign another admin before leaving or delete the jar." }, { status: 400 });
             }
         }
 

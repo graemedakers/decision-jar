@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, UserPlus, ShieldCheck, Settings, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, UserPlus, ShieldCheck, Settings, Users, MapPin } from 'lucide-react';
 
 export default function GuideSetup() {
     return (
@@ -15,6 +15,15 @@ export default function GuideSetup() {
             <p className="mb-6">
                 Every Jar is built around a <strong>Topic</strong>. The topic you choose determines the visual theme and,
                 more importantly, the <strong>Categories</strong> available for your ideas.
+            </p>
+
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <MapPin className="text-red-500" /> GPS & Smart Location
+            </h2>
+            <p className="mb-6">
+                Decision Jar is location-aware. For the best experience, allow the app to access your <strong>GPS</strong>.
+                This allows features like <strong>Magic Fill</strong> and <strong>Dining Concierge</strong> to find exact
+                venues near you right now. If GPS is unavailable, we fall back to the "Home Town" set in your profile.
             </p>
             <div className="grid sm:grid-cols-2 gap-4 mb-8">
                 <div className="p-4 rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30">

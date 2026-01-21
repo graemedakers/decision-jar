@@ -22,6 +22,9 @@ import { Jar, User } from "@prisma/client";
 export function isUserPro(user: User | null | undefined): boolean {
     if (!user) return false;
 
+    // 0. Super Admin (Always Pro)
+    if (user.isSuperAdmin) return true;
+
     // 1. Lifetime Pro
     if (user.isLifetimePro) return true;
 
@@ -122,7 +125,7 @@ export function hasActuallyPaid(
     if (!user) return false;
 
     // Check user-level payment
-    const userPaid = user.isLifetimePro ||
+    const userPaid = user.isSuperAdmin || user.isLifetimePro ||
         (user.subscriptionStatus && ['active', 'trialing', 'past_due'].includes(user.subscriptionStatus));
 
     // Check jar-level payment
