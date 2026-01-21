@@ -33,7 +33,7 @@ export async function toggleFavorite(data: {
         // Check if exists
         const existing = await prisma.favoriteVenue.findFirst({
             where: {
-                jarId,
+                userId: user.id,
                 name: { equals: name, mode: 'insensitive' }
             }
         });

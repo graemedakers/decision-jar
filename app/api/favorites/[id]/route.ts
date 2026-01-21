@@ -21,7 +21,6 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         const count = await prisma.$executeRaw`
             DELETE FROM "FavoriteVenue" 
             WHERE "id" = ${id} 
-            AND "jarId" = ${currentJarId}
             AND "userId" = ${session.user.id}
         `;
 

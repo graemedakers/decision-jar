@@ -76,8 +76,7 @@ export async function DELETE(request: Request) {
         // SECURITY FIX: Enforce ownership by checking userId
         await prisma.$executeRaw`
             DELETE FROM "FavoriteVenue" 
-            WHERE "jarId" = ${currentJarId} 
-            AND "name" = ${name}
+            WHERE "name" = ${name}
             AND "userId" = ${session.user.id}
         `;
 
