@@ -212,13 +212,13 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
             <form onSubmit={handleSubmit} className="relative flex items-center bg-white dark:bg-slate-900 shadow-xl rounded-2xl p-1.5 border border-slate-200 dark:border-white/10 transition-all focus-within:ring-2 focus-within:ring-purple-500/20">
 
                 {/* Left Actions Toolbar */}
-                <div className="flex items-center gap-0.5 px-1 shrink-0 border-r border-slate-100 dark:border-slate-800 mr-2">
+                <div className="flex items-center gap-0 sm:gap-0.5 px-0.5 sm:px-1 shrink-0 border-r border-slate-100 dark:border-slate-800 mr-1 sm:mr-2">
                     {/* Image Upload */}
                     <button
                         type="button"
                         onClick={() => !isUploadingImage && fileInputRef.current?.click()}
                         disabled={isUploadingImage}
-                        className="p-2 rounded-xl text-slate-400 hover:text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors"
+                        className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors"
                         title="Upload Image"
                     >
                         {isUploadingImage ? (
@@ -234,7 +234,7 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
                             type="button"
                             onClick={handleVoiceToggle}
                             className={cn(
-                                "p-2 rounded-xl transition-all",
+                                "p-1.5 sm:p-2 rounded-xl transition-all",
                                 isListening
                                     ? "text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse"
                                     : "text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
@@ -255,11 +255,11 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
                         <BookOpen className="w-5 h-5" />
                     </button>
 
-                    {/* Concierge/AI Shortcut - now redundant but nice to have? Maybe opens concierge modal directly */}
+                    {/* Concierge/AI Shortcut - hidden on mobile to save space */}
                     <button
                         type="button"
                         onClick={() => openModal('CONCIERGE', { initialPrompt: prompt })}
-                        className="p-2 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                        className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors hidden sm:block"
                         title="Ask A.I. Concierge"
                     >
                         <Sparkles className="w-5 h-5" />
@@ -273,7 +273,7 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
                     placeholder={isListening ? "Listening..." : currentPlaceholder}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="flex-1 bg-transparent border-none outline-none text-base sm:text-lg text-slate-800 dark:text-white placeholder:text-slate-400 min-w-0"
+                    className="flex-1 bg-transparent border-none outline-none text-[15px] sm:text-lg text-slate-800 dark:text-white placeholder:text-slate-400 min-w-0"
                     disabled={isGenerating}
                 />
 
