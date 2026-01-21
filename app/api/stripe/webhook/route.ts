@@ -1,3 +1,4 @@
+import { sendPaymentDueEmail } from '@/lib/email';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
@@ -133,9 +134,8 @@ export async function POST(req: Request) {
             });
 
             if (user) {
-                // TODO: Implement sendPaymentDueEmail(user.email, user.name);
-                logger.info(`[PAYMENT_DUE] Sending email to ${user.email} (Status: past_due)`);
-                // Example: await sendEmail(user.email, "Action Required: Payment Failed", "Please update your payment method to keep access.");
+                await sendPaymentDueEmail(user.email, user.name);
+                logger.info(`[PAYMENT_DUE] ✅ Sent payment reminder to ${user.email} (Status: past_due)`);
             } else {
                 logger.warn(`[STRIPE_WEBHOOK] ⚠️ Could not find user for subscription ${subscription.id}`);
             }
