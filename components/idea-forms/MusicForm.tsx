@@ -24,7 +24,7 @@ export function MusicForm({ initialData, onChange }: MusicFormProps) {
             venue: initialData?.venue || { address: "", name: "" }
         },
         mode: "onChange"
-    });
+    } as any);
 
     const values = watch();
     const prevDataRef = React.useRef(JSON.stringify(values));
