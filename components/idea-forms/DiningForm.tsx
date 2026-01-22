@@ -22,10 +22,10 @@ export function DiningForm({ initialData, onChange }: DiningFormProps) {
             rating: initialData?.rating,
             website: initialData?.website || "",
             location: initialData?.location || { address: "", name: "" },
-            reservationRequired: initialData?.reservationRequired ?? false
+            reservationRequired: !!initialData?.reservationRequired
         },
         mode: "onChange"
-    });
+    } as any);
 
     const values = watch();
     const prevDataRef = React.useRef(JSON.stringify(values));
