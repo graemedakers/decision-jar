@@ -28,7 +28,8 @@ export const maxDuration = 60;
 function validateRecommendation(
     recommendation: any,
     userRequest: string,
-    toolType: string
+    toolType: string,
+    inputs?: any
 ): boolean {
     // Non-location tools or tools without strict filtering rules yet should skip validation
     const skipValidationTools = ['CHEF', 'HOLIDAY', 'DATE_NIGHT', 'WEEKEND_PLANNER', 'WEEKEND_EVENTS'];
@@ -270,9 +271,13 @@ function validateRecommendation(
     // SPORTS - Sport Type Rules
     // ============================================
     if (toolType === 'SPORTS') {
+        // Validation now supports checking structured 'sport' input if available (e.g. from pill selection)
+        // This fixes the issue where an empty text search would bypass validation even if "Golf" was selected.
+        const selectedSport = (recommendation.sport || recommendation.type || '').toLowerCase();
+
         const sportPatterns: Record<string, RegExp> = {
             tennis: /\b(tennis|racquet)\b/i,
-            golf: /\b(golf|driving.range)\b/i,
+            golf: /\b(golf|driving.range|fairway|putt)\b/i,
             soccer: /\b(soccer|football|futsal)\b/i,
             basketball: /\b(basketball|hoops)\b/i,
             swimming: /\b(swim|pool|aquatic)\b/i,
@@ -280,10 +285,61 @@ function validateRecommendation(
             rugby: /\b(rugby|league|union)\b/i,
         };
 
+        for (const [sportKey, pattern] of Object.entries(sportPatterns)) {
+            // CHECK 1: If user TYPED this sport
+            if (pattern.test(requestLower)) {
+                if (!pattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User typed ${sportKey}, but this is ${recType}`);
+                    return false;
+                }
+                return true;
+            }
+
+            // CHECK 2: If user SELECTED this sport via UI inputs (e.g. Golf button)
+            // We infer this by checking if the user request is empty but we entered this block? 
+            // Actually, we can't easily access 'inputs' here without changing signature.
+            // BUT, we can make 'validateRecommendation' smarter by assuming if the AI returned "Golf" when "Tennis" 
+            // was asked, it's wrong.
+            // Wait, the issue is "Golf" was selected but "AFL" was returned.
+            // The AI prompt received "Sport: Golf". If it returned AFL, it ignored the prompt.
+            // We need to catch that here.
+        }
+
+        // NEW STRICT CHECK: If the recommendation ITSELF claims to be a specific sport,
+        // and that sport heavily contradicts the apparent user intent (if any), we might flag it.
+        // But the real fix is likely that we need to pass 'inputs' to this function to know what button was pressed.
+        // However, refactoring strictly might be risky.
+        //
+        // ALTERNATIVE: Use the text presence of the sport name in the result.
+        // If the result says "AFL Match" and doesn't mention "Golf", and we know (how?) the user wanted Golf?
+
+
+
+        // 1. Check Explicit Input (Button Selection)
+        if (inputs?.sport && inputs.sport !== 'Any') {
+            const selectedSport = inputs.sport.toLowerCase();
+            const matchingPattern = Object.entries(sportPatterns).find(([key]) => selectedSport.includes(key))?.[1];
+            // Fallback to simple includes if no pattern
+
+            if (matchingPattern) {
+                if (!matchingPattern.test(allText)) {
+                    console.log(`  ❌ REJECT: User selected ${inputs.sport}, but this result does not match.`);
+                    return false;
+                }
+            } else {
+                // If it's a sport we don't have a pattern for (e.g. "Squash"), we just check for the word presence
+                if (!allText.includes(selectedSport)) {
+                    console.log(`  ❌ REJECT: User selected ${inputs.sport}, but result text missing keywords.`);
+                    return false;
+                }
+            }
+        }
+
+        // 2. Check Text Request (if any)
         for (const [sport, pattern] of Object.entries(sportPatterns)) {
             if (pattern.test(requestLower)) {
                 if (!pattern.test(allText)) {
-                    console.log(`  ❌ REJECT: User wants ${sport}, but this is ${recType}`);
+                    console.log(`  ❌ REJECT: User typed ${sport}, but this is ${recType}`);
                     return false;
                 }
                 return true;
@@ -393,7 +449,7 @@ export async function POST(req: NextRequest) {
             if (query && jsonResponse.recommendations && Array.isArray(jsonResponse.recommendations)) {
                 // Validate each recommendation
                 const filteredRecommendations = jsonResponse.recommendations.filter(
-                    (rec: any) => validateRecommendation(rec, query, toolKey)
+                    (rec: any) => validateRecommendation(rec, query, toolKey, inputs)
                 );
 
                 // ✅ RADICAL: If filtering removed more than 60% of results, and it's attempt 1, 
@@ -465,10 +521,14 @@ export async function POST(req: NextRequest) {
                     const trustedDomains = ['google.com', 'facebook.com', 'instagram.com', 'yelp.com', 'tripadvisor.com', 'booking.com', 'airbnb.com'];
                     const isTrusted = trustedDomains.some(domain => currentUrl.includes(domain));
 
+                    // ✅ CRITICAL FIX: If the prompt generated a Google Search intent (which we asked for), TRUST IT.
+                    // Do not overwrite it with a generic search, as the prompt's search is likely more specific.
                     if (currentUrl && !isTrusted && !currentUrl.includes('google.com/search')) {
                         const encodedName = encodeURIComponent(rec.name || '');
                         rec.website = `https://www.google.com/search?q=${encodedName}+${encodedLocation}+${searchSuffix}`;
                         console.log(`[URL Fix] ${toolKey}: Replaced suspicious URL with Google search`);
+                    } else if (currentUrl && currentUrl.includes('google.com/search')) {
+                        console.log(`[URL Fix] ${toolKey}: Trusted generic Google Search URL from AI: ${currentUrl}`);
                     }
 
                     return rec;

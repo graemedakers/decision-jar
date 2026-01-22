@@ -12,7 +12,7 @@ import { revalidatePath } from 'next/cache';
 export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea }>> {
     try {
         const session = await getSession();
-        const { minDuration, maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly } = filters;
+        const { minDuration, maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly, ideaTypes } = filters;
         if (minDuration !== undefined && maxDuration !== undefined && minDuration > maxDuration) {
             return { success: false, error: 'Invalid duration range: maxDuration must be greater than minDuration', status: 400 };
         }
@@ -55,6 +55,12 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
         if (category && category !== 'ANY') whereClause.category = category;
         if (timeOfDay && timeOfDay !== 'ANY') {
             whereClause.timeOfDay = { in: ['ANY', timeOfDay] };
+        }
+
+
+        // Filter by Idea Type
+        if (ideaTypes && Array.isArray(ideaTypes) && ideaTypes.length > 0) {
+            whereClause.ideaType = { in: ideaTypes };
         }
 
         // Fetch ideas

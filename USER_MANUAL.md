@@ -133,6 +133,15 @@ Stuck for inspiration?
 - Browse pre-made templates and AI planners
 - Add complete itineraries or venue recommendations to your jar
 
+### Structured Idea Types
+Decision Jar now supports structured data for common activity types. When adding an idea manually, you can select a **Type** to unlock specific fields:
+- 🎬 **Movies**: Add Director, Runtime, Watch Mode (Streaming/Cinema), and IMDb links.
+- 📖 **Books**: Add Author, Page Count, Format (Physical/Ebook/Audio), and Goodreads links.
+- 🍳 **Recipes**: Add Ingredients, Instructions, Prep/Cook times, and Source URLs.
+- 🎮 **Games**: Add Platforms, Players, Playtime, and Genre.
+
+These structured types provide beautiful, tailored cards in the **Reveal** screen and enable quick actions like "Watch Trailer" or "View Source".
+
 ### Permissions
 *   **Everyone** can add ideas
 *   **Only the Creator** or a **Jar Admin** can edit or delete existing ideas
@@ -143,17 +152,23 @@ Stuck for inspiration?
 
 ### The Spin Filter
 When you click **"Spin Jar"**, you can apply filters to find the perfect match for your current situation:
+*   **Idea Type**: Filter specifically for "Cook" (Recipes), "Watch" (Movies), "Play" (Games), or "Read" (Books).
 *   **Category:** Choose between specific types like Meals or Activities. 
     *   *Note: Only categories with available ideas will show up in the list.*
 *   **Duration/Cost/Energy:** Narrow down by time, budget, or how much effort you want to expend.
 *   **Time of Day:** Pick between "Day" and "Evening" options.
 
 ### The Reveal
-If a match is found, the result is displayed with all its details. You can:
+If a match is found, the result is displayed with all its details. For **Structured Ideas**, you'll see type-specific info and actions:
 1.  **Accept:** Lock in the activity.
 2.  **Set Date:** Record exactly when you plan to do this.
-3.  **Find Places:** For general ideas, find specific venues nearby via Google Maps integration.
-4.  **Find Food:** Instantly scout for restaurants near your chosen activity.
+3.  **Type Actions:** 
+    - **Movies**: Watch Trailer, View IMDb.
+    - **Recipes**: **Cook Mode** (Full-screen distraction-free view), View Source.
+    - **Books**: View Goodreads, Summary Search.
+    - **Games**: View Gameplay, How to Play.
+4.  **Find Places:** For general ideas, find specific venues nearby via Google Maps integration.
+5.  **Find Food:** Planning an activity? Use the <strong>"Find food nearby"</strong> button to instantly search for restaurants near that location using the Dining Concierge.
 
 ---
 

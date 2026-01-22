@@ -1,4 +1,4 @@
-import { LucideIcon, Users, Brain, Sparkles, Zap, MessageSquare, Compass, Heart, GraduationCap, ChefHat, Utensils, Layers, Bell } from "lucide-react";
+import { LucideIcon, Users, Brain, Sparkles, Zap, MessageSquare, Compass, Heart, GraduationCap, ChefHat, Utensils, Layers, Bell, Clapperboard } from "lucide-react";
 
 export interface ResourceGuide {
     slug: string;
@@ -610,6 +610,74 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             {
                 title: "Handling Tie-Breakers & Edge Cases",
                 content: "What happens if the group is perfectly split? Decision Jar's consensus engine handles ties intelligently. Depending on your jar's settings, it will either flip a digital coin between the top winners or trigger an immediate 'Runoff Round' to narrow the focus until a winner emerges."
+            }
+        ]
+    },
+    {
+        slug: "mastering-structured-ideas",
+        category: "Productivity",
+        title: "Mastering Structured Ideas: Beyond Simple Text",
+        description: "How using structured data for movies, books, and recipes can transform your hobby tracking and decision speed.",
+        icon: Layers,
+        readTime: "7 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Benefits of structured idea types in Decision Jar",
+            "description": "Learn how specific data models for common activities improve organization and provide better quick actions."
+        },
+        faqs: [
+            {
+                question: "What are structured ideas?",
+                answer: "Structured ideas are specialized formats for common activities like movies, books, and recipes. They allow you to store specific data like authors, runtimes, or ingredients."
+            },
+            {
+                question: "Why not just use regular text?",
+                answer: "Structured ideas unlock 'Quick Actions' like 'Watch Trailer' or 'Cook Mode' and allow for smarter filtering by playtime, cost, or difficulty."
+            }
+        ],
+        sections: [
+            {
+                title: "The Limitation of Loose Lists",
+                content: "Traditional 'To-Do' lists fail because they are unstructured. 'Watch Inception' is just text. A Movie Idea in Decision Jar is a data object—it knows the runtime, the director, and where you can stream it. This context is what turns a list into a useful tool."
+            },
+            {
+                title: "Reducing Decision Latency",
+                content: "When you spin the jar and it says 'Cook Carbonara', the next question is always 'Do I have the ingredients?' With structured Recipes, the ingredient list is right there. By front-loading this information, you reduce the 'Decision Latency' between picking an idea and starting it."
+            }
+        ]
+    },
+    {
+        slug: "digital-bookshelf-movie-vault",
+        category: "Lifestyle",
+        title: "Your Digital Bookshelf: Tracking Media with Intent",
+        description: "How to use Decision Jar as a dynamic wishlist for your reading and viewing habits.",
+        icon: Clapperboard,
+        readTime: "6 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Managing media wishlists and watchlists with Decision Jar",
+            "description": "Strategies for organizing books and movies to ensure you always have a high-quality selection ready."
+        },
+        faqs: [
+            {
+                question: "Can I use this as a replacement for Goodreads?",
+                answer: "It's a perfect companion! While Goodreads is great for reviews, Decision Jar is for *deciding*. Use the Goodreads link field to keep them connected while letting fate pick your next read."
+            },
+            {
+                question: "How do I filter for the right movie length?",
+                answer: "When you spin the jar, use the Duration filter. Our structured Movie items will respect your choice, ensuring you don't pick a 3-hour epic when you only have 90 minutes."
+            }
+        ],
+        sections: [
+            {
+                title: "The 'Infinite Scroll' Trap",
+                content: "We've all spent 45 minutes scrolling Netflix only to end up watching nothing. This happens because the choice pool is too large. By curating your own 'Watchlist' in a Movie Jar, you limit yourself to things you *actually* want to see, making the final decision effortless."
+            },
+            {
+                title: "Physical vs Digital Intent",
+                content: "Structured Book ideas allow you to track format (Audiobook, Physical, E-book). This helps you pick the right book for the right environment—an audiobook for a road trip, or a physical book for a beach day. Matching the format to the context increases the likelihood of you actually finishing it."
             }
         ]
     }

@@ -104,6 +104,12 @@ export async function POST(request: Request) {
             weather: weather || 'ANY',
             requiresTravel: Boolean(requiresTravel),
             status: ideaStatus as any, // Cast to any to avoid Prisma stale type issues
+
+            // ✅ NEW: Type System Support
+            ideaType: body.ideaType || null,
+            typeData: body.typeData || null,
+            schemaVersion: body.schemaVersion || "1.0",
+            metadata: body.metadata || null,
         };
 
         const idea = await prisma.idea.create({

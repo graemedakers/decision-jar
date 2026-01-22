@@ -21,6 +21,8 @@ interface IdeaFormData {
     weather: string;
     requiresTravel: boolean;
     photoUrls: string[];
+    ideaType?: string;
+    typeData?: any;
 }
 
 interface IdeaWizardProps {

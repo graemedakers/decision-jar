@@ -17,6 +17,8 @@ export const DEFAULT_FORM_DATA = {
     weather: "ANY",
     requiresTravel: false,
     photoUrls: [] as string[],
+    ideaType: undefined as string | undefined, // NEW
+    typeData: undefined as any, // NEW
 };
 
 interface UseIdeaFormProps {
@@ -50,6 +52,8 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 weather: initialData.weather || DEFAULT_FORM_DATA.weather,
                 requiresTravel: initialData.requiresTravel ?? DEFAULT_FORM_DATA.requiresTravel,
                 photoUrls: initialData.photoUrls || [],
+                ideaType: initialData.ideaType || undefined, // NEW
+                typeData: initialData.typeData || undefined, // NEW
             });
         } else {
             setFormData({
@@ -59,7 +63,28 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
         }
     }, [initialData, currentUser?.defaultIdeaPrivate]);
 
-    const categories = getCategoriesForTopic(jarTopic, customCategories);
+    // Map ideaType to appropriate topic for category selection
+    // This ensures books show book categories, movies show movie categories, etc.
+    const getTopicFromIdeaType = (ideaType: string | undefined): string | null => {
+        if (!ideaType) return null;
+        const ideaTypeToTopicMap: Record<string, string> = {
+            'book': 'Books',
+            'movie': 'Movies',
+            'recipe': 'Cooking & Recipes',
+            'game': 'Activities', // Games use Activities categories
+            'dining': 'Restaurants',
+            'travel': 'Travel',
+            'event': 'Activities',
+            'music': 'Activities',
+            'activity': 'Activities',
+            'itinerary': 'Activities'
+        };
+        return ideaTypeToTopicMap[ideaType] || null;
+    };
+
+    // Use ideaType-derived topic if available, otherwise fall back to jar topic
+    const effectiveTopic = getTopicFromIdeaType(formData.ideaType) || jarTopic;
+    const categories = getCategoriesForTopic(effectiveTopic, customCategories);
 
     // Ensure category is valid for topic
     useEffect(() => {
@@ -99,7 +124,9 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 isPrivate: formData.isPrivate,
                 weather: formData.weather,
                 requiresTravel: formData.requiresTravel,
-                photoUrls: formData.photoUrls
+                photoUrls: formData.photoUrls,
+                ideaType: formData.ideaType, // NEW
+                typeData: formData.typeData, // NEW
             };
 
             if (isEditing) {

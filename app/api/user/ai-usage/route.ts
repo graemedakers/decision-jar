@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
             select: {
                 id: true,
                 isLifetimePro: true,
-                subscriptionStatus: true
+                isLifetimePro: true,
+                subscriptionStatus: true,
+                createdAt: true
             }
         });
 
@@ -23,9 +25,9 @@ export async function GET(request: NextRequest) {
         }
 
         // Check Pro status
-        const isPro = user.isLifetimePro ||
-            user.subscriptionStatus === 'active' ||
-            user.subscriptionStatus === 'trialing';
+        // Use centralized premium logic
+        const { isUserPro } = await import('@/lib/premium');
+        const isPro = isUserPro(user);
 
         if (isPro) {
             return NextResponse.json({

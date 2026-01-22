@@ -41,6 +41,8 @@ export interface Idea {
     canEdit?: boolean;
 
     // Extensibility
+    ideaType?: string | null;
+    typeData?: any; // Structured data based on ideaType
     [key: string]: any;
 }
 

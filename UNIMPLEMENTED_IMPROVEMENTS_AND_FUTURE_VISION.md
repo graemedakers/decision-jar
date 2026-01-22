@@ -31,6 +31,11 @@ This document serves as a consolidated master list of features, technical debt, 
 *   **Social Connectivity**:
     *   **Plan Chat ("The Hype Train")**: Per-plan comment threads for coordinating arrival times and logistics.
     *   **Collaborative Memories**: Shared photo uploading for events where multiple jar members were present.
+*   **Deep Collaboration Features**:
+    *   **Visual Squad Presence**: Real-time indicator in the dashboard showing active squad members.
+    *   **Live Activity Toasts**: Real-time notifications for squad actions (adding ideas, spinning, voting).
+    *   **Collaborative Onboarding**: Special flows to encourage immediate member invitation for new jars.
+    *   **"Squad Mode" UI**: A dedicated view or branding for high-intensity group decision-making sessions.
 
 ---
 

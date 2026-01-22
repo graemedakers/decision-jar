@@ -273,8 +273,9 @@ function DashboardContent() {
             label: "Night Out",
             variant: "indigo" as const,
             icon: <Moon className="w-3.5 h-3.5" />,
-            filter: { timeOfDay: 'EVENING' },
-            match: (i: any) => i.timeOfDay === 'EVENING' || i.timeOfDay === 'ANY'
+            filter: { timeOfDay: 'EVENING', categories: ['MEAL', 'BAR', 'SOCIAL', 'NIGHTCLUB', 'CULTURAL'] },
+            match: (i: any) => (i.timeOfDay === 'EVENING' || i.timeOfDay === 'ANY') &&
+                ['MEAL', 'BAR', 'SOCIAL', 'NIGHTCLUB', 'CULTURAL'].includes(i.categoryId || i.category)
         },
         {
             label: "Adventure",
@@ -289,6 +290,27 @@ function DashboardContent() {
             icon: <Sparkles className="w-3.5 h-3.5" />,
             filter: { maxCost: '$' },
             match: (i: any) => (COST_VALUES[i.cost] || 0) <= 1
+        },
+        {
+            label: "Movie",
+            variant: "primary" as const,
+            icon: <span className="text-xs">🎬</span>,
+            filter: { ideaTypes: ['movie'] },
+            match: (i: any) => i.ideaType === 'movie'
+        },
+        {
+            label: "Game",
+            variant: "primary" as const,
+            icon: <span className="text-xs">🎮</span>,
+            filter: { ideaTypes: ['game'] },
+            match: (i: any) => i.ideaType === 'game'
+        },
+        {
+            label: "Cook",
+            variant: "primary" as const,
+            icon: <span className="text-xs">🍳</span>,
+            filter: { ideaTypes: ['recipe'] },
+            match: (i: any) => i.ideaType === 'recipe'
         }
     ];
 
@@ -436,12 +458,7 @@ function DashboardContent() {
                                 </Button>
                             </Link>
 
-                            <Link href="/community" aria-label="Discover Communities">
-                                <Button variant="outline" size="icon" className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-primary transition-colors hover:border-primary/30">
-                                    <Users className="w-5 h-5" />
-                                </Button>
-                            </Link>
-
+                            {/* Community Button Removed */}
                             <Button variant="outline" size="icon" onClick={() => openModal('HELP')} className="w-11 h-11 rounded-full border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Help">
                                 <HelpCircle className="w-5 h-5" />
                             </Button>

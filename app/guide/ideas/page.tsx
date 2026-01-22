@@ -2,7 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Wand2, Plus, Ghost, Mic } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Wand2, Plus, Ghost, Mic, Layers } from 'lucide-react';
 
 export default function GuideIdeas() {
     return (
@@ -23,6 +23,31 @@ export default function GuideIdeas() {
                 <li><strong>Attributes:</strong> Set the estimated cost ($, $$, $$$), activity level (Low, Medium, High), and duration.</li>
                 <li><strong>Details:</strong> Add addresses, links, or specific notes.</li>
             </ul>
+
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <Layers className="text-emerald-500" /> Structured Idea Types
+            </h2>
+            <p className="mb-6">
+                Go beyond simple text. Decision Jar now understands <strong>Structured Types</strong> for common activities. This unlocks specialized forms and data-rich details:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
+                    <h4 className="font-bold flex items-center gap-2 mb-2">🎬 Movies</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Track directors, runtimes, and watch modes. Includes one-tap access to trailers.</p>
+                </div>
+                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
+                    <h4 className="font-bold flex items-center gap-2 mb-2">📖 Books</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Save authors, formats, and Goodreads links for your reading wishlist.</p>
+                </div>
+                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
+                    <h4 className="font-bold flex items-center gap-2 mb-2">🍳 Recipes</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Store ingredients and cooking instructions. Use "Cook Mode" for a focused kitchen view.</p>
+                </div>
+                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
+                    <h4 className="font-bold flex items-center gap-2 mb-2">🎮 Games</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Log platforms, estimated playtime, and co-op status for your next game night.</p>
+                </div>
+            </div>
 
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                 <Wand2 className="text-purple-500" /> Magic Fill (Smart Suggestions)

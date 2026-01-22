@@ -6,6 +6,17 @@ import { showSuccess, showError, showInfo } from "@/lib/toast";
 import { logger } from "@/lib/logger";
 import { findBestMatchingJar, getSuggestionMessage } from "@/lib/jar-topic-matcher";
 
+const determineCost = (price: string | undefined): string => {
+    if (!price) return '$';
+    const p = price.toLowerCase().trim();
+    if (p.includes('free') || p === '0' || p === '$0') return 'FREE';
+
+    // Maintain existing logic for length-based matching (assuming $, $$, $$$ input)
+    if (price.length > 2) return '$$$';
+    if (price.length > 1) return '$$';
+    return '$';
+};
+
 interface ConciergeActionProps {
     onIdeaAdded?: () => void;
     onGoTonight?: (idea: any) => void;
@@ -28,9 +39,15 @@ export function useConciergeActions({
     // Track which specific item is being added (by name) instead of a single boolean
     const [addingItemName, setAddingItemName] = useState<string | null>(null);
 
+    const getIdeaTitle = (rec: any) => {
+        return rec.name || rec.typeData?.title || rec.typeData?.eventName || rec.typeData?.establishmentName || rec.typeData?.activityName || rec.title || 'Untitled Idea';
+    };
+
     const formatDetails = (rec: any) => {
         if (rec.details) return rec.details;
-        let parts = [rec.description];
+        let parts = [];
+        const desc = rec.description || (rec.typeData && 'vibe' in rec.typeData ? `${rec.typeData.vibe} Itinerary` : '');
+        if (desc) parts.push(desc);
         if (rec.cinema_name) parts.push(`Cinema: ${rec.cinema_name}`);
         if (rec.showtimes) parts.push(`Showtimes: ${rec.showtimes}`);
         if (rec.address) parts.push(`Address: ${rec.address}`);
@@ -56,12 +73,12 @@ export function useConciergeActions({
                 try {
                     // Use demo storage
                     const demoIdea = {
-                        description: rec.name,
+                        description: getIdeaTitle(rec),
                         details: formatDetails(rec),
                         indoor: true,
                         duration: "2.0",
                         activityLevel: "LOW",
-                        cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
+                        cost: determineCost(rec.price),
                         timeOfDay: "EVENING",
                         category: category,
                         isPrivate: isPrivate
@@ -87,24 +104,24 @@ export function useConciergeActions({
             // Check for better matching jar (Contextual Jar Auto-Switching)
             let targetJarId: string | null = null;
             let targetJarName: string | null = null;
-            
+
             if (availableJars.length > 1 && currentJarId) {
                 const match = findBestMatchingJar(category, availableJars, currentJarId);
-                
+
                 if (match) {
                     const shouldSwitch = window.confirm(getSuggestionMessage(match, category));
-                    
+
                     if (shouldSwitch) {
                         targetJarId = match.jar.id;
                         targetJarName = match.jar.name;
-                        
+
                         // Switch to the better matching jar
                         await fetch('/api/auth/switch-jar', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ jarId: targetJarId })
                         });
-                        
+
                         trackEvent('jar_auto_switched', {
                             from_jar_id: currentJarId,
                             to_jar_id: targetJarId,
@@ -121,15 +138,19 @@ export function useConciergeActions({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    description: rec.name,
+                    description: getIdeaTitle(rec),
                     details: formatDetails(rec),
                     indoor: true,
                     duration: "2.0",
                     activityLevel: "LOW",
-                    cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
+                    cost: determineCost(rec.price),
                     timeOfDay: "EVENING",
                     category: category,
-                    isPrivate: isPrivate
+                    isPrivate: isPrivate,
+                    // ✅ NEW: Type System Support
+                    ideaType: rec.ideaType || null,
+                    typeData: rec.typeData || rec.data || null,
+                    schemaVersion: "1.0"
                 }),
             });
 
@@ -143,7 +164,7 @@ export function useConciergeActions({
                 ));
 
                 if (onIdeaAdded) onIdeaAdded();
-                
+
                 // Show success message with jar name if switched
                 if (targetJarName) {
                     showSuccess(`✅ Added to "${targetJarName}"!`);
@@ -191,12 +212,12 @@ export function useConciergeActions({
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
-                                            description: rec.name,
+                                            description: getIdeaTitle(rec),
                                             details: formatDetails(rec),
                                             indoor: true,
                                             duration: "2.0",
                                             activityLevel: "LOW",
-                                            cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
+                                            cost: determineCost(rec.price),
                                             timeOfDay: "EVENING",
                                             category: category,
                                             isPrivate: isPrivate
@@ -307,15 +328,19 @@ export function useConciergeActions({
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
-                                    description: rec.name,
+                                    description: getIdeaTitle(rec),
                                     details: formatDetails(rec),
                                     indoor: true,
                                     duration: "2.0",
                                     activityLevel: "LOW",
-                                    cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
+                                    cost: determineCost(rec.price),
                                     timeOfDay: "EVENING",
                                     category: category,
-                                    isPrivate: isPrivate
+                                    isPrivate: isPrivate,
+                                    // ✅ NEW: Type System Support
+                                    ideaType: rec.ideaType || null,
+                                    typeData: rec.typeData || rec.data || null,
+                                    schemaVersion: "1.0"
                                 }),
                             });
 
@@ -369,12 +394,12 @@ export function useConciergeActions({
 
     const handleGoTonight = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
         const ideaData = {
-            description: rec.name,
+            description: getIdeaTitle(rec),
             details: formatDetails(rec),
             indoor: true,
             duration: 2.0,
             activityLevel: "LOW",
-            cost: (rec.price && rec.price.length > 2) ? "$$$" : (rec.price && rec.price.length > 1) ? "$$" : "$",
+            cost: determineCost(rec.price),
             timeOfDay: "EVENING",
             category: category,
             website: rec.website,

@@ -1,12 +1,13 @@
 import {
     Utensils, Wine, Music, Bed, Clapperboard, BookOpen,
     Leaf, Dumbbell, Ticket, Gamepad2, Key, Trophy, ChefHat,
-    Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase, Sparkles, Plane, Calendar
+    Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase, Sparkles, Plane, Calendar, Library
 } from "lucide-react";
 import { ConciergeToolConfig } from "@/components/GenericConciergeModal";
 import { ACTION_LABELS } from "@/lib/ui-constants";
 
 export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
+
     DINING: {
         id: 'dining_concierge',
         title: 'Dining Concierge',
@@ -256,7 +257,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         id: 'book_concierge',
         title: 'Book Finder',
         subtitle: 'Discover your next favorite read',
-        icon: BookOpen,
+        icon: Library,
         colorTheme: 'blue',
         categoryType: 'BOOK',
         hasLocation: false,
@@ -288,7 +289,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             }
         ],
         resultCard: {
-            mainIcon: BookOpen,
+            mainIcon: Library,
             subtextKey: 'author',
             goActionLabel: ACTION_LABELS.DO_THIS
         }

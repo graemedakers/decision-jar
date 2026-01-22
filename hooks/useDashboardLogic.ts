@@ -538,11 +538,54 @@ export function useDashboardLogic() {
                 console.log("Could not get client location:", ignore);
             }
 
+            // 1. Classify Intent
+            const classifyRes = await fetch('/api/intent/classify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt,
+                    location: userLocation,
+                    jarTopic: userData?.jarTopic
+                })
+            });
+
+            let detectedIntent = null;
+
+            if (classifyRes.ok) {
+                const { intent } = await classifyRes.json();
+                detectedIntent = intent;
+                console.log("[SmartRouter] Intent Detected:", intent);
+
+                // 2. Action: Launch Concierge
+                if (intent.intentAction === 'LAUNCH_CONCIERGE') {
+                    setIsGeneratingSmartIdeas(false);
+                    openModal('CONCIERGE', {
+                        toolId: intent.conciergeTool || 'CONCIERGE',
+                        initialPrompt: prompt
+                    });
+                    return;
+                }
+
+                // 3. Action: Add Single Idea
+                if (intent.intentAction === 'ADD_SINGLE') {
+                    setIsGeneratingSmartIdeas(false);
+                    openModal('ADD_IDEA', {
+                        initialData: {
+                            description: intent.topic || prompt,
+                            category: intent.targetCategory || 'ACTIVITY'
+                        }
+                    });
+                    return;
+                }
+            }
+
+            // 4. Action: Bulk Generate (Default)
             const response = await fetch('/api/ideas/bulk-generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt,
+                    intent: detectedIntent, // Pass pre-parsed intent if available
                     location: userLocation, // Pass client location
                     jarId: userData?.activeJarId
                 })

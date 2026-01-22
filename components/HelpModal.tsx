@@ -47,6 +47,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
         { id: "fitness-concierge", title: "Fitness Finder", icon: Dumbbell },
         { id: "premium-shortcuts", title: "Premium Shortcuts", icon: Share2 },
         { id: "adding-ideas", title: "Adding Ideas", icon: Plus },
+        { id: "structured-ideas", title: "Structured Ideas", icon: Layers },
         { id: "weekend-planner", title: "Weekend Planner", icon: Calendar },
         { id: "catering-planner", title: "Dinner Party Chef", icon: Utensils },
         { id: "jar-gifting", title: "Jar Gifting", icon: Gift },
@@ -523,19 +524,21 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                     <Plus className="w-4 h-4" /> Manual Entry (Detailed)
                                 </h4>
                                 <p className="text-slate-600 dark:text-slate-300 text-sm mb-2">
-                                    For more control, click the <Plus className="inline w-4 h-4" /> button to open the full form. This lets you set:
+                                    Click the <Plus className="inline w-4 h-4" /> button to open the full form. Now supports <strong>Structured Idea Types</strong> for Movies, Books, Recipes, and Games!
                                 </p>
                                 <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300 ml-2">
-                                    <li><strong>Description:</strong> The main idea name</li>
-                                    <li><strong>Details:</strong> Additional notes or instructions</li>
-                                    <li><strong>Setting:</strong> Indoor or Outdoor</li>
-                                    <li><strong>Duration:</strong> How long it takes (15min to 8+ hours)</li>
-                                    <li><strong>Cost:</strong> Free, $, $$, or $$$</li>
-                                    <li><strong>Energy Level:</strong> Low, Medium, or High</li>
-                                    <li><strong>Time of Day:</strong> Day, Evening, or Any</li>
-                                    <li><strong>Category:</strong> Activity, Meal, Event, etc.</li>
-                                    <li><strong>Photo URL:</strong> Link to an image</li>
+                                    <li><strong>Idea Type:</strong> Select a type to unlock specialized fields</li>
+                                    <li><strong>Attributes:</strong> Setting, Duration, Cost, Energy</li>
+                                    <li><strong>Detailed Info:</strong> Ingredients, Directors, Authors, etc.</li>
                                 </ul>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-0 h-auto mt-2 text-primary hover:bg-transparent hover:text-primary underline"
+                                    onClick={() => setActiveSection('structured-ideas')}
+                                >
+                                    Learn more about Idea Types →
+                                </Button>
                             </div>
 
                             <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
@@ -633,6 +636,68 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
                             <strong>Pro Tip:</strong> All scouts provide direct booking links, ratings, and can add recommendations to your jar for future spins.
                         </p>
+                    </div>
+                );
+            case "structured-ideas":
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Structured Idea Types</h3>
+                        <p className="text-slate-600 dark:text-slate-300">
+                            Go beyond simple text. Structured ideas allow you to store specific data points for common activities, making them easier to manage and enjoy.
+                        </p>
+
+                        <div className="grid gap-4 mt-4">
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                    🎬 Movies
+                                </h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">Track directors, runtimes, and where to watch. Includes a direct "Watch Trailer" action on reveal.</p>
+                                <ul className="text-[10px] text-slate-400 grid grid-cols-2 gap-x-2">
+                                    <li>• Streaming/Cinema</li>
+                                    <li>• IMDb Links</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                    📖 Books
+                                </h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">Store authors, page counts, and formats. Connect directly to Goodreads.</p>
+                                <ul className="text-[10px] text-slate-400 grid grid-cols-2 gap-x-2">
+                                    <li>• Physical/Ebook/Audio</li>
+                                    <li>• Genre Tracking</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                    🍳 Recipes
+                                </h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">Full ingredient lists and step-by-step instructions. Turn on "Cook Mode" for a distraction-free view.</p>
+                                <ul className="text-[10px] text-slate-400 grid grid-cols-2 gap-x-2">
+                                    <li>• Timings (Prep/Cook)</li>
+                                    <li>• Source URLs</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                    🎮 Games
+                                </h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">Log platforms, player counts, and estimated playtime. Great for board games and video games.</p>
+                                <ul className="text-[10px] text-slate-400 grid grid-cols-2 gap-x-2">
+                                    <li>• Co-op Support</li>
+                                    <li>• Difficulty levels</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="bg-blue-50 dark:bg-blue-500/10 p-4 rounded-xl border border-blue-100 dark:border-blue-500/20 mt-4">
+                            <h4 className="font-bold text-blue-700 dark:text-blue-300 mb-1">🎭 Smart Switching</h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-300">
+                                When you spin the jar and a structured idea is picked, Decision Jar automatically switches its display to match. You'll see beautiful tailored cards instead of generic text.
+                            </p>
+                        </div>
                     </div>
                 );
             case "premium-shortcuts":

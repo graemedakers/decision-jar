@@ -101,16 +101,20 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
             'find', 'where', 'what', 'how', 'show', 'suggest', 'recommend',
             'need', 'want', 'looking for', 'help me', 'can you', 'could you',
             'any ideas', 'give me', 'tell me', 'show me', 'i need', 'i want',
-            'create', 'generate', 'idea'
+            'create', 'generate', 'idea', 'plan', 'search', 'browse'
         ];
+
+        // Keywords that strongly imply a request/search even if not at the start
+        const requestKeywords = ['ideas', 'suggestions', 'recommendations', 'places', 'restaurants', 'movies', 'books', 'recipes', 'itinerary', 'trip'];
 
         // Also check if it's purely a number + keywords (e.g. "10 ideas")
         const numberStart = /^\d+\s/.test(lowerText);
 
         const startsWithQuestion = questionStarters.some(starter => lowerText.startsWith(starter));
+        const containsRequestKeywords = requestKeywords.some(kw => lowerText.includes(kw) && lowerText.split(' ').length > 1);
         const isQuestion = text.trim().endsWith('?');
 
-        return startsWithQuestion || isQuestion || numberStart || lowerText.includes('ideas');
+        return startsWithQuestion || isQuestion || numberStart || lowerText.includes('ideas') || containsRequestKeywords;
     };
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {

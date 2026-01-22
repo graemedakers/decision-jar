@@ -21,6 +21,7 @@ export function ItineraryMarkdownRenderer({ markdown, configId, theme, variant }
     const isItinerary = variant === 'accordion' || configId === 'holiday_concierge';
 
     // Split by H3 (###) which we use for Day headers in prompts
+    if (!markdown) return null;
     const sections = markdown.split(/^### /gm);
 
     const handleDownloadShoppingList = () => {
@@ -127,7 +128,8 @@ export function ItineraryMarkdownRenderer({ markdown, configId, theme, variant }
                     );
                 }
 
-                const [titleLine, ...contentLines] = section.split('\n');
+                const [rawTitle, ...contentLines] = section.split('\n');
+                const titleLine = rawTitle.replace(/^[#*\s]+/, '').trim();
                 const body = contentLines.join('\n').trim();
 
 

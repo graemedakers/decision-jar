@@ -54,19 +54,52 @@ export const getConciergePromptAndMock = (
                 3. If the query asks for something specific (e.g. "brunch cafe with amazing coffee"), IGNORE generic dinner restaurants. Focus ONLY on those specific types of venues.
                 4. Prioritize "Local Legends" and "Top Rated" spots that real locals would recommend in a direct chat.
                 
-                CRITICAL QUALITY CHECK:
-                - If you cannot find a match that fits the query, return an empty list: {"recommendations": []}. 
-                - Generic results that don't match the intent of the query are considered a FAILURE.
-                - Ensure venues are currently operating.
-
-                Return JSON object with "recommendations" array.
-                Fields: name, description (compelling and informative), cuisine, price, address, website, opening_hours, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "dining" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. The "description" should be a compelling 1-2 sentence hook. DO NOT include markdown headers.
+                5. 🎯 LINK ACCURACY: For the root "website" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                   - This is non-negotiable. Do not provide a direct link like .com unless you are 100% certain it exists.
+                   - When in doubt, use the Google Search URL.
+                
+                "typeData" Schema:
+                {
+                  "establishmentName": "Restaurant Name",
+                  "cuisine": "Italian",
+                  "mealType": "dinner",
+                  "priceRange": "$$",
+                  "dietaryOptions": ["Vegetarian", "Gluten-Free"],
+                  "rating": 4.6,
+                  "address": "123 Street Name",
+                  "menuUrl": "https://restaurant.com/menu",
+                  "reservationRequired": false
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "The Rustic Spoon", description: "Farm-to-table dining with a seasonal menu.", cuisine: "Modern American", price: "$$", address: "Market St", google_rating: 4.6 },
-                        { name: "Bella Italia", description: "Authentic handmade pasta.", cuisine: "Italian", price: "$$", address: "Little Italy", google_rating: 4.5 },
-                        { name: "Spice Route", description: "Aromatic curries.", cuisine: "Indian", price: "$$", address: "Central Ave", google_rating: 4.4 }
+                        {
+                            name: "The Rustic Spoon",
+                            description: "Farm-to-table dining with a seasonal menu.",
+                            cuisine: "Modern American",
+                            price: "$$",
+                            address: "Market St",
+                            google_rating: 4.6,
+                            ideaType: "dining",
+                            typeData: {
+                                establishmentName: "The Rustic Spoon",
+                                cuisine: "Modern American",
+                                mealType: "dinner",
+                                priceRange: "$$",
+                                menuUrl: "https://example.com/menu"
+                            }
+                        },
+                        { name: "Bella Italia", description: "Authentic handmade pasta.", cuisine: "Italian", price: "$$", address: "Little Italy", google_rating: 4.5, ideaType: "dining" },
+                        { name: "Spice Route", description: "Aromatic curries.", cuisine: "Indian", price: "$$", address: "Central Ave", google_rating: 4.4, ideaType: "dining" }
                     ]
                 }
             };
@@ -79,24 +112,24 @@ export const getConciergePromptAndMock = (
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-USER REQUEST/CONTEXT: "${extraInstructions}"
-
-⚠️ CRITICAL INSTRUCTION: The user's request above is your PRIMARY DIRECTIVE.
-- INTERPRET their request LITERALLY - if they ask for cafes, ALL 5 MUST BE CAFES; if they ask for activities, ALL 5 MUST BE ACTIVITIES
-- DO NOT SUBSTITUTE or change what they're asking for
-- If their request is specific (e.g., "brunch cafes with good coffee"), ALL 5 RECOMMENDATIONS MUST match ALL criteria
-- If they mention meal times (breakfast, brunch, lunch, dinner), ALL 5 RECOMMENDATIONS MUST be open and suitable for that exact time
-- DO NOT MIX TYPES: If they asked for one thing, don't give them something else for recommendations 2-5
-
-REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC REQUEST ABOVE.
-
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                USER REQUEST/CONTEXT: "${extraInstructions}"
+                
+                ⚠️ CRITICAL INSTRUCTION: The user's request above is your PRIMARY DIRECTIVE.
+                - INTERPRET their request LITERALLY - if they ask for cafes, ALL 5 MUST BE CAFES; if they ask for activities, ALL 5 MUST BE ACTIVITIES
+                - DO NOT SUBSTITUTE or change what they're asking for
+                - If their request is specific (e.g., "brunch cafes with good coffee"), ALL 5 RECOMMENDATIONS MUST match ALL criteria
+                - If they mention meal times (breakfast, brunch, lunch, dinner), ALL 5 RECOMMENDATIONS MUST be open and suitable for that exact time
+                - DO NOT MIX TYPES: If they asked for one thing, don't give them something else for recommendations 2-5
+                
+                REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC REQUEST ABOVE.
+                
                 ` : ''}
                 
                 Respond to the user's request with 5 distinct recommendations near ${targetLocation}.
                 
                 ${extraInstructions ? `
-🔴 REMINDER: All 5 recommendations must satisfy: "${extraInstructions}"
+                泡 REMINDER: All 5 recommendations must satisfy: "${extraInstructions}"
                 ` : ''}
                 
                 Additional preferences (secondary to the critical requirements above):
@@ -110,12 +143,48 @@ REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC
                 2. If the request is vague, provide a diverse mix of high-quality local options (e.g. 1 dining, 1 activity, 1 event, 1 hidden gem).
                 3. Ensure all recommendations are real, open businesses or locations.
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, category (e.g. "Dining", "Activity"), price, address, website, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have an "ideaType" (activity, dining, event) and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                   - These root fields are used for the main card display.
+                4. DO NOT include markdown headers in description or details.
+                5. 🎯 LINK ACCURACY: For "officialWebsite":
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL to guarantee a working link for the user.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                   - This is safer than hallucinating a broken .com or .com.au link.
+                   - When in doubt, ALWAYS use the search link.
+                   - This is safer than hallucinating a broken .com or .com.au link.
+                
+                "typeData" Schema (for activities):
+                {
+                  "activityName": "Name",
+                  "activityType": "activity",
+                  "participants": { "min": 1, "max": 4 },
+                  "duration": 2, // hours
+                  "rating": 4.8,
+                  "officialWebsite": "https://www.google.com/search?q=Venue+Name+official+website",
+                  "location": { "name": "Address" }
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Hidden Garden Cafe", description: "A beautiful secret garden spot.", category: "Dining", price: "$$", address: "Green Lane", google_rating: 4.8 },
+                        {
+                            name: "Hidden Garden Cafe",
+                            description: "A beautiful secret garden spot.",
+                            category: "Dining",
+                            price: "$$",
+                            address: "Green Lane",
+                            google_rating: 4.8,
+                            ideaType: "activity",
+                            typeData: {
+                                activityName: "Hidden Garden Cafe",
+                                activityType: "activity",
+                                location: { name: "Green Lane" }
+                            }
+                        },
                         { name: "City Rock Climbing", description: "Indoor climbing gym.", category: "Activity", price: "$$", address: "Sport St", google_rating: 4.7 }
                     ]
                 }
@@ -130,10 +199,10 @@ REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Drinks Preference: ${inputs.drinks || "Any"}
@@ -141,12 +210,45 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 - Price: ${inputs.price || "Any"}
                 
                 Ensure they are real, currently open businesses with accurate physical addresses.
-                Return JSON with "recommendations" array.
-                Fields: name, description, speciality (e.g. Cocktails, Beer), price, address, website, opening_hours, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "dining" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. "typeData" MUST include the "features" array (e.g. ["Cocktails", "Patio"]).
+                5. 🎯 LINK ACCURACY: For the root "website" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                
+                "typeData" Schema:
+                {
+                  "establishmentName": "Bar Name",
+                  "cuisine": "Bar/Nightlife",
+                  "priceRange": "$$",
+                  "rating": 4.7,
+                  "features": ["Craft Beer", "Live Music"],
+                  "menuUrl": "https://bar.com/drinks"
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "The Mockingbird", description: "Lively atmosphere.", speciality: "Cocktails", price: "$$$", address: "Oak Ave", google_rating: 4.7 },
+                        {
+                            name: "The Mockingbird",
+                            description: "Lively atmosphere.",
+                            speciality: "Cocktails",
+                            price: "$$$",
+                            address: "Oak Ave",
+                            google_rating: 4.7,
+                            ideaType: "dining",
+                            typeData: {
+                                establishmentName: "The Mockingbird",
+                                cuisine: "Cocktails",
+                                priceRange: "$$$",
+                                features: ["Cocktails"],
+                                menuUrl: "https://mockingbird.com/menu"
+                            }
+                        },
                         { name: "Hops & Dreams", description: "Local brews.", speciality: "Beer", price: "$", address: "Main St", google_rating: 4.5 },
                         { name: "Vino Valley", description: "Elegant wine bar.", speciality: "Wine", price: "$$$", address: "River Walk", google_rating: 4.8 }
                     ]
@@ -156,49 +258,72 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
         case 'BAR_CRAWL':
             return {
                 prompt: `
-            Act as a nightlife guide and route planner.
-            Create 3 DISTINCT Bar Crawl Routes near ${targetLocation}.
-            
-            ${getExactNamePriorityRule(extraInstructions)}
-            
-            ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
-            ` : ''}
-            
-            Preferences:
-            - Theme: ${inputs.theme || "Any"}
-            - Stops: ${inputs.stops || "4"}
-            - Vibe: ${inputs.vibe || "Any"}
-            - Budget: ${inputs.price || "Any"}
-            
-            INSTRUCTIONS:
-            1. Create a logical walking or short-drive route between venues.
-            2. Use REAL, popular bars that fit the theme.
-            3. Ensure the order makes sense (e.g. Start at a lighter place, end at a club/late night spot).
-            
-            Return JSON with "recommendations" array (size 3).
-            Fields:
-            - name: Creative Route Name (e.g. "The Downtown Dive Tour")
-            - description: Brief vibe summary
-            - duration_label: Est. Duration / Stops
-            - price: Budget ($, $$, $$$)
-            - google_rating: Avg Rating (Number)
-            - details: Markdown timeline.
-              **FORMAT:**
-              ### The Route
-              **Stop 1:** [Bar Name] - [Why this spot?]
-              **Stop 2:** [Bar Name] - [Speciality Drink?]
-              ...
-              
-              *Walking time: approx 10 mins between stops.*
-            `,
+                Act as a nightlife guide and route planner.
+                Create 3 DISTINCT Bar Crawl Routes near ${targetLocation}.
+                
+                ${getExactNamePriorityRule(extraInstructions)}
+                
+                ${extraInstructions ? `
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+                
+                Preferences:
+                - Theme: ${inputs.theme || "Any"}
+                - Stops: ${inputs.stops || "4"}
+                - Vibe: ${inputs.vibe || "Any"}
+                - Budget: ${inputs.price || "Any"}
+                
+                INSTRUCTIONS:
+                1. Create a logical walking or short-drive route between venues.
+                2. Use REAL, popular bars that fit the theme.
+                3. Ensure the order makes sense (e.g. Start at a lighter place, end at a club/late night spot).
+                
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array (size 3).
+                2. Every recommendation MUST have "ideaType": "itinerary" and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. DO NOT include the timeline in the "details" field; put ALL itinerary data in the "steps" array.
+                5. 🎯 LINK ACCURACY: For the root "website" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                
+                "typeData" Schema:
+                {
+                  "title": "Crawl Name",
+                  "totalDuration": "4 hours",
+                  "vibe": "Party",
+                  "steps": [
+                      { "order": 1, "time": "19:00", "activity": "Start at Bar A", "location": { "name": "Bar A" } },
+                      { "order": 2, "time": "20:00", "activity": "Move to Bar B", "location": { "name": "Bar B" } }
+                  ]
+                }
+                `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Downtown Classics", description: "Best cocktails in the city.", duration_label: "4 Stops", price: "$$$", google_rating: 4.6, details: "### The Route\n**Stop 1:** The Library..." },
-                        { name: "Dive Bar Hero", description: "Cheap drinks and good vibes.", duration_label: "5 Stops", price: "$", google_rating: 4.2, details: "### The Route\n**Stop 1:** Moe's..." }
+                        {
+                            name: "Downtown Classics",
+                            description: "Best cocktails in the city.",
+                            duration_label: "4 Stops",
+                            price: "$$$",
+                            address: targetLocation,
+                            google_rating: 4.6,
+                            ideaType: "itinerary",
+                            typeData: {
+                                title: "Downtown Classics",
+                                totalDuration: "4 hours",
+                                vibe: "Upscale",
+                                steps: [
+                                    { order: 1, time: "18:00", activity: "Cocktails at The Library", location: { name: "The Library" } },
+                                    { order: 2, time: "19:30", activity: "Wine at The Cellar", location: { name: "The Cellar" } }
+                                ]
+                            }
+                        },
+                        { name: "Dive Bar Hero", description: "Cheap drinks and good vibes.", duration_label: "5 Stops", price: "$", address: targetLocation, google_rating: 4.2, ideaType: "itinerary" }
                     ]
                 }
             };
@@ -212,22 +337,53 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Style: ${inputs.style || "Any"}
                 - Must-Have Amenities: ${inputs.amenities || "Any"}
                 - Budget: ${inputs.price || "Any"}
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, speciality (style/vibe), price, address, website, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "travel" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. 🎯 LINK ACCURACY: For the root "website" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                
+                "typeData" Schema:
+                {
+                  "accommodationName": "Hotel Name",
+                  "travelType": "hotel",
+                  "amenities": ["Spa", "Free WiFi"],
+                  "priceRange": "$$$",
+                  "rating": 4.5,
+                  "destination": { "name": "Address/City" }
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Grand Hotel Mock", description: "Luxury stay.", speciality: "Luxury", price: "$$$", address: "Grand Ave", google_rating: 4.7 },
+                        {
+                            name: "Grand Hotel Mock",
+                            description: "Luxury stay.",
+                            speciality: "Luxury",
+                            price: "$$$",
+                            address: "Grand Ave",
+                            google_rating: 4.7,
+                            ideaType: "travel",
+                            typeData: {
+                                destination: { name: "Grand Ave" },
+                                travelType: "hotel",
+                                accommodationName: "Grand Hotel Mock",
+                                amenities: ["Luxury", "Spa"]
+                            }
+                        },
                         { name: "Boutique Inn", description: "Charming and cozy.", speciality: "Boutique", price: "$$", address: "Main St", google_rating: 4.5 }
                     ]
                 }
@@ -242,22 +398,53 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Music: ${inputs.music || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, music (genre), price, address, website, opening_hours, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "activity" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. 🎯 LINK ACCURACY: For the root "website" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                
+                "typeData" Schema:
+                {
+                  "activityName": "Club Name",
+                  "activityType": "nightlife",
+                  "location": { "name": "Address" },
+                  "participants": { "min": 2, "max": 20 },
+                  "rating": 4.5,
+                  "duration": 4
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Club Neon", description: "High energy dance floor.", music: "EDM", price: "$$$", address: "Club District", google_rating: 4.3 },
+                        {
+                            name: "Club Neon",
+                            description: "High energy dance floor.",
+                            music: "EDM",
+                            price: "$$$",
+                            address: "Club District",
+                            google_rating: 4.3,
+                            ideaType: "activity",
+                            typeData: {
+                                activityName: "Club Neon",
+                                activityType: "nightlife",
+                                location: { name: "Club District" },
+                                participants: { min: 4, max: 200 }
+                            }
+                        },
                         { name: "The Lounge", description: "Chill vibes and R&B.", music: "R&B", price: "$$", address: "Downtown", google_rating: 4.5 }
                     ]
                 }
@@ -274,12 +461,12 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 Recommend 5 distinct movies based on the following:
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
-If the user asks for a SPECIFIC MOVIE by name (e.g., "Avatar", "Barbie", "Oppenheimer"), 
-you MUST include that exact movie as the FIRST recommendation, regardless of whether it's currently in cinemas.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                If the user asks for a SPECIFIC MOVIE by name (e.g., "Avatar", "Barbie", "Oppenheimer"), 
+                you MUST include that exact movie as the FIRST recommendation, regardless of whether it's currently in cinemas.
                 ` : ''}
                 
                 - Watch Mode: ${inputs.watchMode}
@@ -308,17 +495,51 @@ you MUST include that exact movie as the FIRST recommendation, regardless of whe
                 - Era: ${inputs.era || "Any"}
                 ${!isCinema && inputs.streamingServices ? `- Streaming on: ${inputs.streamingServices}` : ''}
                 
-                Return JSON with "recommendations" array.
-                Fields: name (Title), description (Plot summary - 2-3 sentences), year, rating (IMDb or Rotten Tomatoes score), genre, director, cast (top 3 actors)
-                ${isCinema ? `Also include: 
-                - website: Google showtimes search URL in format https://www.google.com/search?q=[URL+Encoded+Movie+Title]+showtimes+near+${encodedLocation}
-                - status: "Now Showing", "Coming Soon", or "Check Availability" (for older movies user specifically requested)`
-                        : 'Also include: streaming_service (e.g. Netflix, Prime Video), website (direct link to watch on that service)'}
+                
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "movie" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. DO NOT include markdown headers in the description.
+                
+                "typeData" Schema:
+                {
+                  "title": "Movie Title",
+                  "year": 2024,
+                  "director": "Director Name",
+                  "genre": ["Action", "Sci-Fi"],
+                  "rating": "PG-13",
+                  "runtime": 120,
+                  "cast": ["Actor A", "Actor B"],
+                  "streamingPlatform": "Netflix", // or "Cinema"
+                  "watchMode": "streaming", // "cinema" or "streaming"
+                  "imdbRating": "8.5",
+                  "plot": "Plot summary here..."
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Mockingbird Lane", description: "A gripping thriller.", year: "2024", rating: "92%", genre: "Thriller", streaming_service: "Netflix", website: "https://netflix.com" },
-                        { name: "Laugh Track", description: "Hilarious comedy.", year: "2023", rating: "88%", genre: "Comedy", streaming_service: "Hulu", website: "https://hulu.com" }
+                        {
+                            name: "Mockingbird Lane",
+                            description: "A gripping thriller.",
+                            year: "2024",
+                            rating: "92%",
+                            genre: "Thriller",
+                            streaming_service: "Netflix",
+                            website: "https://netflix.com",
+                            price: "$",
+                            address: "Netflix",
+                            google_rating: 4.8,
+                            ideaType: "movie",
+                            typeData: {
+                                title: "Mockingbird Lane",
+                                year: 2024,
+                                genre: ["Thriller"],
+                                platform: "Netflix"
+                            }
+                        },
+                        { name: "Laugh Track", description: "Hilarious comedy.", year: "2023", rating: "88%", genre: "Comedy", streaming_service: "Hulu", website: "https://hulu.com", price: "$", address: "Hulu", google_rating: 4.5, ideaType: "movie" }
                     ]
                 }
             };
@@ -332,10 +553,10 @@ you MUST include that exact movie as the FIRST recommendation, regardless of whe
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Genre: ${inputs.genre || "Any"}
@@ -343,13 +564,45 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 - Length: ${inputs.length || "Any"}
                 - Era: ${inputs.era || "Any"}
                 
-                Return JSON with "recommendations" array.
-                Fields: name (Title), description (Plot), author, year, genre, page_count (approx)
+                
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "book" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. DO NOT include markdown headers in the description.
+                
+                "typeData" Schema:
+                {
+                  "title": "Book Title",
+                  "author": "Author Name",
+                  "genre": ["Mystery", "Thriller"],
+                  "yearPublished": 2023,
+                  "pageCount": 300,
+                  "format": "physical",
+                  "plot": "Brief plot summary..."
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "The Silent Mock", description: "A mystery thriller.", author: "Jane Doe", year: "2023", genre: "Mystery", page_count: "320" },
-                        { name: "Future Past", description: "Sci-fi epic.", author: "John Smith", year: "2024", genre: "Sci-Fi", page_count: "450" }
+                        {
+                            name: "The Silent Mock",
+                            description: "A mystery thriller.",
+                            author: "Jane Doe",
+                            year: "2023",
+                            genre: "Mystery",
+                            page_count: "320",
+                            price: "$",
+                            google_rating: 4.5,
+                            ideaType: "book",
+                            typeData: {
+                                title: "The Silent Mock",
+                                author: "Jane Doe",
+                                genre: ["Mystery"],
+                                pageCount: 320
+                            }
+                        },
+                        { name: "Future Past", description: "Sci-fi epic.", author: "John Smith", year: "2024", genre: "Sci-Fi", price_type: "Paid", price: "$$", address: "PC", google_rating: 4.7, ideaType: "book" }
                     ]
                 }
             };
@@ -364,23 +617,53 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Activity: ${inputs.activity || "Any"}
                 - Vibe: ${inputs.vibe || "Any"}
                 - Price: ${inputs.price || "Any"}
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, type (activity type), price, address, website, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "activity" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. 🎯 LINK ACCURACY: For the root "website" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                
+                "typeData" Schema:
+                {
+                  "activityName": "Spa Name",
+                  "activityType": "wellness",
+                  "location": { "name": "Address" },
+                  "rating": 4.8,
+                  "officialWebsite": "https://spa-official.com",
+                  "duration": 1.5 // hours
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Zen Garden Spa", description: "Relaxing massage therapy.", type: "Massage", price: "$$", address: "Green St", google_rating: 4.8 },
-                        { name: "Flow Yoga", description: "Peaceful studio.", type: "Yoga", price: "$", address: "Main St", google_rating: 4.9 }
+                        {
+                            name: "Zen Garden Spa",
+                            description: "Relaxing massage therapy.",
+                            type: "Massage",
+                            price: "$$",
+                            address: "Green St",
+                            google_rating: 4.8,
+                            ideaType: "activity",
+                            typeData: {
+                                activityName: "Zen Garden Spa",
+                                activityType: "leisure",
+                                location: { name: "Green St" }
+                            }
+                        },
+                        { name: "Flow Yoga", description: "Peaceful studio.", type: "Yoga", price: "$", address: "Main St", google_rating: 4.9, ideaType: "activity" }
                     ]
                 }
             };
@@ -395,23 +678,53 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Activity: ${inputs.activity || "Any"}
                 - Level: ${inputs.level || "Any"}
                 - Price: ${inputs.price || "Any"}
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, activity_type, price, address, website, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "activity" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. 🎯 LINK ACCURACY: For the root "website" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                
+                "typeData" Schema:
+                {
+                  "activityName": "Gym Name",
+                  "activityType": "fitness",
+                  "location": { "name": "Address" },
+                  "rating": 4.5,
+                  "officialWebsite": "https://gym-official.com",
+                  "duration": 1 // hours
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Iron Gym", description: "Old school bodybuilding.", activity_type: "Gym", price: "$", address: "Muscle Ave", google_rating: 4.5 },
-                        { name: "Trail Run Park", description: "Scenic trails.", activity_type: "Running", price: "Free", address: "Nature Rd", google_rating: 4.9 }
+                        {
+                            name: "Iron Gym",
+                            description: "Old school bodybuilding.",
+                            activity_type: "Gym",
+                            price: "$",
+                            address: "Muscle Ave",
+                            google_rating: 4.5,
+                            ideaType: "activity",
+                            typeData: {
+                                activityName: "Iron Gym",
+                                activityType: "active",
+                                location: { name: "Muscle Ave" }
+                            }
+                        },
+                        { name: "Trail Run Park", description: "Scenic trails.", activity_type: "Running", price: "Free", address: "Nature Rd", google_rating: 4.9, ideaType: "activity" }
                     ]
                 }
             };
@@ -425,10 +738,10 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Type: ${inputs.type || "Any"}
@@ -445,13 +758,47 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 For the 'website' field: Provide the official ticketing website or a Google search URL:
                 https://www.google.com/search?q=[Show+Name]+tickets+${encodeURIComponent(targetLocation)}
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, type, price, address (Venue Name), website, google_rating, show_dates (e.g., "Now - March 2026" or "Opens Feb 15, 2026")
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "event" and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. "typeData" MUST include the specific venue name and a formatted date.
+                5. 🎯 LINK ACCURACY: For the root "website" field and "officialWebsite" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS for Theatres or Venues.
+                   - ALWAYS use a Google Search URL to guarantee a working link for the user.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                
+                "typeData" Schema:
+                {
+                  "eventName": "Show Name",
+                  "eventType": "theatre",
+                  "venue": { "name": "Venue Name", "id": "optional" },
+                  "date": "2024-03-15T19:30:00Z",
+                  "showDates": "Runs through April",
+                  "ticketUrl": "https://...",
+                  "officialWebsite": "https://theatre-official.com"
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "The Mock Opera", description: "A classic performance.", type: "Opera", price: "$$$", address: "Grand Theater", google_rating: 4.8, show_dates: "Now - April 2026" },
-                        { name: "Comedy Cellar Mock", description: "Stand up night.", type: "Comedy", price: "$$", address: "Main St", google_rating: 4.6, show_dates: "Every Friday" }
+                        {
+                            name: "The Mock Opera",
+                            description: "A classic performance.",
+                            type: "Opera",
+                            price: "$$$",
+                            address: "Grand Theater",
+                            google_rating: 4.8,
+                            show_dates: "Now - April 2026",
+                            ideaType: "event",
+                            typeData: {
+                                eventName: "The Mock Opera",
+                                eventType: "theatre",
+                                venue: { name: "Grand Theater" },
+                                date: new Date().toISOString()
+                            }
+                        },
+                        { name: "Comedy Cellar Mock", description: "Stand up night.", type: "Comedy", price: "$$", address: "Main St", google_rating: 4.6, show_dates: "Every Friday", ideaType: "event" }
                     ]
                 }
             };
@@ -465,10 +812,10 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Genre: ${inputs.genre || "Any"}
@@ -476,13 +823,51 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 - Budget: ${inputs.budget || "Any"}
                 - Duration: ${inputs.duration || "Any"}
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, genre, platform (PC, Console, etc), multiplayer_support, price_type (Free/Paid), website (Steam/Store link)
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "game" and a "typeData" object.
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display. (Address can be "Online" or platform names)
+                4. DO NOT include markdown headers in the description.
+                
+                "typeData" Schema:
+                {
+                  "title": "Game Title",
+                  "gameType": "video_game",
+                  "genre": ["RPG", "Action"],
+                  "platform": ["PC", "PS5"],
+                  "minPlayers": 1,
+                  "maxPlayers": 4,
+                  "coop": true,
+                  "rating": "T",
+                  "estimatedPlaytime": 60
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Mock Legends", description: "Battle royal fun.", genre: "Action", platform: "PC/Console", multiplayer_support: "Yes", price_type: "Free" },
-                        { name: "Quest for Code", description: "Epic RPG.", genre: "RPG", platform: "PC", multiplayer_support: "Single", price_type: "Paid" }
+                        {
+                            name: "Mock Legends",
+                            description: "Battle royal fun.",
+                            genre: "Action",
+                            platform: "PC/Console",
+                            multiplayer_support: "Yes",
+                            price_type: "Free",
+                            price: "Free",
+                            address: "PC/Console",
+                            google_rating: 4.2,
+                            ideaType: "game",
+                            typeData: {
+                                title: "Mock Legends",
+                                gameType: "video_game",
+                                genre: ["Action", "Battle Royale"],
+                                platform: ["PC", "Console"],
+                                minPlayers: 1,
+                                maxPlayers: 100,
+                                coop: true,
+                                rating: "T"
+                            }
+                        },
+                        { name: "Quest for Code", description: "Epic RPG.", genre: "RPG", platform: "PC", multiplayer_support: "Single", price_type: "Paid", price: "$$", address: "PC", google_rating: 4.8, ideaType: "game" }
                     ]
                 }
             };
@@ -497,23 +882,53 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Theme: ${inputs.themes || "Any"}
                 - Difficulty: ${inputs.difficulty || "Any"}
                 - Group Size: ${inputs.groupSize || "Any"}
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, theme_type, difficulty_level, price, address, website, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "activity" and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. 🎯 LINK ACCURACY: For the root "website" field:
+                   - 🛑 STOP! DO NOT GUESS DOMAINS.
+                   - ALWAYS use a Google Search URL.
+                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                
+                "typeData" Schema:
+                {
+                  "activityName": "Escape Room Name",
+                  "activityType": "active", 
+                  "location": { "name": "Address" },
+                  "rating": 4.7,
+                  "duration": 1 // hours
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "The Locked Room", description: "Spooky mystery.", theme_type: "Horror", difficulty_level: "Hard", price: "$$", address: "Dark Ln", google_rating: 4.7 },
-                        { name: "Bank Heist Mock", description: "Technological puzzle.", theme_type: "Heist", difficulty_level: "Medium", price: "$$", address: "Bank St", google_rating: 4.5 }
+                        {
+                            name: "The Locked Room",
+                            description: "Spooky mystery.",
+                            theme_type: "Horror",
+                            difficulty_level: "Hard",
+                            price: "$$",
+                            address: "Dark Ln",
+                            google_rating: 4.7,
+                            ideaType: "activity",
+                            typeData: {
+                                activityName: "The Locked Room",
+                                activityType: "active",
+                                location: { name: "Dark Ln" }
+                            }
+                        },
+                        { name: "Bank Heist Mock", description: "Technological puzzle.", theme_type: "Heist", difficulty_level: "Medium", price: "$$", address: "Bank St", google_rating: 4.5, ideaType: "activity" }
                     ]
                 }
             };
@@ -527,23 +942,50 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 - Sport: ${inputs.sport || "Any"}
                 - Type: ${inputs.type || "Watch or Play"}
                 - Membership: ${inputs.membership || "Any"}
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, sport, price, address, website, google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "event" and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                
+                "typeData" Schema:
+                {
+                  "eventName": "Match/Game Name",
+                  "eventType": "sports",
+                  "venue": { "name": "Stadium Name" },
+                  "date": "2024-02-20T14:00:00Z",
+                  "ticketUrl": "https://...",
+                  "officialWebsite": "https://www.google.com/search?q=City+Stadium+official+website"
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "City Stadium", description: "Watch the local team.", sport: "Soccer", price: "$$", address: "Stadium Dr", google_rating: 4.6 },
-                        { name: "Community Courts", description: "Public tennis courts.", sport: "Tennis", price: "Free", address: "Park Ave", google_rating: 4.3 }
+                        {
+                            name: "City Stadium",
+                            description: "Watch the local team.",
+                            sport: "Soccer",
+                            price: "$$",
+                            address: "Stadium Dr",
+                            google_rating: 4.6,
+                            ideaType: "event",
+                            typeData: {
+                                eventName: "City Stadium Match",
+                                eventType: "sports",
+                                venue: { name: "City Stadium" },
+                                date: new Date().toISOString()
+                            }
+                        },
+                        { name: "Community Courts", description: "Public tennis courts.", sport: "Tennis", price: "Free", address: "Park Ave", google_rating: 4.3, ideaType: "event" }
                     ]
                 }
             };
@@ -582,48 +1024,63 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 1. Design a cohesive, restaurant-quality menu that can be executed at home.
                 2. Provide a FULL list of ingredients with estimated quantities suitable for the guest count.
                 3. Include detailed cooking instructions for each course.
-                4. Create a "Chef's Prep Strategy" including timing (what to do 1 day before, day of, and just before serving).
-                5. Ensure the complexity matches the user's requested effort level.
+                4. Ensure the complexity matches the user's requested effort level.
+                5. You MUST include structured recipe data in the 'typeData' object.
 
                 Return JSON with "recommendations" array (size 3).
-                Each item represents a FULL DINNER PLAN.
+                Each item represents a dinner plan or recipe.
 
-                Fields:
-                - name: Creative Menu Title (e.g. "Parisian Bistro Night")
-                - description: Compelling 1-2 sentence overview of the theme and flavor profile.
-                - price: Estimated Cost Level ($, $$, $$$)
-                - google_rating: Complexity Rating (1: Easy, 3: Intermediate, 5: Professional)
-                - details: A formatted string containing the FULL GUIDE in Markdown.
-                  **IMPORTANT FORMATTING FOR 'details':**
-                  Use Markdown headers (###) for clear navigation.
-                  
-                  Follow this structure:
-                  ### 🍽️ The Menu
-                  (Include only the specific courses requested: ${inputs.courses || "Main Only"})
-                  **Entree:** [Dish Name] - [Brief summary]
-                  **Main:** [Dish Name] - [Brief summary]
-                  **Dessert:** [Dish Name] - [Brief summary]
-                  
-                  ### 🛒 Shopping List
-                  (Categorize items for easier shopping. Include quantities for ${inputs.guests || "the party"}.)
-                  - [Section header, e.g. Produce, Meat, Dairy]
-                  - [Quantity] [Item Name]
-                  
-                  ### 👨‍🍳 Cooking Instructions
-                  (Step-by-step for all courses)
-                  1. [Instruction]
-                  2. ...
-                  
-                  ### ⏱️ Prep & Timing Strategy
-                  - **1 Day Before:** [What can be prepped?]
-                  - **Day Of:** [Early prep]
-                  - **T-Minus 1 Hour:** [Final assembly/cooking]
-                  - **During Dinner:** [Serving tips]
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "recipe" and a "typeData" object.
+                3. Every recommendation MUST include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. Every recommendation MUST include a "details" field with a markdown formatted summary of the full menu.
+                5. "address" should be your kitchen or "At Home".
+                6. "google_rating" should be the complexity level (1-5).
+                
+                "typeData" Schema:
+                {
+                  "ingredients": ["1 cup flour", "2 eggs"...],
+                  "instructions": "Step 1...", 
+                  "prepTime": 30, // minutes
+                  "cookTime": 45, // minutes
+                  "servings": 4,
+                  "difficulty": "medium", // easy, medium, hard
+                  "cuisineType": "Italian",
+                  "prepAhead": "Explain what can be done in advance..."
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Italian Romance", description: "A classic 3-course Italian dinner featuring handmade pasta and rich flavors.", price: "$$", google_rating: 3, details: "### 🍽️ The Menu\n**Entree:** Caprese Skewers\n**Main:** Truffle Mushroom Risotto\n**Dessert:** Classic Tiramisu\n\n### 🛒 Shopping List\n- **Produce:** Basil, Mushrooms, Garlic\n- **Dairy:** Mascarpone, Butter, Parmesan\n\n### 👨‍🍳 Cooking Instructions\n1. Prepare the Tiramisu first...\n\n### ⏱️ Prep & Timing Strategy\n- **1 Day Before:** Bake the ladyfingers..." },
-                        { name: "Taco Fiesta", description: "High-energy, interactive DIY taco bar with fresh salsas and slow-cooked meats.", price: "$", google_rating: 1, details: "### 🍽️ The Menu\n**Main:** Braised Chicken Tacos..." }
+                        {
+                            name: "Authentic Carbonara",
+                            description: "Roman classic with guanciale, pecorino, and eggs. No cream!",
+                            price: "$$",
+                            address: "At Home",
+                            google_rating: 3,
+                            occasion: "Romantic Date Night In",
+                            details: "### 🍽️ The Menu\n1. **Primi**: Spaghetti alla Carbonara\n2. **Dolce**: Simple Tiramisu\n\n**Difficulty:** Medium\n**Time:** 30 mins",
+                            ideaType: "recipe",
+                            typeData: {
+                                ingredients: ["Spaghetti", "Guanciale", "Pecorino Romano", "Eggs", "Black Pepper"],
+                                instructions: "Boil water...",
+                                prepTime: 15,
+                                cookTime: 15,
+                                servings: 2,
+                                difficulty: "medium",
+                                cuisineType: "Italian"
+                            }
+                        },
+                        {
+                            name: "Taco Fiesta",
+                            description: "DIY taco bar with fresh salsas.",
+                            price: "$",
+                            address: "At Home",
+                            google_rating: 1,
+                            details: "### 🍽️ The Menu\n...",
+                            ideaType: "recipe"
+                        }
                     ]
                 }
             };
@@ -637,10 +1094,10 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 User Preferences:
@@ -648,32 +1105,52 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 - Structure: ${inputs.structure || "Any"}
                 - Cuisine: ${inputs.cuisine || "Any"}
                 - Budget: ${inputs.price || "Any"}
-                
+
                 INSTRUCTIONS:
                 1. Each plan must be a logical sequence of events (e.g. Pre-dinner drink -> Dinner -> Dessert/Activity).
                 2. Use REAL venues that are open in the evening.
                 3. Ensure the venues are within walking distance or a short drive of each other.
                 
-                Return JSON with "recommendations" array (size 3).
-                Fields:
-                - name: Creative Title (e.g. "Classic Romance in SoHo")
-                - description: Brief summary (1 sentence).
-                - duration_label: Est. Duration (e.g. "3-4 Hours").
-                - price: Overall Budget ($, $$, $$$).
-                - details: A formatted string containing the Timeline.
-                  **IMPORTANT FORMATTING FOR 'details':**
-                  Use Markdown.
-                  Format as a timeline:
-                  **6:00 PM:** [Venue Name] - [Activity/Description] (Approx $)
-                  **7:30 PM:** [Venue Name] - [Activity/Description] (Approx $)
-                  ...
-                  
-                  *Include a tip for transport or parking if relevant.*
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "itinerary" and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. DO NOT include the timeline in the "details" field; put ALL itinerary data in the "steps" array.
+                
+                "typeData" Schema:
+                {
+                  "title": "Date Night Title",
+                  "totalDuration": "4 hours",
+                  "vibe": "Romantic",
+                  "steps": [
+                      { "order": 1, "time": "18:00", "activity": "Drinks at Venue A", "location": { "name": "Venue A" } },
+                      { "order": 2, "time": "19:30", "activity": "Dinner at Venue B", "location": { "name": "Venue B" } }
+                  ]
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Classic Dinner & Movie", description: "A timeless date night combo.", duration_label: "4 Hours", price: "$$", details: "**6:00 PM:** The Local Italian - Dinner... \n**8:00 PM:** Cinema 6 - Movie..." },
-                        { name: "Active Evening", description: "Bowling and Burgers.", duration_label: "3 Hours", price: "$", details: "**6:00 PM:** Strike Bowling... \n**7:30 PM:** Burger Joint..." }
+                        {
+                            name: "Classic Dinner & Movie",
+                            description: "A timeless date night combo.",
+                            duration_label: "4 Hours",
+                            price: "$$",
+                            address: targetLocation,
+                            google_rating: 4.8,
+                            details: "**6:00 PM:** The Local Italian - Dinner... \n**8:00 PM:** Cinema 6 - Movie...",
+                            ideaType: "itinerary",
+                            typeData: {
+                                title: "Classic Dinner & Movie",
+                                totalDuration: "4 hours",
+                                vibe: "Romantic",
+                                steps: [
+                                    { order: 1, time: "18:00", activity: "Dinner at The Local Italian", location: { name: "The Local Italian" } },
+                                    { order: 2, time: "20:00", activity: "Movie at Cinema 6", location: { name: "Cinema 6" } }
+                                ]
+                            }
+                        },
+                        { name: "Active Evening", description: "Bowling and Burgers.", duration_label: "3 Hours", price: "$", address: targetLocation, google_rating: 4.5, details: "**6:00 PM:** Strike Bowling... \n**7:30 PM:** Burger Joint...", ideaType: "itinerary" }
                     ]
                 }
             };
@@ -687,18 +1164,18 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
-                ` : ''}
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
                 
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                ` : ''}
+ 
                 Preferences:
                 - Vibe: ${inputs.mood || "Any"}
                 - Company: ${inputs.company || "Any"}
                 - Specific Day: ${inputs.day || "Any"}
                 - Budget: ${inputs.price || "Any"}
-                
+ 
                 INSTRUCTIONS:
                 1. PRIORITY HIERARCHY (CRITICAL): You MUST prioritize events based on their scarcity:
                    - TIER 1 (TOP PRIORITY): Ultra-short-term events (e.g., a 2-day festival, a weekend carnival, a one-night-only concert).
@@ -709,23 +1186,48 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                    - Do NOT suggest "always open" places like standard museums, parks, or cinemas UNLESS they have a specific special event on.
                 3. FALLBACK: Only if you cannot find 5 high-quality time-limited events, fill the remaining spots with TIER 3 recurring events or exceptional "evergreen" activities that perfectly match the requested vibe.
                 4. Ensure venues are confirmed open on the requested days.
-                
+                 
                 🔗 CRITICAL - WEBSITE FIELD:
                 DO NOT guess or invent website URLs. Instead, use this Google Search format:
                 https://www.google.com/search?q=[Event+or+Venue+Name]+[Location]+official+website
-                
-                Example: For "Victorian Farmers Markets" in Melbourne:
-                https://www.google.com/search?q=Victorian+Farmers+Markets+Melbourne+official+website
-                
+
                 This ensures users always find the correct, current website.
                 
-                Return JSON with "recommendations" array.
-                Fields: name, description, day (e.g. "Saturday 2pm"), price, address, website (Google search URL), google_rating
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "event" and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. DO NOT include markdown headers in the description.
+                
+                "typeData" Schema:
+                {
+                  "eventName": "Event Name",
+                  "eventType": "festival",
+                  "venue": { "name": "Location Name" },
+                  "date": "2024-01-20T10:00:00Z",
+                  "dayOfWeek": "Saturday",
+                  "ticketUrl": "https://..."
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "Saturday Farmers Market", description: "Fresh produce and live music.", day: "Saturday Morning", price: "Free", address: "Town Square", google_rating: 4.8 },
-                        { name: "Jazz in the Park", description: "Smooth jazz and picnics.", day: "Sunday 3pm", price: "Free", address: "Central Park", google_rating: 4.7 }
+                        {
+                            name: "Saturday Farmers Market",
+                            description: "Fresh produce and live music.",
+                            day: "Saturday Morning",
+                            price: "Free",
+                            address: "Town Square",
+                            google_rating: 4.5,
+                            ideaType: "event",
+                            typeData: {
+                                eventName: "Saturday Farmers Market",
+                                eventType: "market",
+                                venue: { name: "Town Square" },
+                                dayOfWeek: "Saturday"
+                            }
+                        },
+                        { name: "Live Jazz @ The Blue Note", description: "Smooth evening vibes.", day: "Sunday Night", price: "$$", address: "Bleecker St", google_rating: 4.8, ideaType: "event" }
                     ]
                 }
             };
@@ -739,19 +1241,19 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 ${getExactNamePriorityRule(extraInstructions)}
                 
                 ${extraInstructions ? `
-🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-${extraInstructions}
-
-YOU MUST ensure ALL recommendations fully align with these specific requirements.
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                "${extraInstructions}"
+                
+                YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
                 TRIP DETAILS:
                 - Dates: ${inputs.dates_start || "Unspecified"} to ${inputs.dates_end || "Unspecified"}
                 - Travel Party: ${inputs.party || "Any"}
                 - Transport Mode: ${inputs.transport || "Any"}
-                - Max Travel Distance/Time: ${inputs.maxDistance || "Any"}
+                - Max Travel Distance / Time: ${inputs.maxDistance || "Any"}
                 - Dining Preferences: ${inputs.dining || "Any"}
-                - Interests/Vibe: ${inputs.interests || "Any"}
+                - Interests / Vibe: ${inputs.interests || "Any"}
                 - Budget: ${inputs.price || "Any"}
 
                 INSTRUCTIONS:
@@ -761,35 +1263,64 @@ YOU MUST ensure ALL recommendations fully align with these specific requirements
                 4. Ensure logistics make sense (e.g. if using public transport, group varying locations logically).
                 5. Each recommendation must be a UNIQUE approach (e.g. "Relaxed & Foodie", "Adventure & Nature", "Culture & History").
 
-                Return JSON with "recommendations" array (size 3).
-                Each item represents a FULL ITINERARY VARIATION.
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "itinerary" and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                   - These root fields are used for the main card display.
+                4. "address" should be the target location or "Various".
+                5. DO NOT include the breakdown in the "details" field; put ALL day-by-day data in the "steps" array.
                 
-                Fields:
-                - name: Creative Title (e.g. "Paris: The Culinary Journey")
-                - description: Brief summary of the vibe (1-2 sentences).
-                - duration_label: The duration (e.g. "3 Days, 2 Nights").
-                - price: Budget level ($, $$, $$$).
-                - details: A formatted string containing the FULL Day-by-Day Itinerary. 
-                  **IMPORTANT FORMATTING FOR 'details':**
-                  Use Markdown.
-                  Format each day as:
-                  ### Day 1: [Date] - [Theme]
-                  **Morning:** [Activity Title] - [Description] (Map: [Link])
-                  **Lunch:** [Restaurant] - [Cuisine] (Map: [Link])
-                  **Afternoon:** ...
-                  **Dinner:** ...
-                  
-                  
-                  *IMPORTANT: For map links, use FULL Google Maps URLs in this format:*
-                  *https://www.google.com/maps/search/?api=1&query=[Place+Name]+[Address]*
-                  *DO NOT use short URLs (maps.app.goo.gl) as they are deprecated and often expired.*
-                  *Example: https://www.google.com/maps/search/?api=1&query=Eiffel+Tower+Paris*
+                "typeData" Schema:
+                {
+                  "title": "Holiday Itinerary Name",
+                  "totalDuration": "3 Days",
+                  "vibe": "Adventure",
+                  "steps": [
+                    { "day": 1, "activity": "Morning hike", "location": { "name": "Mountain Park" } },
+                    { "day": 1, "activity": "Lunch at Cafe", "location": { "name": "Village Cafe" } },
+                    { "day": 2, "activity": "Beach visit", "location": { "name": "Sunny Shore" } }
+                  ]
+                }
                 `,
                 mockResponse: {
                     recommendations: [
-                        { name: "The Cultural Explorer", description: "A deep dive into history and museums.", duration_label: "3 Days", price: "$$", details: "### Day 1...\n..." },
-                        { name: "The Foodie Escape", description: "Tasting the best local flavors.", duration_label: "3 Days", price: "$$$", details: "### Day 1...\n..." },
-                        { name: "Nature & Chill", description: "Hiking trails and spa evenings.", duration_label: "3 Days", price: "$", details: "### Day 1...\n..." }
+                        {
+                            name: "The Cultural Explorer",
+                            description: "A deep dive into history and museums.",
+                            duration_label: "3 Days",
+                            address: targetLocation,
+                            price: "$$",
+                            google_rating: 4.8,
+                            ideaType: "itinerary",
+                            typeData: {
+                                title: "The Cultural Explorer",
+                                totalDuration: "3 Days",
+                                vibe: "Culture",
+                                steps: [
+                                    { day: 1, activity: "Louvre Museum Tour", location: { name: "The Louvre, Paris" } },
+                                    { day: 1, activity: "Dinner at Benoit", location: { name: "Benoit Paris" } },
+                                    { day: 2, activity: "Palace of Versailles", location: { name: "Versailles" } }
+                                ]
+                            }
+                        },
+                        {
+                            name: "The Foodie Escape",
+                            description: "Tasting the best local flavors.",
+                            duration_label: "3 Days",
+                            address: targetLocation,
+                            price: "$$$",
+                            google_rating: 4.9,
+                            ideaType: "itinerary",
+                            typeData: {
+                                title: "The Foodie Escape",
+                                totalDuration: "3 Days",
+                                vibe: "Foodie",
+                                steps: [
+                                    { day: 1, activity: "Market Tour", location: { name: "Local Market" } }
+                                ]
+                            }
+                        }
                     ]
                 }
             };

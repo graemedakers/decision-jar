@@ -9,6 +9,8 @@ import { LocationInput } from "./LocationInput";
 import { ConciergeResultCard } from "@/components/ConciergeResultCard";
 import { RichDetailsModal } from "./RichDetailsModal";
 import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
+import { IdeaTypeRenderer } from "@/components/idea-types/IdeaTypeRenderer";
+import { suggestIdeaType, getStandardizedData } from "@/lib/idea-standardizer";
 import { useDemoConcierge } from "@/lib/use-demo-concierge";
 import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog";
@@ -776,6 +778,11 @@ export function GenericConciergeModal({
                                             const isChef = config.id === 'chef_concierge';
                                             const isExpanded = expandedRecIndex === index;
 
+                                            // Calculate standardized type data on the fly
+                                            const effectiveType = rec.ideaType || suggestIdeaType(rec);
+                                            const typeData = rec.typeData || getStandardizedData(rec);
+                                            const hasStandardizedData = !!effectiveType && !!typeData;
+
                                             return (
                                                 <ConciergeResultCard
                                                     key={index}
@@ -793,19 +800,31 @@ export function GenericConciergeModal({
                                                     ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
                                                     isAddingToJar={addingItemName === rec.name}
 
-                                                    // Inline Expansion for Holidays & Chef
-                                                    expandable={isHoliday || isChef}
+                                                    // Inline Expansion for Holidays, Chef, or any Typed Idea (Explicit or Inferred)
+                                                    expandable={isHoliday || isChef || hasStandardizedData}
                                                     isExpanded={isExpanded}
                                                     onToggleExpand={() => setExpandedRecIndex(isExpanded ? null : index)}
-                                                    renderExpandedContent={(isHoliday || isChef) ? (
-                                                        <ItineraryMarkdownRenderer
-                                                            markdown={rec.details}
-                                                            configId={config.id}
-                                                            theme={getThemeClasses(config.colorTheme)}
-                                                        />
-                                                    ) : undefined}
+                                                    renderExpandedContent={
+                                                        // Check for structured type data first
+                                                        hasStandardizedData ? (
+                                                            <div className="bg-slate-50 dark:bg-white/5 rounded-lg overflow-hidden border border-slate-200 dark:border-white/5">
+                                                                <IdeaTypeRenderer
+                                                                    type={effectiveType!}
+                                                                    data={typeData}
+                                                                    compact={false}
+                                                                />
+                                                            </div>
+                                                        ) : (isHoliday || isChef) ? (
+                                                            <ItineraryMarkdownRenderer
+                                                                markdown={rec.details}
+                                                                configId={config.id}
+                                                                theme={getThemeClasses(config.colorTheme)}
+                                                            />
+                                                        ) : undefined
+                                                    }
                                                 />
                                             );
+
                                         })}
                                     </div>
                                 </div>

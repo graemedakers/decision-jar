@@ -267,6 +267,12 @@ model Idea {
   notes          String?   // "Best pizza ever!"
   details        String?   // "Wear comfortable shoes", "Bring a swimsuit"
   
+  // ✅ NEW: Type System Support (All Optional)
+  ideaType      String?       // e.g. "recipe", "movie", "book"
+  schemaVersion String?       // e.g. "v1"
+  typeData      Json?         // Structured data based on ideaType
+  metadata      Json?         // Flexible extra data
+  
   // Rich Data Fields
   address        String?
   website        String?

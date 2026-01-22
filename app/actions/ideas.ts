@@ -246,6 +246,8 @@ export async function duplicateIdea(id: string, targetJarId?: string): Promise<A
                 rating: null,
                 notes: null,
                 isSurprise: false, // Reset surprise status for new copy
+                typeData: cloneData.typeData ?? undefined,
+                metadata: cloneData.metadata ?? undefined,
             }
         });
 

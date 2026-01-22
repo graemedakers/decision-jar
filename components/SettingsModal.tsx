@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/Input";
 import { getApiUrl, isCapacitor, getCurrentLocation } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteLogModal } from "@/components/DeleteLogModal";
-import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown, ShieldCheck, Gift } from "lucide-react";
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
+import { X, MapPin, Trash2, History, RefreshCw, UserMinus, CreditCard, Sparkles, Users, ChevronDown, ShieldCheck, Gift, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BASE_DOMAIN } from "@/lib/config";
@@ -31,7 +32,13 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [location, setLocation] = useState(currentLocation || "");
     const [interests, setInterests] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isDeletingJar, setIsDeletingJar] = useState(false);
+    const [isRegeneratingCode, setIsRegeneratingCode] = useState(false);
+    const [isRegeneratingPremium, setIsRegeneratingPremium] = useState(false);
     const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+    const [isConfirmEmptyJarOpen, setIsConfirmEmptyJarOpen] = useState(false);
+    const [isConfirmRegenCodeOpen, setIsConfirmRegenCodeOpen] = useState(false);
+    const [isConfirmRegenPremiumOpen, setIsConfirmRegenPremiumOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isSuperAdmin, setIsSuperAdmin] = useState(false);
     const [inviteCode, setInviteCode] = useState("");
@@ -168,10 +175,18 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
         }
     };
 
-    const handleEmptyJar = async () => {
-        if (!confirm(`Are you sure you want to ${labels.emptyJarAction.toLowerCase()}? This will delete ALL ideas, including your history of past sessions. This action cannot be undone.`)) return;
+    const handleEmptyJar = () => {
+        if (!activeJarId) {
+            showError("No active jar selected.");
+            return;
+        }
+        setIsConfirmEmptyJarOpen(true);
+    };
 
-        setIsLoading(true);
+    const performEmptyJar = async () => {
+        if (!activeJarId) return;
+
+        setIsDeletingJar(true);
         try {
             const url = getApiUrl(`/api/jars/${activeJarId}/reset`);
             console.log("Emptying jar at:", url);
@@ -185,6 +200,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
             if (res.ok) {
                 const data = contentType?.includes("application/json") ? await res.json() : {};
                 showSuccess(data.message || "Jar emptied successfully!");
+                setIsConfirmEmptyJarOpen(false);
                 onClose();
                 router.refresh();
                 window.location.reload();
@@ -203,14 +219,16 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
             console.error("Handle empty jar error:", error);
             showError(`Error emptying jar: ${error?.message || "Check console"}`);
         } finally {
-            setIsLoading(false);
+            setIsDeletingJar(false);
         }
     };
 
-    const handleRegenerateCode = async () => {
-        if (!confirm("Are you sure you want to regenerate your invite code? The old code will stop working.")) return;
+    const handleRegenerateCode = () => {
+        setIsConfirmRegenCodeOpen(true);
+    };
 
-        setIsLoading(true);
+    const performRegenerateCode = async () => {
+        setIsRegeneratingCode(true);
         try {
             const res = await fetch(getApiUrl(`/api/jars/${activeJarId}/regenerate-code`), {
                 method: 'POST',
@@ -221,6 +239,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                 const data = await res.json();
                 showSuccess(`Success! Your new invite code is: ${data.newCode}`);
                 setInviteCode(data.newCode); // Update local state
+                setIsConfirmRegenCodeOpen(false);
                 router.refresh();
             } else {
                 const data = await res.json();
@@ -230,13 +249,16 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
             console.error(error);
             showError("Error regenerating code");
         } finally {
-            setIsLoading(false);
+            setIsRegeneratingCode(false);
         }
     };
 
-    const handleRegeneratePremiumToken = async () => {
-        if (!confirm("Are you sure? This will invalidate previous premium invite links.")) return;
-        setIsLoading(true);
+    const handleRegeneratePremiumToken = () => {
+        setIsConfirmRegenPremiumOpen(true);
+    };
+
+    const performRegeneratePremiumToken = async () => {
+        setIsRegeneratingPremium(true);
         try {
             const res = await fetch(getApiUrl('/api/user/premium-token'), {
                 method: 'POST',
@@ -247,6 +269,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                 const data = await res.json();
                 showSuccess("Success! Premium token valid.");
                 setPremiumInviteToken(data.token);
+                setIsConfirmRegenPremiumOpen(false);
                 router.refresh();
             } else {
                 const data = await res.json();
@@ -256,7 +279,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
             console.error(error);
             showError("Error regenerating token");
         } finally {
-            setIsLoading(false);
+            setIsRegeneratingPremium(false);
         }
     };
 
@@ -659,8 +682,24 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                                 Copy Link
                                                             </button>
                                                         </div>
-                                                        <Button type="button" variant="ghost" size="sm" onClick={handleRegenerateCode} className="w-full text-slate-500">
-                                                            <RefreshCw className="w-3 h-3 mr-2" /> Regenerate Code
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={handleRegenerateCode}
+                                                            className="w-full text-slate-500"
+                                                            disabled={isRegeneratingCode}
+                                                        >
+                                                            {isRegeneratingCode ? (
+                                                                <>
+                                                                    <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                                                                    Regenerating...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <RefreshCw className="w-3 h-3 mr-2" /> Regenerate Code
+                                                                </>
+                                                            )}
                                                         </Button>
                                                     </div>
 
@@ -675,8 +714,14 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                         variant="secondary"
                                                         className="w-full border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400"
                                                         onClick={handleEmptyJar}
+                                                        disabled={!activeJarId || isDeletingJar}
                                                     >
-                                                        {labels.emptyJarAction}
+                                                        {isDeletingJar ? (
+                                                            <>
+                                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                                Emptying...
+                                                            </>
+                                                        ) : labels.emptyJarAction}
                                                     </Button>
                                                     <p className="text-[10px] text-slate-400 mt-2 text-center">Irreversible. Deletes all ideas.</p>
                                                 </div>
@@ -708,6 +753,30 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                 email={currentUserEmail}
                 featureName="Pro Upgrade"
                 description="Verify your email to upgrade to Pro and unlock unlimited AI tools, custom jars, and premium features."
+            />
+
+            <DeleteConfirmModal
+                isOpen={isConfirmEmptyJarOpen}
+                onClose={() => setIsConfirmEmptyJarOpen(false)}
+                onConfirm={performEmptyJar}
+                title={labels.emptyJarAction}
+                description={`Are you sure you want to empty this jar? This will delete ALL ideas, including your history of past sessions. This action cannot be undone.`}
+            />
+
+            <DeleteConfirmModal
+                isOpen={isConfirmRegenCodeOpen}
+                onClose={() => setIsConfirmRegenCodeOpen(false)}
+                onConfirm={performRegenerateCode}
+                title="Regenerate Invite Code"
+                description="Are you sure you want to regenerate your invite code? The old code will stop working immediately."
+            />
+
+            <DeleteConfirmModal
+                isOpen={isConfirmRegenPremiumOpen}
+                onClose={() => setIsConfirmRegenPremiumOpen(false)}
+                onConfirm={performRegeneratePremiumToken}
+                title="Regenerate Premium Token"
+                description="Are you sure? This will invalidate all previous premium invite links."
             />
         </>
     );

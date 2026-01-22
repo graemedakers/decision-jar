@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Filter, ArrowRight, Sun, CloudRain, Snowflake, Sparkles, Car, Home } from "lucide-react";
+import { Filter, ArrowRight, Sun, CloudRain, Snowflake, Sparkles, Car, Home, ChefHat, Clapperboard, Gamepad2, BookOpen } from "lucide-react";
 import { getCategoryDef } from "@/lib/categories";
 import { COST_LEVELS, ACTIVITY_LEVELS, TIME_OF_DAY, WEATHER_TYPES } from "@/lib/constants";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
@@ -9,7 +9,7 @@ import { Button } from "./ui/Button";
 interface SpinFiltersModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSpin: (filters: { maxDuration?: number; maxCost?: string; maxActivityLevel?: string; timeOfDay?: string; category?: string; weather?: string; localOnly?: boolean }) => void;
+    onSpin: (filters: { maxDuration?: number; maxCost?: string; maxActivityLevel?: string; timeOfDay?: string; category?: string; weather?: string; localOnly?: boolean; ideaTypes?: string[] }) => void;
     jarTopic?: string | null;
     ideas: any[];
     customCategories?: any[];
@@ -22,6 +22,7 @@ export function SpinFiltersModal({ isOpen, onClose, onSpin, jarTopic, ideas, cus
     const [timeOfDay, setTimeOfDay] = useState<string | undefined>(undefined);
     const [category, setCategory] = useState<string | undefined>(undefined);
     const [weather, setWeather] = useState<string | undefined>(undefined);
+    const [ideaTypes, setIdeaTypes] = useState<string[]>([]);
     const [localOnly, setLocalOnly] = useState<boolean>(false);
 
     // 1. Get unique category IDs present in unselected ideas
@@ -42,12 +43,13 @@ export function SpinFiltersModal({ isOpen, onClose, onSpin, jarTopic, ideas, cus
             setTimeOfDay(undefined);
             setCategory(undefined);
             setWeather(undefined);
+            setIdeaTypes([]);
             setLocalOnly(false);
         }
     }, [isOpen]);
 
     const handleSpin = () => {
-        onSpin({ maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly });
+        onSpin({ maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly, ideaTypes });
         onClose();
     };
 
@@ -79,6 +81,37 @@ export function SpinFiltersModal({ isOpen, onClose, onSpin, jarTopic, ideas, cus
                                 >
                                     <cat.icon className="w-4 h-4" />
                                     <span className="truncate w-full text-center text-xs">{cat.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Idea Type Filter */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Idea Type</label>
+                        <div className="grid grid-cols-4 gap-2">
+                            {[
+                                { id: 'recipe', label: 'Cook', icon: ChefHat },
+                                { id: 'movie', label: 'Watch', icon: Clapperboard },
+                                { id: 'game', label: 'Play', icon: Gamepad2 },
+                                { id: 'book', label: 'Read', icon: BookOpen }
+                            ].map((type) => (
+                                <button
+                                    key={type.id}
+                                    onClick={() => {
+                                        setIdeaTypes(prev =>
+                                            prev.includes(type.id)
+                                                ? prev.filter(t => t !== type.id)
+                                                : [...prev, type.id]
+                                        );
+                                    }}
+                                    className={`p-2 rounded-lg text-[10px] font-medium transition-colors border flex flex-col items-center gap-1 ${ideaTypes.includes(type.id)
+                                        ? "bg-primary text-white border-primary shadow-md"
+                                        : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-800 dark:hover:text-white"
+                                        }`}
+                                >
+                                    <type.icon className="w-4 h-4" />
+                                    {type.label}
                                 </button>
                             ))}
                         </div>

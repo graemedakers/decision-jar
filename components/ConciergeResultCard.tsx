@@ -4,7 +4,7 @@ import React from "react";
 import { ShareButton } from "@/components/ShareButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { ACTION_LABELS } from "@/lib/ui-constants";
-import { trackRideShareClicked } from "@/lib/analytics";
+import { StandardizedIdeaHeader } from "./StandardizedIdeaHeader";
 
 // Categories that are inherently digital/online and shouldn't show map
 const DIGITAL_CATEGORIES = ['BOOK', 'GAME', 'STREAMING', 'ONLINE', 'DIGITAL', 'VIRTUAL'];
@@ -26,7 +26,7 @@ function isDigitalItem(rec: ConciergeRecommendation, categoryType: string): bool
     if (DIGITAL_CATEGORIES.includes(categoryType.toUpperCase())) {
         return true;
     }
-    
+
     // Check for digital keywords in name or address
     const textToCheck = `${rec.name || ''} ${rec.address || ''} ${rec.description || ''}`.toLowerCase();
     return DIGITAL_KEYWORDS.some(keyword => textToCheck.includes(keyword));
@@ -108,137 +108,34 @@ export function ConciergeResultCard({
                 {expandable && (
                     <button
                         onClick={onToggleExpand}
-                        className="absolute top-3 right-3 p-2 rounded-full transition-all z-10 text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                        className="absolute top-2.5 right-2.5 p-1.5 rounded-full transition-all z-10 text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
                         aria-label={isExpanded ? "Collapse details" : "View full plan"}
                     >
                         {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </button>
                 )}
 
-                <div className="flex-1 pr-14">
-                    <div className="flex justify-between items-start">
-                        <h4 className="font-bold text-slate-900 dark:text-white text-lg">{rec.name}</h4>
-                        {rec.price && (
-                            <span className="text-xs font-bold px-2 py-1 bg-slate-100 dark:bg-white/10 rounded text-slate-600 dark:text-slate-300 ml-2 whitespace-nowrap">
-                                {rec.price}
-                            </span>
-                        )}
-                    </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{rec.description}</p>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-slate-400">
-                        {MainIcon && subtext && (
-                            <span className="flex items-center gap-1">
-                                <MainIcon className="w-3 h-3" /> {subtext}
-                            </span>
-                        )}
-                        {SecondIcon && secondSubtext && (
-                            <span className="flex items-center gap-1">
-                                <SecondIcon className="w-3 h-3" /> {secondSubtext}
-                            </span>
-                        )}
-                        {/* Only show address with MapPin for physical locations, not digital items */}
-                        {rec.address && !isDigitalItem(rec, categoryType) && (
-                            <span className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" /> {rec.cinema_name ? `${rec.cinema_name} - ${rec.address}` : rec.address}
-                            </span>
-                        )}
-                        {/* For digital items, show platform info without MapPin */}
-                        {rec.address && isDigitalItem(rec, categoryType) && (
-                            <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                                <ExternalLink className="w-3 h-3" /> {rec.address}
-                            </span>
-                        )}
-                        {rec.showtimes && (
-                            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
-                                <Clock className="w-3 h-3" /> {rec.showtimes}
-                            </span>
-                        )}
-                        {rec.show_dates && (
-                            <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-medium">
-                                <Calendar className="w-3 h-3" /> {rec.show_dates}
-                            </span>
-                        )}
-                        {rec.google_rating && (
-                            <span className={`flex items-center gap-1 ${ratingClass}`}>
-                                <Star className="w-3 h-3 fill-current" /> {rec.google_rating}
-                            </span>
-                        )}
-                    </div>
-                    {rec.google_rating && (
-                        <button
-                            onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(rec.name + " " + (rec.address || "") + " reviews")}`, '_blank')}
-                            className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 underline mt-1 text-left"
-                        >
-                            Read Google Reviews
-                        </button>
-                    )}
+                <div className={`flex-1 ${expandable ? 'pr-24' : 'pr-12'}`}>
+                    <StandardizedIdeaHeader
+                        name={rec.name || rec.typeData?.title || rec.typeData?.eventName || rec.typeData?.establishmentName || rec.typeData?.activityName || rec.title || 'Untitled Idea'}
+                        description={rec.description || (rec.typeData && 'vibe' in rec.typeData ? `${rec.typeData.vibe} Itinerary` : '')}
+                        address={rec.address}
+                        price={rec.price}
+                        rating={rec.google_rating}
+                        website={rec.website || rec.typeData?.playUrl || rec.typeData?.officialWebsite}
+                        menuUrl={rec.menuUrl || rec.typeData?.menuUrl || rec.typeData?.menuLink}
+                        category={categoryType}
+                        showtimes={rec.showtimes}
+                        showDates={rec.show_dates}
+                        cinemaName={rec.cinema_name}
+                        compact={true}
+                    />
                 </div>
 
             </div>
 
             {/* Action Buttons Container - Two rows for clarity */}
             <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/5 space-y-2">
-                {/* Row 1: Info Links (Map, Web) - only show if there are visible links */}
-                {/* Hide Map button for digital items (games, streaming, ebooks, etc.) */}
-                {((!isDigitalItem(rec, categoryType) && rec.address) || rec.website) && (
-                    <div className="flex items-center gap-2">
-                        {!isDigitalItem(rec, categoryType) && rec.address && (
-                            <>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
-                                    onClick={() => {
-                                        const query = rec.cinema_name ? `${rec.cinema_name} ${rec.address}` : `${rec.name} ${rec.address}`;
-                                        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
-                                    }}
-                                >
-                                    <ExternalLink className="w-3 h-3 mr-1" /> Map
-                                </Button>
-                                {/* Uber deep link */}
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
-                                    onClick={() => {
-                                        const destination = rec.address || rec.name;
-                                        trackRideShareClicked('uber', destination, categoryType);
-                                        window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[formatted_address]=${encodeURIComponent(destination)}`, '_blank');
-                                    }}
-                                    title="Get Uber ride"
-                                >
-                                    <Car className="w-3 h-3 mr-1" /> Uber
-                                </Button>
-                                {/* Lyft deep link */}
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
-                                    onClick={() => {
-                                        const destination = rec.address || rec.name;
-                                        trackRideShareClicked('lyft', destination, categoryType);
-                                        window.open(`https://lyft.com/ride?destination[address]=${encodeURIComponent(destination)}`, '_blank');
-                                    }}
-                                    title="Get Lyft ride"
-                                >
-                                    <Car className="w-3 h-3 mr-1" /> Lyft
-                                </Button>
-                            </>
-                        )}
-
-                        {rec.website && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap"
-                                onClick={() => window.open(rec.website, '_blank')}
-                            >
-                                <ExternalLink className="w-3 h-3 mr-1" /> {rec.showtimes ? 'Tickets' : 'Web'}
-                            </Button>
-                        )}
-                    </div>
-                )}
-
                 {/* Row 2: Primary Action Buttons - always on same line */}
                 <div className="flex items-center gap-1.5">
                     <ShareButton

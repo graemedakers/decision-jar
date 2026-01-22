@@ -2,7 +2,7 @@
 import {
     Calendar, Utensils, Wine, Footprints, Moon, Clapperboard,
     Leaf, Dumbbell, Ticket, ChefHat, Gamepad2, Key, Trophy,
-    Book, Disc, Bed, Users, Plane, Sparkles
+    Book, Disc, Bed, Users, Plane, Sparkles, Library
 } from "lucide-react";
 
 export type ToolColor = 'purple' | 'blue' | 'orange' | 'pink' | 'rose' | 'indigo' | 'violet' | 'red' | 'cyan' | 'emerald' | 'amber' | 'teal' | 'green';
@@ -247,7 +247,7 @@ export const DASHBOARD_TOOLS: DashboardTool[] = [
         id: 'book_finder',
         title: 'Book Finder',
         description: 'Discover your next favorite read tailored to your mood.',
-        icon: Book,
+        icon: Library,
         color: 'blue',
         requiresPremium: true,
         actionType: 'concierge',

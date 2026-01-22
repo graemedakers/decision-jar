@@ -1,7 +1,8 @@
 "use client";
-import { getItinerary, getCateringPlan } from "@/lib/utils";
+import { getItinerary, getCateringPlan, getVenueDetails } from "@/lib/utils";
 import { ItineraryPreview } from "./ItineraryPreview";
 import { CateringPreview } from "./CateringPreview";
+import { VenuePreview } from "./VenuePreview";
 import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
 import { ShoppingListPreview } from "./ShoppingListPreview";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +20,13 @@ import { IdeaWizard } from "@/components/wizard/IdeaWizard"; // Import Wizard
 import { trackModalAbandoned } from "@/lib/analytics";
 import { useModalSystem } from "@/components/ModalProvider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog";
+import { IdeaFormRenderer } from "@/components/idea-forms/IdeaFormRenderer"; // New import
+import { IdeaTypeTemplate } from "./idea-types/IdeaTypeTemplate";
+import { IdeaTypeRenderer } from "./idea-types/IdeaTypeRenderer";
+import { suggestIdeaType, getStandardizedData } from "@/lib/idea-standardizer";
+import { UnifiedIdeaCard } from "./UnifiedIdeaCard";
+import React from 'react';
+
 
 interface AddIdeaModalProps {
     isOpen: boolean;
@@ -147,18 +155,41 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         await handleSubmit(e);
     };
 
+    const effectiveType = (formData.ideaType || suggestIdeaType(formData))?.toLowerCase();
+    const typeData = formData.typeData || getStandardizedData(formData);
+    const hasStructuredData = !!(effectiveType && typeData);
+
     const itinerary = getItinerary(formData.details);
     const cateringPlan = getCateringPlan(formData.details);
+    const venueDetails = getVenueDetails(formData.details);
     const hasMarkdown = formData.details && (formData.details.includes("###") || formData.details.includes("**"));
-    const showPreviewToggle = itinerary || cateringPlan || hasMarkdown;
+
+    // Show preview toggle for ideas with structured type data OR special content formats
+    const showPreviewToggle = !!effectiveType || !!itinerary || !!cateringPlan || !!venueDetails || !!hasMarkdown;
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent raw className="bg-slate-50 dark:bg-slate-900 border-none">
                 <DialogHeader onClose={handleClose} className="border-none pb-0">
                     <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                        {viewMode === 'PREVIEW' && showPreviewToggle ? (itinerary ? "Itinerary Preview" : (cateringPlan || formData.details?.includes('Shopping List')) ? "Menu Preview" : "Plan Preview") :
-                            (initialData && initialData.id ? "Edit Idea" : "Add New Idea")}
+                        {viewMode === 'PREVIEW' && showPreviewToggle ? (
+                            hasStructuredData ? (
+                                {
+                                    'recipe': '🍳 Recipe Details',
+                                    'book': '📚 Book Details',
+                                    'movie': '🎬 Movie Details',
+                                    'game': '🎮 Game Details',
+                                    'event': '🎭 Event Details',
+                                    'travel': '✈️ Travel Details',
+                                    'itinerary': '📋 Itinerary',
+                                    'dining': '🍽️ Dining Details',
+                                    'music': '🎵 Music Details',
+                                    'activity': '🏃 Activity Details'
+                                }[effectiveType || ''] || 'Idea Preview'
+                            ) : itinerary ? "Itinerary Preview" :
+                                (cateringPlan || formData.details?.includes('Shopping List')) ? "Menu Preview" :
+                                    venueDetails ? "Venue Details" : "Plan Preview"
+                        ) : (initialData && initialData.id ? "Edit Idea" : "Add New Idea")}
                         {(!initialData || !initialData.id) && !showPreviewToggle && (
                             <button
                                 type="button"
@@ -229,17 +260,22 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                 <div className="flex-1 overflow-y-auto overscroll-contain px-4 md:px-6 py-4 custom-scrollbar">
                     {showPreviewToggle && viewMode === 'PREVIEW' ? (
                         <div className="space-y-4">
-                            <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl">
-                                {itinerary ? (
-                                    <ItineraryPreview itinerary={itinerary} />
-                                ) : cateringPlan ? (
-                                    <CateringPreview plan={cateringPlan} />
-                                ) : (
-                                    <ItineraryMarkdownRenderer
-                                        markdown={formData.details}
-                                        variant={formData.details.includes('### Day') ? 'accordion' : 'sections'}
-                                        theme={{ sectionHeaderColor: 'text-secondary' }}
-                                    />
+                            <div ref={contentRef} className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
+                                <UnifiedIdeaCard
+                                    idea={formData}
+                                    effectiveType={effectiveType || undefined}
+                                    typeData={typeData}
+                                />
+
+                                {/* Additional Markdown content if present and not handled by card */}
+                                {formData.details && (formData.details.includes('###') || formData.details.includes('**')) && !hasStructuredData && (
+                                    <div className="mt-8 pt-8 border-t border-slate-100 dark:border-white/5">
+                                        <ItineraryMarkdownRenderer
+                                            markdown={formData.details}
+                                            variant={formData.details?.includes('### Day') ? 'accordion' : 'sections'}
+                                            theme={{ sectionHeaderColor: 'text-secondary' }}
+                                        />
+                                    </div>
                                 )}
                             </div>
 
@@ -255,7 +291,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     ) : isWizardMode && !initialData?.id ? (
                         <IdeaWizard
                             formData={formData}
-                            setFormData={setFormData}
+                            setFormData={setFormData as any}
                             categories={categories}
                             onSubmit={handleSubmitWithTracking}
                             onCancel={onClose}
@@ -264,6 +300,68 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     ) : (
                         <form id="add-idea-form" onSubmit={handleSubmitWithTracking} className="space-y-6">
                             <fieldset disabled={!!initialData?.id && (!currentUser || initialData.createdById !== currentUser.id)} className="space-y-6 disabled:opacity-80 min-w-0">
+                                <div className="space-y-2 min-w-0">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Idea Type (Optional)</label>
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={formData.ideaType || ""}
+                                            onChange={(e) => setFormData({ ...formData, ideaType: e.target.value || undefined, typeData: undefined })}
+                                            className="glass-input flex-1 text-slate-800 dark:text-white"
+                                        >
+                                            <option value="">Standard (No specific type)</option>
+                                            <option value="dining">Dining</option>
+                                            <option value="recipe">Recipe</option>
+                                            <option value="book">Book</option>
+                                            <option value="movie">Movie</option>
+                                            <option value="music">Music</option>
+                                            <option value="game">Game</option>
+                                            <option value="activity">Activity</option>
+                                            <option value="event">Event/Show</option>
+                                            <option value="travel">Travel/Stay</option>
+                                            <option value="itinerary">Itinerary</option>
+                                        </select>
+
+                                        {!formData.ideaType && suggestIdeaType(formData) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const suggested = suggestIdeaType(formData);
+                                                    const data = getStandardizedData(formData);
+                                                    if (suggested) {
+                                                        setFormData({
+                                                            ...formData,
+                                                            ideaType: suggested,
+                                                            typeData: data || undefined
+                                                        });
+                                                    }
+                                                }}
+                                                className="px-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-lg flex items-center gap-1.5 transition-all animate-pulse"
+                                                title={`Standardize as ${suggestIdeaType(formData)}`}
+                                            >
+                                                <Sparkles className="w-4 h-4" />
+                                                Standardize
+                                            </button>
+                                        )}
+                                    </div>
+
+
+                                </div>
+
+                                {formData.ideaType && (
+                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <IdeaFormRenderer
+                                            ideaType={formData.ideaType}
+                                            typeData={formData.typeData}
+                                            onChange={(data) => {
+                                                // Prevent infinite loops with deep equality check
+                                                if (JSON.stringify(data) !== JSON.stringify(formData.typeData)) {
+                                                    setFormData(prev => ({ ...prev, typeData: data }));
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                )}
+
                                 <div className="space-y-2 min-w-0">
                                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Category</label>
                                     <div className="bg-slate-200/50 dark:bg-black/20 rounded-xl p-1 border border-slate-200 dark:border-white/10 overflow-hidden w-full">

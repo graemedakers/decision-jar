@@ -86,7 +86,7 @@ export async function POST(request: Request) {
         
         Return JSON with:
         - description (string)
-        - details (string)
+        - details (string: MUST include sections like **Summary:** [brief 1-sentence bio], **Address:** [real address if known], **Rating:** [x/5], etc. for venues. For BOOKS, include **Author:**, **Genre:**, **Year:**, **Summary:**)
         - indoor (boolean)
         - duration (string: "0.25", "0.5", "1.0", "2.0", "4.0", "8.0")
         - activityLevel (string: "LOW", "MEDIUM", "HIGH")
@@ -96,6 +96,8 @@ export async function POST(request: Request) {
         - url (string)
         - weather (string: "ANY", "SUNNY", "RAINY", "COLD")
         - requiresTravel (boolean)
+        - ideaType (string: "book", "movie", "recipe", "game", "dining", "event", "travel" or null)
+        - typeData (object: JSON data matching the schema for the ideaType. e.g. for book: { title, author, yearPublished, genre: [] })
         `;
 
         const { reliableGeminiCall } = await import('@/lib/gemini');
@@ -113,6 +115,8 @@ export async function POST(request: Request) {
                 timeOfDay: ideaData.timeOfDay,
                 category: ideaData.category,
                 website: ideaData.url || null,
+                ideaType: ideaData.ideaType || null,
+                typeData: ideaData.typeData || null,
 
                 jarId: user.activeJarId!,
                 createdById: user.id,

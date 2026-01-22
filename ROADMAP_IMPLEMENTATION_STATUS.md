@@ -279,6 +279,7 @@ Enhance group decision-making by allowing jars to spin a shortlist of options (e
 ## 📋 Future Considerations (Phase 11+)
 
 1. **Community Jars** - Public jar discovery and forking
-2. **Performance** - React Query caching optimization
-3. **Testing** - E2E test coverage with Playwright
-4. **Dynamic Manifest** - Server-generated manifest with premium shortcuts
+2. **Advanced Squad Collaboration** - Visual presence, live activity toasts, and social decision-making UI (See [collaboration_strategy.md](file:///c:/Users/graem/.gemini/antigravity/brain/fc0544e5-cc5f-4d57-a5c5-c4b9e3333af0/collaboration_strategy.md))
+3. **Performance** - React Query caching optimization
+4. **Testing** - E2E test coverage with Playwright
+5. **Dynamic Manifest** - Server-generated manifest with premium shortcuts

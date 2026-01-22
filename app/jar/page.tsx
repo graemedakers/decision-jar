@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift, Book, Popcorn, Gamepad2, ChefHat, Plane, Ticket, Music, Map as MapIcon, ListChecks, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
@@ -12,7 +12,12 @@ import { useIdeas } from "@/hooks/useIdeas";
 import { useModalSystem } from "@/components/ModalProvider";
 import { useFavorites } from "@/hooks/useFavorites";
 import { ACTION_LABELS } from "@/lib/ui-constants";
+import { getCategoryDef } from "@/lib/categories";
+import { getVenueDetails, getShortHours } from "@/lib/utils";
+import { getStandardizedData, suggestIdeaType } from "@/lib/idea-standardizer";
 import React from "react";
+
+
 
 export default function JarPage() {
     const router = useRouter();
@@ -29,6 +34,10 @@ export default function JarPage() {
     const [showConfetti, setShowConfetti] = useState(false);
     const [availableJars, setAvailableJars] = useState<any[]>([]);
 
+    // Bulk Actions State
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
     // Sync location from userData
     useEffect(() => {
         if (userData?.location) {
@@ -40,17 +49,17 @@ export default function JarPage() {
     useEffect(() => {
         if (!isIdeasLoading && ideas.length === 0 && userData?.activeJarId) {
             try {
-                const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
-                if (!dismissed) {
-                    openModal('JAR_QUICKSTART', {
-                        jarId: userData.activeJarId,
-                        jarName: userData.jarName || 'Your Jar',
-                        jarTopic: userData.jarTopic || 'General'
-                    });
-                }
+                // User requested to redirect to dashboard on empty jar instead of showing empty state
+                router.push('/dashboard');
+
+                // Legacy QuickStart logic kept but unreachable if we redirect
+                // const dismissed = localStorage.getItem(`quickstart_dismissed_${userData.activeJarId}`);
+                // if (!dismissed) {
+                //    openModal('JAR_QUICKSTART', { ... });
+                // }
             } catch (e) { }
         }
-    }, [ideas.length, isIdeasLoading, userData?.activeJarId, userData?.jarTopic, openModal]);
+    }, [ideas.length, isIdeasLoading, userData?.activeJarId, router]);
 
     useEffect(() => {
         const fetchAvailableJars = async () => {
@@ -140,6 +149,44 @@ export default function JarPage() {
         }
     };
 
+    const toggleSelection = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        const newSet = new Set(selectedIds);
+        if (newSet.has(id)) {
+            newSet.delete(id);
+        } else {
+            newSet.add(id);
+        }
+        setSelectedIds(newSet);
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${selectedIds.size} ideas? This cannot be undone.`)) return;
+
+        try {
+            const res = await fetch('/api/ideas/bulk-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ideaIds: Array.from(selectedIds) })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                // alert(data.message); // Optional: show success message
+                setSelectedIds(new Set());
+                setIsSelectionMode(false);
+                fetchIdeas();
+            } else {
+                const err = await res.json();
+                alert(`Failed to delete: ${err.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Bulk delete failed:', error);
+            alert('Failed to delete ideas');
+        }
+    };
+
     const activeIdeas = ideas.filter(i => !i.selectedAt);
     const isAdminPickMode = userData?.jarSelectionMode === 'ADMIN_PICK';
     const isAdmin = !!userData?.isCreator;
@@ -186,13 +233,7 @@ export default function JarPage() {
                         </Button>
                     )}
 
-                    <Button
-                        onClick={() => openModal('ADD_IDEA')}
-                        className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-6 h-11 shadow-lg shadow-primary/20 flex items-center gap-2"
-                    >
-                        <Plus className="w-4 h-4" />
-                        <span>Add Idea</span>
-                    </Button>
+                    {/* Add Idea button removed */}
 
                     {userData?.activeJarId && isAdmin && (
                         <Button
@@ -203,6 +244,46 @@ export default function JarPage() {
                             <Users className="w-4 h-4" />
                             <span className="hidden sm:inline">Members</span>
                         </Button>
+                    )}
+
+                    {/* Bulk Actions Toggle */}
+                    {activeIdeas.length > 0 && isAdmin && (
+                        <>
+                            <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-1" />
+
+                            {isSelectionMode ? (
+                                <>
+                                    <Button
+                                        onClick={handleBulkDelete}
+                                        disabled={selectedIds.size === 0}
+                                        className="rounded-full font-bold h-11 flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Delete ({selectedIds.size})</span>
+                                        <span className="sm:hidden">({selectedIds.size})</span>
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => {
+                                            setIsSelectionMode(false);
+                                            setSelectedIds(new Set());
+                                        }}
+                                        className="rounded-full h-11 w-11 p-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
+                                    >
+                                        <XCircle className="w-6 h-6" />
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsSelectionMode(true)}
+                                    className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 w-11 p-0 flex items-center justify-center text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white"
+                                    title="Select Multiple"
+                                >
+                                    <ListChecks className="w-5 h-5" />
+                                </Button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
@@ -230,9 +311,33 @@ export default function JarPage() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 key={idea.id}
-                                onClick={() => idea.canEdit && !idea.isMasked && openModal('ADD_IDEA', { initialData: idea })}
-                                className={`glass-card p-5 relative group cursor-pointer hover:border-slate-300 dark:hover:border-white/20 transition-all ${idea.isMasked ? 'opacity-75 bg-slate-100 dark:bg-slate-900/50' : 'hover:-translate-y-1 bg-white dark:bg-slate-900/40'} ${idea.status === 'PENDING' ? 'ring-2 ring-yellow-500/20 bg-yellow-500/5' : ''}`}
+                                onClick={(e) => {
+                                    if (isSelectionMode) {
+                                        toggleSelection(e, idea.id);
+                                    } else {
+                                        idea.canEdit && !idea.isMasked && openModal('ADD_IDEA', { initialData: idea });
+                                    }
+                                }}
+                                className={`glass-card p-5 relative group cursor-pointer transition-all ${isSelectionMode && selectedIds.has(idea.id)
+                                    ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 scale-[0.98]'
+                                    : isSelectionMode
+                                        ? 'hover:bg-slate-50 dark:hover:bg-white/5 opacity-80 hover:opacity-100' // Dim unselected in select mode
+                                        : idea.isMasked
+                                            ? 'opacity-75 bg-slate-100 dark:bg-slate-900/50'
+                                            : 'hover:-translate-y-1 bg-white dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-white/20'
+                                    } ${idea.status === 'PENDING' ? 'ring-2 ring-yellow-500/20 bg-yellow-500/5' : ''}`}
                             >
+                                {/* Selection Checkbox Overlay */}
+                                {isSelectionMode && (
+                                    <div className="absolute top-3 left-3 z-30">
+                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedIds.has(idea.id)
+                                            ? 'bg-indigo-500 border-indigo-500 text-white'
+                                            : 'border-slate-300 dark:border-white/20 bg-white dark:bg-black/40'
+                                            }`}>
+                                            {selectedIds.has(idea.id) && <Check className="w-3.5 h-3.5" />}
+                                        </div>
+                                    </div>
+                                )}
                                 {idea.status === 'PENDING' && (
                                     <div className="absolute -top-3 left-4 z-20 flex items-center gap-1.5 bg-gradient-to-r from-yellow-500 to-amber-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-yellow-500/20 ring-2 ring-white dark:ring-slate-900">
                                         <Clock className="w-3 h-3" />
@@ -287,16 +392,72 @@ export default function JarPage() {
                                 </div>
 
                                 <div className="mb-3 flex items-start justify-between">
-                                    <div className={`p-2 rounded-lg ${idea.category === 'MEAL' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400' :
-                                        idea.category === 'EVENT' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' :
-                                            idea.category === 'PLANNED_DATE' ? 'bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400' :
-                                                'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400'
-                                        }`}>
-                                        {idea.category === 'MEAL' && <Utensils className="w-4 h-4" />}
-                                        {idea.category === 'EVENT' && <Calendar className="w-4 h-4" />}
-                                        {idea.category === 'PLANNED_DATE' && <Moon className="w-4 h-4" />}
-                                        {(!idea.category || idea.category === 'ACTIVITY') && <Activity className="w-4 h-4" />}
-                                    </div>
+                                    {(() => {
+                                        const category = (idea.categoryId || idea.category) || 'ACTIVITY';
+                                        const effectiveType = idea.ideaType || suggestIdeaType(idea);
+                                        const categoryDef = getCategoryDef(category);
+
+                                        // Start with category icon, but override with specialized types
+                                        let Icon = categoryDef.icon;
+                                        let colorClass = "bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400"; // Default Blue
+
+                                        // Type-based Overrides (Priority 1)
+                                        if (effectiveType === 'book') {
+                                            Icon = Book;
+                                            colorClass = "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400";
+                                        } else if (effectiveType === 'movie') {
+                                            Icon = Popcorn;
+                                            colorClass = "bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400";
+                                        } else if (effectiveType === 'game') {
+                                            Icon = Gamepad2;
+                                            colorClass = "bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400";
+                                        } else if (effectiveType === 'recipe') {
+                                            Icon = ChefHat;
+                                            colorClass = "bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400";
+                                        } else if (effectiveType === 'travel') {
+                                            Icon = Plane;
+                                            colorClass = "bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400";
+                                        } else if (effectiveType === 'event') {
+                                            Icon = Ticket;
+                                            colorClass = "bg-fuchsia-100 dark:bg-fuchsia-500/20 text-fuchsia-600 dark:text-fuchsia-400";
+                                        } else if (effectiveType === 'dining') {
+                                            Icon = Utensils;
+                                            colorClass = "bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400";
+                                        } else if (effectiveType === 'music') {
+                                            Icon = Music;
+                                            colorClass = "bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400";
+                                        } else if (effectiveType === 'itinerary') {
+                                            Icon = Layers;
+                                            colorClass = "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400";
+                                        } else if (effectiveType === 'activity') {
+                                            if (['WELLNESS', 'SPA', 'MEDITATION'].includes(category)) {
+                                                colorClass = "bg-teal-100 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400";
+                                            } else if (['FITNESS', 'STRENGTH', 'CARDIO', 'YOGA'].includes(category)) {
+                                                colorClass = "bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400";
+                                            }
+                                        } else {
+                                            // Category-based Themes (Priority 2)
+                                            if (['MEAL', 'DINING', 'CASUAL', 'FINE_DINING', 'BRUNCH', 'FAST_FOOD'].includes(category)) {
+                                                colorClass = "bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400";
+                                            } else if (['BAR', 'COCKTAIL', 'PUB', 'WINE_BAR', 'ROOFTOP', 'SPEAKEASY', 'NIGHTLIFE'].includes(category)) {
+                                                colorClass = "bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400";
+                                            } else if (['EVENT', 'SOCIAL', 'CULTURAL'].includes(category)) {
+                                                colorClass = "bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400";
+                                            } else if (category === 'PLANNED_DATE') {
+                                                colorClass = "bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400";
+                                            } else if (['WELLNESS', 'SPA', 'MEDITATION'].includes(category)) {
+                                                colorClass = "bg-teal-100 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400";
+                                            } else if (['FITNESS', 'STRENGTH', 'CARDIO', 'YOGA', 'FITNESS_CLASS'].includes(category)) {
+                                                colorClass = "bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400";
+                                            }
+                                        }
+
+                                        return (
+                                            <div className={`p-2 rounded-lg ${colorClass}`}>
+                                                <Icon className="w-4 h-4" />
+                                            </div>
+                                        );
+                                    })()}
                                     <div className="flex gap-2 items-center">
                                         {(idea.category === 'PLANNED_DATE' && !idea.isMasked) || (isAdminPickMode && isAdmin && !idea.isMasked) ? (
                                             <Button
@@ -321,29 +482,93 @@ export default function JarPage() {
                                         : idea.description}
                                 </h3>
 
-                                {!idea.isMasked && (
-                                    <div className="flex flex-wrap gap-2 mt-auto pt-2">
-                                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/5">
-                                            {idea.duration}h
-                                        </span>
-                                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/5">
-                                            {idea.cost}
-                                        </span>
-                                        {idea.category === 'PLANNED_DATE' ? (
-                                            <>
-                                                {idea.notes && (
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-300 border border-pink-200 dark:border-pink-500/30 w-full text-center mt-1">
-                                                        {idea.notes.replace('Planned for: ', '')}
-                                                    </span>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/5">
-                                                {idea.indoor ? 'Indoor' : 'Outdoor'}
+                                {(() => {
+                                    const venueDetails = getVenueDetails(idea.details);
+                                    const shortHours = getShortHours(venueDetails?.hours);
+
+                                    // Use standardizer for metadata fallback
+                                    const typeData = idea.typeData || getStandardizedData(idea);
+                                    const effectiveType = idea.ideaType || suggestIdeaType(idea);
+
+                                    let typeBadge = null;
+                                    if (effectiveType === 'book' && typeData) {
+                                        typeBadge = (
+                                            <span className="text-[10px] font-bold text-indigo-500 truncate max-w-[120px]">
+                                                {typeData.author}
                                             </span>
-                                        )}
-                                    </div>
-                                )}
+                                        );
+                                    } else if (effectiveType === 'movie' && typeData) {
+                                        typeBadge = (
+                                            <span className="text-[10px] font-bold text-rose-500">
+                                                {typeData.year}
+                                            </span>
+                                        );
+                                    } else if (effectiveType === 'game' && typeData) {
+                                        typeBadge = (
+                                            <span className="text-[10px] font-bold text-purple-500">
+                                                {typeData.platform?.[0]}
+                                            </span>
+                                        );
+                                    }
+
+
+                                    return (
+                                        <div className="flex flex-wrap gap-2 mt-auto pt-2 items-center">
+                                            {/* Duration & Cost */}
+                                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/5">
+                                                {idea.duration}h
+                                            </span>
+                                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/5">
+                                                {idea.cost}
+                                            </span>
+
+                                            {/* Type-Specific Meta */}
+                                            {effectiveType === 'recipe' && typeData?.servings && (
+                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20 flex items-center gap-1">
+                                                    <Users className="w-2.5 h-2.5" />
+                                                    Serves {typeData.servings}
+                                                </span>
+                                            )}
+
+                                            {effectiveType === 'travel' && typeData?.destination?.name && (
+                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-sky-500/20 flex items-center gap-1">
+                                                    <MapIcon className="w-2.5 h-2.5" />
+                                                    {typeData.destination.name}
+                                                </span>
+                                            )}
+
+                                            {effectiveType === 'event' && typeData?.venue?.name && (
+                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-fuchsia-50 dark:bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border border-fuchsia-100 dark:border-fuchsia-500/20 flex items-center gap-1">
+                                                    <MapIcon className="w-2.5 h-2.5" />
+                                                    {typeData.venue.name}
+                                                </span>
+                                            )}
+
+                                            {shortHours && (
+                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20 flex items-center gap-1">
+                                                    <Clock className="w-2.5 h-2.5" />
+                                                    {shortHours}
+                                                </span>
+                                            )}
+
+                                            {typeBadge}
+
+                                            {idea.category === 'PLANNED_DATE' ? (
+                                                <>
+                                                    {idea.notes && (
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-300 border border-pink-200 dark:border-pink-500/30 w-full text-center mt-1">
+                                                            {idea.notes.replace('Planned for: ', '')}
+                                                        </span>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/5">
+                                                    {idea.indoor ? 'Indoor' : 'Outdoor'}
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
 
                                 {idea.isMasked && (
                                     <div className="mt-auto pt-2 flex items-center justify-center">

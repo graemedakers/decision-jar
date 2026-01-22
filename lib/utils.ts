@@ -101,6 +101,90 @@ export function getCateringPlan(details?: string | null) {
     return null;
 }
 
+/**
+ * Enhances the extraction of hours by taking a representative snippet (e.g., today's or a summary).
+ * Truncates long multi-day strings for card display.
+ */
+export function getShortHours(hours?: string | null): string | null {
+    if (!hours) return null;
+
+    // If it's a simple range "9am - 5pm", return it
+    if (hours.length < 20) return hours;
+
+    // If it's a multi-line or comma-separated list like "Mon: 9-5, Tue: 9-5..."
+    // try to find today's day or just take the first part
+    const parts = hours.split(/[,|\n]/);
+    if (parts.length > 1) {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const todayIdx = new Date().getDay();
+        const todayName = days[todayIdx];
+
+        const todayMatch = parts.find(p => p.includes(todayName));
+        if (todayMatch) return todayMatch.trim();
+
+        return parts[0].trim();
+    }
+
+    // Fallback: truncate
+    return hours.substring(0, 25) + (hours.length > 25 ? '...' : '');
+}
+
+export function getVenueDetails(details?: string | null) {
+    if (!details) return null;
+
+    // Detect if this looks like a venue info block
+    const hasAddress = details.includes('**Address:**') || details.includes('Address:');
+    const hasRating = details.includes('**Rating:**') || details.includes('Rating:');
+    const hasHours = details.includes('**Hours:**') || details.includes('Hours:');
+
+    if (!hasAddress && !hasRating && !hasHours) return null;
+
+    const extract = (key: string) => {
+        // Match bold or plain keys, then capture until newline
+        const regex = new RegExp(`(?:\\*\\*)?${key}:?(?:\\*\\*)?\\*?\\s*(.*)`, 'i');
+        const match = details.match(regex);
+        if (match) {
+            let val = match[1].trim();
+            // Remove trailing markdown bolding if present
+            val = val.replace(/\*\*$/, '').trim();
+            // Remove any leftover leading/trailing asterisks
+            val = val.replace(/^\*+/, '').replace(/\*+$/, '').trim();
+            return val || null;
+        }
+        return null;
+    };
+
+    const address = extract('Address');
+    const rating = extract('Rating');
+    const hours = extract('Hours');
+    const description = extract('Description') || extract('Summary') || extract('Note');
+
+    let website = extract('Website');
+    if (website) {
+        // Handle markdown link format: [Text](URL)
+        const mdLinkMatch = website.match(/\[.*?\]\((https?:\/\/[^\s)]+)\)/);
+        if (mdLinkMatch) {
+            website = mdLinkMatch[1];
+        }
+    }
+
+    // Fallback to searching context if not found on explicit line
+    if (!website) {
+        website = details.match(/https?:\/\/[^\s]+/)?.[0] || null;
+    }
+
+    if (!address && !rating && !website && !hours) return null;
+
+    return {
+        address,
+        rating,
+        hours,
+        website,
+        description
+    };
+}
+
+
 export function getApiUrl(path: string) {
     if (path.startsWith('http')) return path;
 

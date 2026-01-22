@@ -1,7 +1,11 @@
 "use client";
 import React from "react";
-import { X, ChefHat, ShoppingCart, Clock, Utensils, Check, Share2, Plus, Zap, Star, Plane, Map, Calendar, ArrowRight, ChevronDown, ChevronUp, Download } from "lucide-react";
+import { X, ChefHat, ShoppingCart, Clock, Utensils, Check, Share2, Plus, Zap, Star, Plane, Map, Calendar, ArrowRight, ChevronDown, ChevronUp, Download, Sparkles } from "lucide-react";
 import { downloadShoppingListPdf } from "@/lib/pdf-utils";
+import { UnifiedIdeaCard } from "@/components/UnifiedIdeaCard";
+import { IdeaTypeRenderer } from "@/components/idea-types/IdeaTypeRenderer";
+import { ItineraryMarkdownRenderer } from "./ItineraryMarkdownRenderer";
+import { suggestIdeaType, getStandardizedData } from "@/lib/idea-standardizer";
 
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -70,103 +74,10 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
         return <Check className="w-5 h-5 text-slate-400" />;
     };
 
-    // --- Enhanced Markdown Parser ---
-    const parseMarkdown = (md: string) => {
-        const isItinerary = configId === 'holiday_concierge';
-        const sections = md.split(/^### /gm);
-
-        return sections.map((section, idx) => {
-            if (!section.trim()) return null;
-
-            if (idx === 0 && !md.startsWith('### ')) {
-                return (
-                    <div key={idx} className="mb-6 text-slate-600 dark:text-slate-300 italic">
-                        {section}
-                    </div>
-                );
-            }
-
-            const [titleLine, ...contentLines] = section.split('\n');
-            const body = contentLines.join('\n').trim();
-
-            const renderBody = (text: string) => {
-                return text.split('\n').map((line, i) => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return <div key={i} className="h-2" />;
-
-                    if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-                        return <div key={i} className="font-bold text-slate-800 dark:text-slate-100 mt-3 mb-1">{trimmed.replace(/\*\*/g, '')}</div>;
-                    }
-                    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-                        return <li key={i} className="ml-4 list-disc pl-1 text-slate-600 dark:text-slate-300">{trimmed.replace(/^[-*] /, '')}</li>;
-                    }
-
-                    const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
-                    if (linkMatch) {
-                        const [full, text, url] = linkMatch;
-                        const parts = line.split(full);
-                        return (
-                            <p key={i} className="mb-1 text-sm sm:text-base">
-                                {parts[0]}
-                                <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline font-medium inline-flex items-center gap-0.5">
-                                    {text} <ArrowRight className="w-3 h-3" />
-                                </a>
-                                {parts[1]}
-                            </p>
-                        );
-                    }
-
-                    return <p key={i} className="mb-1 text-sm sm:text-base text-slate-600 dark:text-slate-300">{line}</p>;
-                });
-            };
-
-            if (isItinerary) {
-                const isOpen = openCards[idx];
-                return (
-                    <div key={idx} className="mb-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden transition-all duration-300">
-                        <button
-                            onClick={() => toggleCard(idx)}
-                            className="w-full bg-slate-100 dark:bg-slate-700/30 px-4 py-3 border-b border-transparent data-[open=true]:border-slate-200 dark:data-[open=true]:border-white/5 flex items-center justify-between gap-2 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
-                            data-open={isOpen}
-                        >
-                            <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-500" />
-                                <h3 className="font-bold text-slate-900 dark:text-white text-lg">{titleLine.trim()}</h3>
-                            </div>
-                            {isOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
-                        </button>
-
-                        <AnimatePresence initial={false}>
-                            {isOpen && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <div className="p-4 bg-white/50 dark:bg-transparent">
-                                        {renderBody(body)}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                );
-            }
-
-            return (
-                <div key={idx} className="mb-6">
-                    <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 border-b border-slate-100 dark:border-white/10 pb-2 ${theme.sectionHeaderColor}`}>
-                        {getIconForSection(titleLine)}
-                        {titleLine.trim()}
-                    </h3>
-                    <div className="leading-relaxed">
-                        {renderBody(body)}
-                    </div>
-                </div>
-            );
-        });
-    };
+    // Unified logic to determine what and how to render
+    const effectiveType = data?.ideaType || (data ? suggestIdeaType(data) : null);
+    const typeData = data?.typeData || (data ? getStandardizedData(data) : null);
+    const hasStandardizedData = !!effectiveType && !!typeData;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -215,14 +126,31 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
                         )}
                     </div>
 
-                    {data.description && (
-                        <p className="text-lg text-slate-600 dark:text-slate-300 mb-6 italic leading-relaxed">
-                            {data.description}
-                        </p>
-                    )}
+                    {/* RENDERING ENGINE */}
+                    <div className="space-y-6">
+                        <UnifiedIdeaCard
+                            idea={data}
+                            effectiveType={effectiveType || undefined}
+                            typeData={typeData}
+                        />
 
-                    <div className="prose dark:prose-invert max-w-none">
-                        {parseMarkdown(data.details || "# No details available\nSorry, full details could not be loaded.")}
+                        {/* Long-form Markdown Content */}
+                        {data.details && (data.details.includes('###') || data.details.includes('**')) && (
+                            <div className="mt-8 pt-8 border-t border-slate-100 dark:border-white/5">
+                                <ItineraryMarkdownRenderer
+                                    markdown={data.details}
+                                    configId={configId}
+                                    theme={theme}
+                                />
+                            </div>
+                        )}
+
+                        {/* Fallback for simple description if no markdown */}
+                        {(!data.details || (!data.details.includes('###') && !data.details.includes('**'))) && data.description && (
+                            <p className="text-lg text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                                {data.description}
+                            </p>
+                        )}
                     </div>
                 </div>
 

@@ -273,6 +273,8 @@ export const getAllCategories = (): CategoryDef[] => {
     return Array.from(all.values());
 };
 
+export const VALID_AI_CATEGORY_IDS = getAllCategories().map(c => c.id);
+
 export const getCategoryDef = (id: string, customCategories?: any[]): CategoryDef => {
     // 1. Check custom categories first
     if (customCategories) {
@@ -312,9 +314,14 @@ export const getThemeForTopic = (topic: string | null | undefined): TopicTheme =
 
 export const getBestCategoryFit = (requestedId: string, topic: string | null | undefined, customCategories?: any[]): string => {
     const valid = getCategoriesForTopic(topic, customCategories);
+    const normalizedReq = requestedId.toUpperCase().replace(/[\s-]/g, '_');
 
-    // 1. Perfect match
-    if (valid.some(v => v.id === requestedId)) return requestedId;
+    // 1. Perfect match (id check)
+    if (valid.some(v => v.id === normalizedReq)) return normalizedReq;
+    // Check if any valid ID is "contained" in the requested string (e.g. "FINE_DINING_PLACE" -> "FINE_DINING")
+    // or if requested string matches label
+    const labelMatch = valid.find(v => v.label.toUpperCase().replace(/[\s-]/g, '_') === normalizedReq);
+    if (labelMatch) return labelMatch.id;
 
     // 2. Common mappings
     const mappings: Record<string, string[]> = {
@@ -328,7 +335,15 @@ export const getBestCategoryFit = (requestedId: string, topic: string | null | u
         'GAME': ['GAMING', 'ENTERTAINMENT', 'INDOOR'],
         'ACTIVITY': ['OUTDOOR', 'INDOOR', 'SOCIAL', 'EVENT'],
         'CATERING': ['DINNER', 'MEAL', 'SOCIAL', 'FOOD', 'DINING'],
-        'MEAL_PREP': ['MEAL', 'DINNER', 'LUNCH', 'FOOD']
+        'MEAL_PREP': ['MEAL', 'DINNER', 'LUNCH', 'FOOD'],
+        // AI Common Deviations
+        'FOOD': ['DINING', 'MEAL', 'RESTAURANT', 'SOCIAL'],
+        'RESTAURANT': ['DINING', 'MEAL', 'FOOD', 'SOCIAL'],
+        'DRINKS': ['BAR', 'NIGHTLIFE', 'SOCIAL', 'COCKTAIL'],
+        'WALK': ['ACTIVITY', 'OUTDOOR', 'WELLNESS', 'FITNESS'],
+        'HIKE': ['ACTIVITY', 'OUTDOOR', 'FITNESS', 'WELLNESS'],
+        'SHOW': ['MOVIE', 'CULTURAL', 'ENTERTAINMENT', 'SOCIAL'],
+        'THEATRE': ['CULTURAL', 'ENTERTAINMENT', 'SOCIAL', 'ACTIVITY']
     };
 
     const potentials = mappings[requestedId] || [];
