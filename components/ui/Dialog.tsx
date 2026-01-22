@@ -29,8 +29,6 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     React.useEffect(() => {
         if (open) {
             document.body.style.overflow = 'hidden';
-            // Scroll to top of any active timers or layout shifts
-            window.scrollTo(0, 0);
         } else {
             document.body.style.overflow = '';
         }
