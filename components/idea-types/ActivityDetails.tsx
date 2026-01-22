@@ -74,18 +74,28 @@ export function ActivityDetails({ data, compact, idea }: ActivityDetailsProps) {
                 </div>
             )}
 
-            {(data.equipmentNeeded?.length ?? 0) > 0 && (
-                <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-slate-500 uppercase">Equipment Needed</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {data.equipmentNeeded!.map((item, i) => (
-                            <Badge key={i} variant="secondary" className="bg-white dark:bg-black/20 text-slate-600">
-                                {item}
-                            </Badge>
-                        ))}
+            {(() => {
+                const equipment = (data as any).equipmentNeeded;
+                // Handle legacy data where equipmentNeeded might be a string instead of array
+                const items = Array.isArray(equipment)
+                    ? equipment
+                    : (typeof equipment === 'string' && equipment.length > 0 ? [equipment] : []);
+
+                if (items.length === 0) return null;
+
+                return (
+                    <div className="space-y-2">
+                        <h4 className="text-xs font-semibold text-slate-500 uppercase">Equipment Needed</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {items.map((item, i) => (
+                                <Badge key={i} variant="secondary" className="bg-white dark:bg-black/20 text-slate-600">
+                                    {item}
+                                </Badge>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {idea?.details &&
                 idea.details.toLowerCase().trim() !== (data.activityType || "").toLowerCase().trim() &&
