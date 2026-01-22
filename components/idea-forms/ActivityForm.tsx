@@ -13,14 +13,16 @@ interface ActivityFormProps {
 }
 
 export function ActivityForm({ initialData, onChange }: ActivityFormProps) {
+    const defaults: Partial<ActivityFormData> = {
+        activityType: initialData?.activityType || "",
+        bookingRequired: initialData?.bookingRequired === true,
+        location: initialData?.location || { address: "", name: "" },
+        officialWebsite: initialData?.officialWebsite || ""
+    };
+
     const { register, watch, formState: { errors } } = useForm<ActivityFormData>({
         resolver: zodResolver(ActivitySchema),
-        defaultValues: {
-            activityType: initialData?.activityType || "",
-            bookingRequired: initialData?.bookingRequired === true, // Explicit boolean check
-            location: initialData?.location || { address: "", name: "" },
-            officialWebsite: initialData?.officialWebsite || ""
-        },
+        defaultValues: defaults,
         mode: "onChange"
     });
 
