@@ -41,7 +41,7 @@ export async function parseIntent(
            - If they ask for a list or a number of things, use 'BULK_GENERATE'.
            - If they ask "What", "Where", "How", "Suggest", "Recommend", or "Find", use 'LAUNCH_CONCIERGE'.
         2. "conciergeTool": If 'LAUNCH_CONCIERGE', map to the best tool ID:
-           - DINING (restaurants, food), BAR (pubs), MOVIE, BOOK, GAME, HOTEL, WELLNESS (spa/yoga), FITNESS (gym), THEATRE, SPORTS, HOLIDAY (travel/itinerary), ESCAPE_ROOM.
+           - DINING (restaurants, food), BAR (pubs), MOVIE, BOOK, GAME, HOTEL, WELLNESS (spa/yoga), FITNESS (gym), THEATRE, SPORTS, HOLIDAY (travel/itinerary), ESCAPE_ROOM, SIMPLE (quotes, jokes, affirmations, ideas).
         3. "quantity": Extract number of ideas requested for BULK_GENERATE. Default to 5.
         4. "topic": The specific subject the user asked for.
         5. "location": Extract specific location if mentioned (e.g., "in Paris").
@@ -59,6 +59,8 @@ export async function parseIntent(
         - "10 quick recipes" → BULK_GENERATE, quantity: 10, topic: "recipes", contentFormat: "MARKDOWN_RECIPE"
         - "Plan a 3 day trip to Tokyo" → LAUNCH_CONCIERGE, conciergeTool: "HOLIDAY", contentFormat: "MARKDOWN_ITINERARY"
         - "Suggest some board games" → LAUNCH_CONCIERGE, conciergeTool: "GAME"
+        - "7 self affirmations" → BULK_GENERATE, conciergeTool: "SIMPLE", quantity: 7, topic: "self affirmations"
+        - "Tell me a joke" → LAUNCH_CONCIERGE, conciergeTool: "SIMPLE", topic: "joke"
 
         Return ONLY JSON:
         {

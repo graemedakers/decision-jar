@@ -8,7 +8,7 @@ import { GameForm } from '@/components/idea-forms/GameForm';
 import { DiningForm } from '@/components/idea-forms/DiningForm';
 import { MusicForm } from '@/components/idea-forms/MusicForm';
 import { ActivityForm } from '@/components/idea-forms/ActivityForm';
-
+import { SimpleForm } from '@/components/idea-forms/SimpleForm';
 
 interface IdeaFormRendererProps {
     ideaType: string;
@@ -37,6 +37,8 @@ export function IdeaFormRenderer({ ideaType, typeData, onChange }: IdeaFormRende
             return <MusicForm initialData={typeData} onChange={onChange} />;
         case 'activity':
             return <ActivityForm initialData={typeData} onChange={onChange} />;
+        case 'simple':
+            return <SimpleForm initialData={typeData} onChange={onChange} />;
         case 'itinerary':
             return <div className="p-4 bg-slate-100 dark:bg-white/10 rounded text-center text-sm text-slate-500">Manual Itinerary Entry Coming Soon. Use the AI Wizard for now.</div>;
         default:

@@ -69,6 +69,24 @@ export function UnifiedIdeaCard({
         website: finalWebsite
     };
 
+    // SPECIAL RENDERER FOR SIMPLE TEXT (Quotes, Affirmations, Jokes)
+    if (effectiveType === 'simple' && typeData) {
+        return (
+            <div className={`flex flex-col items-center justify-center p-8 gap-6 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-white/5 shadow-sm ${compact ? 'min-h-[200px]' : 'min-h-[300px]'}`}>
+                <div className="max-w-xl space-y-4">
+                    <p className={`font-serif text-slate-800 dark:text-slate-100 leading-relaxed ${compact ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
+                        "{typeData.text}"
+                    </p>
+                    {typeData.author && (
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-4">
+                            — {typeData.author}
+                        </p>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={`flex flex-col gap-6 ${compact ? '' : 'w-full'}`}>
             {!hideHeader && (

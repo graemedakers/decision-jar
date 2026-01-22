@@ -309,6 +309,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                             className="glass-input flex-1 text-slate-800 dark:text-white"
                                         >
                                             <option value="">Standard (No specific type)</option>
+                                            <option value="simple">Simple (Quote, Joke, Note)</option>
                                             <option value="dining">Dining</option>
                                             <option value="recipe">Recipe</option>
                                             <option value="book">Book</option>

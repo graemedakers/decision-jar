@@ -70,6 +70,11 @@ export function suggestIdeaType(idea: any): string | null {
         return 'itinerary';
     }
 
+    // Simple / Text-Only
+    if (['SIMPLE', 'QUOTE', 'JOKE', 'AFFIRMATION', 'NOTE'].includes(category) || textToCheck.match(/\b(quote|affirmation|joke|dad joke)\b/)) {
+        return 'simple';
+    }
+
     return null;
 }
 

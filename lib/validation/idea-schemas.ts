@@ -11,7 +11,8 @@ export const IdeaTypeEnum = z.enum([
     'game',      // NEW
     'event',     // NEW
     'travel',    // NEW
-    'itinerary'  // NEW
+    'itinerary', // NEW
+    'simple'     // NEW
 ]);
 
 export type IdeaType = z.infer<typeof IdeaTypeEnum>;
@@ -189,6 +190,14 @@ export const ItinerarySchema = z.object({
 
 // --- Union Schema ---
 
+// 11. Simple (Text-only content)
+export const SimpleSchema = z.object({
+    text: z.string().min(1),         // The main content/quote/joke
+    theme: z.string().optional(),    // e.g. "motivational", "dad joke"
+    author: z.string().optional(),   // e.g. "Marcus Aurelius"
+    backgroundColor: z.string().optional() // Hex code for customization
+});
+
 export const IdeaTypeDataSchema = z.discriminatedUnion('type', [
     z.object({ type: z.literal('recipe'), data: RecipeSchema }),
     z.object({ type: z.literal('movie'), data: MovieSchema }),
@@ -196,9 +205,9 @@ export const IdeaTypeDataSchema = z.discriminatedUnion('type', [
     z.object({ type: z.literal('activity'), data: ActivitySchema }),
     z.object({ type: z.literal('dining'), data: DiningSchema }),
     z.object({ type: z.literal('music'), data: MusicSchema }),
-    // NEW
     z.object({ type: z.literal('game'), data: GameSchema }),
     z.object({ type: z.literal('event'), data: EventSchema }),
     z.object({ type: z.literal('travel'), data: TravelSchema }),
     z.object({ type: z.literal('itinerary'), data: ItinerarySchema }),
+    z.object({ type: z.literal('simple'), data: SimpleSchema }),
 ]);

@@ -252,6 +252,7 @@ IDEA TYPE SCHEMAS (use "ideaType" and "typeData" fields):
 - event: { eventName, eventType: "theatre"|"sports"|"concert"|"comedy"|"festival"|"other", venue: { name: string }, date?: datetime, startTime?: string, ticketUrl?: url, officialWebsite?: url, lineup?: string[], showDates?: string }
 - travel: { destination: { name, address? }, travelType: "hotel"|"resort"|"camping"|"road_trip"|"flight", amenities?: string[], accommodationName?: string, priceRange?: "$"|"$$"|"$$$" }
 - itinerary: { title, steps: [{ order, time?, activity, location: { name: string }, notes? }], totalDuration?: string, vibe?: string, estimatedCost?: "$"|"$$"|"$$$"|"$$$$" }
+- simple: { text: string, theme?: string, author?: string, backgroundColor?: string }
 `;
 
                     systemPrompt = `

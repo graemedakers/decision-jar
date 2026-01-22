@@ -48,6 +48,13 @@ export function IdeaTypeRenderer({ type, data, compact = false, idea }: IdeaType
             return <DiningDetails data={data} compact={compact} idea={idea} />;
         case 'activity':
             return <ActivityDetails data={data} compact={compact} idea={idea} />;
+        case 'simple':
+            return (
+                <div className="text-center p-4">
+                    <p className="font-serif text-lg italic">"{data.text}"</p>
+                    {data.author && <p className="text-xs text-muted-foreground mt-2">— {data.author}</p>}
+                </div>
+            );
         default:
             return <GenericDetails data={data} idea={idea} compact={compact} />;
     }
