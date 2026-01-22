@@ -24,7 +24,7 @@ export function ActivityForm({ initialData, onChange }: ActivityFormProps) {
         resolver: zodResolver(ActivitySchema),
         defaultValues: defaults as any,
         mode: "onChange"
-    });
+    } as any);
 
     const values = watch();
     const prevDataRef = React.useRef(JSON.stringify(values));
