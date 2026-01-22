@@ -22,7 +22,7 @@ export function ActivityForm({ initialData, onChange }: ActivityFormProps) {
 
     const { register, watch, formState: { errors } } = useForm<ActivityFormData>({
         resolver: zodResolver(ActivitySchema),
-        defaultValues: defaults,
+        defaultValues: defaults as any,
         mode: "onChange"
     });
 
