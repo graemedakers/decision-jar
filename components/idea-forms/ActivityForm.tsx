@@ -17,7 +17,7 @@ export function ActivityForm({ initialData, onChange }: ActivityFormProps) {
         resolver: zodResolver(ActivitySchema),
         defaultValues: {
             activityType: initialData?.activityType || "",
-            bookingRequired: initialData?.bookingRequired ?? false,
+            bookingRequired: !!initialData?.bookingRequired,
             location: initialData?.location || { address: "", name: "" },
             officialWebsite: initialData?.officialWebsite || ""
         },
