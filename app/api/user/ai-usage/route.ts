@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
             select: {
                 id: true,
                 isLifetimePro: true,
-                isLifetimePro: true,
                 subscriptionStatus: true,
                 createdAt: true
             }
