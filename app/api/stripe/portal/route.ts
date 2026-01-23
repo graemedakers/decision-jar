@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
     try {
         const session = await getSession();
-        if (!session || (!session.user.activeJarId && !session.user.coupleId)) {
+        if (!session || !session.user.activeJarId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
         const user = await prisma.user.findUnique({
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
         if (!customerId) {
             // Fallback to Jar (Legacy)
-            const currentJarId = session.user.activeJarId || session.user.coupleId;
+            const currentJarId = session.user.activeJarId;
             if (currentJarId) {
                 const jar = await prisma.jar.findUnique({
                     where: { id: currentJarId }

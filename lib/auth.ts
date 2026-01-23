@@ -1,90 +1,14 @@
-import { SignJWT, jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from './prisma';
-
-const secretKey = process.env.AUTH_SECRET || "secret-key-change-me-in-prod";
-const key = new TextEncoder().encode(secretKey);
-
-export async function encrypt(payload: any) {
-    return await new SignJWT(payload)
-        .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime('24h')
-        .sign(key);
-}
-
-export async function decrypt(input: string): Promise<any> {
-    const { payload } = await jwtVerify(input, key, {
-        algorithms: ['HS256'],
-    });
-    return payload;
-}
-
-export async function login(userData: any) {
-    // Create the session
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    const session = await encrypt({ user: userData, expires });
-
-    // Save the session in a cookie
-    const isProduction = process.env.NODE_ENV === 'production';
-    (await cookies()).set('session', session, {
-        expires,
-        httpOnly: true,
-        path: '/',
-        sameSite: 'lax',
-        secure: isProduction
-    });
-}
-
-export async function logout() {
-    // Destroy the session
-    const isProduction = process.env.NODE_ENV === 'production';
-    const cookieStore = await cookies();
-
-    // Clear custom session
-    cookieStore.set('session', '', {
-        expires: new Date(0),
-        path: '/',
-        sameSite: 'lax',
-        secure: isProduction
-    });
-
-    // Clear NextAuth sessions
-    cookieStore.set('next-auth.session-token', '', {
-        expires: new Date(0),
-        path: '/',
-        sameSite: 'lax',
-        secure: isProduction
-    });
-    cookieStore.set('__Secure-next-auth.session-token', '', {
-        expires: new Date(0),
-        path: '/',
-        sameSite: 'lax',
-        secure: isProduction
-    });
-}
+import { auth } from './next-auth-helper';
 
 export async function getSession() {
-    // 1. Check custom jose session
-    const sessionCookie = (await cookies()).get('session')?.value;
-    if (sessionCookie) {
-        try {
-            const payload = await decrypt(sessionCookie);
-            if (payload) return payload;
-        } catch (error) {
-            // Fall through to NextAuth
-        }
-    }
-
-    // 2. Check NextAuth session
     try {
-        const { auth } = await import('./next-auth-helper');
         const nextAuthSession = await auth();
 
         if (nextAuthSession?.user?.email) {
             // Map NextAuth session to match custom session structure
-            const user = await (prisma as any).user.findFirst({
+            // This ensures backward compatibility for components expecting the full user object
+            const user = await prisma.user.findFirst({
                 where: { email: { equals: nextAuthSession.user.email, mode: 'insensitive' } }
             });
 
@@ -97,43 +21,30 @@ export async function getSession() {
                         activeJarId: user.activeJarId,
                         isLifetimePro: user.isLifetimePro,
                         stripeSubscriptionId: user.stripeSubscriptionId,
-                        subscriptionStatus: user.subscriptionStatus,
-                        coupleId: user.legacyJarId // Legacy mapping
+                        subscriptionStatus: user.subscriptionStatus
                     },
                     expires: nextAuthSession.expires
                 };
             }
 
-            // If user not in DB, return basic session so api/auth/me can handle it
+            // If user not in DB (edge case), return basic session
             return {
                 user: { email: nextAuthSession.user.email },
                 expires: nextAuthSession.expires
             };
         }
     } catch (error) {
-        console.error("Error checking NextAuth session:", error);
+        console.error("Error getting session:", error);
     }
 
     return null;
 }
 
-export async function updateSession(request: NextRequest) {
-    const session = request.cookies.get('session')?.value;
-    if (!session) return;
+// Deprecated but kept to prevent breakages if imported, but now value-less or redirecting
+export async function login(userData: any) {
+    console.warn("Legacy login() called. This function is deprecated. Use signIn() from next-auth/react.");
+}
 
-    // Refresh the session so it doesn't expire
-    const parsed = await decrypt(session);
-    parsed.expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const res = NextResponse.next();
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.cookies.set({
-        name: 'session',
-        value: await encrypt(parsed),
-        httpOnly: true,
-        expires: parsed.expires,
-        path: '/',
-        sameSite: 'lax',
-        secure: isProduction,
-    });
-    return res;
+export async function logout() {
+    console.warn("Legacy logout() called. This function is deprecated. Use signOut() from next-auth/react.");
 }

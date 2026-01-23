@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { Gift, Loader2, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
@@ -26,14 +25,25 @@ interface GiftData {
 export function GiftClientPage({
     token,
     initialGift,
-    initialError
+    initialError,
+    initialSession
 }: {
     token: string,
     initialGift: GiftData | null,
-    initialError: string | null
+    initialError: string | null,
+    initialSession?: any // Accept server-side session
 }) {
     const router = useRouter();
-    const { data: session, status } = useSession();
+    const { data: session, status: clientStatus } = useSession();
+
+    // Compute auth status immediately from server session if available
+    // This bypasses the 'loading' state and prevents the redirect loop
+    const isAuthenticated = !!initialSession || clientStatus === 'authenticated';
+    const isLoadingAuth = !initialSession && clientStatus === 'loading';
+
+    // Status normalization for logic
+    const status = isAuthenticated ? 'authenticated' : (isLoadingAuth ? 'loading' : 'unauthenticated');
+
     const [gift, setGift] = useState<GiftData | null>(initialGift);
     const [isLoading, setIsLoading] = useState(!initialGift && !initialError);
     const [isAccepting, setIsAccepting] = useState(false);
@@ -62,25 +72,28 @@ export function GiftClientPage({
         }
     }, [token, initialGift, initialError]);
 
-    useEffect(() => {
-        const handleAutoAccept = async () => {
-            const pendingToken = sessionStorage.getItem('pending_gift_token');
-            if (status === 'authenticated' && pendingToken === token) {
-                sessionStorage.removeItem('pending_gift_token');
-                handleAccept();
-            }
-        };
-        handleAutoAccept();
-    }, [status, token]);
+    const handleAccept = useCallback(async () => {
+        if (isAccepting) return;
 
-    const handleAccept = async () => {
-        setIsAccepting(true);
-
-        if (status !== 'authenticated') {
-            sessionStorage.setItem('pending_gift_token', token);
-            signIn(undefined, { callbackUrl: `/gift/${token}` });
+        // Don't act while session is still loading
+        if (status === 'loading') {
             return;
         }
+
+        if (status === 'unauthenticated') {
+            sessionStorage.setItem('pending_gift_token', token);
+            // CRITIONAL CHANGE: Redirect to DASHBOARD after login, not back here.
+            // The dashboard will handle the actual acceptance.
+            signIn(undefined, { callbackUrl: '/dashboard' });
+            return;
+        }
+
+        // Must be authenticated to proceed
+        if (status !== 'authenticated') {
+            return;
+        }
+
+        setIsAccepting(true);
 
         try {
             const res = await fetch(`/api/gift/${token}/accept`, {
@@ -89,6 +102,10 @@ export function GiftClientPage({
 
             if (!res.ok) {
                 const data = await res.json();
+
+                // Clear token on failure paths to prevent redirect loop
+                sessionStorage.removeItem('pending_gift_token');
+
                 if (data.error === 'JAR_LIMIT_REACHED') {
                     alert("You've reached your jar limit! Please upgrade or delete a jar to accept this gift.");
                     router.push('/dashboard');
@@ -98,15 +115,29 @@ export function GiftClientPage({
             }
 
             const data = await res.json();
-            router.push(`/dashboard?newGift=${data.jarId}`);
+            sessionStorage.removeItem('pending_gift_token');
+
+            // Use window.location.href for a HARD refresh to ensure all caches are busted
+            window.location.href = `/dashboard?newGift=${data.jarId}`;
 
         } catch (err: any) {
+            console.error('[GiftAccept] Error:', err);
+            sessionStorage.removeItem('pending_gift_token'); // Final safety clear
             alert(err.message);
             setIsAccepting(false);
         }
-    };
+    }, [status, token, isAccepting, router]);
 
-    if (isLoading) {
+    useEffect(() => {
+        if (status === 'authenticated' && !isAccepting) {
+            const pendingToken = sessionStorage.getItem('pending_gift_token');
+            if (pendingToken === token) {
+                handleAccept();
+            }
+        }
+    }, [status, token, handleAccept, isAccepting]);
+
+    if (isLoading || status === 'loading') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />

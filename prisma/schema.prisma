@@ -21,7 +21,7 @@ model Jar {
   voteCandidatesCount Int @default(0) // 0 = All ideas, >0 = Shortlist/Runoff count
   defaultIdeaPrivate Boolean @default(false)
   isGiftable    Boolean  @default(true) 
-
+  isMysteryMode Boolean  @default(false) // If true, all ideas are hidden until selected
   customCategories Json? // Array of { id: string, label: string }
 
   sourceGiftId  String?
@@ -180,6 +180,7 @@ model GiftToken {
   
   // Metadata
   personalMessage String? 
+  isMysteryMode Boolean  @default(false)
   createdAt     DateTime @default(now())
   expiresAt     DateTime?
   

@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift, Book, Popcorn, Gamepad2, ChefHat, Plane, Ticket, Music, Map as MapIcon, ListChecks, Check } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift, Book, Popcorn, Gamepad2, ChefHat, Plane, Ticket, Music, Map as MapIcon, ListChecks, Check, Share } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
@@ -15,6 +15,7 @@ import { ACTION_LABELS } from "@/lib/ui-constants";
 import { getCategoryDef } from "@/lib/categories";
 import { getVenueDetails, getShortHours } from "@/lib/utils";
 import { getStandardizedData, suggestIdeaType } from "@/lib/idea-standardizer";
+import { showInfo } from "@/lib/toast";
 import React from "react";
 
 
@@ -108,8 +109,10 @@ export default function JarPage() {
             });
 
             if (res.ok) {
+                const updatedIdea = await res.json();
                 await fetchIdeas();
-                router.push('/dashboard');
+                // Show the reveal modal instead of redirecting
+                openModal('DATE_REVEAL', { idea: { ...idea, ...updatedIdea }, isDirectSelection: true });
             } else {
                 const err = await res.text();
                 console.error("Go Tonight Failed:", err);
@@ -191,7 +194,7 @@ export default function JarPage() {
     const isAdminPickMode = userData?.jarSelectionMode === 'ADMIN_PICK';
     const isAdmin = !!userData?.isCreator;
     const hasPartner = !!userData?.partnerName;
-    const isLoading = isIdeasLoading || isLoadingUser || (isFetching && ideas.length === 0);
+    const isLoading = isIdeasLoading || isLoadingUser;
 
     return (
         <main className="page-with-nav min-h-screen bg-slate-50 dark:bg-slate-950 px-4 md:px-8 relative overflow-hidden w-full max-w-5xl mx-auto transition-colors duration-500">
@@ -230,6 +233,17 @@ export default function JarPage() {
                         >
                             <Gift className="w-4 h-4" />
                             <span className="hidden sm:inline">Gift Jar</span>
+                        </Button>
+                    )}
+
+                    {userData?.activeJarId && isAdmin && (
+                        <Button
+                            onClick={() => openModal('JAR_MEMBERS')}
+                            variant="outline"
+                            className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 flex items-center gap-2 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20"
+                        >
+                            <Share className="w-4 h-4" />
+                            <span className="hidden sm:inline">Share Jar</span>
                         </Button>
                     )}
 
@@ -314,8 +328,14 @@ export default function JarPage() {
                                 onClick={(e) => {
                                     if (isSelectionMode) {
                                         toggleSelection(e, idea.id);
+                                    } else if (idea.isMasked) {
+                                        showInfo(isAdminPickMode
+                                            ? "It's a mystery! Use the 'Pick Mystery' button to select it."
+                                            : "It's a mystery! Spin the jar to reveal it."
+                                        );
                                     } else {
-                                        idea.canEdit && !idea.isMasked && openModal('ADD_IDEA', { initialData: idea });
+                                        // Allow viewing details
+                                        openModal('ADD_IDEA', { initialData: idea });
                                     }
                                 }}
                                 className={`glass-card p-5 relative group cursor-pointer transition-all ${isSelectionMode && selectedIds.has(idea.id)
@@ -459,14 +479,17 @@ export default function JarPage() {
                                         );
                                     })()}
                                     <div className="flex gap-2 items-center">
-                                        {(idea.category === 'PLANNED_DATE' && !idea.isMasked) || (isAdminPickMode && isAdmin && !idea.isMasked) ? (
+                                        {(idea.category === 'PLANNED_DATE' && !idea.isMasked) || (isAdminPickMode && isAdmin) ? (
                                             <Button
                                                 size="sm"
                                                 className={`h-7 text-[10px] border-0 text-white ${isAdminPickMode ? 'bg-amber-500 hover:bg-amber-600' : 'bg-pink-500 hover:bg-pink-600'}`}
                                                 onClick={(e) => handleGoTonight(e, idea)}
                                             >
                                                 {isAdminPickMode ? (
-                                                    <span className="flex items-center gap-1"><Crown className="w-3 h-3" /> Pick Winner</span>
+                                                    <span className="flex items-center gap-1">
+                                                        <Crown className="w-3 h-3" />
+                                                        {idea.isMasked ? "Pick Mystery" : "Pick Winner"}
+                                                    </span>
                                                 ) : ACTION_LABELS.DO_THIS}
                                             </Button>
                                         ) : null}
@@ -478,7 +501,7 @@ export default function JarPage() {
                                     {idea.isMasked
                                         ? (idea.isSurprise
                                             ? (hasPartner ? "✨ Shared Surprise" : "✨ Surprise")
-                                            : `${idea.createdBy?.name || "Partner"}'s Secret`)
+                                            : (idea.createdBy?.name === userData?.name || idea.createdBy?.id === userData?.id) ? "🔒 Mystery Idea" : `${idea.createdBy?.name || "Partner"}'s Secret`)
                                         : idea.description}
                                 </h3>
 

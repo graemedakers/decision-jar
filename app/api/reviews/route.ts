@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
     const session = await getSession();
-    if (!session) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
         const review = await prisma.appReview.create({
             data: {
-                userId: session.user.id,
+                userId: session.user.id!,
                 rating: parseInt(rating),
                 comment,
                 isPublic: true // Default to true for now

@@ -1,35 +1,13 @@
 import NextAuth from "next-auth";
 import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
-
 const { auth } = NextAuth(authConfig);
-
-const secretKey = process.env.AUTH_SECRET || "secret-key-change-me-in-prod";
-const key = new TextEncoder().encode(secretKey);
-
-async function decrypt(input: string): Promise<any> {
-    const { payload } = await jwtVerify(input, key, {
-        algorithms: ['HS256'],
-    });
-    return payload;
-}
 
 export default auth(async (req) => {
     const path = req.nextUrl.pathname;
     const isLoggedIn = !!req.auth;
 
-    // Custom session detection (legacy)
-    const customSession = req.cookies.get('session')?.value;
-    let isCustomLoggedIn = false;
-    if (customSession) {
-        try {
-            await decrypt(customSession);
-            isCustomLoggedIn = true;
-        } catch (e) { }
-    }
-
-    const isAuthenticated = isLoggedIn || isCustomLoggedIn;
+    const isAuthenticated = isLoggedIn;
 
     // 1. Landing Page Redirect (if logged in)
     if (path === '/') {

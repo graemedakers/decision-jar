@@ -23,7 +23,7 @@ export function LoginForm() {
     const handleSocialLogin = async (provider: string) => {
         setIsSocialLoading(provider);
         try {
-            const callbackUrl = inviteCode ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : "/dashboard";
+            const callbackUrl = inviteCode ? `/join?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}` : "/dashboard";
             await signIn(provider, { callbackUrl });
         } catch (error) {
             console.error(`${provider} login error:`, error);
@@ -47,30 +47,30 @@ export function LoginForm() {
         }
 
         try {
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-                credentials: 'include',
+            // Updated to use NextAuth signIn for credentials as well
+            const result = await signIn("credentials", {
+                email,
+                password,
+                redirect: false, // We'll handle redirect manually to support our custom Join logic
             });
 
-            const data = await res.json();
+            if (result?.error) {
+                alert("Invalid email or password");
+                return;
+            }
 
-            if (res.ok) {
-                // If invite code exists, redirect with code so dashboard can handle join
-                // (in case the join above fails or for double-checking)
+            if (result?.ok) {
+                // If invite code exists, redirect to /join key page which handles the actual joining logic
                 const redirectUrl = inviteCode
-                    ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}`
+                    ? `/join?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}`
                     : "/dashboard";
 
                 // Use hard redirect to ensure cookies are fully propagated
                 window.location.href = redirectUrl;
-            } else {
-                alert(data.error || "Login failed");
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred");
+            alert("An error occurred during login");
         } finally {
             setIsLoading(false);
         }

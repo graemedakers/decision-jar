@@ -405,7 +405,7 @@ export async function POST(req: NextRequest) {
 
         // 4. Rate Limiting (skip for demo mode)
         if (ratelimit && !isDemoMode) {
-            const identifier = session!.user.id;
+            const identifier = session!.user.id!;
             const { success } = await ratelimit.limit(identifier);
             if (!success) {
                 return apiError('Rate limit exceeded. Please try again later.', 429, 'RATE_LIMIT');
@@ -414,7 +414,7 @@ export async function POST(req: NextRequest) {
 
         // 5. Subscription Check
         if (!isDemoMode) {
-            const access = await checkSubscriptionAccess(session!.user.id, config.id);
+            const access = await checkSubscriptionAccess(session!.user.id!, config.id);
             if (!access.allowed) {
                 return apiError(access.reason || 'Premium required', 403, 'PREMIUM_REQUIRED');
             }

@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { auth } from "@/lib/next-auth-helper";
+import { getSession } from "@/lib/auth"; // Use unified auth helper
 import { prisma } from "@/lib/prisma";
 import { cloneJarForGift } from '@/lib/gift-utils';
 
@@ -9,7 +9,7 @@ export async function POST(
     { params }: { params: Promise<{ token: string }> }
 ) {
     try {
-        const session = await auth();
+        const session = await getSession();
         if (!session || !session.user) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
@@ -66,11 +66,21 @@ export async function POST(
         // 2. Check User Jar Limit
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            include: { memberships: true }
+            include: {
+                memberships: {
+                    include: { jar: true }
+                }
+            }
         });
 
         const isPro = user?.isLifetimePro || user?.subscriptionStatus === 'active';
-        const currentJars = user?.memberships.length || 0;
+
+        // Refined jar counting: Exclude community jars if they exist
+        const personalJars = (user?.memberships || []).filter((m: any) => {
+            const refCode = m.jar?.referenceCode;
+            return refCode !== 'BUGRPT' && refCode !== 'FEATREQ';
+        });
+        const currentJars = personalJars.length;
 
         if (!isPro && currentJars >= 2) {
             return NextResponse.json({
@@ -79,35 +89,44 @@ export async function POST(
             }, { status: 403 });
         }
 
-        // 3. Clone Jar
-        const newJar = await cloneJarForGift(gift.sourceJarId, userId, gift.id);
+        // 3. Clone Jar & Update State Atomically
+        const result = await prisma.$transaction(async (tx) => {
+            // Clone the jar (passing the transaction client)
+            const newJar = await cloneJarForGift(gift.sourceJarId, userId, gift.id, tx);
 
-        // 4. Update Token Stats
-        // If this is the first person, mark them as the 'acceptedBy' (if consistent with schema)
-        // If someone already accepted, we just increment count.
-        const updateData: any = {
-            acceptCount: { increment: 1 }
-        };
+            // Update gift stats
+            if (!gift.acceptedById) {
+                await tx.giftToken.update({
+                    where: { id: gift.id },
+                    data: {
+                        acceptCount: { increment: 1 },
+                        acceptedById: userId,
+                        acceptedAt: new Date()
+                    }
+                });
+            } else {
+                await tx.giftToken.update({
+                    where: { id: gift.id },
+                    data: {
+                        acceptCount: { increment: 1 }
+                    }
+                });
+            }
 
-        if (!gift.acceptedById) {
-            updateData.acceptedById = userId;
-            updateData.acceptedAt = new Date();
-        }
+            // Update user's active jar
+            await tx.user.update({
+                where: { id: userId },
+                data: { activeJarId: newJar.id }
+            });
 
-        await prisma.giftToken.update({
-            where: { id: gift.id },
-            data: updateData
-        });
-
-        // 5. Update User Active Jar
-        await prisma.user.update({
-            where: { id: userId },
-            data: { activeJarId: newJar.id }
+            return newJar;
+        }, {
+            timeout: 10000 // 10s timeout for cloning process
         });
 
         return NextResponse.json({
             success: true,
-            jarId: newJar.id
+            jarId: result.id
         });
 
     } catch (error) {

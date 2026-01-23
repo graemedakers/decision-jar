@@ -204,7 +204,8 @@ export async function GET(request: Request) {
                 jar: {
                     select: {
                         type: true,
-                        selectionMode: true
+                        selectionMode: true,
+                        isMysteryMode: true
                     }
                 }
             },
@@ -220,6 +221,7 @@ export async function GET(request: Request) {
             const isPrivate = idea.isPrivate;
             const isGroupJar = idea.jar.type === 'SOCIAL';
             const isVotingJar = (idea.jar.selectionMode as string) === 'VOTE';
+            const isMysteryJar = (idea.jar as any).isMysteryMode;
 
             let processedIdea: any = {
                 ...idea,
@@ -232,7 +234,19 @@ export async function GET(request: Request) {
 
             // Apply Masking Logic (Skip for Admin in Admin Pick Mode OR during an active Vote)
             const isAdminPick = idea.jar.selectionMode === 'ADMIN_PICK';
-            if (!isSelected && !isMyIdea && !(isAdmin && isAdminPick) && !isVoteActive) {
+
+            // MYSTERY MODE: Overrides everything else if active. 
+            // Even owners cannot see ideas in mystery mode until spun (selected).
+            if (isMysteryJar && !isSelected) {
+                processedIdea = {
+                    ...processedIdea,
+                    description: "Mystery Surprise",
+                    details: "This idea is hidden until revealed!",
+                    isMasked: true
+                };
+            }
+            // Standard Masking Logic
+            else if (!isSelected && !isMyIdea && !(isAdmin && isAdminPick) && !isVoteActive) {
                 // Voting Jars: Everyone sees everything to vote (unless specifically private or a surprise)
                 if (isVotingJar && (isSurprise || isPrivate)) {
                     processedIdea = {
@@ -283,7 +297,8 @@ export async function GET(request: Request) {
             // Append permission flags
             return {
                 ...processedIdea,
-                canEdit: isMyIdea || isAdmin,
+                canEdit: (isMyIdea || isAdmin) && !isMysteryJar, // Cannot edit mystery ideas until revealed? Or maybe just can't see them? 
+                // Let's say if it's masked, you can't edit it easily because the form needs data.
                 canDelete: isMyIdea || isAdmin
             };
         }).filter(Boolean);

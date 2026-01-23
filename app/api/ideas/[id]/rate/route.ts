@@ -9,10 +9,10 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await getSession();
-    if (!session || (!session.user.activeJarId && !session.user.coupleId && !session.user.jarId)) {
+    if (!session || !session.user.activeJarId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const currentJarId = session.user.activeJarId || session.user.coupleId || session.user.jarId;
+    const currentJarId = session.user.activeJarId;
 
     const { id } = await params;
 
@@ -52,10 +52,10 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await getSession();
-    if (!session || (!session.user.activeJarId && !session.user.coupleId && !session.user.jarId)) {
+    if (!session || !session.user.activeJarId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const currentJarId = session.user.activeJarId || session.user.coupleId || session.user.jarId;
+    const currentJarId = session.user.activeJarId;
 
     const { id } = await params;
     const { rating, notes, photoUrls } = await request.json();

@@ -148,14 +148,13 @@ export function SignupForm() {
                     // With conditional verification, we auto-login and redirect to dashboard
                     // They'll see a friendly verification banner there instead of being blocked
                     try {
-                        const loginRes = await fetch("/api/auth/login", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email, password }),
-                            credentials: 'include',
+                        const result = await signIn("credentials", {
+                            email,
+                            password,
+                            redirect: false,
                         });
 
-                        if (loginRes.ok) {
+                        if (result?.ok) {
                             const dashboardUrl = inviteCode
                                 ? `/dashboard?code=${inviteCode}${premiumToken ? `&pt=${premiumToken}` : ''}`
                                 : "/dashboard";
@@ -196,31 +195,14 @@ export function SignupForm() {
     };
 
     const handleAutoLogin = async () => {
-        if (!existingEmail || !savedPassword) return;
-        setIsLoading(true);
-        try {
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: existingEmail, password: savedPassword }),
-                credentials: 'include',
-            });
+        // Instead of trying to auto-login with possibly wrong password,
+        // redirect to login page with pre-filled email and preserved invite code
+        const params = new URLSearchParams();
+        if (existingEmail) params.set('email', existingEmail);
+        if (inviteCode) params.set('code', inviteCode);
+        if (premiumToken) params.set('pt', premiumToken);
 
-            const data = await res.json();
-
-            if (res.ok) {
-                // If invite code exists, the dashboard will handle the join via the useEffect hook we added
-                window.location.href = `/dashboard?code=${inviteCode || ""}${premiumToken ? `&pt=${premiumToken}` : ""}`;
-            } else {
-                // If login fails (maybe wrong password), fall back to manual login page
-                router.push(`/login?email=${encodeURIComponent(existingEmail)}&code=${inviteCode || ""}${premiumToken ? `&pt=${premiumToken}` : ""}`);
-            }
-        } catch (error) {
-            console.error("Auto-login error:", error);
-            router.push(`/login?email=${encodeURIComponent(existingEmail)}&code=${inviteCode || ""}${premiumToken ? `&pt=${premiumToken}` : ""}`);
-        } finally {
-            setIsLoading(false);
-        }
+        router.push(`/login?${params.toString()}`);
     };
 
     if (isValidating) {

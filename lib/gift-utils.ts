@@ -1,7 +1,6 @@
-
 import { nanoid, customAlphabet } from 'nanoid';
-import { PrismaClient } from '@prisma/client';
-import { prisma } from '@/lib/prisma'; // Assumes you have a singleton prisma instance
+import { Prisma, PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { generateUniqueJarCode } from '@/lib/utils';
 
 // Use a readable alphabet for gift tokens (no 0, O, 1, I, l)
@@ -36,39 +35,50 @@ export async function generateGiftToken(): Promise<string> {
 
 /**
  * Clones a jar and its ideas for a recipient.
+ * Supports passing a prisma client (e.g. from a transaction).
  */
 export async function cloneJarForGift(
     sourceJarId: string,
     recipientUserId: string,
-    giftTokenId: string
+    giftTokenId: string,
+    db: Prisma.TransactionClient | PrismaClient = prisma
 ) {
+    console.log(`[cloneJarForGift] Starting clone: source=${sourceJarId}, recipient=${recipientUserId}, giftToken=${giftTokenId}`);
+
+    // 0. Fetch Gift Token Settings
+    const giftToken = await db.giftToken.findUnique({
+        where: { id: giftTokenId }
+    }) as any;
+
     // 1. Fetch Source Jar & Ideas
-    const sourceJar = await prisma.jar.findUnique({
+    const sourceJar = await db.jar.findUnique({
         where: { id: sourceJarId },
         include: {
             ideas: {
                 where: {
                     status: 'APPROVED',
-                    isSurprise: false // Do not clone surprise ideas? Or do we? Spec implies full CLONE.
-                    // Let's clone EVERYTHING that is valid for a user to see.
-                    // Actually, private ideas should be converted to public.
+                    isSurprise: false
                 }
             }
         }
-    });
+    }) as any;
 
-    if (!sourceJar) throw new Error("Source jar not found");
+    if (!sourceJar) {
+        console.error(`[cloneJarForGift] Source jar not found: ${sourceJarId}`);
+        throw new Error("Source jar not found");
+    }
 
     // 2. Clone Jar Metadata
     const referenceCode = await generateUniqueJarCode();
 
-    const clonedJar = await prisma.jar.create({
+    const clonedJar = await db.jar.create({
         data: {
             name: sourceJar.name, // Keep original name
             type: sourceJar.type,
             topic: sourceJar.topic,
             selectionMode: sourceJar.selectionMode,
-            defaultIdeaPrivate: false, // Reset to default
+            defaultIdeaPrivate: false,
+            isMysteryMode: giftToken?.isMysteryMode || false,
             sourceGiftId: giftTokenId,
             referenceCode,
             voteCandidatesCount: sourceJar.voteCandidatesCount,
@@ -79,14 +89,13 @@ export async function cloneJarForGift(
                     status: 'ACTIVE'
                 }
             }
-        }
+        } as any
     });
 
-    // 3. Clone Ideas
-    // Convert private -> public
-    // Reset status fields
+    console.log(`[cloneJarForGift] Cloned jar created: ${clonedJar.id} (${clonedJar.referenceCode})`);
+
     if (sourceJar.ideas.length > 0) {
-        const ideasData = sourceJar.ideas.map(idea => ({
+        const ideasData = (sourceJar.ideas as any[]).map((idea: any) => ({
             description: idea.description,
             indoor: idea.indoor,
             duration: idea.duration,
@@ -96,10 +105,9 @@ export async function cloneJarForGift(
             category: idea.category,
 
             jarId: clonedJar.id,
-            createdById: recipientUserId, // Recipient becomes creator of their copy
+            createdById: recipientUserId,
 
-            // Context fields
-            notes: null, // Clear personal notes? Maybe keep descriptions/details but clear notes.
+            notes: null,
             details: idea.details,
             address: idea.address,
             website: idea.website,
@@ -107,23 +115,22 @@ export async function cloneJarForGift(
             openingHours: idea.openingHours,
             photoUrls: idea.photoUrls,
 
-            // Logic flags
-            isPrivate: false, // FORCE PUBLIC
+            isPrivate: false,
             isSurprise: idea.isSurprise,
             requiresTravel: idea.requiresTravel,
             weather: idea.weather,
-            status: 'APPROVED' as const, // Ensure clean status
+            status: 'APPROVED' as const,
 
-            // Reset state
             selectedAt: null,
             selectedDate: null,
             rating: null,
             memoryReminderSent: false
         }));
 
-        await prisma.idea.createMany({
+        await db.idea.createMany({
             data: ideasData
         });
+        console.log(`[cloneJarForGift] Cloned ${ideasData.length} ideas`);
     }
 
     return clonedJar;

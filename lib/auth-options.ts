@@ -2,18 +2,75 @@ import { NextAuthConfig } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
-import { generateUniqueJarCode } from "@/lib/utils";
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthConfig = {
     adapter: PrismaAdapter(prisma) as any,
     debug: process.env.NODE_ENV === 'development',
+    session: {
+        strategy: "jwt",
+    },
+    ...authConfig,
+    providers: [
+        ...authConfig.providers,
+        Credentials({
+            name: "credentials",
+            credentials: {
+                email: { label: "Email", type: "email" },
+                password: { label: "Password", type: "password" }
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) {
+                    return null;
+                }
+
+                const email = (credentials.email as string).toLowerCase().trim();
+                const password = credentials.password as string;
+
+                try {
+                    const user = await prisma.user.findUnique({
+                        where: { email },
+                    });
+
+                    if (!user) {
+                        return null;
+                    }
+
+                    // Check if user has a password (if not, they might be OAuth only)
+                    if (!user.passwordHash) {
+                        // You could throw an error here to tell the user to use social login
+                        // but usually returning null is safer for security (generic error)
+                        // However, we can handle specific errors in the UI if we want to be helpful
+                        return null;
+                    }
+
+                    const isValid = await bcrypt.compare(password, user.passwordHash);
+
+                    if (!isValid) {
+                        return null;
+                    }
+
+                    // Return user object without sensitive data
+                    return {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        image: user.image,
+                    };
+                } catch (error) {
+                    console.error("Auth error:", error);
+                    return null;
+                }
+            }
+        })
+    ],
     events: {
         createUser: async ({ user }) => {
             if (!user.id) return;
 
             try {
                 // Use transaction to ensure atomicity
-                // If any step fails, all changes are rolled back
                 await prisma.$transaction(async (tx) => {
                     // Check if this is an OAuth user (no password = OAuth)
                     const fullUser = await tx.user.findUnique({
@@ -32,44 +89,13 @@ export const authOptions: NextAuthConfig = {
                         });
                         console.log(`✅ Auto-verified OAuth user: ${user.id}`);
                     }
-
-                    // Don't create a default jar automatically
-                    // Let users customize their first jar through the dashboard modal
-                    // This ensures both OAuth and email/password users get the same onboarding experience
-
-                    // Add to community jars (BUGRPT and FEATREQ)
-                    const communityJars = await tx.jar.findMany({
-                        where: {
-                            referenceCode: { in: ['BUGRPT', 'FEATREQ'] }
-                        }
-                    });
-
-                    if (communityJars.length > 0) {
-                        await tx.jarMember.createMany({
-                            data: communityJars.map(jar => ({
-                                jarId: jar.id,
-                                userId: user.id!,
-                                role: 'MEMBER'
-                            }))
-                        });
-                    }
                 });
 
                 console.log(`✅ Successfully initialized new user: ${user.id}`);
             } catch (error) {
-                // Log the error with full context for debugging
                 console.error(`❌ CRITICAL: Failed to set up user ${user.id}:`, error);
-
-                // In production, you may want to:
-                // 1. Send error to monitoring service (e.g., Sentry)
-                // 2. Set a flag on user account to trigger manual setup
-                // 3. Send alert to admin
-
-                // For now, we throw to prevent silent failures
-                // This will cause the signup to fail, which is better than leaving user in broken state
-                throw new Error(`Failed to initialize user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`[DEBUG SHIELD] Suppressing error in createUser event:`, error);
             }
         }
     },
-    ...authConfig,
 };

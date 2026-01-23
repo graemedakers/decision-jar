@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import { Input } from "@/components/ui/Input";
+import { Checkbox } from "@/components/ui/Checkbox"; // Import Checkbox
 import { Gift, Copy, Share, Check, Loader2, AlertCircle } from "lucide-react";
 import { useModalSystem } from "./ModalProvider";
 import { toast } from "sonner";
@@ -22,6 +23,7 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
     const { closeModal } = useModalSystem();
     const [step, setStep] = useState<'CREATE' | 'SHARE'>('CREATE');
     const [message, setMessage] = useState("");
+    const [isMysteryMode, setIsMysteryMode] = useState(false); // State for mystery mode
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [giftData, setGiftData] = useState<{ token: string; url: string; expiresAt: string } | null>(null);
@@ -59,7 +61,10 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
             const res = await fetch(`/api/jars/${jarId}/gift`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ personalMessage: message })
+                body: JSON.stringify({
+                    personalMessage: message,
+                    isMysteryMode: isMysteryMode // Pass the state
+                })
             });
 
             if (!res.ok) {
@@ -149,6 +154,25 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
                                 />
                                 <div className="text-xs text-right text-muted-foreground">
                                     {message.length}/200
+                                </div>
+                            </div>
+
+                            <div className="flex items-center space-x-2 bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-500/30">
+                                <Checkbox
+                                    id="mystery-mode"
+                                    checked={isMysteryMode}
+                                    onCheckedChange={(c: boolean | 'indeterminate') => setIsMysteryMode(!!c)}
+                                />
+                                <div className="grid gap-1.5 leading-none">
+                                    <Label
+                                        htmlFor="mystery-mode"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        Mystery Jar Mode
+                                    </Label>
+                                    <p className="text-xs text-muted-foreground">
+                                        Recipient won't see any ideas in the list. They must spin to reveal them one by one!
+                                    </p>
                                 </div>
                             </div>
 

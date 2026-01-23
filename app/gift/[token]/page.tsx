@@ -45,8 +45,11 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
     }
 }
 
+import { auth } from "@/lib/next-auth-helper";
+
 export default async function GiftLandingPage({ params }: { params: Promise<{ token: string }> }) {
     const { token } = await params;
+    const session = await auth(); // Server-side auth check
     let giftData = null;
     let error = null;
 
@@ -92,8 +95,9 @@ export default async function GiftLandingPage({ params }: { params: Promise<{ to
                     name: gift.sourceJar.name,
                     topic: gift.sourceJar.topic,
                     ideaCount: totalIdeas,
-                    previewIdeas: gift.sourceJar.ideas
+                    previewIdeas: (gift as any).isMysteryMode ? [] : gift.sourceJar.ideas
                 },
+                isMysteryMode: (gift as any).isMysteryMode,
                 createdAt: gift.createdAt.toISOString(),
                 expiresAt: gift.expiresAt?.toISOString() || null
             };
@@ -108,6 +112,7 @@ export default async function GiftLandingPage({ params }: { params: Promise<{ to
             token={token}
             initialGift={giftData as any}
             initialError={error}
+            initialSession={session}
         />
     );
 }

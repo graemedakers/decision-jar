@@ -11,7 +11,7 @@ export async function GET() {
     try {
         const logs = await prisma.deletedLog.findMany({
             where: {
-                jarId: session.user.activeJarId || session.user.coupleId!, // Fallback for stability
+                jarId: session.user.activeJarId!,
             },
             orderBy: {
                 deletedAt: 'desc',

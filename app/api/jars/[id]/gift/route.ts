@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/next-auth-helper";
+import { getSession } from "@/lib/auth"; // Use unified auth helper
 import { generateGiftToken } from '@/lib/gift-utils';
 
 export async function POST(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const session = await auth();
+    const session = await getSession();
 
     if (!session || !session.user) {
         return new NextResponse("Unauthorized", { status: 401 });
@@ -20,7 +20,7 @@ export async function POST(
     }
 
     try {
-        const { personalMessage, expiresInDays = 90 } = await req.json();
+        const { personalMessage, expiresInDays = 90, isMysteryMode = false } = await req.json();
 
         // 0. Check for existing active token for this jar/user
         const existingGift = await prisma.giftToken.findFirst({
@@ -33,11 +33,15 @@ export async function POST(
         });
 
         if (existingGift) {
-            // Update message if changed
-            if (personalMessage !== undefined && personalMessage !== existingGift.personalMessage) {
+            // Update message and mode if changed
+            if ((personalMessage !== undefined && personalMessage !== existingGift.personalMessage) ||
+                (isMysteryMode !== undefined && isMysteryMode !== existingGift.isMysteryMode)) {
                 await prisma.giftToken.update({
                     where: { id: existingGift.id },
-                    data: { personalMessage }
+                    data: {
+                        personalMessage,
+                        isMysteryMode
+                    }
                 });
             }
 
@@ -46,50 +50,13 @@ export async function POST(
                 gift: {
                     ...existingGift,
                     personalMessage: personalMessage ?? existingGift.personalMessage,
+                    isMysteryMode: isMysteryMode ?? existingGift.isMysteryMode,
                     url: `${process.env.NEXTAUTH_URL || 'https://spinthejar.com'}/gift/${existingGift.token}`,
                 }
             });
         }
 
-        // 1. Validate Access (Must be OWNER or ADMIN)
-        const membership = await prisma.jarMember.findFirst({
-            where: {
-                jarId: jarId,
-                userId: userId,
-                role: { in: ['OWNER', 'ADMIN'] }
-            }
-        });
 
-        if (!membership) {
-            return new NextResponse("Forbidden: You must be an Owner or Admin to gift a jar.", { status: 403 });
-        }
-
-        // 2. Validate Jar Content (Minimum 5 ideas)
-        const ideasCount = await prisma.idea.count({
-            where: { jarId: jarId, status: 'APPROVED' }
-        });
-
-        if (ideasCount < 5) {
-            return new NextResponse("Jar must have at least 5 approved ideas to be gifted.", { status: 400 });
-        }
-
-        // 3. Rate Limiting (Free Users: 2/month)
-        // Fetch user plan status
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-                subscriptionStatus: true,
-                isLifetimePro: true,
-                giftsThisMonth: true
-            }
-        });
-
-        const isPro = user?.isLifetimePro || user?.subscriptionStatus === 'active';
-
-        // Check limit if not pro
-        if (!isPro && (user?.giftsThisMonth || 0) >= 2) {
-            return new NextResponse("Monthly gift limit reached. Upgrade to Pro for unlimited gifting.", { status: 429 });
-        }
 
         // 4. Generate Token & Create Record
         const token = await generateGiftToken();
@@ -102,6 +69,7 @@ export async function POST(
                 sourceJarId: jarId,
                 giftedById: userId,
                 personalMessage,
+                isMysteryMode,
                 expiresAt,
                 isActive: true
             }

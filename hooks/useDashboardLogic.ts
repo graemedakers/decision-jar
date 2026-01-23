@@ -386,9 +386,20 @@ export function useDashboardLogic() {
         const action = searchParams?.get('action');
         const ideaId = searchParams?.get('ideaId');
         const toolId = searchParams?.get('tool');
+        const newGift = searchParams?.get('newGift'); // Handle Gift Acceptance
 
         let urlCleaned = false;
         const newParams = new URLSearchParams(searchParams.toString());
+
+        // 0. Handle Gift Acceptance (Refresh Data + Confetti)
+        if (newGift) {
+            console.log('[Dashboard] New gift detected, force refreshing data');
+            refreshUser();
+            fetchIdeas();
+            setShowConfetti(true);
+            newParams.delete('newGift');
+            urlCleaned = true;
+        }
 
         // 1. Direct Idea Opening (Legacy support + new structure)
         if (ideaId && ideas.length > 0) {
@@ -470,12 +481,11 @@ export function useDashboardLogic() {
         if (urlCleaned) {
             window.history.replaceState({}, '', `${window.location.pathname}?${newParams.toString()}`);
         }
-    }, [searchParams, isLoadingUser, isLoadingIdeas, ideas, openModal, setShowQuiz, setShowOnboarding, router]);
+    }, [searchParams, isLoadingUser, isLoadingIdeas, ideas, openModal, setShowQuiz, setShowOnboarding, router, refreshUser, fetchIdeas]);
 
     // 5. Handlers
     const handleLogout = async () => {
         await signOut({ redirect: false });
-        await fetch(getApiUrl('/api/auth/logout'), { method: 'POST' });
         window.location.href = '/';
     };
 
@@ -527,7 +537,7 @@ export function useDashboardLogic() {
     };
 
 
-    const handleSmartPrompt = async (prompt: string) => {
+    const handleSmartPrompt = useCallback(async (prompt: string) => {
         setIsGeneratingSmartIdeas(true);
         try {
             // Attempt to get client location (fails gracefully)
@@ -626,7 +636,7 @@ export function useDashboardLogic() {
         } finally {
             setIsGeneratingSmartIdeas(false);
         }
-    };
+    }, [userData?.jarTopic, userData?.activeJarId, openModal, fetchIdeas]);
 
     return {
         // State

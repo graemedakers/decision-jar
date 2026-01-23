@@ -179,7 +179,7 @@ function DashboardContent() {
         }));
 
     const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
-    const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isLoadingIdeas;
+    const showEmptyState = userData?.activeJarId && ideas.length === 0;
     const showAdminStatus = isAdminPickMode;
     const showStatusSection = showNoJars || showAdminStatus || showEmptyState;
 
@@ -213,31 +213,73 @@ function DashboardContent() {
 
     // ✅ CRITICAL: Auto-prompt for users without personal jars
     // This covers: New users who sign up and only have access to community jars (Bug Reports, etc.)
+    // ✅ CRITIONAL: Auto-accept pending gift in Dashboard (Protected Route)
+    useEffect(() => {
+        const pendingToken = sessionStorage.getItem('pending_gift_token');
+
+        // If we have a token and we are authenticated (userData exists)
+        if (pendingToken && userData) {
+
+            // Set a local loading state to block interaction
+            // Note: We're not using a state variable here to avoid re-renders,
+            // but effectively we want to perform this action ONCE.
+
+            const acceptGift = async () => {
+                try {
+                    // Show a toast or just block UI?
+                    // Ideally we'd have a specific "Unwrapping..." state
+
+                    const res = await fetch(`/api/gift/${pendingToken}/accept`, {
+                        method: 'POST'
+                    });
+
+                    // Clear token immediately to prevent retry loops
+                    sessionStorage.removeItem('pending_gift_token');
+
+                    if (!res.ok) {
+                        const data = await res.json();
+                        if (data.error === 'JAR_LIMIT_REACHED') {
+                            alert("You've reached your jar limit! Please upgrade or delete a jar to accept this gift.");
+                        } else {
+                            console.error('[Dashboard] Gift acceptance failed:', data);
+                            // Optional: Toast error
+                        }
+                    } else {
+                        const data = await res.json();
+                        console.log('[Dashboard] Gift accepted successfully!', data.jarId);
+
+                        // Refresh user data to show new jar
+                        window.location.href = `/dashboard?newGift=${data.jarId}`;
+                    }
+
+                } catch (err) {
+                    console.error('[Dashboard] Error accepting gift:', err);
+                    sessionStorage.removeItem('pending_gift_token');
+                }
+            };
+
+            acceptGift();
+            return; // processed
+        }
+    }, [userData, router]); // Run when userData loads
+
+    // 2. Auto-prompt logic (Original)
     useEffect(() => {
         // Wait for user data to be loaded
         if (isLoadingUser || !userData) return;
 
+        // Don't prompt if we just processed a gift (token check happens above)
+        if (sessionStorage.getItem('pending_gift_token')) return;
+
         // Get all memberships
         const memberships = userData.memberships || [];
-
-        // Count personal (non-community) jars
         const personalJars = memberships;
         const hasPersonalJars = personalJars.length > 0;
 
-        // Check if current active jar is a personal jar
-        const activeJarIsPersonal = userData.activeJarId &&
-            personalJars.some((m: any) => m.jar?.id === userData.activeJarId);
+        // Skip if we just accepted a gift (URL param check)
+        const newGift = new URLSearchParams(window.location.search).get('newGift');
 
-        // If user has NO personal jars, prompt them to create one
-        if (!hasPersonalJars) {
-            // Check for pending gift FIRST
-            const pendingGift = sessionStorage.getItem('pending_gift_token');
-            if (pendingGift) {
-                router.push(`/gift/${pendingGift}`);
-                return;
-            }
-
-            // Use a longer delay to ensure page is fully loaded on mobile
+        if (!hasPersonalJars && !newGift) {
             setTimeout(() => {
                 openModal('CREATE_JAR');
             }, 500);

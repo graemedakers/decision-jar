@@ -124,7 +124,7 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
                 try {
                     // Send push notifications to other jar members (not the person who picked)
                     // Send push notification to other jar members (not the person who picked)
-                    await notifyJarMembers(currentJarId, session.user.id, {
+                    await notifyJarMembers(currentJarId, session.user.id as string, {
                         title: `🎯 New pick: "${selectedIdea.description}"`,
                         body: `${session.user.name || 'Someone'} selected this from your jar!`,
                         url: `/jar?selected=${selectedIdea.id}`,

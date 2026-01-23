@@ -119,7 +119,7 @@ export async function startVote(jarId: string, options: any) {
 export async function castVote(jarId: string, ideaId: string) {
     const auth = await checkAuth(jarId);
     if ('error' in auth) return auth;
-    const userId = auth.session.user.id;
+    const userId = auth.session.user.id!;
 
     const session = await prisma.voteSession.findFirst({
         where: { jarId, status: 'ACTIVE' }

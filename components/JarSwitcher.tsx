@@ -27,6 +27,7 @@ interface Jar {
     topic?: string | null;
     level?: number;
     xp?: number;
+    referenceCode?: string;
 }
 
 const getJarIcon = (jar: Jar, className?: string) => {
@@ -71,6 +72,15 @@ interface JarSwitcherProps {
     variant?: 'default' | 'title';
     onSwitch?: () => Promise<void> | void;
 }
+
+const getRoleLabel = (role: string) => {
+    switch (role) {
+        case 'OWNER': return 'Owner';
+        case 'ADMIN': return 'Admin';
+        case 'VIEWER': return 'Viewer';
+        default: return 'Member';
+    }
+};
 
 export function JarSwitcher({ user, className, variant = 'default', onSwitch }: JarSwitcherProps) {
     // ... state ...
@@ -272,57 +282,62 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                     </div>
 
                     {/* Scrollable Jar List */}
-                    <div className="overflow-y-auto flex-1 custom-scrollbar">
-                        {/* Current Active Jar (Highlighted at top of list if no search or matches search) */}
+                    <div className="overflow-y-auto flex-1 custom-scrollbar py-1">
+                        {/* Current Active Jar */}
                         {activeJar && (!searchQuery || activeJar.name?.toLowerCase().includes(searchQuery.toLowerCase())) && (
-                            <div className="p-1">
-                                <DropdownMenuItem className="bg-slate-50 dark:bg-white/5 data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-white/10 cursor-default flex justify-between group rounded-md">
-                                    <div className="flex items-center gap-3">
+                            <div className="px-2 mb-1">
+                                <DropdownMenuItem className="p-2 bg-indigo-50/50 dark:bg-indigo-500/10 focus:bg-indigo-100 dark:focus:bg-indigo-500/20 cursor-default flex justify-between group rounded-xl border border-indigo-100 dark:border-indigo-500/20">
+                                    <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <div className={cn(
-                                            "w-8 h-8 rounded-full flex items-center justify-center border",
+                                            "w-10 h-10 rounded-full flex items-center justify-center border shadow-sm shrink-0",
                                             getJarColorClasses(activeJar.type as any)
                                         )}>
-                                            {getJarIcon(activeJar, "w-4 h-4")}
+                                            {getJarIcon(activeJar, "w-5 h-5")}
                                         </div>
-                                        <div className="text-left">
-                                            <div className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-[140px]">{activeJar.name || "My Jar"}</div>
-                                            <div className="text-xs text-slate-500">Active • {activeJar.topic || (activeJar.type === 'ROMANTIC' ? 'Personal' : 'Group')}</div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-2 w-full">
+                                                <span className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                                    {activeJar.name || "My Jar"}
+                                                </span>
+                                                {activeJar.referenceCode && (
+                                                    <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 bg-white dark:bg-white/10 px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/5 shadow-xs shrink-0">
+                                                        #{activeJar.referenceCode}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <span className="flex w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                <span className="text-xs text-slate-500 font-medium truncate">
+                                                    {getRoleLabel(activeMembership?.role || 'MEMBER')} • {activeJar.topic || (activeJar.type === 'ROMANTIC' ? 'Personal' : 'Group')}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleLeaveJar(activeJar.id);
-                                        }}
-                                        className="p-1 hover:bg-red-500/20 rounded text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                                        title="Leave Jar"
-                                        aria-label="Leave Jar"
-                                    >
-                                        <LogOut className="w-3.5 h-3.5" />
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            // Scroll to smart prompt
-                                            const el = document.getElementById('smart-prompt-input');
-                                            if (el) {
-                                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                const input = el.querySelector('input');
-                                                if (input) input.focus();
-                                            }
-                                        }}
-                                        className="p-1 hover:bg-purple-500/20 rounded text-slate-500 hover:text-purple-500 transition-colors opacity-0 group-hover:opacity-100 ml-1"
-                                        title="Smart Fill (AI)"
-                                        aria-label="Smart Fill (AI)"
-                                    >
-                                        <Sparkles className="w-3.5 h-3.5" />
-                                    </button>
+
+                                    {/* Quick Actions for Active Jar */}
+                                    <div className="flex flex-col gap-1 ml-2 pl-2 border-l border-indigo-200/50 dark:border-white/10">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const el = document.getElementById('smart-prompt-input');
+                                                if (el) {
+                                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    const input = el.querySelector('input');
+                                                    if (input) input.focus();
+                                                }
+                                            }}
+                                            className="p-1 hover:bg-white dark:hover:bg-white/10 rounded-md text-indigo-400 hover:text-indigo-600 transition-colors"
+                                            title="Smart Fill"
+                                        >
+                                            <Sparkles className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
                                 </DropdownMenuItem>
                             </div>
                         )}
 
-                        {/* Other Jars */}
-                        <div className="p-1 space-y-0.5">
+                        {/* Recent/Other Jars */}
+                        <div className="px-2 space-y-0.5">
                             {otherMemberships
                                 .filter(m => !searchQuery || m.jar.name?.toLowerCase().includes(searchQuery.toLowerCase()))
                                 .map((membership) => (
@@ -330,21 +345,28 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                                         key={membership.jarId}
                                         onClick={() => handleSwitchJar(membership.jarId)}
                                         disabled={isLoading}
-                                        className="flex items-center justify-between cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md"
+                                        className="p-2 flex items-center justify-between cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-xl group"
                                     >
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 min-w-0 flex-1">
                                             <div className={cn(
-                                                "w-8 h-8 rounded-full flex items-center justify-center border",
+                                                "w-9 h-9 rounded-full flex items-center justify-center border shrink-0 opacity-80 group-hover:opacity-100 transition-opacity",
                                                 getJarColorClasses(membership.jar.type as any)
                                             )}>
                                                 {getJarIcon(membership.jar, "w-4 h-4")}
                                             </div>
-                                            <div>
-                                                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate max-w-[160px]">
-                                                    {membership.jar.name || "Untitled Jar"}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">
+                                                        {membership.jar.name || "Untitled Jar"}
+                                                    </span>
+                                                    {membership.jar.referenceCode && (
+                                                        <span className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded shrink-0">
+                                                            #{membership.jar.referenceCode}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                <div className="text-xs text-slate-500">
-                                                    {membership.role === 'ADMIN' ? 'Admin' : 'Member'}
+                                                <div className="text-xs text-slate-500 truncate">
+                                                    {getRoleLabel(membership.role)} • {membership.jar.topic || 'General'}
                                                 </div>
                                             </div>
                                         </div>
@@ -354,29 +376,29 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
                     </div>
 
                     {/* Fixed Footer Actions */}
-                    <div className="p-1 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-white/[0.02]">
-                        <DropdownMenuItem onClick={() => setIsManagerOpen(true)} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md py-2">
-                            <div className="w-7 h-7 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
-                                <Settings className="w-3.5 h-3.5 text-slate-400" />
+                    <div className="p-2 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/50 backdrop-blur-sm space-y-1">
+                        <DropdownMenuItem onClick={() => setIsManagerOpen(true)} className="group gap-3 cursor-pointer focus:bg-white dark:focus:bg-white/5 rounded-lg py-2 px-3 border border-transparent focus:border-slate-200 dark:focus:border-white/10 transition-all">
+                            <div className="w-6 h-6 rounded-md flex items-center justify-center bg-slate-200/50 dark:bg-slate-800 text-slate-500 group-focus:text-slate-700 dark:group-focus:text-slate-300 transition-colors">
+                                <Settings className="w-3.5 h-3.5" />
                             </div>
-                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Manage My Jars</span>
+                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Manage My Jars</span>
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem onClick={handleCreateJar} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md py-2">
-                            <div className="w-7 h-7 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
-                                <Plus className="w-3.5 h-3.5 text-slate-400" />
-                            </div>
-                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Create New Jar</span>
-                        </DropdownMenuItem>
+                        <div className="grid grid-cols-2 gap-1">
+                            <DropdownMenuItem onClick={handleCreateJar} className="group gap-2 cursor-pointer focus:bg-white dark:focus:bg-white/5 rounded-lg py-2 px-3 border border-transparent focus:border-slate-200 dark:focus:border-white/10">
+                                <div className="w-5 h-5 rounded-md flex items-center justify-center bg-indigo-100/50 dark:bg-indigo-500/20 text-indigo-500">
+                                    <Plus className="w-3 h-3" />
+                                </div>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Create</span>
+                            </DropdownMenuItem>
 
-                        <DropdownMenuItem onClick={handleJoinJar} className="gap-3 cursor-pointer focus:bg-slate-100 dark:focus:bg-white/5 rounded-md py-2">
-                            <div className="w-7 h-7 rounded-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
-                                <LogOut className="w-3.5 h-3.5 text-slate-400 rotate-180" />
-                            </div>
-                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Join Existing Jar</span>
-                        </DropdownMenuItem>
-
-
+                            <DropdownMenuItem onClick={handleJoinJar} className="group gap-2 cursor-pointer focus:bg-white dark:focus:bg-white/5 rounded-lg py-2 px-3 border border-transparent focus:border-slate-200 dark:focus:border-white/10">
+                                <div className="w-5 h-5 rounded-md flex items-center justify-center bg-orange-100/50 dark:bg-orange-500/20 text-orange-500">
+                                    <LogOut className="w-3 h-3 rotate-180" />
+                                </div>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Join</span>
+                            </DropdownMenuItem>
+                        </div>
                     </div>
                 </DropdownMenuContent>
             </DropdownMenu>

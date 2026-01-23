@@ -99,7 +99,7 @@ export function useLoadingState({
         }
 
         // If we have no ideas AND they're loading (first time, not refetch), show loading
-        if (ideas.length === 0 && isLoadingIdeas && !isFetchingIdeas) {
+        if (ideas.length === 0 && isLoadingIdeas) {
             return true;
         }
 

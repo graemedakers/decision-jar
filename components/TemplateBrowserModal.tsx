@@ -108,7 +108,10 @@ export function TemplateBrowserModal({
                 body: JSON.stringify({ templateId })
             });
 
-            if (!response.ok) throw new Error('Failed to create jar');
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to create jar');
+            }
 
             const jar = await response.json();
 
@@ -126,9 +129,12 @@ export function TemplateBrowserModal({
             setTimeout(() => {
                 window.location.href = `/dashboard?jar=${jar.id}`;
             }, 500);
-        } catch (error) {
-            console.error('Error creating jar from template:', error);
-            showError('Failed to create jar. Please try again.');
+        } catch (error: any) {
+            // Don't log expected business rule errors to console
+            if (!error.message?.includes('Plan limit')) {
+                console.error('Error creating jar from template:', error);
+            }
+            showError(error.message || 'Failed to create jar. Please try again.');
         } finally {
             setCreatingTemplate(null);
         }

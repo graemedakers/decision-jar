@@ -10,9 +10,10 @@ export async function POST(
     context: { params: Promise<{ id: string }> }
 ) {
     const session = await getSession();
-    if (!session?.user) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = session.user.id;
 
     const { id: jarId } = await context.params;
     const json = await request.json();
@@ -20,7 +21,7 @@ export async function POST(
 
     // Verify membership
     const membership = await prisma.jarMember.findUnique({
-        where: { userId_jarId: { userId: session.user.id, jarId } }
+        where: { userId_jarId: { userId, jarId } }
     });
 
     if (!membership) {
@@ -30,9 +31,9 @@ export async function POST(
     try {
         switch (action) {
             case 'START':
-                return handleStartVote(jarId, session.user.id, json, membership.role === 'ADMIN' || membership.role === 'OWNER');
+                return handleStartVote(jarId, userId, json, membership.role === 'ADMIN' || membership.role === 'OWNER');
             case 'CAST':
-                return handleCastVote(jarId, session.user.id, json);
+                return handleCastVote(jarId, userId, json);
             case 'CANCEL':
                 if (membership.role !== 'ADMIN' && membership.role !== 'OWNER') return NextResponse.json({ error: "Admin only" }, { status: 403 });
                 return handleCancelVote(jarId);
