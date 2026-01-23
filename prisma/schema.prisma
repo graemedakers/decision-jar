@@ -22,6 +22,8 @@ model Jar {
   defaultIdeaPrivate Boolean @default(false)
   isGiftable    Boolean  @default(true) 
   isMysteryMode Boolean  @default(false) // If true, all ideas are hidden until selected
+  revealPace    String?  @default("INSTANT") // "INSTANT", "DAILY"
+  lastRevealAt  DateTime? // Timestamp of the last successful mystery reveal
   customCategories Json? // Array of { id: string, label: string }
 
   sourceGiftId  String?
@@ -181,6 +183,7 @@ model GiftToken {
   // Metadata
   personalMessage String? 
   isMysteryMode Boolean  @default(false)
+  revealPace    String?  @default("INSTANT")
   createdAt     DateTime @default(now())
   expiresAt     DateTime?
   
