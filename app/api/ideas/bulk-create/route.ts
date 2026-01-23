@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { notifyJarMembers } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
     try {
@@ -63,6 +64,17 @@ export async function POST(request: NextRequest) {
                 })
             )
         );
+
+        // Send push notification to other jar members (non-blocking)
+        const notificationCount = createdIdeas.length;
+        if (notificationCount > 0) {
+            notifyJarMembers(jarId, session.user.id, {
+                title: `💡 ${session.user.name || 'Someone'} added new ideas`,
+                body: `Added ${notificationCount} new idea${notificationCount > 1 ? 's' : ''} to the jar!`,
+                url: '/jar',
+                icon: '/icon-192.png'
+            }, 'notifyIdeaAdded').catch(err => console.error("Notification error:", err));
+        }
 
         return NextResponse.json({
             success: true,

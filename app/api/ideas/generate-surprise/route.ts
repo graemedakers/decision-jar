@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getCategoriesForTopic } from '@/lib/categories';
+import { notifyJarMembers } from '@/lib/notifications';
 
 export async function POST(request: Request) {
     let category: string | undefined;
@@ -128,6 +129,14 @@ export async function POST(request: Request) {
                 requiresTravel: ideaData.requiresTravel || false,
             }
         });
+
+        // Send push notification to other jar members (non-blocking)
+        notifyJarMembers(user.activeJarId!, session.user.id, {
+            title: `💡 ${session.user.name || 'Someone'} added a new surprise!`,
+            body: '🤫 It\'s a secret... spin to find out!',
+            url: '/jar',
+            icon: '/icon-192.png'
+        }, 'notifyIdeaAdded').catch(err => console.error("Notification error:", err));
 
         return NextResponse.json({ success: true, idea: newIdea });
 

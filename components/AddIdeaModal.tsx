@@ -8,7 +8,7 @@ import { ShoppingListPreview } from "./ShoppingListPreview";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles, Trash2, Move, ShoppingCart } from "lucide-react";
+import { X, Plus, Clock, Activity, DollarSign, Home, Trees, Loader2, ExternalLink, Wand2, Lock, Sun, CloudRain, Snowflake, Car, Sparkles, Trash2, Move, ShoppingCart, Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { COST_LEVELS, ACTIVITY_LEVELS, TIME_OF_DAY, WEATHER_TYPES } from "@/lib/constants";
 import { exportToPdf } from "@/lib/pdf-export";
@@ -26,6 +26,7 @@ import { IdeaTypeRenderer } from "./idea-types/IdeaTypeRenderer";
 import { suggestIdeaType, getStandardizedData } from "@/lib/idea-standardizer";
 import { UnifiedIdeaCard } from "./UnifiedIdeaCard";
 import React from 'react';
+import { useFavorites } from "@/hooks/useFavorites";
 
 
 interface AddIdeaModalProps {
@@ -44,6 +45,7 @@ interface AddIdeaModalProps {
 
 export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrade, jarTopic, customCategories, currentUser, onSuccess, initialMode = 'default', availableJars = [] }: AddIdeaModalProps) {
     const { openModal: openGlobalModal } = useModalSystem();
+    const { favorites, toggleFavorite, isToggling } = useFavorites();
 
     // Default to wizard for new ideas, form for edits
     const [isWizardMode, setIsWizardMode] = useState(!initialData?.id && initialMode !== 'magic');
@@ -695,6 +697,30 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                     title="Delete Idea"
                                 >
                                     <Trash2 className="w-5 h-5" />
+                                </button>
+                            )}
+                            {initialData && initialData.id && (
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        try {
+                                            await toggleFavorite(initialData);
+                                        } catch (err) {
+                                            console.error("Failed to update favorite", err);
+                                        }
+                                    }}
+                                    disabled={isToggling}
+                                    className={`px-4 py-3 rounded-xl border transition-colors flex items-center justify-center shrink-0 ${favorites.some(f => f.name === (initialData.description || initialData.name))
+                                        ? 'border-pink-200 dark:border-pink-900/30 text-pink-500 bg-pink-50 dark:bg-pink-900/10'
+                                        : 'border-slate-200 dark:border-white/10 text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5'
+                                        }`}
+                                    title={favorites.some(f => f.name === (initialData.description || initialData.name)) ? "Remove from Favorites" : "Add to Favorites"}
+                                >
+                                    {isToggling ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <Heart className={`w-5 h-5 ${favorites.some(f => f.name === (initialData.description || initialData.name)) ? 'fill-current' : ''}`} />
+                                    )}
                                 </button>
                             )}
                             <button

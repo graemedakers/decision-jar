@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift, Book, Popcorn, Gamepad2, ChefHat, Plane, Ticket, Music, Map as MapIcon, ListChecks, Check, Share } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift, Book, Popcorn, Gamepad2, ChefHat, Plane, Ticket, Music, Map as MapIcon, ListChecks, Check, Share, Heart } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
@@ -27,7 +27,7 @@ export default function JarPage() {
     // Custom Hooks
     const { userData, isPremium, refreshUser, isLoading: isLoadingUser, level, hasPaid, coupleCreatedAt, isTrialEligible } = useUser();
     const { ideas, isLoading: isIdeasLoading, isFetching, fetchIdeas } = useIdeas();
-    const { favoritesCount, fetchFavorites } = useFavorites();
+    const { favoritesCount, fetchFavorites, favorites, toggleFavorite } = useFavorites();
     const { openModal, closeModal, activeModal } = useModalSystem();
 
     // Local State
@@ -422,6 +422,24 @@ export default function JarPage() {
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     )}
+
+                                    <button
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            try {
+                                                await toggleFavorite(idea);
+                                            } catch (err) {
+                                                showError("Failed to update favorite");
+                                            }
+                                        }}
+                                        className={`p-2 rounded-full transition-all shadow-sm ${favorites.some(f => f.name === (idea.description || idea.name))
+                                            ? 'bg-pink-100 dark:bg-pink-500/20 text-pink-500'
+                                            : 'bg-slate-100 dark:bg-black/40 text-slate-500 dark:text-slate-400 hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-500/10'
+                                            }`}
+                                        title={favorites.some(f => f.name === (idea.description || idea.name)) ? "Remove from Favorites" : "Add to Favorites"}
+                                    >
+                                        <Heart className={`w-4 h-4 ${favorites.some(f => f.name === (idea.description || idea.name)) ? 'fill-current' : ''}`} />
+                                    </button>
                                 </div>
 
                                 <div className="mb-3 flex items-start justify-between">

@@ -175,7 +175,34 @@ export async function DELETE(
             // 8. Delete Memberships
             await tx.jarMember.deleteMany({ where: { jarId: id } });
 
-            // 9. Finally, Delete the Jar
+            // 9. Cleanup GiftTokens where this jar is the source
+            // Search for all gifts from this jar
+            const gifts = await tx.giftToken.findMany({
+                where: { sourceJarId: id },
+                select: { id: true }
+            });
+            const giftIds = gifts.map(g => g.id);
+
+            if (giftIds.length > 0) {
+                // a. Remove links from any jars cloned from these gifts
+                await tx.jar.updateMany({
+                    where: { sourceGiftId: { in: giftIds } },
+                    data: { sourceGiftId: null }
+                });
+
+                // b. Delete the gift tokens themselves
+                await tx.giftToken.deleteMany({
+                    where: { id: { in: giftIds } }
+                });
+            }
+
+            // 10. Clear pointers to gifts that were gifted to this jar (optional but clean)
+            await tx.jar.update({
+                where: { id },
+                data: { sourceGiftId: null }
+            });
+
+            // 11. Finally, Delete the Jar
             await tx.jar.delete({ where: { id: id } });
         });
 

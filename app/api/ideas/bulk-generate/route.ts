@@ -6,6 +6,7 @@ import { parseIntent } from '@/lib/intent-parser';
 import { VALID_AI_CATEGORY_IDS, getBestCategoryFit } from '@/lib/categories';
 import { getStandardizedData, suggestIdeaType } from '@/lib/idea-standardizer';
 import { IdeaStatus } from '@prisma/client';
+import { notifyJarMembers } from '@/lib/notifications';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -488,6 +489,17 @@ IDEA TYPE SCHEMAS (use "ideaType" and "typeData" fields):
                 });
             })
         );
+
+        // Send push notification to other jar members (non-blocking)
+        const notificationCount = createdIdeas.length;
+        if (notificationCount > 0) {
+            notifyJarMembers(jar.id, session.user.id, {
+                title: `✨ ${session.user.name || 'Someone'} added new ideas`,
+                body: `Added ${notificationCount} new idea${notificationCount > 1 ? 's' : ''} to the jar!`,
+                url: '/jar',
+                icon: '/icon-192.png'
+            }, 'notifyIdeaAdded').catch(err => console.error("Notification error:", err));
+        }
 
         return NextResponse.json({
             success: true,

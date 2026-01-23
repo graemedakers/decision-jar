@@ -27,7 +27,7 @@ model Jar {
   customCategories Json? // Array of { id: string, label: string }
 
   sourceGiftId  String?
-  sourceGift    GiftToken? @relation("ClonedFromGift", fields: [sourceGiftId], references: [id])
+  sourceGift    GiftToken? @relation("ClonedFromGift", fields: [sourceGiftId], references: [id], onDelete: SetNull)
   giftsCreated  GiftToken[] @relation("GiftedJar")
   
   members       JarMember[]
@@ -176,7 +176,7 @@ model GiftToken {
   
   // Source
   sourceJarId   String
-  sourceJar     Jar      @relation("GiftedJar", fields: [sourceJarId], references: [id])
+  sourceJar     Jar      @relation("GiftedJar", fields: [sourceJarId], references: [id], onDelete: Cascade)
   giftedById    String
   giftedBy      User     @relation("GiftCreator", fields: [giftedById], references: [id])
   

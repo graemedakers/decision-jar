@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, ExternalLink, Trash2, MapPin, Star, Share2, Users } from "lucide-react";
+import { X, Heart, ExternalLink, Trash2, MapPin, Star, Share2, Users, ArrowUpRight } from "lucide-react";
 import { Button } from "./ui/Button";
 import { getJarLabels } from "@/lib/labels";
+import { StandardizedIdeaHeader } from "./StandardizedIdeaHeader";
+import { ShareButton } from "./ShareButton";
 
 interface FavoritesModalProps {
     isOpen: boolean;
@@ -113,41 +115,35 @@ export function FavoritesModal({ isOpen, onClose, topic }: FavoritesModalProps) 
                             ) : (
                                 <div className="space-y-4">
                                     {favorites.map((fav) => (
-                                        <div key={fav.id} className="bg-slate-50/80 dark:bg-white/5 p-4 rounded-xl flex flex-col sm:flex-row gap-4 relative group border border-slate-200/50 dark:border-white/5">
+                                        <div key={fav.id} className="glass p-4 rounded-xl flex flex-col hover:bg-slate-50 dark:hover:bg-white/5 transition-colors relative bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
                                             <div className="flex-1">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="flex items-center gap-2">
-                                                        <h4 className="font-bold text-slate-900 dark:text-white text-lg">{fav.name}</h4>
-                                                    </div>
-                                                    <span className="text-xs font-bold px-2 py-1 bg-slate-200 dark:bg-white/10 rounded text-slate-600 dark:text-slate-300">{fav.type}</span>
-                                                </div>
-                                                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{fav.description}</p>
-                                                <div className="flex items-center gap-4 mt-3 text-xs text-slate-500 dark:text-slate-400">
-                                                    {fav.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {fav.address}</span>}
-                                                    {fav.googleRating && (
-                                                        <span className="flex items-center gap-1 text-orange-500 dark:text-yellow-400">
-                                                            <Star className="w-3 h-3 fill-current" /> {fav.googleRating}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                <StandardizedIdeaHeader
+                                                    name={fav.name}
+                                                    description={fav.description}
+                                                    address={fav.address}
+                                                    rating={fav.googleRating}
+                                                    website={fav.websiteUrl}
+                                                    category={fav.type === 'RESTAURANT' ? 'MEAL' : 'ACTIVITY'}
+                                                    compact={true}
+                                                />
                                             </div>
-                                            <div className="flex flex-row sm:flex-col gap-2 justify-end">
-                                                <Button size="sm" variant="ghost" className="text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10" onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fav.name + " " + (fav.address || ""))}`, '_blank')}>
-                                                    <ExternalLink className="w-4 h-4 mr-1" /> Map
-                                                </Button>
-                                                {fav.websiteUrl && (
-                                                    <Button size="sm" variant="ghost" className="text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10" onClick={() => window.open(fav.websiteUrl, '_blank')}>
-                                                        <ExternalLink className="w-4 h-4 mr-1" /> Web
-                                                    </Button>
-                                                )}
 
-                                                <Button size="sm" variant="ghost" onClick={() => handleNativeShare(fav)} className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-slate-200 dark:hover:bg-white/10">
-                                                    <Share2 className="w-4 h-4 mr-1" /> Share
-                                                </Button>
+                                            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex flex-wrap items-center gap-2">
+                                                <ShareButton
+                                                    title={`✨ ${fav.name}`}
+                                                    description={fav.description}
+                                                    url={fav.websiteUrl}
+                                                    className="text-xs h-7 px-2 whitespace-nowrap"
+                                                />
 
                                                 {fav.isOwner && (
-                                                    <Button size="sm" variant="ghost" onClick={() => handleDelete(fav.id)} className="text-xs text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10">
-                                                        <Trash2 className="w-4 h-4 mr-1" /> Remove
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleDelete(fav.id)}
+                                                        className="text-xs h-7 px-2 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
                                                     </Button>
                                                 )}
                                             </div>
