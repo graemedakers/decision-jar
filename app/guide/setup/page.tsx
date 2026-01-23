@@ -53,10 +53,16 @@ export default function GuideSetup() {
             </div>
 
             <h2 className="text-2xl font-bold mb-4">Creating your First Jar</h2>
-            <p className="mb-6">
+            <p className="mb-4">
                 When you create your first jar, you'll select one of these topics. This sets the stage for how you'll
                 organize your decisions.
             </p>
+            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-8">
+                <h4 className="font-bold mb-2 flex items-center gap-2">🕵️ Mystery Mode</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Want to keep the contents a secret? Enable <strong>Mystery Mode</strong> during setup to hide all idea names until they are revealed by a shake of the jar.
+                </p>
+            </div>
 
 
 

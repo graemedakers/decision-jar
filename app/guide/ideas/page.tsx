@@ -79,12 +79,21 @@ export default function GuideIdeas() {
             </p>
 
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                <Ghost className="text-slate-400" /> Ghost Ideas (Surprises)
+                <Ghost className="text-slate-400" /> surprise Ideas
             </h2>
-            <p className="mb-6">
+            <p className="mb-4">
                 Sometimes the best dates are surprises. You can add a <strong>Surprise Idea</strong> that hides its name and details from
-                your partner or group. The idea will only be revealed once the jar "spins" and selects it!
+                your partner or group. The idea will only be revealed once it is selected!
             </p>
+            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-8">
+                <h4 className="font-bold mb-2 flex items-center gap-2"><Ghost className="w-4 h-4 text-primary" /> Mystery Jars</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                    For the ultimate adventure, enable <strong>Mystery Mode</strong> in your Jar Settings. This hides <em>every</em> idea in the jar pool.
+                </p>
+                <div className="p-3 bg-primary/10 rounded-lg border border-primary/20 text-xs">
+                    <strong>⏳ Reveal Pacing:</strong> To keep things exciting, only <strong>one mystery idea</strong> can be revealed per day. This ensures you savor each choice! (Note: Jars gifted by others are exempt from this limit).
+                </div>
+            </div>
             <div className="bg-purple-100 dark:bg-purple-900/20 p-6 rounded-xl border border-purple-200 dark:border-purple-800 mb-8">
                 <h3 className="font-bold mb-2">💡 Pro Tip</h3>
                 <p className="text-sm">

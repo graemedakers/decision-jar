@@ -47,10 +47,13 @@ export default function GuideSelection() {
             <p className="mb-4">
                 In larger groups, a random spin might cause arguments. That's why we built <strong>Voting Mode</strong>.
             </p>
-            <p className="mb-6">
+            <p className="mb-4">
                 The Admin can start a voting round. Members are presented with a selection of ideas and can cast their vote.
                 The system handles ties automatically with a random tiebreaker or a second run-off round.
             </p>
+            <div className="bg-amber-50 dark:bg-amber-500/10 p-4 rounded-xl border border-amber-200 dark:border-amber-500/20 mb-6 font-medium text-sm">
+                <strong>📝 Requirements:</strong> Group Voting requires at least <strong>3 active members</strong> and is disabled for <strong>Mystery Jars</strong>. If a jar drops below 3 members, it will automatically revert to Random Spin mode.
+            </div>
 
             <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 mb-8 shadow-xl">
                 <Image

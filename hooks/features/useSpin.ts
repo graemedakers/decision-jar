@@ -92,7 +92,8 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
             // 4. Fetch Result - Inject excluded IDs
             const spinFilters = {
                 ...filters,
-                excludeIds: [...(filters.excludeIds || []), ...skippedIds]
+                excludeIds: [...(filters.excludeIds || []), ...skippedIds],
+                userTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
             };
             const res = await spinJar(spinFilters);
 

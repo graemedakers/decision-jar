@@ -15,7 +15,7 @@ import { ACTION_LABELS } from "@/lib/ui-constants";
 import { getCategoryDef } from "@/lib/categories";
 import { getVenueDetails, getShortHours } from "@/lib/utils";
 import { getStandardizedData, suggestIdeaType } from "@/lib/idea-standardizer";
-import { showInfo } from "@/lib/toast";
+import { showInfo, showError, showSuccess } from "@/lib/toast";
 import React from "react";
 
 
@@ -103,7 +103,8 @@ export default function JarPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     selectedAt: new Date().toISOString(),
-                    selectedDate: new Date().toISOString()
+                    selectedDate: new Date().toISOString(),
+                    userTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
                 }),
                 credentials: 'include',
             });
@@ -114,9 +115,21 @@ export default function JarPage() {
                 // Show the reveal modal instead of redirecting
                 openModal('DATE_REVEAL', { idea: { ...idea, ...updatedIdea }, isDirectSelection: true });
             } else {
-                const err = await res.text();
-                console.error("Go Tonight Failed:", err);
-                alert("Failed to start date night: " + err);
+                let errorMessage = "Failed to start date night";
+
+                if (res.status === 429) {
+                    errorMessage = "Patience! You can only open one mystery idea per day. Come back tomorrow!";
+                }
+
+                try {
+                    const clonedRes = res.clone();
+                    const errData = await clonedRes.json();
+                    errorMessage = errData.error || (typeof errData === 'string' ? errData : errorMessage);
+                } catch (e) {
+                    const rawText = await res.text().catch(() => null);
+                    if (rawText) errorMessage = rawText;
+                }
+                showError(errorMessage);
             }
         } catch (err) {
             console.error(err);

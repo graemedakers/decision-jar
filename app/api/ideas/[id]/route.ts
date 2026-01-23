@@ -237,9 +237,41 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             }, { status: 400 });
         }
 
-        const updatedIdea = await prisma.idea.update({
-            where: { id },
-            data: body,
+        const { userTimeZone = 'UTC', ...ideaData } = body;
+        const isReveal = !!(ideaData.selectedAt && !idea.selectedAt);
+
+        // 🛑 Reveal Pace Check (for Admin Picks)
+        const jar = idea.jar as any;
+        if (isReveal && jar.revealPace === 'DAILY' && jar.lastRevealAt) {
+            const now = new Date();
+            const last = new Date(jar.lastRevealAt);
+
+            // Use Intl to compare "Calendar Days" in the user's timezone
+            const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: userTimeZone as string, year: 'numeric', month: '2-digit', day: '2-digit' });
+            const todayStr = fmt.format(now);
+            const lastStr = fmt.format(last);
+
+            if (todayStr === lastStr) {
+                return NextResponse.json(
+                    { error: "Patience! You can only open one mystery idea per day. Come back tomorrow!" },
+                    { status: 429 }
+                );
+            }
+        }
+
+        const updatedIdea = await prisma.$transaction(async (tx) => {
+            // If this is a reveal, update the jar's lastRevealAt
+            if (isReveal) {
+                await (tx.jar as any).update({
+                    where: { id: currentJarId },
+                    data: { lastRevealAt: new Date() }
+                });
+            }
+
+            return await tx.idea.update({
+                where: { id },
+                data: ideaData,
+            });
         });
 
         return NextResponse.json(updatedIdea);

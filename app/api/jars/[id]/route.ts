@@ -42,7 +42,21 @@ export async function PUT(
         if (body.name !== undefined) updateData.name = body.name;
         if (body.topic !== undefined) updateData.topic = body.topic;
         if (body.customCategories !== undefined) updateData.customCategories = body.customCategories;
-        if (body.selectionMode !== undefined) updateData.selectionMode = body.selectionMode;
+        if (body.selectionMode !== undefined) {
+            if (body.selectionMode === 'VOTE') {
+                const jar = membership.jar;
+                if (jar.isMysteryMode) {
+                    return NextResponse.json({ error: "Voting is not allowed for mystery jars" }, { status: 400 });
+                }
+                const memberCount = await prisma.jarMember.count({
+                    where: { jarId: id, status: 'ACTIVE' }
+                });
+                if (memberCount < 3) {
+                    return NextResponse.json({ error: "Group voting requires at least 3 members" }, { status: 400 });
+                }
+            }
+            updateData.selectionMode = body.selectionMode;
+        }
         if (body.voteCandidatesCount !== undefined) updateData.voteCandidatesCount = Number(body.voteCandidatesCount);
         if (body.defaultIdeaPrivate !== undefined) updateData.defaultIdeaPrivate = !!body.defaultIdeaPrivate;
 

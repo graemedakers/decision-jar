@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers, Key, Share2, MousePointer2, Bell, Gift } from "lucide-react";
+import { X, BookOpen, MapPin, Plus, Sparkles, History, Settings, HelpCircle, Calendar, Utensils, Wine, Compass, RefreshCcw, Pencil, ExternalLink, Trophy, Users, Disc, Bed, Clapperboard, Leaf, Dumbbell, Ticket, Brain, Gamepad2, Crown, Shield, Layers, Key, Share2, MousePointer2, Bell, Gift, Ghost } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface HelpModalProps {
@@ -181,6 +181,14 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                 <p className="text-sm text-slate-600 dark:text-slate-300">
                                     Click <strong>"Spin the Jar"</strong> to randomly pick an idea. Apply filters (cost, duration, energy) to narrow options. Perfect when you want fate to decide!
                                 </p>
+                                <div className="mt-4 p-3 bg-slate-900/5 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
+                                    <h5 className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5 mb-1">
+                                        <Ghost className="w-3.5 h-3.5 text-slate-400" /> Mystery Results
+                                    </h5>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                        For <strong>Mystery Jars</strong> or <strong>Surprise Ideas</strong>, details are hidden until revealed. To keep the anticipation alive, only <strong>one mystery reveal</strong> is allowed per day. Gifted mystery jars (curated by others) are exempt from this limit!
+                                    </p>
+                                </div>
                             </div>
 
                             <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800/50">
@@ -188,7 +196,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                     <Users className="w-5 h-5" /> Voting Mode
                                 </h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
-                                    <strong>Best for:</strong> Friend groups, teams, democratic decisions
+                                    <strong>Best for:</strong> Friend groups, teams, democratic decisions (Requires 3+ Members)
                                 </p>
                                 <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
                                     <strong>How it works:</strong>
@@ -198,10 +206,12 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                                     <li><strong>Cast Vote:</strong> Everyone votes on their favorite. For fairness, you cannot vote for ideas you suggested!</li>
                                     <li><strong>Sidelines:</strong> If a round only has your ideas, you'll be placed on the sidelines to watch the live progress.</li>
                                     <li><strong>Instant Reveal:</strong> Once the final vote is cast, the winner's card pops up for everyone simultaneously.</li>
-                                    <li><strong>Settling Ties:</strong> If votes are split, the system will trigger a Random Tie-break or a new Runoff Round.</li>
                                 </ul>
-                                <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">
-                                    🎉 Featuring <strong>Real-time Broadcast</strong> sync! No page reloads required.
+                                <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-800/20 rounded-lg text-[11px] text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700/30">
+                                    <strong>⚠️ Constraints:</strong> Voting Mode is unavailable for <strong>Mystery Jars</strong> and requires at least <strong>3 active members</strong> in a standard jar. If members leave and your group drops to 2, the jar will automatically revert to Random Spin mode.
+                                </div>
+                                <p className="text-[11px] text-blue-800 dark:text-blue-300 mt-3 flex items-center gap-1.5 font-medium">
+                                    <Sparkles className="w-3.5 h-3.5" /> Featuring <strong>Real-time Broadcast</strong> sync!
                                 </p>
                             </div>
 
@@ -312,6 +322,7 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                             <li><strong>Favorites:</strong> Access your saved "Go-To" ideas from the heart icon in the header</li>
                             <li><strong>In The Jar:</strong> Browse your complete list of ideas, add new ones, or edit existing entries</li>
                             <li><strong>Spin Button:</strong> The main action — click to randomly select an idea based on your filters</li>
+                            <li><strong>Jar Insights:</strong> View stats about your jar in the sidebar, including the <strong>total number of ideas</strong>, the active <strong>selection mode</strong>, and the <strong>total member count</strong>.</li>
                             <li><strong>Explore Tab:</strong> Navigate here to discover new activities using AI planners and scouts</li>
                         </ul>
                     </div>

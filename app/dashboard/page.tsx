@@ -842,7 +842,11 @@ function DashboardContent() {
                                         </div>
                                         <div className="flex justify-between items-center group">
                                             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider">Spin Mode</span>
-                                            <span className="text-xs text-slate-900 dark:text-white font-bold px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg shadow-sm capitalize">{jarSelectionMode?.toLowerCase()}</span>
+                                            <span className="text-xs text-slate-900 dark:text-white font-bold px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg shadow-sm capitalize">{jarSelectionMode?.toLowerCase()?.replace('_', ' ')}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center group">
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider">Members</span>
+                                            <span className="text-xs text-slate-900 dark:text-white font-bold px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg shadow-sm">{userData?.memberCount || 1} members</span>
                                         </div>
                                     </div>
                                 </div>

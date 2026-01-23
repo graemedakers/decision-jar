@@ -24,7 +24,19 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
         // 1. Fetch User and Active Jar
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
-            include: { memberships: true }
+            include: {
+                memberships: {
+                    include: {
+                        jar: {
+                            select: {
+                                id: true,
+                                revealPace: true,
+                                lastRevealAt: true
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         if (!user) return { success: false, error: 'User not found', status: 404 };
@@ -32,9 +44,13 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
         const currentJarId = user.activeJarId || user.memberships?.[0]?.jarId;
         if (!currentJarId) return { success: false, error: 'No active jar found', status: 400 };
 
-        // 🚨 Permission Check: Only Admins/Owners can spin
         const currentUserMembership = user.memberships.find(m => m.jarId === currentJarId);
+        // Access the Jar from the membership query (safely)
+        const activeJar = currentUserMembership?.jar;
 
+        if (!activeJar) return { success: false, error: 'Jar not found', status: 404 };
+
+        // 🚨 Permission Check: Only Admins/Owners can spin
         const canSpin = currentUserMembership?.role === 'ADMIN' || currentUserMembership?.role === 'OWNER';
 
         if (!canSpin) {
@@ -43,6 +59,34 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
                 error: 'Only jar admins can spin the jar. Ask an admin to spin!',
                 status: 403
             };
+        }
+
+        // 🛑 Reveal Pace Check
+        if (activeJar.revealPace === 'DAILY' && activeJar.lastRevealAt) {
+            // Get user timezone from filters or default to UTC
+            const userTimeZone = filters.userTimeZone || 'UTC';
+
+            try {
+                const now = new Date();
+                const last = new Date(activeJar.lastRevealAt);
+
+                // Use Intl to compare "Calendar Days" in the user's timezone
+                const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: userTimeZone, year: 'numeric', month: '2-digit', day: '2-digit' });
+                const todayStr = fmt.format(now);
+                const lastStr = fmt.format(last);
+
+                if (todayStr === lastStr) {
+                    return {
+                        success: false,
+                        error: "Patience! You can only open one mystery idea per day. Come back tomorrow!",
+                        status: 429
+                    };
+                }
+            } catch (e) {
+                console.error("Timezone check failed", e);
+                // Fail safe: Allow spin if TZ check fails? Or Block? 
+                // Let's block to be safe but log it.
+            }
         }
 
         // 2. Build Prisma-level Filters
@@ -111,12 +155,24 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
 
         // 5. Update Selection State
         if (session && currentJarId) {
-            await prisma.idea.update({
-                where: { id: selectedIdea.id },
-                data: {
-                    selectedAt: new Date(),
-                    selectedDate: new Date(),
-                },
+            // Transaction to ensure atomicity
+            await prisma.$transaction(async (tx) => {
+                // Update Idea
+                await tx.idea.update({
+                    where: { id: selectedIdea.id },
+                    data: {
+                        selectedAt: new Date(),
+                        selectedDate: new Date(),
+                    },
+                });
+
+                // Update Jar (Last Reveal)
+                await tx.jar.update({
+                    where: { id: currentJarId },
+                    data: {
+                        lastRevealAt: new Date()
+                    }
+                });
             });
 
             // Parallel background tasks

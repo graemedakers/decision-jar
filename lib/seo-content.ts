@@ -280,6 +280,14 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             {
                 question: "What if we don't like the new activity?",
                 answer: "The bonding doesn't come from the activity being 'perfect'—it comes from the shared vulnerability of trying something unfamiliar together."
+            },
+            {
+                question: "How do I make my jar more mysterious?",
+                answer: "Enable 'Mystery Mode' in Jar Settings. This hides all idea names until they are selected and revealed."
+            },
+            {
+                question: "Why can I only reveal one mystery idea per day?",
+                answer: "Decision Jar is about intentionality. By limiting mystery reveals to one per day, we encourage groups to actually do the activity they picked rather than 'doom-spinning' for a better surprise. If a jar was gifted to you with curated ideas, this limit is lifted!"
             }
         ],
         sections: [
@@ -596,6 +604,14 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             {
                 question: "What if someone isn't eligible to vote?",
                 answer: "To keep things fair, the system prevents users from voting for their own ideas. If a round only contains your ideas, you'll be moved to the 'Sidelines' where you can watch the results come in live."
+            },
+            {
+                question: "How do I enable Voting Mode?",
+                answer: "You can switch to Voting Mode in Jar Settings. However, it requires a group of at least 3 active members and cannot be used in 'Mystery Mode' jars."
+            },
+            {
+                question: "What happens if our group drops below 3 members?",
+                answer: "If your jar has only 2 members, Voting Mode becomes technically impossible (since you can't vote for your own ideas). The system will automatically revert your jar to Random Spin mode to ensure you can still make decisions."
             }
         ],
         sections: [

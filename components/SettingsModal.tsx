@@ -54,6 +54,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const [defaultIdeaPrivate, setDefaultIdeaPrivate] = useState(false);
     const [isGiftable, setIsGiftable] = useState(true);
     const [ideaCount, setIdeaCount] = useState(0);
+    const [memberCount, setMemberCount] = useState(0);
+    const [isMysteryMode, setIsMysteryMode] = useState(false);
 
     // Premium Invite Logic
     const [currentUserEmail, setCurrentUserEmail] = useState("");
@@ -104,6 +106,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                 .then(jar => {
                                     setIsGiftable(jar.isGiftable ?? true);
                                     setIdeaCount(jar._count?.ideas || 0);
+                                    setMemberCount(jar.members?.length || 0);
+                                    setIsMysteryMode(!!jar.isMysteryMode);
                                 });
                         }
 
@@ -578,19 +582,40 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                                                         </div>
 
                                                         <div className="space-y-2">
-                                                            <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Mode</label>
+                                                            <div className="flex justify-between">
+                                                                <label className="text-sm font-bold text-slate-800 dark:text-gray-200">Mode</label>
+                                                                {jarSelectionMode === 'VOTE' && (
+                                                                    <span className="text-[10px] text-indigo-500 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 rounded">
+                                                                        {memberCount} active members
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                             <div className="relative">
                                                                 <select
                                                                     value={jarSelectionMode}
                                                                     onChange={(e) => setJarSelectionMode(e.target.value as any)}
-                                                                    className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm appearance-none focus:outline-none focus:border-primary"
+                                                                    className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-2.5 text-sm appearance-none focus:outline-none focus:border-primary disabled:opacity-50"
                                                                 >
                                                                     <option value="RANDOM">Random Spin</option>
                                                                     <option value="ADMIN_PICK">Admin Pick</option>
-                                                                    <option value="VOTE">Group Voting</option>
+                                                                    {!isMysteryMode && (
+                                                                        <option value="VOTE" disabled={memberCount < 3}>
+                                                                            Group Voting {memberCount < 3 ? "(Needs 3+ Members)" : ""}
+                                                                        </option>
+                                                                    )}
                                                                 </select>
                                                                 <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
                                                             </div>
+                                                            {isMysteryMode && (
+                                                                <p className="text-[10px] text-amber-500 mt-1">
+                                                                    Voting is disabled for Mystery Jars.
+                                                                </p>
+                                                            )}
+                                                            {!isMysteryMode && memberCount < 3 && (
+                                                                <p className="text-[10px] text-slate-400 mt-1">
+                                                                    Group voting requires at least 3 members (Owner + 2).
+                                                                </p>
+                                                            )}
                                                         </div>
 
                                                         {jarSelectionMode === 'VOTE' && (

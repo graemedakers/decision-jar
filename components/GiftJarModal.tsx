@@ -24,6 +24,7 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
     const [step, setStep] = useState<'CREATE' | 'SHARE'>('CREATE');
     const [message, setMessage] = useState("");
     const [isMysteryMode, setIsMysteryMode] = useState(false); // State for mystery mode
+    const [revealPace, setRevealPace] = useState("INSTANT"); // State for reveal pace
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [giftData, setGiftData] = useState<{ token: string; url: string; expiresAt: string } | null>(null);
@@ -63,7 +64,8 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     personalMessage: message,
-                    isMysteryMode: isMysteryMode // Pass the state
+                    isMysteryMode: isMysteryMode, // Pass the state
+                    revealPace: isMysteryMode ? revealPace : "INSTANT"
                 })
             });
 
@@ -175,6 +177,38 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
                                     </p>
                                 </div>
                             </div>
+
+                            {isMysteryMode && (
+                                <div className="pl-8 space-y-3 animate-in slide-in-from-top-2 fade-in">
+                                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Unlock Pace</Label>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center space-x-2">
+                                            <input
+                                                type="radio"
+                                                id="pace-instant"
+                                                name="revealPace"
+                                                value="INSTANT"
+                                                checked={revealPace === "INSTANT"}
+                                                onChange={() => setRevealPace("INSTANT")}
+                                                className="text-primary focus:ring-primary"
+                                            />
+                                            <label htmlFor="pace-instant" className="text-sm">Instant (No Limit)</label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <input
+                                                type="radio"
+                                                id="pace-daily"
+                                                name="revealPace"
+                                                value="DAILY"
+                                                checked={revealPace === "DAILY"}
+                                                onChange={() => setRevealPace("DAILY")}
+                                                className="text-primary focus:ring-primary"
+                                            />
+                                            <label htmlFor="pace-daily" className="text-sm">One Idea Per Day</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {error && (
                                 <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md text-sm flex items-start gap-2">

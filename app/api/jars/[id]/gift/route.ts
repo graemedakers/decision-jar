@@ -20,7 +20,7 @@ export async function POST(
     }
 
     try {
-        const { personalMessage, expiresInDays = 90, isMysteryMode = false } = await req.json();
+        const { personalMessage, expiresInDays = 90, isMysteryMode = false, revealPace = "INSTANT" } = await req.json();
 
         // 0. Check for existing active token for this jar/user
         const existingGift = await prisma.giftToken.findFirst({
@@ -33,14 +33,16 @@ export async function POST(
         });
 
         if (existingGift) {
-            // Update message and mode if changed
+            // Update message, mode, and pace if changed
             if ((personalMessage !== undefined && personalMessage !== existingGift.personalMessage) ||
-                (isMysteryMode !== undefined && isMysteryMode !== existingGift.isMysteryMode)) {
+                (isMysteryMode !== undefined && isMysteryMode !== existingGift.isMysteryMode) ||
+                (revealPace !== undefined && revealPace !== existingGift.revealPace)) {
                 await prisma.giftToken.update({
                     where: { id: existingGift.id },
                     data: {
                         personalMessage,
-                        isMysteryMode
+                        isMysteryMode,
+                        revealPace
                     }
                 });
             }
@@ -51,6 +53,7 @@ export async function POST(
                     ...existingGift,
                     personalMessage: personalMessage ?? existingGift.personalMessage,
                     isMysteryMode: isMysteryMode ?? existingGift.isMysteryMode,
+                    revealPace: revealPace ?? existingGift.revealPace,
                     url: `${process.env.NEXTAUTH_URL || 'https://spinthejar.com'}/gift/${existingGift.token}`,
                 }
             });
@@ -70,6 +73,7 @@ export async function POST(
                 giftedById: userId,
                 personalMessage,
                 isMysteryMode,
+                revealPace,
                 expiresAt,
                 isActive: true
             }

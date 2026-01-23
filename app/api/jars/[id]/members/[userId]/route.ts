@@ -63,6 +63,24 @@ export async function DELETE(
             where: { userId_jarId: { userId: targetUserId, jarId } }
         });
 
+        // Auto-revert to RANDOM if members < 3
+        const jar = await prisma.jar.findUnique({
+            where: { id: jarId },
+            select: { selectionMode: true }
+        });
+
+        if (jar?.selectionMode === 'VOTE') {
+            const memberCount = await prisma.jarMember.count({
+                where: { jarId, status: 'ACTIVE' }
+            });
+            if (memberCount < 3) {
+                await prisma.jar.update({
+                    where: { id: jarId },
+                    data: { selectionMode: 'RANDOM' }
+                });
+            }
+        }
+
         return NextResponse.json({ success: true });
 
     } catch (error) {

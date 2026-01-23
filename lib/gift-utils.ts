@@ -79,6 +79,7 @@ export async function cloneJarForGift(
             selectionMode: sourceJar.selectionMode,
             defaultIdeaPrivate: false,
             isMysteryMode: giftToken?.isMysteryMode || false,
+            revealPace: giftToken?.revealPace || "INSTANT",
             sourceGiftId: giftTokenId,
             referenceCode,
             voteCandidatesCount: sourceJar.voteCandidatesCount,
