@@ -356,7 +356,8 @@ function DashboardContent() {
         }
     ];
 
-    const activeQuickChips = allQuickChips.filter(chip => ideas.some(chip.match)).slice(0, 4);
+    const activeIdeas = ideas.filter((i: any) => !i.selectedAt);
+    const activeQuickChips = allQuickChips.filter(chip => activeIdeas.some(chip.match)).slice(0, 4);
 
     if (isLoading) {
         return (

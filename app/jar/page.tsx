@@ -10,6 +10,8 @@ import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
 import { useIdeas } from "@/hooks/useIdeas";
 import { useModalSystem } from "@/components/ModalProvider";
+import { SmartPromptInput } from "@/components/SmartPromptInput";
+import { useSmartPrompt } from "@/hooks/features/useSmartPrompt";
 import { useFavorites } from "@/hooks/useFavorites";
 import { ACTION_LABELS } from "@/lib/ui-constants";
 import { getCategoryDef } from "@/lib/categories";
@@ -29,6 +31,12 @@ export default function JarPage() {
     const { ideas, isLoading: isIdeasLoading, isFetching, fetchIdeas } = useIdeas();
     const { favoritesCount, fetchFavorites, favorites, toggleFavorite } = useFavorites();
     const { openModal, closeModal, activeModal } = useModalSystem();
+
+    const { handleSmartPrompt, isGeneratingSmartIdeas, aiUsage } = useSmartPrompt({
+        userData,
+        fetchIdeas,
+        refreshUser
+    });
 
     // Local State
     const [userLocation, setUserLocation] = useState<string | null>(null);
@@ -322,14 +330,23 @@ export default function JarPage() {
                         <p className="text-slate-400">Opening your jar...</p>
                     </div>
                 ) : activeIdeas.length === 0 ? (
-                    <EnhancedEmptyState
-                        jarTopic={userData?.jarTopic || 'General'}
-                        jarName={userData?.jarName || 'Your Jar'}
-                        jarId={userData?.activeJarId || ''}
-                        inviteCode={userData?.coupleReferenceCode || userData?.referenceCode}
-                        onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
-                        onAddIdeaClick={() => openModal('ADD_IDEA')}
-                    />
+                    <div className="space-y-6 max-w-2xl mx-auto w-full">
+                        <SmartPromptInput
+                            jarTopic={userData?.jarTopic || 'General'}
+                            onGenerate={handleSmartPrompt}
+                            isGenerating={isGeneratingSmartIdeas}
+                            aiUsage={aiUsage}
+                            className="w-full"
+                        />
+                        <EnhancedEmptyState
+                            jarTopic={userData?.jarTopic || 'General'}
+                            jarName={userData?.jarName || 'Your Jar'}
+                            jarId={userData?.activeJarId || ''}
+                            inviteCode={userData?.coupleReferenceCode || userData?.referenceCode}
+                            onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
+                            onAddIdeaClick={() => openModal('ADD_IDEA')}
+                        />
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {activeIdeas.map((idea) => (
