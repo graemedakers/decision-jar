@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useModalSystem } from "@/components/ModalProvider";
 import imageCompression from 'browser-image-compression';
 import { showError, showSuccess } from "@/lib/toast";
+import { SmartInputEducationTip } from "@/components/SmartInputEducationTip";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SmartPromptInputProps {
@@ -204,7 +205,8 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
     const ButtonColor = showGenerate ? "from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" : "bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900"; // Manual add is simpler
 
     return (
-        <div className={cn("space-y-3", className)}>
+        <div className={cn("space-y-3 relative", className)}>
+            <SmartInputEducationTip onTryExample={setPrompt} />
             <input
                 type="file"
                 ref={fileInputRef}
