@@ -123,9 +123,9 @@ export function MovieDetails({ data, compact, idea }: MovieDetailsProps) {
 
             {/* Smart Actions */}
             <div className="flex flex-col gap-2">
-                {data.watchMode?.toLowerCase() === 'cinema' && (
+                {(data.watchMode?.toLowerCase() === 'cinema' || data.showtimesUrl) && (
                     <a
-                        href={`https://www.google.com/search?q=${encodeURIComponent((data.title || "") + " showtimes near me")}`}
+                        href={data.showtimesUrl || `https://www.google.com/search?q=${encodeURIComponent((data.title || "") + " showtimes near me")}`}
                         target="_blank"
                         rel="noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-2.5 px-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg transition-colors shadow-sm"

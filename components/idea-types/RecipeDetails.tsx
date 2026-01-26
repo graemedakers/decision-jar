@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Clock, Users, ChefHat, ExternalLink, ListChecks, FileText, Maximize2, X, CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -35,9 +36,22 @@ export function RecipeDetails({ data, compact, idea }: RecipeDetailsProps) {
         <div className="space-y-5 mt-1">
             {/* Title */}
             {!compact && (
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                    {recipeTitle}
-                </h2>
+                <div className="flex justify-between items-start gap-4">
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                        {recipeTitle}
+                    </h2>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsCookMode(true)}
+                        className="gap-2 text-orange-600 border-orange-200 hover:bg-orange-50 shrink-0"
+                    >
+                        <Maximize2 className="w-4 h-4" />
+                        <span className="hidden sm:inline">Cook Mode</span>
+                        <span className="sm:hidden">Cook</span>
+                    </Button>
+                </div>
             )}
 
             {idea?.description && idea.description.toLowerCase().trim() !== recipeTitle.toLowerCase().trim() && (
@@ -99,29 +113,19 @@ export function RecipeDetails({ data, compact, idea }: RecipeDetailsProps) {
                 </div>
             )}
 
-            <div className="flex justify-end pt-1">
-                <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setIsCookMode(true)}
-                    className="gap-2 text-orange-600 border-orange-200 hover:bg-orange-50"
-                >
-                    <Maximize2 className="w-4 h-4" />
-                    Open Cook Mode
-                </Button>
-            </div>
+
 
             {/* Ingredients */}
             {data.ingredients && data.ingredients.length > 0 && (
-                <div className="space-y-3">
+                <div className="space-y-2">
                     <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         <ListChecks className="w-4 h-4 text-primary" />
                         Ingredients
                     </h4>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600 dark:text-slate-300">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-600 dark:text-slate-300">
                         {data.ingredients.map((ing: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2 bg-slate-50 dark:bg-black/20 p-2 rounded-lg">
-                                <span className="block w-1.5 h-1.5 rounded-full bg-primary/40 mt-1.5 shrink-0" />
+                            <li key={i} className="flex items-start gap-2 py-0.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 shrink-0" />
                                 <span>{ing}</span>
                             </li>
                         ))}
@@ -142,9 +146,12 @@ export function RecipeDetails({ data, compact, idea }: RecipeDetailsProps) {
                 </div>
             )}
 
-            {/* Cook Mode Overlay */}
-            {isCookMode && (
-                <div className="fixed inset-0 z-[100] bg-white dark:bg-slate-950 overflow-y-auto overscroll-none p-6 md:p-12 animate-in fade-in zoom-in duration-200">
+            {/* Cook Mode Overlay - Portaled to escape parent modal constraints */}
+            {isCookMode && typeof document !== 'undefined' && createPortal(
+                <div
+                    className="fixed inset-0 z-[2000] bg-white dark:bg-slate-950 overflow-y-auto overscroll-none p-6 md:p-12 animate-in fade-in zoom-in duration-200"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <div className="max-w-3xl mx-auto space-y-8">
                         <div className="flex justify-between items-start border-b dark:border-white/10 pb-6">
                             <div>
@@ -199,7 +206,8 @@ export function RecipeDetails({ data, compact, idea }: RecipeDetailsProps) {
                             </Button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

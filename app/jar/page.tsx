@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift, Book, Popcorn, Gamepad2, ChefHat, Plane, Ticket, Music, Map as MapIcon, ListChecks, Check, Share, Heart } from "lucide-react";
+import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift, Book, Popcorn, Gamepad2, ChefHat, Plane, Ticket, Music, Youtube, Map as MapIcon, ListChecks, Check, Share, Heart, Wine, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
@@ -472,11 +472,21 @@ export default function JarPage() {
                                             Icon = Ticket;
                                             colorClass = "bg-fuchsia-100 dark:bg-fuchsia-500/20 text-fuchsia-600 dark:text-fuchsia-400";
                                         } else if (effectiveType === 'dining') {
-                                            Icon = Utensils;
-                                            colorClass = "bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400";
+                                            const tData = idea.typeData || getStandardizedData(idea);
+                                            const cuisine = (tData?.cuisine || "").toLowerCase();
+                                            if (cuisine.match(/bar|pub|nightlife|club|cocktail|tavern/)) {
+                                                Icon = Wine;
+                                                colorClass = "bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400";
+                                            } else {
+                                                Icon = Utensils;
+                                                colorClass = "bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400";
+                                            }
                                         } else if (effectiveType === 'music') {
                                             Icon = Music;
                                             colorClass = "bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400";
+                                        } else if (effectiveType === 'youtube') {
+                                            Icon = Youtube;
+                                            colorClass = "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400";
                                         } else if (effectiveType === 'itinerary') {
                                             Icon = Layers;
                                             colorClass = "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400";
@@ -533,7 +543,13 @@ export default function JarPage() {
                                         ? (idea.isSurprise
                                             ? (hasPartner ? "✨ Shared Surprise" : "✨ Surprise")
                                             : (idea.createdBy?.name === userData?.name || idea.createdBy?.id === userData?.id) ? "🔒 Mystery Idea" : `${idea.createdBy?.name || "Partner"}'s Secret`)
-                                        : idea.description}
+                                        : (() => {
+                                            const isGenericTitle = !idea.description || idea.description === 'Shared Link' || idea.description === 'YouTube Video' || idea.description === 'Loading video info...';
+                                            const typeData = idea.typeData || getStandardizedData(idea);
+                                            return (isGenericTitle && (typeData?.title || typeData?.videoId))
+                                                ? (typeData.title || `YouTube: ${typeData.videoId}`)
+                                                : idea.description;
+                                        })()}
                                 </h3>
 
                                 {(() => {
@@ -568,6 +584,34 @@ export default function JarPage() {
 
                                     return (
                                         <div className="flex flex-wrap gap-2 mt-auto pt-2 items-center">
+                                            {/* Website / Search Link - Priority First */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const tData = idea.typeData || getStandardizedData(idea);
+                                                    const url = idea.website || tData?.officialWebsite || tData?.website || tData?.menuUrl;
+                                                    if (url) {
+                                                        window.open(url, '_blank');
+                                                    } else {
+                                                        const baseName = typeData?.title || idea.name;
+                                                        let query = baseName + " " + (idea.address || "");
+
+                                                        // Smart Context for Escape Rooms
+                                                        const desc = (idea.description || "").toLowerCase();
+                                                        if (idea.category === 'ESCAPE_ROOM' || (desc.includes('puzzle') || desc.includes('escape') || desc.includes('mystery')) && !baseName.toLowerCase().includes('escape')) {
+                                                            query += " Escape Room";
+                                                        }
+
+                                                        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                                                    }
+                                                }}
+                                                className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/5 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors flex items-center gap-1"
+                                                title="Open Website or Search"
+                                            >
+                                                <ExternalLink className="w-2.5 h-2.5" />
+                                                {(idea.website || (idea.typeData || getStandardizedData(idea))?.officialWebsite) ? 'Web' : 'Search'}
+                                            </button>
+
                                             {/* Duration & Cost */}
                                             <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/5">
                                                 {idea.duration}h

@@ -118,6 +118,18 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         }
     };
 
+    const fetchYouTubeMetadata = async (url: string) => {
+        try {
+            const response = await fetch(`/api/youtube/metadata?url=${encodeURIComponent(url)}`);
+            if (!response.ok) return null;
+            const data = await response.json();
+            return data;
+        } catch (e) {
+            console.error("YouTube metadata fetch skipped:", e);
+            return null;
+        }
+    };
+
     useEffect(() => {
         if (isOpen) {
             setViewMode('PREVIEW');
@@ -136,6 +148,54 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
             ideaWasAdded.current = false;
         }
     }, [isOpen]);
+
+    // Auto-detect YouTube metadata for shared links
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const urlToCheck = formData.details || formData.description;
+        const isYouTubeUrl = urlToCheck && (urlToCheck.includes('youtube.com/watch') || urlToCheck.includes('youtu.be/') || urlToCheck.includes('youtube.com/shorts/'));
+
+        if (isYouTubeUrl) {
+            const isGenericTitle = !formData.description || formData.description === 'Shared Link' || formData.description === 'YouTube Video';
+
+            // If it's a generic title, we definitely want to fetch
+            if (isGenericTitle) {
+                // Set loading state immediately in the description field
+                if (formData.description !== "Loading video info...") {
+                    setFormData(prev => ({ ...prev, description: "Loading video info...", ideaType: 'youtube' }));
+                }
+
+                fetchYouTubeMetadata(urlToCheck).then(metadata => {
+                    if (metadata) {
+                        setFormData(prev => {
+                            // Extract video ID if not already present
+                            let vId = prev.typeData?.videoId;
+                            if (!vId) {
+                                const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{10,12})/i;
+                                const match = urlToCheck.match(youtubeRegex);
+                                if (match) vId = match[1];
+                            }
+
+                            return {
+                                ...prev,
+                                description: metadata.title || prev.description,
+                                ideaType: 'youtube',
+                                typeData: {
+                                    ...prev.typeData,
+                                    title: metadata.title,
+                                    channelTitle: metadata.authorName,
+                                    watchUrl: urlToCheck,
+                                    thumbnailUrl: metadata.thumbnailUrl,
+                                    videoId: vId
+                                }
+                            };
+                        });
+                    }
+                });
+            }
+        }
+    }, [isOpen, formData.details, formData.description === 'Shared Link', formData.description === 'YouTube Video']);
 
     // Enhanced close handler with abandonment tracking
     const handleClose = () => {
@@ -169,6 +229,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     // Show preview toggle for ideas with structured type data OR special content formats
     const showPreviewToggle = !!effectiveType || !!itinerary || !!cateringPlan || !!venueDetails || !!hasMarkdown;
 
+
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent raw className="bg-slate-50 dark:bg-slate-900 border-none">
@@ -184,13 +245,19 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                     'event': '🎭 Event Details',
                                     'travel': '✈️ Travel Details',
                                     'itinerary': '📋 Itinerary',
-                                    'dining': '🍽️ Dining Details',
+                                    'dining': (() => {
+                                        const cuisine = (typeData as any)?.cuisine || "";
+                                        const isBar = /bar|pub|nightlife|club|cocktail/i.test(cuisine);
+                                        return isBar ? '🍸 Bar Details' : '🍽️ Dining Details';
+                                    })(),
                                     'music': '🎵 Music Details',
-                                    'activity': '🏃 Activity Details'
+                                    'activity': '🏃 Activity Details',
+                                    'youtube': '📺 YouTube Video'
                                 }[effectiveType || ''] || 'Idea Preview'
                             ) : itinerary ? "Itinerary Preview" :
                                 (cateringPlan || formData.details?.includes('Shopping List')) ? "Menu Preview" :
-                                    venueDetails ? "Venue Details" : "Plan Preview"
+                                    venueDetails ? "Venue Details" :
+                                        (effectiveType === 'recipe' ? "Recipe Details" : "Plan Preview")
                         ) : (initialData && initialData.id ? "Edit Idea" : "Add New Idea")}
                         {(!initialData || !initialData.id) && !showPreviewToggle && (
                             <button
@@ -263,11 +330,13 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     {showPreviewToggle && viewMode === 'PREVIEW' ? (
                         <div className="space-y-4">
                             <div ref={contentRef} className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
-                                <UnifiedIdeaCard
-                                    idea={formData}
-                                    effectiveType={effectiveType || undefined}
-                                    typeData={typeData}
-                                />
+                                <form id="add-idea-form" onSubmit={handleSubmitWithTracking}>
+                                    <UnifiedIdeaCard
+                                        idea={formData}
+                                        effectiveType={effectiveType || undefined}
+                                        typeData={typeData}
+                                    />
+                                </form>
 
                                 {/* Additional Markdown content if present and not handled by card */}
                                 {formData.details && (formData.details.includes('###') || formData.details.includes('**')) && !hasStructuredData && (
@@ -312,7 +381,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                         >
                                             <option value="">Standard (No specific type)</option>
                                             <option value="simple">Simple (Quote, Joke, Note)</option>
-                                            <option value="dining">Dining</option>
+                                            <option value="dining">Dining / Bar</option>
                                             <option value="recipe">Recipe</option>
                                             <option value="book">Book</option>
                                             <option value="movie">Movie</option>
@@ -393,7 +462,38 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                                     <Input
                                         id="description-input"
                                         value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        onChange={async (e) => {
+                                            const val = e.target.value;
+                                            // If user pastes a YouTube link as the title, try to give it a better default title
+                                            if (val.includes('youtube.com/watch') || val.includes('youtu.be/')) {
+                                                setFormData({ ...formData, description: "Loading title...", details: val + (formData.details ? "\n" + formData.details : "") });
+
+                                                const metadata = await fetchYouTubeMetadata(val);
+                                                if (metadata) {
+                                                    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{10,12})/i;
+                                                    const match = val.match(youtubeRegex);
+                                                    const vId = match ? match[1] : undefined;
+
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        description: metadata.title || "YouTube Video",
+                                                        ideaType: 'youtube',
+                                                        typeData: {
+                                                            ...prev.typeData,
+                                                            title: metadata.title,
+                                                            channelTitle: metadata.authorName,
+                                                            watchUrl: val,
+                                                            thumbnailUrl: metadata.thumbnailUrl,
+                                                            videoId: vId
+                                                        }
+                                                    }));
+                                                } else {
+                                                    setFormData(prev => ({ ...prev, description: "YouTube Video" }));
+                                                }
+                                            } else {
+                                                setFormData({ ...formData, description: val });
+                                            }
+                                        }}
                                         placeholder={categories.find(c => c.id === formData.category)?.placeholder || "e.g. Build a blanket fort"}
                                         className="w-full"
                                         required
@@ -671,7 +771,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                     )}
                 </div>
 
-                {(!isWizardMode || !!initialData?.id) && (
+                {(viewMode === 'PREVIEW' || !isWizardMode || !!initialData?.id) && (
                     <DialogFooter className="bg-slate-100 dark:bg-slate-900/50">
                         <div className="flex gap-2 w-full">
                             {initialData && initialData.id && availableJars.length > 1 && (initialData.canEdit ?? (currentUser && initialData.createdById === currentUser.id)) && (

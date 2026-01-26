@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, Calendar, ChevronDown, ChevronUp, Check, Loader2, Car } from "lucide-react";
+import { ExternalLink, Heart, MapPin, Plus, Star, Zap, Clock, Calendar, ChevronDown, ChevronUp, Check, Loader2, Car, Ticket, Monitor } from "lucide-react";
 import React from "react";
 import { ShareButton } from "@/components/ShareButton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -130,6 +130,42 @@ export function ConciergeResultCard({
                         cinemaName={rec.cinema_name}
                         compact={true}
                     />
+                    {/* Book Concierge Metadata */}
+                    {categoryType === 'BOOK' && rec.typeData && (
+                        <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 flex flex-wrap gap-x-3 gap-y-1 items-center">
+                            {rec.typeData.author && (
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                    ✍️ {rec.typeData.author}
+                                </span>
+                            )}
+                            {rec.typeData.yearPublished && (
+                                <span>📅 {rec.typeData.yearPublished}</span>
+                            )}
+                            {rec.typeData.pageCount && (
+                                <span>📄 {rec.typeData.pageCount} pages</span>
+                            )}
+                            {rec.typeData.isbn && (
+                                <span className="font-mono text-[10px] opacity-70 select-all">
+                                    ISBN: {rec.typeData.isbn}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Movie Concierge Visual Distinction */}
+                    {rec.typeData?.watchMode && (
+                        <div className="mt-2 flex gap-2">
+                            {rec.typeData.watchMode.toLowerCase() === 'cinema' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 uppercase tracking-wider">
+                                    <Ticket className="w-3 h-3" /> In Theaters
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 uppercase tracking-wider">
+                                    <Monitor className="w-3 h-3" /> Streaming
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
 
             </div>

@@ -72,10 +72,23 @@ export function StandardizedIdeaHeader({
                 <h4 className={`font-black text-slate-900 dark:text-white leading-tight break-words ${compact ? 'text-lg' : 'text-2xl sm:text-3xl'}`}>
                     {name}
                 </h4>
-                {price && (
-                    <span className="text-xs font-bold px-2 py-1 bg-slate-100 dark:bg-white/10 rounded text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {price}
-                    </span>
+                {price && price !== 'N/A' && price !== 'n/a' && (
+                    website ? (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(website, '_blank');
+                            }}
+                            className="text-xs font-bold px-2 py-1 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 rounded text-slate-600 dark:text-slate-300 transition-colors cursor-pointer active:scale-95 max-w-[45%] text-right leading-tight"
+                            title="Check price/tickets"
+                        >
+                            {price} <ExternalLink className="w-2.5 h-2.5 inline ml-1 opacity-50 shrink-0" />
+                        </button>
+                    ) : (
+                        <span className="text-xs font-bold px-2 py-1 bg-slate-100 dark:bg-white/10 rounded text-slate-600 dark:text-slate-300 max-w-[45%] text-right leading-tight">
+                            {price}
+                        </span>
+                    )
                 )}
             </div>
 
@@ -139,7 +152,7 @@ export function StandardizedIdeaHeader({
             )}
 
             {/* Quick Action Links */}
-            {((!isDigital && address) || website || menuUrl) && (
+            {((!isDigital && address) || website || menuUrl || name) && (
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-white/5 overflow-x-auto pb-1 no-scrollbar">
                     {!isDigital && address && (
                         <>
@@ -229,6 +242,23 @@ export function StandardizedIdeaHeader({
                             onClick={() => window.open(website, '_blank')}
                         >
                             <ExternalLink className="w-3 h-3 mr-1" /> {showtimes ? 'Tickets' : 'Web'}
+                        </Button>
+                    )}
+                    {!website && !showtimes && name && (
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap font-medium"
+                            onClick={() => {
+                                let query = name + " " + (address || "");
+                                // Smart Context for Escape Rooms (Explicit category or detected from content)
+                                if (category === 'ESCAPE_ROOM' || ((category === 'ACTIVITY' || !category) && (description?.toLowerCase().includes('puzzle') || description?.toLowerCase().includes('escape') || description?.toLowerCase().includes('mystery')) && !name.toLowerCase().includes('escape'))) {
+                                    query += " Escape Room";
+                                }
+                                window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                            }}
+                        >
+                            <ExternalLink className="w-3 h-3 mr-1" /> Search
                         </Button>
                     )}
                 </div>

@@ -50,7 +50,7 @@ export const getConciergePromptAndMock = (
 
                 YOUR MISSION:
                 1. Simulate a deep search of local reviews, food blogs, and maps for ${targetLocation}.
-                2. Identify 5 venues that are the HIGHEST RELEVANCE match for the PRIMARY SEARCH QUERY.
+                2. Identify relevant venues (default 5, unless user requested more) that are the HIGHEST RELEVANCE match for the PRIMARY SEARCH QUERY.
                 3. If the query asks for something specific (e.g. "brunch cafe with amazing coffee"), IGNORE generic dinner restaurants. Focus ONLY on those specific types of venues.
                 4. Prioritize "Local Legends" and "Top Rated" spots that real locals would recommend in a direct chat.
                 
@@ -105,87 +105,171 @@ export const getConciergePromptAndMock = (
             };
 
         case 'CONCIERGE':
+            // Detect how many items the user wants (default 5)
+            const countMatch = extraInstructions?.match(/(\d+)\s*(recipes?|meals?|dishes?|ideas?|suggestions?|options?|places?|restaurants?|things?)/i);
+            const itemCount = countMatch ? Math.min(parseInt(countMatch[1]), 10) : 5;
+
+            // Pre-detect if this is a recipe request
+            const isRecipeRequest = extraInstructions && /recipe|cook|ingredient|homemade|make at home|meal prep|what to cook/i.test(extraInstructions);
+
             return {
                 prompt: `
-                Act as a versatile local lifestyle concierge.
+                You are a versatile AI assistant that helps users find exactly what they're looking for.
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
-                ${extraInstructions ? `
-                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-                USER REQUEST/CONTEXT: "${extraInstructions}"
+                🎯 USER REQUEST:
+                "${extraInstructions || 'General recommendations'}"
                 
-                ⚠️ CRITICAL INSTRUCTION: The user's request above is your PRIMARY DIRECTIVE.
-                - INTERPRET their request LITERALLY - if they ask for cafes, ALL 5 MUST BE CAFES; if they ask for activities, ALL 5 MUST BE ACTIVITIES
-                - DO NOT SUBSTITUTE or change what they're asking for
-                - If their request is specific (e.g., "brunch cafes with good coffee"), ALL 5 RECOMMENDATIONS MUST match ALL criteria
-                - If they mention meal times (breakfast, brunch, lunch, dinner), ALL 5 RECOMMENDATIONS MUST be open and suitable for that exact time
-                - DO NOT MIX TYPES: If they asked for one thing, don't give them something else for recommendations 2-5
+                📍 User Location: ${targetLocation}
                 
-                REPEAT: EVERY SINGLE ONE OF THE 5 RECOMMENDATIONS MUST MATCH THE USER'S SPECIFIC REQUEST ABOVE.
-                
+                ${isRecipeRequest ? `
+                ⛔ RECIPE REQUEST DETECTED - CRITICAL RULES:
+                - The user is asking for HOME-COOKED RECIPES
+                - You MUST return recipes with ingredients and cooking instructions
+                - You MUST NOT return restaurants, cafes, or establishments
+                - Every item MUST have ideaType: "recipe" and address: "At Home"
+                - Every item MUST include typeData with ingredients array and instructions
                 ` : ''}
                 
-                Respond to the user's request with 5 distinct recommendations near ${targetLocation}.
-                
-                ${extraInstructions ? `
-                泡 REMINDER: All 5 recommendations must satisfy: "${extraInstructions}"
-                ` : ''}
-                
-                Additional preferences (secondary to the critical requirements above):
+                Additional context:
                 - Mood: ${inputs.mood || "Any"}
                 - Company: ${inputs.company || "Any"}
                 - Duration: ${inputs.duration || "Any"}
                 - Budget: ${inputs.price || "Any"}
+
+                ⚠️ STEP 1 - UNDERSTAND WHAT THE USER WANTS:
+                Read their request carefully and determine the CATEGORY:
                 
-                INSTRUCTIONS:
-                1. Interpret the "USER REQUEST" intelligently. If they ask for "fun things to do", suggest activities. If they ask for "Italian food", suggest restaurants.
-                2. If the request is vague, provide a diverse mix of high-quality local options (e.g. 1 dining, 1 activity, 1 event, 1 hidden gem).
-                3. Ensure all recommendations are real, open businesses or locations.
+                | User Asks For | ideaType to use |
+                |---------------|-----------------|
+                | Recipes, meals, dishes, cooking ideas, "what to cook", "home cooking" | "recipe" |
+                | Restaurants, cafes, places to eat, "where to eat", "cheap eats" | "dining" |
+                | Activities, things to do, experiences | "activity" |
+                | Bars, drinks, cocktails, pubs | "bar" |
+                | Movies, films, what to watch | "movie" |
+                | Books, reading | "book" |
+                | Events, concerts, shows | "event" |
+                | Hotels, accommodation, staycation | "hotel" |
+                | Games, video games | "game" |
+                | YouTube videos | "youtube" |
                 
-                ⚠️ CRITICAL OUTPUT RULES:
-                1. Return JSON with a "recommendations" array.
-                2. Every recommendation MUST have an "ideaType" (activity, dining, event) and "typeData".
-                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
-                   - These root fields are used for the main card display.
-                   - These root fields are used for the main card display.
-                4. DO NOT include markdown headers in description or details.
-                5. 🎯 LINK ACCURACY: For "officialWebsite":
-                   - 🛑 STOP! DO NOT GUESS DOMAINS.
-                   - ALWAYS use a Google Search URL to guarantee a working link for the user.
-                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
-                   - This is safer than hallucinating a broken .com or .com.au link.
-                   - When in doubt, ALWAYS use the search link.
-                   - This is safer than hallucinating a broken .com or .com.au link.
+                ⚠️ CRITICAL: 
+                - If they ask for RECIPES or HOME COOKING → ideaType MUST be "recipe", address MUST be "At Home"
+                - If they ask for "MEALS":
+                   - "Meals for home", "to cook", "ingredients" → use "recipe"
+                   - "Meals out", "cheap eats", "places" → use "dining"
+                - If they ask for RESTAURANTS → ideaType MUST be "dining", address is the venue location
+                - DO NOT confuse recipes with restaurants! "3 dinner recipes" ≠ "3 dinner restaurants"
                 
-                "typeData" Schema (for activities):
+                ⚠️ STEP 2 - GENERATE ${itemCount} RECOMMENDATIONS:
+                Return exactly ${itemCount} items that match their request.
+                ALL items should be the SAME ideaType (don't mix recipes with restaurants).
+                IF generating RECIPES: Include FULL ingredient lists with quantities and step-by-step instructions.
+
+                ⚠️ STEP 3 - FORMAT YOUR RESPONSE:
+                Return JSON with a "recommendations" array. Each item MUST have:
+                
+                REQUIRED ROOT FIELDS (for all types):
                 {
-                  "activityName": "Name",
-                  "activityType": "activity",
-                  "participants": { "min": 1, "max": 4 },
-                  "duration": 2, // hours
-                  "rating": 4.8,
-                  "officialWebsite": "https://www.google.com/search?q=Venue+Name+official+website",
-                  "location": { "name": "Address" }
+                  "name": "Item Name",
+                  "description": "Brief 1-2 sentence description",
+                  "ideaType": "<one of: recipe, dining, activity, bar, movie, book, event, hotel, game, youtube>",
+                  "address": "<location OR 'At Home' for recipes/movies/books>",
+                  "price": "$" | "$$" | "$$$" | "Free",
+                  "google_rating": 4.5,
+                  "typeData": { ... type-specific data ... }
                 }
+                
+                TYPE-SPECIFIC "typeData" SCHEMAS:
+                
+                For ideaType: "recipe":
+                {
+                  "ingredients": ["1 cup flour", "2 eggs", "(include EXACT quantities)"],
+                  "instructions": "Detailed step-by-step cooking instructions...",
+                  "prepTime": 15,
+                  "cookTime": 30,
+                  "servings": 4,
+                  "difficulty": "easy" | "medium" | "hard",
+                  "cuisineType": "Italian",
+                  "prepAhead": "Tips on what can be prepared in advance (e.g. 'Marinate chicken overnight')"
+                }
+                
+                For ideaType: "dining" or "bar":
+                {
+                  "establishmentName": "Restaurant Name",
+                  "cuisine": "Italian",
+                  "priceRange": "$$",
+                  "rating": 4.6,
+                  "officialWebsite": "https://www.google.com/search?q=Restaurant+Name+official+website"
+                }
+                
+                For ideaType: "activity":
+                {
+                  "activityName": "Activity Name",
+                  "activityType": "outdoor" | "indoor" | "adventure",
+                  "duration": 2,
+                  "participants": { "min": 1, "max": 4 },
+                  "officialWebsite": "https://www.google.com/search?q=Activity+Name"
+                }
+                
+                For ideaType: "movie":
+                {
+                  "movieTitle": "Movie Name",
+                  "genre": "Action",
+                  "releaseYear": 2024,
+                  "director": "Director Name",
+                  "streamingPlatform": "Netflix"
+                }
+                
+                For ideaType: "book":
+                {
+                  "bookTitle": "Book Name",
+                  "author": "Author Name",
+                  "genre": "Fiction",
+                  "pages": 350
+                }
+                
+                🎯 LINK ACCURACY: For any "officialWebsite" field:
+                - ALWAYS use: https://www.google.com/search?q=[Name]+official+website
+                - DO NOT guess domain names!
                 `,
                 mockResponse: {
                     recommendations: [
                         {
-                            name: "Hidden Garden Cafe",
-                            description: "A beautiful secret garden spot.",
-                            category: "Dining",
-                            price: "$$",
-                            address: "Green Lane",
-                            google_rating: 4.8,
-                            ideaType: "activity",
+                            name: "Quick Chicken Stir-Fry",
+                            description: "A fast, healthy weeknight dinner ready in 20 minutes.",
+                            ideaType: "recipe",
+                            price: "$",
+                            address: "At Home",
+                            google_rating: 2,
                             typeData: {
-                                activityName: "Hidden Garden Cafe",
-                                activityType: "activity",
-                                location: { name: "Green Lane" }
+                                ingredients: ["500g chicken breast", "2 cups vegetables", "Soy sauce", "Garlic", "Ginger"],
+                                instructions: "Step 1: Slice chicken. Step 2: Stir-fry with vegetables...",
+                                prepTime: 10,
+                                cookTime: 10,
+                                servings: 4,
+                                difficulty: "easy",
+                                cuisineType: "Asian"
                             }
                         },
-                        { name: "City Rock Climbing", description: "Indoor climbing gym.", category: "Activity", price: "$$", address: "Sport St", google_rating: 4.7 }
+                        {
+                            name: "One-Pot Pasta",
+                            description: "Everything cooks in one pot for easy cleanup.",
+                            ideaType: "recipe",
+                            price: "$",
+                            address: "At Home",
+                            google_rating: 1,
+                            typeData: {
+                                ingredients: ["Pasta", "Tomatoes", "Basil", "Garlic", "Olive oil"],
+                                instructions: "Step 1: Add all to pot. Step 2: Cook until pasta is done...",
+                                prepTime: 5,
+                                cookTime: 20,
+                                servings: 4,
+                                difficulty: "easy",
+                                cuisineType: "Italian"
+                            }
+                        }
                     ]
                 }
             };
@@ -194,7 +278,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a local nightlife concierge.
-                Recommend 5 distinct bars or drink spots near ${targetLocation}.
+                Recommend distinct bars or drink spots (default 5, unless user requested more) near ${targetLocation}.
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
@@ -332,7 +416,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a travel concierge for ${targetLocation}.
-                Recommend 5 distinct hotels/stays:
+                Recommend distinct hotels/stays (default 5, unless user requested more):
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
@@ -393,7 +477,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a nightlife promoter for ${targetLocation}.
-                Recommend 5 distinct clubs/parties:
+                Recommend distinct clubs/parties (default 5, unless user requested more):
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
@@ -458,7 +542,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a movie critic and recommendation expert.
-                Recommend 5 distinct movies based on the following:
+                Recommend distinct movies (default 5, unless user requested more) based on the following:
                 
                 ${extraInstructions ? `
                 🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
@@ -494,6 +578,13 @@ export const getConciergePromptAndMock = (
                 - Mood: ${inputs.mood || "Any"}
                 - Era: ${inputs.era || "Any"}
                 ${!isCinema && inputs.streamingServices ? `- Streaming on: ${inputs.streamingServices}` : ''}
+                
+                ${!isCinema ? `
+                STREAMING MODE INSTRUCTIONS:
+                - The "website" field MUST be a Google Search URL for watching the movie:
+                  https://www.google.com/search?q=watch+[Movie+Name]+on+[Platform]
+                - Set "price" to "N/A" (since it's subscription based) or leave empty.
+                ` : ''}
                 
                 
                 ⚠️ CRITICAL OUTPUT RULES:
@@ -548,7 +639,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a literary curator.
-                Recommend 5 distinct books:
+                Recommend distinct books (default 5, unless user requested more):
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
@@ -579,6 +670,7 @@ export const getConciergePromptAndMock = (
                   "genre": ["Mystery", "Thriller"],
                   "yearPublished": 2023,
                   "pageCount": 300,
+                  "isbn": "978-3-16-148410-0",
                   "format": "physical",
                   "plot": "Brief plot summary..."
                 }
@@ -611,7 +703,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a wellness concierge.
-                Recommend 5 distinct spas/studios near ${targetLocation}.
+                Recommend distinct spas/studios (default 5, unless user requested more) near ${targetLocation}.
                 Prioritize venues as close as possible to this area:
                 
                 ${getExactNamePriorityRule(extraInstructions)}
@@ -672,7 +764,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a fitness guide.
-                Recommend 5 distinct gyms or fitness activities near ${targetLocation}.
+                Recommend distinct gyms or fitness activities (default 5, unless user requested more) near ${targetLocation}.
                 Prioritize options within easy reach of this area:
                 
                 ${getExactNamePriorityRule(extraInstructions)}
@@ -733,7 +825,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a theatre critic and arts guide for ${targetLocation}.
-                Recommend 5 distinct shows, productions, or arts exhibitions.
+                Recommend distinct shows, productions, or arts exhibitions (default 5, unless user requested more).
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
@@ -803,11 +895,64 @@ export const getConciergePromptAndMock = (
                 }
             };
 
+        case 'MUSIC':
+            return {
+                prompt: `
+                Act as a music discovery guide.
+                Recommend distinct albums or concerts (default 5, unless user requested more).
+                
+                ${getExactNamePriorityRule(extraInstructions)}
+                
+                ${extraInstructions ? `
+                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
+                ${extraInstructions}
+                ` : ''}
+                
+                - Artist/Genre: ${inputs.artist || "Any"}
+                - Type: ${inputs.type || "Album or Concert"}
+                
+                ⚠️ CRITICAL OUTPUT RULES:
+                1. Return JSON with a "recommendations" array.
+                2. Every recommendation MUST have "ideaType": "music" and "typeData".
+                3. Every recommendation MUST also include root fields: name, description, address (venue or "Spotify/Apple"), price, google_rating.
+                
+                "typeData" Schema:
+                {
+                  "artist": "Artist Name",
+                  "title": "Album/Concert Title",
+                  "type": "album" | "concert",
+                  "releaseYear": 2024,
+                  "genre": ["Pop"],
+                  "listenLink": "https://..."
+                }
+                `,
+                mockResponse: {
+                    recommendations: [
+                        {
+                            name: "Mock Album",
+                            description: "A great new release.",
+                            ideaType: "music",
+                            price: "$",
+                            address: "Spotify",
+                            google_rating: 4.5,
+                            typeData: {
+                                artist: "Mock Artist",
+                                title: "Mock Album",
+                                type: "album",
+                                releaseYear: 2024,
+                                genre: ["Pop"],
+                                listenLink: "https://spotify.com"
+                            }
+                        }
+                    ]
+                }
+            };
+
         case 'GAME':
             return {
                 prompt: `
                 Act as a gaming expert.
-                Recommend 5 distinct video games:
+                Recommend distinct video games (default 5, unless user requested more):
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
@@ -840,7 +985,8 @@ export const getConciergePromptAndMock = (
                   "maxPlayers": 4,
                   "coop": true,
                   "rating": "T",
-                  "estimatedPlaytime": 60
+                  "estimatedPlaytime": 60,
+                  "playUrl": "link to store/play"
                 }
                 `,
                 mockResponse: {
@@ -864,7 +1010,8 @@ export const getConciergePromptAndMock = (
                                 minPlayers: 1,
                                 maxPlayers: 100,
                                 coop: true,
-                                rating: "T"
+                                rating: "T",
+                                estimatedPlaytime: 20
                             }
                         },
                         { name: "Quest for Code", description: "Epic RPG.", genre: "RPG", platform: "PC", multiplayer_support: "Single", price_type: "Paid", price: "$$", address: "PC", google_rating: 4.8, ideaType: "game" }
@@ -876,7 +1023,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as an escape room enthusiast.
-                Recommend 5 distinct escape rooms located near ${targetLocation}.
+                Recommend distinct escape rooms (default 5, unless user requested more) located near ${targetLocation}.
                 Ensure the addresses are accurate for the specific branches in this area:
                 
                 ${getExactNamePriorityRule(extraInstructions)}
@@ -937,7 +1084,7 @@ export const getConciergePromptAndMock = (
             return {
                 prompt: `
                 Act as a local sports guide.
-                Recommend 5 distinct sports venues or events near ${targetLocation}:
+                Recommend distinct sports venues or events (default 5, unless user requested more) near ${targetLocation}:
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
@@ -991,65 +1138,80 @@ export const getConciergePromptAndMock = (
             };
 
         case 'CHEF':
+            // Count how many recipes to generate (default 3)
+            const recipeCountMatch = extraInstructions?.match(/(\d+)\s*(recipes?|meals?|dishes?|menus?)/i);
+            const recipeCount = recipeCountMatch ? Math.min(parseInt(recipeCountMatch[1]), 7) : 3;
+
             return {
                 prompt: `
-                Act as a professional Executive Chef and Menu Planner.
-                Create 3 DISTINCT, premium, and complete dinner party menu concepts.
+                🍳 YOU ARE A HOME COOKING CHEF & RECIPE GENERATOR 🍳
                 
-                ${getExactNamePriorityRule(extraInstructions)}
+                ⛔ CRITICAL RESTRICTION - READ CAREFULLY:
+                - You are ONLY allowed to return HOME-COOKED RECIPES
+                - You are FORBIDDEN from returning restaurants, cafes, takeout places, or any establishments
+                - Every item MUST be something the user can COOK AT HOME in their own kitchen
+                - If you return a restaurant instead of a recipe, you have FAILED your task
                 
-                ${extraInstructions ? `
-                🎯 CRITICAL USER REQUIREMENTS (HIGHEST PRIORITY):
-                "${extraInstructions}"
-                
-                YOU MUST ensure ALL recommendations fully align with these specific requirements.
-                ` : ''}
+                🎯 USER REQUEST:
+                "${extraInstructions || 'Recipe ideas'}"
                 
                 USER PREFERENCES:
-                - Occasion: ${inputs.occasion || "Any"}
-                - Guests: ${inputs.guests || "Any"}
+                - Occasion: ${inputs.occasion || "Everyday Cooking"}
+                - Guests: ${inputs.guests || "2-4 People"}
                 - Cuisine: ${inputs.cuisine || "Any"}
-                - Courses: ${inputs.courses || "Any"}
-                - Effort: ${inputs.complexity || "Any"}
+                - Courses: ${inputs.courses || "Main Dish Only"}
+                - Effort: ${inputs.complexity || "Quick & Easy"}
                 - Dietary: ${inputs.dietary || "None"}
                 
-                ${isSecretMode ? `
-                🤫 SECRET MODE ACTIVE:
-                The user wants to keep these ideas a complete surprise. 
-                Do NOT include the specific names of dishes or ingredients in the high-level 'name' and 'description' fields if they would give away the surprise too easily. 
-                Focus on the VIBE and THEME in the name/description, and keep the specific menu details inside the 'details' field.
-                ` : ''}
+                ${isSecretMode ? `🤫 SECRET MODE: Keep dish names vague.` : ''}
 
-                YOUR MISSION:
-                1. Design a cohesive, restaurant-quality menu that can be executed at home.
-                2. Provide a FULL list of ingredients with estimated quantities suitable for the guest count.
-                3. Include detailed cooking instructions for each course.
-                4. Ensure the complexity matches the user's requested effort level.
-                5. You MUST include structured recipe data in the 'typeData' object.
+                📋 YOUR TASK:
+                Generate exactly ${recipeCount} HOME-COOKED RECIPES with:
+                1. A complete ingredient list with EXACT QUANTITIES (e.g., "200g chicken breast", "2 tbsp olive oil")
+                2. Step-by-step cooking instructions numbered clearly
+                3. Prep time and cook time
+                4. Serving size
+                5. Difficulty level (easy/medium/hard)
 
-                Return JSON with "recommendations" array (size 3).
-                Each item represents a dinner plan or recipe.
-
-                ⚠️ CRITICAL OUTPUT RULES:
-                1. Return JSON with a "recommendations" array.
-                2. Every recommendation MUST have "ideaType": "recipe" and a "typeData" object.
-                3. Every recommendation MUST include root fields: name, description, address, price, google_rating. 
-                   - These root fields are used for the main card display.
-                4. Every recommendation MUST include a "details" field with a markdown formatted summary of the full menu.
-                5. "address" should be your kitchen or "At Home".
-                6. "google_rating" should be the complexity level (1-5).
+                ⚠️ MANDATORY OUTPUT FORMAT:
+                Return JSON with "recommendations" array containing EXACTLY ${recipeCount} recipes.
                 
-                "typeData" Schema:
+                EACH RECIPE MUST FOLLOW THIS EXACT STRUCTURE:
                 {
-                  "ingredients": ["1 cup flour", "2 eggs"...],
-                  "instructions": "Step 1...", 
-                  "prepTime": 30, // minutes
-                  "cookTime": 45, // minutes
-                  "servings": 4,
-                  "difficulty": "medium", // easy, medium, hard
-                  "cuisineType": "Italian",
-                  "prepAhead": "Explain what can be done in advance..."
+                  "name": "Recipe Name (e.g., 'Honey Garlic Chicken')",
+                  "description": "Brief 1-2 sentence description of the dish",
+                  "ideaType": "recipe",
+                  "address": "At Home",
+                  "price": "$",
+                  "google_rating": 3,
+                  "details": "A summary of the dish and cooking approach",
+                  "typeData": {
+                    "title": "Recipe Name",
+                    "ingredients": [
+                      "400g pasta",
+                      "200g bacon, diced",
+                      "4 eggs",
+                      "100g parmesan, grated",
+                      "2 cloves garlic, minced",
+                      "Salt and pepper to taste"
+                    ],
+                    "instructions": "1. Boil pasta according to package directions.\\n2. Cook bacon until crispy.\\n3. Whisk eggs with parmesan.\\n4. Combine hot pasta with bacon.\\n5. Remove from heat and stir in egg mixture.\\n6. Season and serve immediately.",
+                    "prepTime": 10,
+                    "cookTime": 20,
+                    "servings": 4,
+                    "difficulty": "easy",
+                    "cuisineType": "Italian",
+                    "prepAhead": "Can prep ingredients up to a day in advance"
+                  }
                 }
+
+                🚫 DO NOT:
+                - Return restaurant names or addresses
+                - Return establishments or venues
+                - Return food delivery options
+                - Forget the typeData object
+                - Forget the ingredients array
+                - Forget the instructions
                 `,
                 mockResponse: {
                     recommendations: [
@@ -1319,6 +1481,148 @@ export const getConciergePromptAndMock = (
                                 steps: [
                                     { day: 1, activity: "Market Tour", location: { name: "Local Market" } }
                                 ]
+                            }
+                        }
+                    ]
+                }
+            };
+        case 'RECIPE':
+            // Count how many recipes to generate (default 3)
+            const recipeCountMatchRec = extraInstructions?.match(/(\d+)\s*(recipes?|meals?|dishes?|menus?)/i);
+            const recipeCountRec = recipeCountMatchRec ? Math.min(parseInt(recipeCountMatchRec[1]), 7) : 3;
+
+            return {
+                prompt: `
+                🍳 YOU ARE A HOME COOKING RECIPE GENERATOR 🍳
+                
+                ⛔ CRITICAL RESTRICTION - READ CAREFULLY:
+                - You are ONLY allowed to return HOME-COOKED RECIPES
+                - You are FORBIDDEN from returning restaurants, cafes, takeout places, or any establishments
+                - Every item MUST be something the user can COOK AT HOME
+                - If you return a restaurant instead of a recipe, you have FAILED your task
+                
+                🎯 USER REQUEST:
+                "${extraInstructions || 'Recipe ideas'}"
+                
+                USER PREFERENCES:
+                - Meal Type: ${inputs.mealType || "Any"}
+                - Cuisine: ${inputs.cuisine || "Any"}
+                - Dietary: ${inputs.dietary || "None"}
+                - Prep Time: ${inputs.time || "Any"}
+                
+                ${isSecretMode ? `🤫 SECRET MODE: Keep dish names vague.` : ''}
+
+                📋 YOUR TASK:
+                Generate exactly ${recipeCountRec} HOME-COOKED RECIPES with:
+                1. A complete ingredient list with EXACT QUANTITIES (e.g., "200g chicken breast", "2 tbsp olive oil")
+                2. Step-by-step cooking instructions numbered clearly
+                3. Prep time and cook time
+                4. Serving size
+                5. Difficulty level (easy/medium/hard)
+
+                ⚠️ MANDATORY OUTPUT FORMAT:
+                Return JSON with "recommendations" array containing EXACTLY ${recipeCountRec} recipes.
+                
+                EACH RECIPE MUST FOLLOW THIS EXACT STRUCTURE:
+                {
+                  "name": "Recipe Name (e.g., 'Honey Garlic Chicken')",
+                  "description": "Brief 1-2 sentence description of the dish",
+                  "ideaType": "recipe",
+                  "address": "At Home",
+                  "price": "$",
+                  "google_rating": 3,
+                  "details": "A summary of the dish",
+                  "website": "https://www.google.com/search?q=Recipe+Name+recipe",
+                  "typeData": {
+                    "title": "Recipe Name",
+                    "ingredients": [
+                      "400g pasta",
+                      "200g bacon, diced",
+                      "4 eggs",
+                      "100g parmesan, grated",
+                      "2 cloves garlic, minced",
+                      "Salt and pepper to taste"
+                    ],
+                    "instructions": "1. Boil pasta according to package directions.\\n2. Cook bacon until crispy.\\n3. Whisk eggs with parmesan.\\n4. Combine hot pasta with bacon.\\n5. Remove from heat and stir in egg mixture.\\n6. Season and serve immediately.",
+                    "prepTime": 10,
+                    "cookTime": 20,
+                    "servings": 4,
+                    "difficulty": "easy",
+                    "cuisineType": "Italian",
+                    "prepAhead": "Can prep ingredients up to a day in advance"
+                  }
+                }
+
+                🚫 DO NOT:
+                - Return restaurant names or addresses
+                - Return establishments or venues
+                - Return food delivery options
+                - Forget the typeData object
+                - Forget the ingredients array
+                - Forget the instructions
+                `,
+                mockResponse: {
+                    recommendations: [
+                        {
+                            name: "Authentic Carbonara",
+                            description: "Roman classic with guanciale, pecorino, and eggs. No cream!",
+                            price: "$$",
+                            address: "At Home",
+                            google_rating: 4.5,
+                            ideaType: "recipe",
+                            typeData: {
+                                ingredients: ["Spaghetti", "Guanciale", "Pecorino Romano", "Eggs", "Black Pepper"],
+                                instructions: "Boil water...",
+                                prepTime: 15,
+                                cookTime: 15,
+                                servings: 2,
+                                difficulty: "medium",
+                                cuisineType: "Italian"
+                            }
+                        }
+                    ]
+                }
+            };
+
+        case 'YOUTUBE':
+            return {
+                prompt: `
+                Act as a YouTube Discovery Engine.
+                
+                🛑 MISSION:
+                Use your search tool to find 5 HIGHLY RELEVANT YouTube videos for: "${extraInstructions || inputs.topic}" in "${targetLocation}".
+                
+                ⚠️ REQUIRED JSON STRUCTURE:
+                {
+                  "recommendations": [
+                    {
+                      "name": "Video Title",
+                      "description": "Short, engaging summary.",
+                      "website": "DIRECT_YOUTUBE_URL",
+                      "ideaType": "youtube",
+                      "typeData": {
+                        "videoId": "11_CHAR_ID",
+                        "watchUrl": "DIRECT_YOUTUBE_URL",
+                        "channelTitle": "Creator Name"
+                      }
+                    }
+                  ]
+                }
+                
+                Every recommendation MUST include the direct YouTube watch URL in both "website" and "typeData.watchUrl".
+                `,
+                mockResponse: {
+                    recommendations: [
+                        {
+                            name: "Pros & Cons of Intermittent Fasting",
+                            description: "A balanced look at fasting benefits.",
+                            website: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                            ideaType: "youtube",
+                            typeData: {
+                                videoId: "dQw4w9WgXcQ",
+                                watchUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                                title: "Pros & Cons of Intermittent Fasting",
+                                channelTitle: "Health Insider"
                             }
                         }
                     ]

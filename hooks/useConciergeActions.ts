@@ -58,6 +58,54 @@ export function useConciergeActions({
         return parts.filter(Boolean).join('\n\n');
     };
 
+    // Validate and normalize recipe data before saving
+    const normalizeRecipeData = (rec: any): any => {
+        // Only apply to recipe types
+        if (rec.ideaType !== 'recipe') {
+            return rec;
+        }
+
+        const normalized = { ...rec };
+
+        // Ensure typeData exists
+        if (!normalized.typeData) {
+            normalized.typeData = {};
+        }
+
+        // Force address to "At Home" for recipes
+        if (!normalized.address || normalized.address.toLowerCase() !== 'at home') {
+            normalized.address = 'At Home';
+        }
+
+        // Try to extract ingredients from details if missing
+        if (!normalized.typeData.ingredients || !Array.isArray(normalized.typeData.ingredients) || normalized.typeData.ingredients.length === 0) {
+            if (normalized.details && typeof normalized.details === 'string') {
+                const ingredientMatch = normalized.details.match(/### Ingredients\n([\s\S]*?)(?=###|$)/i);
+                if (ingredientMatch) {
+                    const ingredientLines = ingredientMatch[1].split('\n').filter((line: string) => line.trim().startsWith('-'));
+                    normalized.typeData.ingredients = ingredientLines.map((line: string) => line.replace(/^-\s*/, '').trim());
+                }
+            }
+        }
+
+        // Try to extract instructions from details if missing
+        if (!normalized.typeData.instructions || typeof normalized.typeData.instructions !== 'string' || normalized.typeData.instructions.length === 0) {
+            if (normalized.details && typeof normalized.details === 'string') {
+                const instructionsMatch = normalized.details.match(/### Instructions\n([\s\S]*?)(?=###|$)/i);
+                if (instructionsMatch) {
+                    normalized.typeData.instructions = instructionsMatch[1].trim();
+                }
+            }
+        }
+
+        // Ensure title is set
+        if (!normalized.typeData.title) {
+            normalized.typeData.title = getIdeaTitle(rec);
+        }
+
+        return normalized;
+    };
+
     const handleAddToJar = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
         // FIX 1: Prevent duplicate clicks on the same item
         if (addingItemName === rec.name) {
@@ -133,23 +181,28 @@ export function useConciergeActions({
                 }
             }
 
+            // Normalize recipe data if applicable
+            const normalizedRec = normalizeRecipeData(rec);
+
             // Regular authenticated mode
             const res = await fetch('/api/ideas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    description: getIdeaTitle(rec),
-                    details: formatDetails(rec),
+                    description: getIdeaTitle(normalizedRec),
+                    details: formatDetails(normalizedRec),
                     indoor: true,
                     duration: "2.0",
                     activityLevel: "LOW",
-                    cost: determineCost(rec.price),
+                    cost: determineCost(normalizedRec.price),
                     timeOfDay: "EVENING",
                     category: category,
                     isPrivate: isPrivate,
+                    // Address for recipes should be "At Home"
+                    address: normalizedRec.address || null,
                     // ✅ NEW: Type System Support
-                    ideaType: rec.ideaType || null,
-                    typeData: rec.typeData || rec.data || null,
+                    ideaType: normalizedRec.ideaType || null,
+                    typeData: normalizedRec.typeData || normalizedRec.data || null,
                     schemaVersion: "1.0"
                 }),
             });
@@ -393,20 +446,50 @@ export function useConciergeActions({
     };
 
     const handleGoTonight = async (rec: any, category: string = "ACTIVITY", isPrivate: boolean = true) => {
+        // FIX: Ensure recipes are normalized and typed correctly before opening modal
+        let itemToProcess = { ...rec };
+
+        // Robust Recipe Detection: Check category OR explicit keywords matching text OR typeData
+        const isMealCategory = ['MEAL', 'FOOD', 'BREAKFAST', 'LUNCH', 'DINNER', 'DESSERT', 'BAKING'].includes(category);
+        const textToScan = (itemToProcess.description + " " + (itemToProcess.details || "")).toLowerCase();
+
+        // Check for specific typeData fields that indicate a recipe
+        const hasRecipeData = itemToProcess.typeData && (
+            Array.isArray(itemToProcess.typeData.ingredients) ||
+            (itemToProcess.typeData.instructions && itemToProcess.typeData.instructions.length > 20)
+        );
+
+        const hasRecipeKeywords = textToScan.match(/ingredients|prep time|cook time|serves \d/);
+
+        // Force ideaType='recipe' if ANY strong signal is present
+        // We overwrite existing type because API sometimes mislabels recipes as 'dining'
+        if ((isMealCategory || hasRecipeKeywords || hasRecipeData) && itemToProcess.ideaType !== 'recipe') {
+            itemToProcess.ideaType = 'recipe';
+        }
+
+        // Apply normalization (extracts ingredients, sets address to "At Home", etc)
+        if (itemToProcess.ideaType === 'recipe') {
+            itemToProcess = normalizeRecipeData(itemToProcess);
+        }
+
         const ideaData = {
-            description: getIdeaTitle(rec),
-            details: formatDetails(rec),
+            description: getIdeaTitle(itemToProcess),
+            details: formatDetails(itemToProcess),
             indoor: true,
             duration: 2.0,
             activityLevel: "LOW",
-            cost: determineCost(rec.price),
+            cost: determineCost(itemToProcess.price),
             timeOfDay: "EVENING",
             category: category,
-            website: rec.website,
-            address: rec.address,
-            openingHours: rec.opening_hours,
-            googleRating: rec.google_rating,
-            isPrivate: isPrivate
+            website: itemToProcess.website,
+            address: itemToProcess.address,
+            openingHours: itemToProcess.opening_hours,
+            googleRating: itemToProcess.google_rating ? parseFloat(String(itemToProcess.google_rating)) : null,
+            isPrivate: isPrivate,
+            // ✅ FIX: Preserve Type System Data
+            ideaType: itemToProcess.ideaType || null,
+            typeData: itemToProcess.typeData || itemToProcess.data || null,
+            schemaVersion: "1.0"
         };
 
         try {

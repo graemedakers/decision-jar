@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { X, ChefHat, ShoppingCart, Clock, Utensils, Check, Share2, Plus, Zap, Star, Plane, Map, Calendar, ArrowRight, ChevronDown, ChevronUp, Download, Sparkles } from "lucide-react";
+import { X, ChefHat, ShoppingCart, Clock, Utensils, Check, Share2, Plus, Zap, Star, Plane, Map, Calendar, ArrowRight, ChevronDown, ChevronUp, Download, Sparkles, Youtube } from "lucide-react";
 import { downloadShoppingListPdf } from "@/lib/pdf-utils";
 import { UnifiedIdeaCard } from "@/components/UnifiedIdeaCard";
 import { IdeaTypeRenderer } from "@/components/idea-types/IdeaTypeRenderer";
@@ -49,6 +49,15 @@ export function RichDetailsModal({ isOpen, onClose, data, configId, onAddToJar, 
                     buttonLabel: 'View Full Plan',
                     bgPattern: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.2) 1px, transparent 0)',
                     sectionHeaderColor: 'text-blue-600 dark:text-blue-400'
+                };
+            case 'youtube_discovery':
+                return {
+                    gradient: 'from-red-600 to-rose-700',
+                    icon: Youtube,
+                    label: 'YouTube Scout',
+                    buttonLabel: 'Watch Selection',
+                    bgPattern: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0)',
+                    sectionHeaderColor: 'text-red-700 dark:text-red-400'
                 };
             case 'chef_concierge':
             default:

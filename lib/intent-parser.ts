@@ -1,7 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { VALID_AI_CATEGORY_IDS } from './categories';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { reliableGeminiCall } from './gemini';
 
 export interface ParsedIntent {
     intentAction: 'BULK_GENERATE' | 'ADD_SINGLE' | 'LAUNCH_CONCIERGE' | 'UNKNOWN';
@@ -22,8 +20,6 @@ export async function parseIntent(
     userContext?: { location?: string; jarTopic?: string }
 ): Promise<ParsedIntent> {
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-
         const systemPrompt = `
         You are an advanced intent parser for a "Decision Jar" app. 
         Your goal is to categorize user requests into one of three distinct actions:
@@ -41,62 +37,26 @@ export async function parseIntent(
            - If they ask for a list or a number of things, use 'BULK_GENERATE'.
            - If they ask "What", "Where", "How", "Suggest", "Recommend", or "Find", use 'LAUNCH_CONCIERGE'.
         2. "conciergeTool": If 'LAUNCH_CONCIERGE', map to the best tool ID:
-           - DINING (restaurants, food), BAR (pubs), MOVIE, BOOK, GAME, HOTEL, WELLNESS (spa/yoga), FITNESS (gym), THEATRE, SPORTS, HOLIDAY (travel/itinerary), ESCAPE_ROOM, SIMPLE (quotes, jokes, affirmations, ideas).
+           - DINING (restaurants, food), BAR (pubs), MOVIE, BOOK, GAME, HOTEL, WELLNESS (spa/yoga), FITNESS (gym), THEATRE, SPORTS, HOLIDAY (travel/itinerary), ESCAPE_ROOM, SIMPLE (quotes, jokes, affirmations, ideas), YOUTUBE (videos, tutorials).
         3. "quantity": Extract number of ideas requested for BULK_GENERATE. Default to 5.
         4. "topic": The specific subject the user asked for.
         5. "location": Extract specific location if mentioned (e.g., "in Paris").
         6. "requiresVenueLookup": Set to true IF the request needs physical addresses (Restaurants, Bars, Gyms).
-        7. "venueType": specify category: 'DINING', 'BAR', 'ACTIVITY', 'NIGHTCLUB'.
-        8. "contentFormat": 'MARKDOWN_RECIPE' for recipes, 'MARKDOWN_ITINERARY' for plans.
-        9. "isLocationDependent": True if physical location is required to fulfill.
+        7. "isLocationDependent": True if physical location is required to fulfill.
 
-        EXAMPLES:
-        - "5 sci-fi movies" → BULK_GENERATE, quantity: 5, topic: "sci-fi movies"
-        - "Add Interstellar" → ADD_SINGLE, topic: "Interstellar"
-        - "Titanic" → ADD_SINGLE, topic: "Titanic"
-        - "What movie should I watch?" → LAUNCH_CONCIERGE, conciergeTool: "MOVIE"
-        - "Find Italian restaurants nearby" → LAUNCH_CONCIERGE, conciergeTool: "DINING", requiresVenueLookup: true
-        - "10 quick recipes" → BULK_GENERATE, quantity: 10, topic: "recipes", contentFormat: "MARKDOWN_RECIPE"
-        - "Plan a 3 day trip to Tokyo" → LAUNCH_CONCIERGE, conciergeTool: "HOLIDAY", contentFormat: "MARKDOWN_ITINERARY"
-        - "Suggest some board games" → LAUNCH_CONCIERGE, conciergeTool: "GAME"
-        - "7 self affirmations" → BULK_GENERATE, conciergeTool: "SIMPLE", quantity: 7, topic: "self affirmations"
-        - "Tell me a joke" → LAUNCH_CONCIERGE, conciergeTool: "SIMPLE", topic: "joke"
-
-        Return ONLY JSON:
-        {
-            "intentAction": "string",
-            "conciergeTool": "string | null",
-            "quantity": number,
-            "topic": "string",
-            "location": "string | null",
-            "constraints": ["string"],
-            "targetCategory": "string",
-            "requiresVenueLookup": boolean,
-            "venueType": "string | null",
-            "contentFormat": "string",
-            "isLocationDependent": boolean
-        }
+        Return ONLY a valid JSON object.
         `;
 
-        const result = await model.generateContent([
-            systemPrompt,
-            `User Request: "${prompt}"`
-        ]);
+        const intent = await reliableGeminiCall<ParsedIntent>(systemPrompt + `\n\nUser Request: "${prompt}"`, {
+            jsonMode: true,
+            temperature: 0.1
+        });
 
-        const text = result.response.text();
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        // Ensure defaults if AI missed fields
+        if (!intent.quantity) intent.quantity = 5;
+        if (!intent.intentAction) intent.intentAction = 'BULK_GENERATE';
 
-        if (!jsonMatch) {
-            // Fallback for simple parsing if AI fails
-            return {
-                intentAction: 'BULK_GENERATE',
-                quantity: 5,
-                topic: prompt,
-                targetCategory: 'ACTIVITY'
-            };
-        }
-
-        return JSON.parse(jsonMatch[0]);
+        return intent;
     } catch (error) {
         console.error("Intent parsing error:", error);
         // Robust fallback with basic keyword matching
@@ -108,13 +68,15 @@ export async function parseIntent(
         else if (lowerPrompt.match(/book|read|novel/)) fallbackTool = 'BOOK';
         else if (lowerPrompt.match(/game|play|board game/)) fallbackTool = 'GAME';
         else if (lowerPrompt.match(/activity|fun|do|weekend/)) fallbackTool = 'ACTIVITY';
+        else if (lowerPrompt.match(/youtube|video|tutorial/)) fallbackTool = 'YOUTUBE';
 
         return {
             intentAction: 'BULK_GENERATE',
             quantity: 5,
             topic: prompt,
             conciergeTool: fallbackTool,
-            targetCategory: fallbackTool ? 'ACTIVITY' : 'ACTIVITY'
+            targetCategory: 'ACTIVITY'
         };
     }
 }
+

@@ -214,7 +214,14 @@ export function DashboardModals({
                     }}
                     onGoTonight={(idea) => {
                         closeModal();
-                        openModal('DATE_REVEAL', { idea, isDirectSelection: true });
+                        if (idea.ideaType === 'recipe' || getModalProps('CONCIERGE')?.toolId === 'RECIPE') {
+                            openModal('ADD_IDEA', {
+                                initialData: { ...idea, ideaType: 'recipe' }, // Explicitly force type to be safe
+                                initialMode: 'default'
+                            });
+                        } else {
+                            openModal('DATE_REVEAL', { idea, isDirectSelection: true });
+                        }
                     }}
                     onFavoriteUpdated={fetchFavorites}
                     onUpdateUserLocation={(newLoc) => setUserLocation(newLoc)}

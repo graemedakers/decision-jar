@@ -343,7 +343,22 @@ export const getBestCategoryFit = (requestedId: string, topic: string | null | u
         'WALK': ['ACTIVITY', 'OUTDOOR', 'WELLNESS', 'FITNESS'],
         'HIKE': ['ACTIVITY', 'OUTDOOR', 'FITNESS', 'WELLNESS'],
         'SHOW': ['MOVIE', 'CULTURAL', 'ENTERTAINMENT', 'SOCIAL'],
-        'THEATRE': ['CULTURAL', 'ENTERTAINMENT', 'SOCIAL', 'ACTIVITY']
+        'THEATRE': ['CULTURAL', 'ENTERTAINMENT', 'SOCIAL', 'ACTIVITY'],
+        // Movie Genres
+        'ACTION': ['MOVIE', 'CINEMA', 'FILM', 'ENTERTAINMENT'],
+        'SCI-FI': ['MOVIE', 'CINEMA', 'FILM', 'SCI_FI', 'ENTERTAINMENT'],
+        'COMEDY': ['MOVIE', 'CINEMA', 'FILM', 'ENTERTAINMENT', 'SHOW'],
+        'DRAMA': ['MOVIE', 'CINEMA', 'FILM', 'ENTERTAINMENT'],
+        'HORROR': ['MOVIE', 'CINEMA', 'FILM', 'ENTERTAINMENT'],
+        'THRILLER': ['MOVIE', 'CINEMA', 'FILM', 'ENTERTAINMENT'],
+        'ROMANCE': ['MOVIE', 'BOOK', 'CINEMA', 'FILM', 'ENTERTAINMENT'],
+        'DOCUMENTARY': ['MOVIE', 'CINEMA', 'FILM', 'NON_FICTION'],
+        'ANIMATION': ['MOVIE', 'CINEMA', 'FILM', 'ENTERTAINMENT'],
+        // Book Genres
+        'FICTION': ['BOOK', 'NOVEL', 'READING'],
+        'NON_FICTION': ['BOOK', 'READING', 'LEARNING'],
+        'MYSTERY': ['BOOK', 'MOVIE', 'READING'],
+        'FANTASY': ['BOOK', 'MOVIE', 'GAME', 'READING']
     };
 
     const potentials = mappings[requestedId] || [];
@@ -351,7 +366,19 @@ export const getBestCategoryFit = (requestedId: string, topic: string | null | u
         if (valid.some(v => v.id === p)) return p;
     }
 
-    // 3. Just return the first valid one if all else fails
+    // 3. Global Fallback: Check ALL categories to preserve correctness over topic-strictness
+    // This prevents a "Movie" being coerced into "Fine Dining" just because the jar is "Restaurants"
+    const allCategories = getAllCategories();
+
+    // Check ID match in global list
+    if (allCategories.some(c => c.id === normalizedReq)) return normalizedReq;
+
+    // Check common mappings against global list
+    for (const p of potentials) {
+        if (allCategories.some(c => c.id === p)) return p;
+    }
+
+    // 4. Last Resort: Just return the first valid one for this topic (or Activity)
     return valid[0]?.id || 'ACTIVITY';
 };
 

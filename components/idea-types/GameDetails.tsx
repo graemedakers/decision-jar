@@ -68,7 +68,8 @@ export function GameDetails({ data, compact, idea }: { data: GameTypeData; compa
                             window.open(data.playUrl, '_blank', 'noopener,noreferrer');
                         } else {
                             // Fallback: Search for the game online
-                            const query = `Play ${data.title} online`;
+                            const gameTitle = data.title || idea?.title || idea?.name || "";
+                            const query = `Play ${gameTitle} online`;
                             window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
                         }
                     }}
@@ -88,7 +89,7 @@ export function GameDetails({ data, compact, idea }: { data: GameTypeData; compa
                 </div>
             )}
 
-            {idea?.description && idea.description.toLowerCase().trim() !== data.title.toLowerCase().trim() && (
+            {idea?.description && idea.description.toLowerCase().trim() !== (data.title || idea.title || "").toLowerCase().trim() && (
                 <div className="bg-white/40 dark:bg-black/20 p-3 rounded-lg border border-purple-100/50 dark:border-white/5 mt-4">
                     <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic whitespace-pre-wrap">
                         {idea.description}

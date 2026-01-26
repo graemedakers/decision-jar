@@ -31,6 +31,7 @@ export const ACTION_LABELS = {
   VIEW_WEB: "View Web",
   VIEW_MENU: "View Menu",
   VIEW_ITINERARY: "View Itinerary",
+  VIEW_RECIPE: "View Recipe",
 
   // Loading/State labels
   ADDING: "Adding...",

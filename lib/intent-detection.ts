@@ -3,24 +3,26 @@
  * Analyzes user input to automatically select the appropriate concierge skill
  */
 
-export type ConciergeIntent = 
-    | 'DINING' 
-    | 'BAR' 
-    | 'BAR_CRAWL' 
-    | 'NIGHTCLUB' 
-    | 'HOTEL' 
-    | 'MOVIE' 
-    | 'BOOK' 
-    | 'WELLNESS' 
-    | 'FITNESS' 
-    | 'THEATRE' 
-    | 'GAME' 
-    | 'ESCAPE_ROOM' 
-    | 'SPORTS' 
-    | 'CHEF' 
-    | 'DATE_NIGHT' 
-    | 'WEEKEND_EVENTS' 
+export type ConciergeIntent =
+    | 'DINING'
+    | 'BAR'
+    | 'BAR_CRAWL'
+    | 'NIGHTCLUB'
+    | 'HOTEL'
+    | 'MOVIE'
+    | 'BOOK'
+    | 'WELLNESS'
+    | 'FITNESS'
+    | 'THEATRE'
+    | 'GAME'
+    | 'ESCAPE_ROOM'
+    | 'SPORTS'
+    | 'RECIPE'
+    | 'CHEF'
+    | 'DATE_NIGHT'
+    | 'WEEKEND_EVENTS'
     | 'HOLIDAY'
+    | 'YOUTUBE'
     | 'CONCIERGE'; // Generic fallback
 
 interface IntentPattern {
@@ -32,8 +34,13 @@ interface IntentPattern {
 const INTENT_PATTERNS: IntentPattern[] = [
     {
         intent: 'DINING',
-        keywords: ['dinner', 'lunch', 'breakfast', 'restaurant', 'eat', 'food', 'meal', 'brunch', 'cafe', 'coffee'],
-        phrases: ['somewhere to eat', 'place to eat', 'grab food', 'get dinner', 'find a restaurant']
+        keywords: ['restaurant', 'eat out', 'takeout', 'takeaway', 'reservation', 'brunch', 'cafe', 'coffee shop', 'dining', 'eatery', 'bistro'],
+        phrases: ['somewhere to eat', 'place to eat', 'grab food', 'get dinner', 'find a restaurant', 'where to eat', 'good restaurant', 'best restaurant', 'eat near', 'food near', 'dinner out', 'lunch out', 'breakfast place']
+    },
+    {
+        intent: 'RECIPE',
+        keywords: ['recipe', 'recipes', 'cook', 'cooking', 'ingredients', 'dish', 'meal prep', 'home cooking', 'bake', 'baking', 'homemade', 'make at home'],
+        phrases: ['cook dinner', 'what to cook', 'recipe ideas', 'meal ideas', 'make for dinner', 'cook at home', 'meal recipes', 'recipes for', 'budget friendly meal', 'easy meal', 'quick meal', 'family meal', 'weeknight meal', 'healthy meal', 'dinner recipes', 'lunch recipes', 'breakfast recipes']
     },
     {
         intent: 'BAR',
@@ -97,8 +104,8 @@ const INTENT_PATTERNS: IntentPattern[] = [
     },
     {
         intent: 'CHEF',
-        keywords: ['cook', 'recipe', 'menu', 'dinner party', 'cooking', 'chef', 'prepare'],
-        phrases: ['cook dinner', 'dinner party menu', 'what to cook', 'recipe ideas']
+        keywords: ['personal chef', 'private chef', 'hire chef', 'chef service', 'catering'],
+        phrases: ['hire a chef', 'personal chef service', 'find a chef', 'catering for party']
     },
     {
         intent: 'DATE_NIGHT',
@@ -114,6 +121,11 @@ const INTENT_PATTERNS: IntentPattern[] = [
         intent: 'HOLIDAY',
         keywords: ['trip', 'travel', 'vacation', 'holiday', 'visit', 'itinerary', 'tour'],
         phrases: ['plan a trip', 'travel to', 'vacation plans', 'holiday itinerary', 'visit']
+    },
+    {
+        intent: 'YOUTUBE',
+        keywords: ['youtube', 'video', 'watch', 'video clip', 'tutorial', 'stream'],
+        phrases: ['youtube video', 'watch a video', 'find videos about', 'see it on youtube']
     }
 ];
 
@@ -140,7 +152,7 @@ export function detectIntent(message: string): ConciergeIntent {
 
     // Then check for keyword matches
     const scores: Record<ConciergeIntent, number> = {} as any;
-    
+
     for (const pattern of INTENT_PATTERNS) {
         let score = 0;
         for (const keyword of pattern.keywords) {
@@ -155,7 +167,7 @@ export function detectIntent(message: string): ConciergeIntent {
 
     // Return the intent with the highest score
     const sortedIntents = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-    
+
     if (sortedIntents.length > 0 && sortedIntents[0][1] > 0) {
         return sortedIntents[0][0] as ConciergeIntent;
     }
@@ -170,7 +182,7 @@ export function detectIntent(message: string): ConciergeIntent {
 export function getIntentConfidence(message: string, intent: ConciergeIntent): number {
     const lowerMessage = message.toLowerCase().trim();
     const pattern = INTENT_PATTERNS.find(p => p.intent === intent);
-    
+
     if (!pattern) return 0;
 
     let matchCount = 0;

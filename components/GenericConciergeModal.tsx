@@ -36,6 +36,7 @@ export interface ConciergeSection {
     condition?: {
         sectionId: string;
         values: string[]; // Show if ONE of these is selected in the target section
+        mode?: 'include' | 'exclude'; // Default 'include'
     };
 }
 
@@ -389,7 +390,7 @@ export function GenericConciergeModal({
     });
 
     const onGoAction = (rec: any) => {
-        if (config.id === 'chef_concierge' || config.id === 'holiday_concierge') {
+        if (config.id === 'chef_concierge' || config.id === 'holiday_concierge' || config.id === 'youtube_discovery') {
             setViewingItem(rec);
         } else {
             handleGoTonightFromHook(rec, config.categoryType, isPrivate);
@@ -618,7 +619,11 @@ export function GenericConciergeModal({
                                 // Check visibility condition
                                 if (section.condition) {
                                     const triggerValues = selections[section.condition.sectionId] || [];
-                                    const isVisible = triggerValues.some(v => section.condition!.values.includes(v));
+                                    const hasMatch = triggerValues.some(v => section.condition!.values.includes(v));
+
+                                    const mode = section.condition.mode || 'include';
+                                    const isVisible = mode === 'exclude' ? !hasMatch : hasMatch;
+
                                     if (!isVisible) return null;
                                 }
 
@@ -779,9 +784,42 @@ export function GenericConciergeModal({
                                             const isExpanded = expandedRecIndex === index;
 
                                             // Calculate standardized type data on the fly
-                                            const effectiveType = rec.ideaType || suggestIdeaType(rec);
+                                            // FIX: Force 'recipe' type for Recipe Finder tool OR if user asked for recipes in the prompt
+                                            const userPrompt = (customInputs['extraInstructions'] || '').toLowerCase();
+                                            const isRecipeRequest = userPrompt.includes('recipe') || userPrompt.includes('cook') || userPrompt.includes('meal');
+
+                                            const effectiveType = ((config.id === 'recipe_discovery' || isRecipeRequest) ? 'recipe' : (rec.ideaType || suggestIdeaType(rec)));
                                             const typeData = rec.typeData || getStandardizedData(rec);
                                             const hasStandardizedData = !!effectiveType && !!typeData;
+
+                                            // Helper to wrap handlers with inferred type and data
+                                            // FIX: Pass the INFERRED type and Standardized Data to the action handler
+                                            const enhanceRecWithType = (originalRec: any) => {
+                                                const enhanced = { ...originalRec };
+
+                                                // Always attach the type we detected/suggested
+                                                if (!enhanced.ideaType && effectiveType) {
+                                                    enhanced.ideaType = effectiveType;
+                                                }
+
+                                                // Always attach the standardized data we parsed
+                                                if (!enhanced.typeData && typeData) {
+                                                    enhanced.typeData = typeData;
+                                                }
+
+                                                // Special overrides for specific tools
+                                                if (config.id === 'recipe_discovery') {
+                                                    enhanced.ideaType = 'recipe';
+                                                    enhanced.category = 'MEAL';
+                                                }
+
+                                                // For Generic Concierge returning recipes, hint the category
+                                                if (effectiveType === 'recipe' && config.categoryType === 'ACTIVITY') {
+                                                    enhanced.category = 'MEAL';
+                                                }
+
+                                                return enhanced;
+                                            };
 
                                             return (
                                                 <ConciergeResultCard
@@ -794,8 +832,12 @@ export function GenericConciergeModal({
                                                     secondSubtext={config.resultCard.secondSubtextKey ? rec[config.resultCard.secondSubtextKey] : undefined}
                                                     isPrivate={isPrivate}
                                                     onFavorite={handleFavorite}
-                                                    onAddToJar={handleAddToJar}
-                                                    onGoAction={() => onGoAction(rec)}
+                                                    onAddToJar={(r, c, p) => handleAddToJar(enhanceRecWithType(r), c, p)}
+                                                    onGoAction={() => {
+                                                        const enhanced = enhanceRecWithType(rec);
+                                                        console.log('[Concierge] onGoAction clicked', enhanced);
+                                                        onGoAction(enhanced);
+                                                    }}
                                                     goActionLabel={config.resultCard.goActionLabel || ACTION_LABELS.DO_THIS}
                                                     ratingClass={config.resultCard.ratingClass || "text-yellow-400"}
                                                     isAddingToJar={addingItemName === rec.name}

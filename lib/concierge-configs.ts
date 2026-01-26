@@ -1,7 +1,7 @@
 import {
     Utensils, Wine, Music, Bed, Clapperboard, BookOpen,
     Leaf, Dumbbell, Ticket, Gamepad2, Key, Trophy, ChefHat,
-    Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase, Sparkles, Plane, Calendar, Library
+    Clock, Users, DollarSign, Wallet, Star, Ghost, Briefcase, Sparkles, Plane, Calendar, Library, Youtube
 } from "lucide-react";
 import { ConciergeToolConfig } from "@/components/GenericConciergeModal";
 import { ACTION_LABELS } from "@/lib/ui-constants";
@@ -242,7 +242,12 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
                 id: 'era',
                 label: 'Era preference',
                 type: 'single-select',
-                options: ["New Release (2020s)", "Modern (2010s)", "2000s", "90s", "80s", "Classic (Pre-80s)"]
+                options: ["New Release (2020s)", "Modern (2010s)", "2000s", "90s", "80s", "Classic (Pre-80s)"],
+                condition: {
+                    sectionId: 'watchMode',
+                    values: ['Cinema'],
+                    mode: 'exclude'
+                }
             }
         ],
         resultCard: {
@@ -428,7 +433,7 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
         subtitle: 'Unlock the best puzzles nearby',
         icon: Key,
         colorTheme: 'indigo',
-        categoryType: 'ACTIVITY',
+        categoryType: 'ESCAPE_ROOM',
         hasLocation: true,
         hasPrice: false,
         sections: [
@@ -551,6 +556,48 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             mainIcon: ChefHat,
             subtextKey: 'occasion',
             goActionLabel: ACTION_LABELS.VIEW_MENU
+        }
+    },
+    RECIPE: {
+        id: 'recipe_discovery',
+        title: 'Recipe Finder',
+        subtitle: 'Find delicious recipes to cook at home',
+        icon: ChefHat,
+        colorTheme: 'orange',
+        categoryType: 'MEAL',
+        hasLocation: false,
+        hasPrice: true, // Budget
+        sections: [
+            {
+                id: 'mealType',
+                label: 'Meal Type',
+                type: 'multi-select',
+                options: ["Breakfast", "Brunch", "Lunch", "Dinner", "Snack", "Dessert"]
+            },
+            {
+                id: 'cuisine',
+                label: 'Cuisine',
+                type: 'multi-select',
+                allowCustom: true,
+                options: ["Italian", "Mexican", "Asian", "Indian", "Mediterranean", "American", "Healthy"]
+            },
+            {
+                id: 'dietary',
+                label: 'Dietary',
+                type: 'multi-select',
+                options: ["Vegetarian", "Vegan", "Gluten Free", "Keto", "Low Carb", "High Protein"]
+            },
+            {
+                id: 'time',
+                label: 'Prep Time',
+                type: 'single-select',
+                options: ["Quick (< 15 mins)", "Medium (30 mins)", "Long (1 hour+)", "Slow Cooker"]
+            }
+        ],
+        resultCard: {
+            mainIcon: ChefHat,
+            subtextKey: 'cuisine',
+            goActionLabel: ACTION_LABELS.VIEW_RECIPE || "View Recipe"
         }
     },
 
@@ -678,6 +725,36 @@ export const CONCIERGE_CONFIGS: Record<string, ConciergeToolConfig> = {
             mainIcon: Calendar,
             subtextKey: 'duration_label',
             goActionLabel: ACTION_LABELS.VIEW_ITINERARY
+        }
+    },
+    YOUTUBE: {
+        id: 'youtube_discovery',
+        title: 'YouTube Scout',
+        subtitle: 'Find the perfect videos to watch',
+        icon: Youtube,
+        colorTheme: 'red',
+        categoryType: 'YouTube',
+        hasLocation: false,
+        hasPrice: false,
+        sections: [
+            {
+                id: 'topic',
+                label: 'What do you want to find?',
+                type: 'multi-select',
+                allowCustom: true,
+                options: ["Music", "Educational", "Entertainment", "Gaming", "News", "Sports", "Nature", "Technology", "Cooking", "Workout"]
+            },
+            {
+                id: 'vibe',
+                label: 'Select a vibe',
+                type: 'multi-select',
+                options: ["Relaxing", "Exciting", "Inspirational", "Funny", "Serious", "Cinematic", "Fast-paced", "Chill"]
+            }
+        ],
+        resultCard: {
+            mainIcon: Youtube,
+            subtextKey: 'channelTitle',
+            goActionLabel: ACTION_LABELS.DO_THIS
         }
     }
 };

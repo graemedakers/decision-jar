@@ -12,7 +12,8 @@ export const IdeaTypeEnum = z.enum([
     'event',     // NEW
     'travel',    // NEW
     'itinerary', // NEW
-    'simple'     // NEW
+    'simple',    // NEW
+    'youtube'
 ]);
 
 export type IdeaType = z.infer<typeof IdeaTypeEnum>;
@@ -46,6 +47,7 @@ export const RecipeSchema = z.object({
     servings: z.number().int().positive().optional(),
     difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
     cuisineType: z.string().optional(),
+    prepAhead: z.string().optional(),
     dietaryTags: z.array(z.string()).optional(),
     nutritionInfo: z.object({
         calories: z.number().optional(),
@@ -68,6 +70,7 @@ export const MovieSchema = z.object({
     watchMode: z.enum(['cinema', 'streaming', 'either']).optional(),
     streamingPlatform: z.array(z.string()).optional(), // Changed to array
     theaters: z.array(z.string()).optional(), // New: Multiple cinemas
+    showtimesUrl: z.string().url().optional(), // New: Direct ticket link
     imdbLink: z.string().url().optional(),
     rottenTomatoesScore: z.number().min(0).max(100).optional(),
     plot: z.string().optional(),
@@ -210,4 +213,12 @@ export const IdeaTypeDataSchema = z.discriminatedUnion('type', [
     z.object({ type: z.literal('travel'), data: TravelSchema }),
     z.object({ type: z.literal('itinerary'), data: ItinerarySchema }),
     z.object({ type: z.literal('simple'), data: SimpleSchema }),
+    z.object({
+        type: z.literal('youtube'), data: z.object({
+            videoId: z.string(),
+            watchUrl: z.string().url(),
+            channelTitle: z.string().optional(),
+            vibe: z.string().optional()
+        })
+    }),
 ]);

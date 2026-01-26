@@ -10,6 +10,7 @@ import { BookDetails } from './BookDetails';
 import { MusicDetails } from './MusicDetails';
 import { DiningDetails } from './DiningDetails';
 import { ActivityDetails } from './ActivityDetails';
+import { YouTubeDetails } from './YouTubeDetails';
 import { GenericDetails } from './GenericDetails';
 
 interface IdeaTypeRendererProps {
@@ -55,6 +56,8 @@ export function IdeaTypeRenderer({ type, data, compact = false, idea }: IdeaType
                     {data.author && <p className="text-xs text-muted-foreground mt-2">— {data.author}</p>}
                 </div>
             );
+        case 'youtube':
+            return <YouTubeDetails data={data} idea={idea} />;
         default:
             return <GenericDetails data={data} idea={idea} compact={compact} />;
     }

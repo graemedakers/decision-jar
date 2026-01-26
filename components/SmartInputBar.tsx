@@ -30,6 +30,7 @@ export function SmartInputBar() {
     const [inputValue, setInputValue] = useState("");
     const [isFocused, setIsFocused] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [isThinking, setIsThinking] = useState(false);
     const [hasTrackedFocus, setHasTrackedFocus] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [speechSupported, setSpeechSupported] = useState(false);
@@ -130,35 +131,20 @@ export function SmartInputBar() {
         }
     };
 
-    /**
-     * Detect if input is a request/question vs an actual idea
-     * Requests should go to AI Concierge, ideas should go to manual entry
-     */
-    const isRequest = (text: string): boolean => {
-        const lowerText = text.toLowerCase().trim();
-
-        // Question patterns
-        const questionStarters = [
-            'find', 'where', 'what', 'how', 'show', 'suggest', 'recommend',
-            'need', 'want', 'looking for', 'help me', 'can you', 'could you',
-            'any ideas', 'give me', 'tell me', 'show me', 'i need', 'i want'
-        ];
-
-        // Check if starts with a question word/phrase
-        const startsWithQuestion = questionStarters.some(starter =>
-            lowerText.startsWith(starter)
-        );
-
-        // Check if contains question words anywhere
-        const containsQuestionWord = ['find', 'recommend', 'suggest', 'need', 'want'].some(word =>
-            lowerText.includes(word)
-        );
-
-        // Check if ends with question mark
-        const isQuestion = text.trim().endsWith('?');
-
-        // It's a request if it starts with question word OR is a question OR contains strong request words
-        return startsWithQuestion || isQuestion || (containsQuestionWord && lowerText.split(' ').length > 2);
+    // AI Intent Classification replaces regex logic
+    const classifyInput = async (query: string) => {
+        try {
+            const res = await fetch('/api/ai/classify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query }),
+            });
+            if (!res.ok) throw new Error("Classification failed");
+            return await res.json();
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
     };
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,45 +223,85 @@ export function SmartInputBar() {
         }
     };
 
-    const handleSubmit = (e?: React.FormEvent) => {
+    const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
 
-        if (!inputValue.trim()) return;
+        if (!inputValue.trim() || isThinking) return;
 
+        // 1. Handle URLs immediately (Fast path)
         if (isUrl(inputValue)) {
-            // Handle as Link
             trackPathSelected('1_have_idea', { trigger: 'url_paste' });
             trackModalOpened('add_idea', { triggered_by: 'smart_input_url' });
 
+            const isYouTube = inputValue.includes('youtube.com') || inputValue.includes('youtu.be');
             openModal('ADD_IDEA', {
                 initialData: {
-                    description: "Shared Link",
-                    details: inputValue
+                    description: isYouTube ? "YouTube Video" : "Shared Link",
+                    details: inputValue,
+                    ideaType: isYouTube ? 'youtube' : undefined
                 }
             });
-        } else if (isRequest(inputValue)) {
-            // Smart Routing: Detected as request/question → Route to AI Concierge
-            trackPathSelected('2_need_inspiration', {
-                trigger: 'smart_routing_detected_request',
-                previous_path: '1_have_idea'
-            });
-            trackModalOpened('concierge', { triggered_by: 'smart_input_auto_routed' });
-
-            openModal('CONCIERGE', {
-                initialPrompt: inputValue
-            });
-        } else {
-            // Handle as Manual Idea
-            trackPathSelected('1_have_idea', { trigger: 'text_entry' });
-            trackModalOpened('add_idea', { triggered_by: 'smart_input_text' });
-
-            openModal('ADD_IDEA', {
-                initialData: {
-                    description: inputValue
-                }
-            });
+            setInputValue("");
+            return;
         }
-        setInputValue("");
+
+        // 2. AI Classification for everything else
+        setIsThinking(true);
+        try {
+            const aiResult = await classifyInput(inputValue);
+
+            // Fallback if AI fails: Manual Entry
+            if (!aiResult || !aiResult.intent) {
+                trackPathSelected('1_have_idea', { trigger: 'ai_fallback' });
+                openModal('ADD_IDEA', { initialData: { description: inputValue } });
+            }
+
+            // 3. Handle Intents
+            else if (aiResult.intent === 'GENERATE_IDEAS') {
+                // Bulk / Concierge Mode
+                trackPathSelected('2_need_inspiration', {
+                    trigger: 'smart_input_ai',
+                    topic: aiResult.classification?.topic
+                });
+                trackModalOpened('concierge', { triggered_by: 'smart_input_ai' });
+
+                openModal('CONCIERGE', {
+                    // Map topic to config ID (approximate match or direct)
+                    toolId: aiResult.classification?.topic,
+                    initialPrompt: inputValue // Pass original query to refine the results
+                });
+            }
+            else if (aiResult.intent === 'EXECUTE_ACTION') {
+                // Smart Add Mode
+                trackPathSelected('1_have_idea', { trigger: 'smart_input_ai_extracted' });
+                trackModalOpened('add_idea', { triggered_by: 'smart_input_ai_extracted' });
+
+                const { title, description, type, url } = aiResult.extraction || {};
+
+                // Map AI type to ID logic (simple mapping)
+                let ideaType = type?.toLowerCase();
+                if (ideaType === 'chef') ideaType = 'recipe';
+
+                openModal('ADD_IDEA', {
+                    initialData: {
+                        description: title || inputValue,
+                        details: (description || "") + (url ? `\n\n${url}` : ""),
+                        ideaType: ideaType !== 'other' ? ideaType : undefined,
+                        // Could also pass 'category' if we mapped it
+                    }
+                });
+            } else {
+                // Default / Unknown
+                openModal('ADD_IDEA', { initialData: { description: inputValue } });
+            }
+
+        } catch (err) {
+            // Safe Fallback
+            openModal('ADD_IDEA', { initialData: { description: inputValue } });
+        } finally {
+            setIsThinking(false);
+            setInputValue("");
+        }
     };
 
     return (
@@ -327,8 +353,8 @@ export function SmartInputBar() {
                                 type="button"
                                 onClick={isListening ? stopVoiceInput : startVoiceInput}
                                 className={`p-2 sm:p-2.5 rounded-xl transition-all ${isListening
-                                        ? 'text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse'
-                                        : 'text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                    ? 'text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse'
+                                    : 'text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
                                     }`}
                                 title={isListening ? "Stop listening" : "Voice input"}
                             >
@@ -399,9 +425,9 @@ export function SmartInputBar() {
                             }
                         }}
                         onBlur={() => setIsFocused(false)}
-                        placeholder={isListening ? "Listening..." : "Type or speak your idea..."}
-                        className={`flex-1 bg-transparent border-none outline-none px-1.5 sm:px-3 py-3 sm:py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-sm sm:text-base md:text-lg min-w-0 ${isListening ? 'placeholder:text-red-400 placeholder:animate-pulse' : ''}`}
-                        disabled={isListening}
+                        placeholder={isListening ? "Listening..." : isThinking ? "Thinking..." : "Type or speak your idea..."}
+                        className={`flex-1 bg-transparent border-none outline-none px-1.5 sm:px-3 py-3 sm:py-4 text-slate-800 dark:text-white placeholder:text-slate-400 text-sm sm:text-base md:text-lg min-w-0 ${isListening ? 'placeholder:text-red-400 placeholder:animate-pulse' : ''} ${isThinking ? 'placeholder:text-purple-400 placeholder:animate-pulse cursor-wait' : ''}`}
+                        disabled={isListening || isThinking}
                     />
 
                     {/* Right Action (Dynamic) */}

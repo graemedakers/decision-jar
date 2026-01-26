@@ -32,7 +32,7 @@ function validateRecommendation(
     inputs?: any
 ): boolean {
     // Non-location tools or tools without strict filtering rules yet should skip validation
-    const skipValidationTools = ['CHEF', 'HOLIDAY', 'DATE_NIGHT', 'WEEKEND_PLANNER', 'WEEKEND_EVENTS'];
+    const skipValidationTools = ['CHEF', 'RECIPE', 'HOLIDAY', 'DATE_NIGHT', 'WEEKEND_PLANNER', 'WEEKEND_EVENTS'];
     if (skipValidationTools.includes(toolType)) {
         return true;
     }
@@ -397,6 +397,9 @@ export async function POST(req: NextRequest) {
             key => CONCIERGE_CONFIGS[key].id === configId || key === configId
         );
 
+        console.log(`[Concierge] Received configId: "${configId}", resolved toolKey: "${toolKey}"`);
+        console.log(`[Concierge] extraInstructions: "${rawExtraInstructions}"`);
+
         if (!toolKey) {
             return apiError(`Invalid config ID: ${configId}`, 400, 'INVALID_CONFIG');
         }
@@ -442,8 +445,50 @@ export async function POST(req: NextRequest) {
                 isPrivate === true
             );
 
-            console.log(`[Concierge] Attempt ${attempt} for query: "${query}"`);
-            const jsonResponse = await reliableGeminiCall(prompt, { jsonMode: true }) as { recommendations?: any[] };
+            console.log(`[Concierge] Attempt ${attempt} for toolKey: "${toolKey}", query: "${query}"`);
+
+            // Check if the user's request is for recipes/cooking (should NOT search)
+            const isRecipeRequest = query && /recipe|cook|meal|dish|ingredient|make.*dinner|make.*lunch|prepare/i.test(query);
+
+            // Tools that should use Google Search (finding real venues/locations)
+            const locationBasedTools = ['DINING', 'BAR', 'WELLNESS', 'FITNESS', 'HOTEL', 'NIGHTCLUB', 'ESCAPE_ROOM', 'SPORTS'];
+
+            // Tools that should NEVER use search (AI generates content, not finds venues)
+            const noSearchTools = ['CHEF', 'RECIPE', 'MOVIE', 'BOOK', 'GAME'];
+            // Check if the user's request is for recipes/cooking
+            // For recipes, we often WANT search to get real URLs, but sometimes the model fails with search.
+            // Let's enable search for RECIPE by default but handle failures gracefully.
+            const shouldUseSearch = toolKey !== 'RECIPE' && configId !== 'recipe_discovery';
+
+            // Use lower temperature for content-generation tools to get more deterministic outputs
+            // Higher temperature (0.7) for venue/location recommendations for variety
+            const contentGenerationTools = ['CHEF', 'RECIPE', 'MOVIE', 'BOOK', 'GAME'];
+            const temperature = contentGenerationTools.includes(toolKey) ? 0.3 : 0.7;
+
+            console.log(`[Concierge] Calling Gemini with useSearch=${shouldUseSearch}, temperature=${temperature}`);
+
+            let jsonResponse: { recommendations?: any[] };
+            try {
+                jsonResponse = await reliableGeminiCall(prompt, {
+                    temperature: temperature,
+                    jsonMode: !shouldUseSearch, // Disable JSON mode if using search (as per gemini.ts fix)
+                    useSearch: shouldUseSearch
+                }) as { recommendations?: any[] };
+
+            } catch (err: any) {
+                console.error(`[Concierge] Gemini call failed: ${err.message}`);
+                // If search failed, try one more time WITHOUT search before giving up
+                if (shouldUseSearch) {
+                    console.log(`[Concierge] Retrying without search...`);
+                    jsonResponse = await reliableGeminiCall(prompt, {
+                        temperature: temperature,
+                        jsonMode: true,
+                        useSearch: false
+                    }) as { recommendations?: any[] };
+                } else {
+                    throw err;
+                }
+            }
             console.log(`[Concierge] Received response from model for ${toolKey}. Total recs: ${jsonResponse.recommendations?.length || 0}`);
 
             if (query && jsonResponse.recommendations && Array.isArray(jsonResponse.recommendations)) {
@@ -512,23 +557,35 @@ export async function POST(req: NextRequest) {
             }
 
             // General URL normalization for other location-based concierges
+            // 🛑 EXCEPTION: Do not normalize YouTube URLs. Grounding links are precise.
+            if (toolKey === 'YOUTUBE') return result;
+
             const searchSuffix = urlNormalizationRules[toolKey];
             if (searchSuffix) {
                 result.recommendations = result.recommendations.map((rec: any) => {
                     const currentUrl = rec.website || '';
 
-                    // Only replace if URL looks suspicious (not google, not major platforms)
-                    const trustedDomains = ['google.com', 'facebook.com', 'instagram.com', 'yelp.com', 'tripadvisor.com', 'booking.com', 'airbnb.com'];
-                    const isTrusted = trustedDomains.some(domain => currentUrl.includes(domain));
-
-                    // ✅ CRITICAL FIX: If the prompt generated a Google Search intent (which we asked for), TRUST IT.
-                    // Do not overwrite it with a generic search, as the prompt's search is likely more specific.
-                    if (currentUrl && !isTrusted && !currentUrl.includes('google.com/search')) {
+                    // ✅ CRITICAL FIX: If no URL is provided, generate a fallback Google Search URL
+                    // This ensures "Check Ticket Price" or "Web" buttons always have a destination
+                    if (!currentUrl) {
                         const encodedName = encodeURIComponent(rec.name || '');
                         rec.website = `https://www.google.com/search?q=${encodedName}+${encodedLocation}+${searchSuffix}`;
-                        console.log(`[URL Fix] ${toolKey}: Replaced suspicious URL with Google search`);
-                    } else if (currentUrl && currentUrl.includes('google.com/search')) {
-                        console.log(`[URL Fix] ${toolKey}: Trusted generic Google Search URL from AI: ${currentUrl}`);
+                        console.log(`[URL Fix] ${toolKey}: Generated missing URL -> ${rec.website}`);
+                    }
+                    // Only replace if URL looks suspicious (not google, not major platforms)
+                    else {
+                        const trustedDomains = ['google.com', 'facebook.com', 'instagram.com', 'yelp.com', 'tripadvisor.com', 'booking.com', 'airbnb.com', 'youtube.com', 'youtu.be', 'ticketmaster', 'eventbrite'];
+                        const isTrusted = trustedDomains.some(domain => currentUrl.includes(domain));
+
+                        // ✅ CRITICAL FIX: If the prompt generated a Google Search intent (which we asked for), TRUST IT.
+                        // Do not overwrite it with a generic search, as the prompt's search is likely more specific.
+                        if (!isTrusted && !currentUrl.includes('google.com/search')) {
+                            const encodedName = encodeURIComponent(rec.name || '');
+                            rec.website = `https://www.google.com/search?q=${encodedName}+${encodedLocation}+${searchSuffix}`;
+                            console.log(`[URL Fix] ${toolKey}: Replaced suspicious URL with Google search`);
+                        } else if (currentUrl.includes('google.com/search')) {
+                            // console.log(`[URL Fix] ${toolKey}: Trusted generic Google Search URL from AI: ${currentUrl}`);
+                        }
                     }
 
                     return rec;
@@ -538,13 +595,83 @@ export async function POST(req: NextRequest) {
             return result;
         };
 
+        // Helper: Validate and fix recipe responses
+        // Ensures RECIPE/CHEF tools return properly structured recipe data
+        const validateRecipeResponses = (result: { recommendations?: any[] }) => {
+            // Only apply to recipe-generating tools
+            if (toolKey !== 'RECIPE' && toolKey !== 'CHEF') {
+                return result;
+            }
+
+            if (!result.recommendations || !Array.isArray(result.recommendations)) {
+                return result;
+            }
+
+            console.log(`[RecipeValidator] Validating ${result.recommendations.length} recommendations for ${toolKey}`);
+
+            result.recommendations = result.recommendations.map((rec: any) => {
+                // Force ideaType to be "recipe"
+                if (rec.ideaType !== 'recipe') {
+                    console.log(`[RecipeValidator] Fixed ideaType from "${rec.ideaType}" to "recipe" for "${rec.name}"`);
+                    rec.ideaType = 'recipe';
+                }
+
+                // Force address to "At Home"
+                if (rec.address && rec.address !== 'At Home' && !rec.address.toLowerCase().includes('home')) {
+                    console.log(`[RecipeValidator] Fixed address from "${rec.address}" to "At Home" for "${rec.name}"`);
+                    rec.address = 'At Home';
+                }
+
+                // Ensure typeData exists
+                if (!rec.typeData) {
+                    console.log(`[RecipeValidator] Creating missing typeData for "${rec.name}"`);
+                    rec.typeData = {};
+                }
+
+                // Try to extract ingredients from details if missing
+                if (!rec.typeData.ingredients || !Array.isArray(rec.typeData.ingredients) || rec.typeData.ingredients.length === 0) {
+                    // Try to parse from details markdown
+                    if (rec.details && typeof rec.details === 'string') {
+                        const ingredientMatch = rec.details.match(/### Ingredients\n([\s\S]*?)(?=###|$)/i);
+                        if (ingredientMatch) {
+                            const ingredientLines = ingredientMatch[1].split('\n').filter((line: string) => line.trim().startsWith('-'));
+                            rec.typeData.ingredients = ingredientLines.map((line: string) => line.replace(/^-\s*/, '').trim());
+                            console.log(`[RecipeValidator] Extracted ${rec.typeData.ingredients.length} ingredients from details for "${rec.name}"`);
+                        }
+                    }
+                }
+
+                // Try to extract instructions from details if missing
+                if (!rec.typeData.instructions || typeof rec.typeData.instructions !== 'string' || rec.typeData.instructions.length === 0) {
+                    if (rec.details && typeof rec.details === 'string') {
+                        const instructionsMatch = rec.details.match(/### Instructions\n([\s\S]*?)(?=###|$)/i);
+                        if (instructionsMatch) {
+                            rec.typeData.instructions = instructionsMatch[1].trim();
+                            console.log(`[RecipeValidator] Extracted instructions from details for "${rec.name}"`);
+                        }
+                    }
+                }
+
+                // Ensure title is set
+                if (!rec.typeData.title) {
+                    rec.typeData.title = rec.name;
+                }
+
+                return rec;
+            });
+
+            return result;
+        };
+
         if (useMockData) {
             const { mockResponse } = getConciergePromptAndMock(toolKey, inputs, targetLocation, rawExtraInstructions, isPrivate);
             return NextResponse.json(normalizeVenueUrls(mockResponse));
         }
 
-        const finalResult = await runConciergeSearch(rawExtraInstructions);
-        return NextResponse.json(normalizeVenueUrls(finalResult));
+        const rawResult = await runConciergeSearch(rawExtraInstructions);
+        const validatedResult = validateRecipeResponses(rawResult);
+        const finalResult = normalizeVenueUrls(validatedResult);
+        return NextResponse.json(finalResult);
 
     } catch (error: any) {
         return handleApiError(error);

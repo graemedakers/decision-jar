@@ -49,6 +49,16 @@ export type TravelTypeData = z.infer<typeof TravelSchema>;
 // 10. Itinerary
 export type ItineraryTypeData = z.infer<typeof ItinerarySchema>;
 
+// 11. YouTube
+export interface YouTubeTypeData {
+    videoId: string;
+    watchUrl: string;
+    title?: string;
+    channelTitle?: string;
+    thumbnailUrl?: string;
+    vibe?: string;
+}
+
 // Union Type
 export type IdeaTypeData =
     | RecipeTypeData
@@ -60,6 +70,7 @@ export type IdeaTypeData =
     | GameTypeData
     | EventTypeData
     | TravelTypeData
-    | ItineraryTypeData;
+    | ItineraryTypeData
+    | YouTubeTypeData;
 
 export type IdeaType = z.infer<typeof IdeaTypeEnum>;

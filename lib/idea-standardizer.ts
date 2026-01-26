@@ -9,6 +9,46 @@ export function suggestIdeaType(idea: any): string | null {
     // Check keywords if category is ambiguous or mismatched
     const textToCheck = ((idea.description || "") + " " + (idea.details || "")).toLowerCase();
 
+    // 0. High Priority: YouTube (Check title, details, AND website/link)
+    const urlToCheck = (idea.website || idea.link || idea.url || "").toLowerCase();
+    if (textToCheck.includes('youtube.com') || textToCheck.includes('youtu.be') ||
+        urlToCheck.includes('youtube.com') || urlToCheck.includes('youtu.be')) {
+        return 'youtube';
+    }
+
+    // 0.5 HIGH PRIORITY: Recipe Detection (before category check)
+    // Check if typeData has recipe structure (ingredients/instructions)
+    if (idea.typeData) {
+        const hasIngredients = Array.isArray(idea.typeData.ingredients) && idea.typeData.ingredients.length > 0;
+        const hasInstructions = typeof idea.typeData.instructions === 'string' && idea.typeData.instructions.length > 10;
+        const hasPrepTime = typeof idea.typeData.prepTime === 'number';
+        const hasCookTime = typeof idea.typeData.cookTime === 'number';
+        const hasServings = typeof idea.typeData.servings === 'number';
+
+        // If typeData has recipe-specific fields, it's definitely a recipe
+        if (hasIngredients || (hasInstructions && (hasPrepTime || hasCookTime || hasServings))) {
+            return 'recipe';
+        }
+    }
+
+    // Check if address is "At Home" (strong indicator for recipe)
+    const address = (idea.address || "").toLowerCase();
+    if (address === 'at home' || address.includes('home')) {
+        // Also check for recipe keywords in text
+        if (textToCheck.includes('recipe') || textToCheck.includes('ingredient') ||
+            textToCheck.includes('cook') || textToCheck.includes('prep') ||
+            textToCheck.includes('serve') || textToCheck.includes('minute') ||
+            /\d+\s*(g|kg|oz|cup|tbsp|tsp|ml|l)\b/.test(textToCheck)) { // Quantity patterns
+            return 'recipe';
+        }
+    }
+
+    // Check for explicit recipe patterns in text (even without category)
+    const hasRecipePattern = /### ingredients|### instructions|step \d+:|prep time:|cook time:|serves \d+/i.test(idea.details || '');
+    if (hasRecipePattern) {
+        return 'recipe';
+    }
+
     // Books
     if (['FICTION', 'NON_FICTION', 'SCI_FI', 'MYSTERY', 'ROMANCE', 'BIOGRAPHY', 'SELF_HELP'].includes(category)) {
         return 'book';
@@ -35,14 +75,40 @@ export function suggestIdeaType(idea: any): string | null {
     }
 
     // Recipes vs Dining
-    if (['BREAKFAST', 'LUNCH', 'DINNER', 'DESSERT', 'BAKING', 'CATERING', 'MEAL_PREP'].includes(category)) {
-        if (textToCheck.includes('recipe') || textToCheck.includes('ingredients') || textToCheck.includes('cook')) {
-            return 'recipe';
-        }
+    // IF category is explicitly MEAL, default to recipe unless it looks like a restaurant
+    if (['MEAL', 'BAKING', 'MEAL_PREP'].includes(category)) {
+        return 'recipe';
     }
 
-    if (['FINE_DINING', 'CASUAL', 'BRUNCH', 'FAST_FOOD', 'INTERNATIONAL', 'DINING', 'RESTAURANT', 'FOOD'].includes(category)) {
-        return 'dining';
+    // Unified Food/Dining Logic: Handles everything from "Meal" to "Fine Dining"
+    const foodCategories = [
+        'BREAKFAST', 'LUNCH', 'DINNER', 'DESSERT', 'FOOD', 'DINING', 'RESTAURANT', 'MEAL',
+        'FINE_DINING', 'CASUAL', 'BRUNCH', 'FAST_FOOD', 'INTERNATIONAL'
+    ];
+
+    if (foodCategories.includes(category)) {
+        const textLow = textToCheck.toLowerCase();
+
+        // Explicit Recipe Keywords
+        if (textLow.includes('recipe') || textLow.includes('ingredients') || textLow.includes('cook') || textLow.includes('make this') || textLow.includes('serves') || textLow.includes('dish') || textLow.includes('flavor')) {
+            return 'recipe';
+        }
+
+        // Explicit Dining Keywords
+        const diningKeywords = ['restaurant', 'reservation', 'book a table', 'seating', 'takeout', 'venue', 'located', 'atmosphere', 'service', 'menu link'];
+        if (diningKeywords.some(k => textLow.includes(k))) {
+            return 'dining';
+        }
+
+        // Ambiguous Fallback: If it's physically located (has address != home), assume dining.
+        // Otherwise, if it sounds like food, assume recipe.
+        const address = (idea.address || "").toLowerCase();
+        if (address && address !== 'at home' && address.length > 5) {
+            return 'dining';
+        }
+
+        // Default to RECIPE for all food categories if we aren't sure it's a place
+        return 'recipe';
     }
 
     // Bars / Nightlife
@@ -75,6 +141,11 @@ export function suggestIdeaType(idea: any): string | null {
         return 'simple';
     }
 
+    // YouTube
+    if (['YOUTUBE', 'VIDEO', 'TUTORIAL'].includes(category)) {
+        return 'youtube';
+    }
+
     return null;
 }
 
@@ -85,10 +156,13 @@ export function suggestIdeaType(idea: any): string | null {
 export function getStandardizedData(idea: any): any {
     // 1. Direct hit - AI already provided structured data
     if (idea.typeData && Object.keys(idea.typeData).length > 0) {
-        return {
-            ...idea.typeData,
-            _standardized: true
-        };
+        // SPECIAL CASE: If it's a youtube type but missing videoId, allow recovery logic below
+        if (!(idea.ideaType === 'youtube' && !idea.typeData.videoId)) {
+            return {
+                ...idea.typeData,
+                _standardized: true
+            };
+        }
     }
 
     // 2. Recovery - Check for JSON blocks in text (AI sometimes leaks them)
@@ -107,7 +181,8 @@ export function getStandardizedData(idea: any): any {
     }
 
     // 3. Inference - For legacy ideas without typeData
-    const suggestedType = suggestIdeaType(idea);
+    // CRITICAL FIX: Respect the explicit ideaType if present!
+    const suggestedType = (idea.ideaType && idea.ideaType !== 'standard') ? idea.ideaType.toLowerCase() : suggestIdeaType(idea);
     if (!suggestedType) return null;
 
     // Special handling for legacy recipes
@@ -125,6 +200,15 @@ export function getStandardizedData(idea: any): any {
                 _standardized: true
             };
         }
+    }
+
+    // Recovery for Movies
+    if (suggestedType === 'movie') {
+        return {
+            title: idea.title || idea.name || idea.description,
+            plot: idea.details || idea.description,
+            _standardized: true
+        };
     }
 
     // Recovery for Itineraries from Markdown
@@ -202,6 +286,21 @@ export function getStandardizedData(idea: any): any {
             }
 
             return data;
+        }
+    }
+
+    // Recovery for YouTube Links
+    if ((suggestedType === 'youtube' || textToScan.includes('youtube.com') || textToScan.includes('youtu.be') || textToScan.includes('watch?v='))) {
+        const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/i;
+        const match = textToScan.match(youtubeRegex) || (idea.website && idea.website.match(youtubeRegex));
+        if (match && match[1]) {
+            const videoId = match[1];
+            return {
+                videoId: videoId,
+                title: idea.typeData?.title || (idea.description && idea.description !== 'Shared Link' && idea.description !== 'YouTube Video' ? idea.description : undefined),
+                watchUrl: `https://www.youtube.com/watch?v=${videoId}`,
+                _standardized: true
+            };
         }
     }
 

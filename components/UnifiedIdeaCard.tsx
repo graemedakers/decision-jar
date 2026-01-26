@@ -50,7 +50,10 @@ export function UnifiedIdeaCard({
 
     // Sanitize address: Remove venue name if it's included (e.g. "Venue Name - 123 Street")
     const rawAddress = idea.address || typeData?.address || typeData?.location?.address || typeData?.venue?.address;
-    const name = idea.description || idea.name || idea.title || 'Untitled Idea';
+    const isGenericTitle = !idea.description || idea.description === 'Shared Link' || idea.description === 'YouTube Video' || idea.description === 'Loading video info...';
+    const name = (isGenericTitle && (typeData?.title || typeData?.videoId))
+        ? (typeData.title || `YouTube: ${typeData.videoId}`)
+        : (idea.description || idea.name || idea.title || 'Untitled Idea');
 
     let address = rawAddress;
     if (address && name && address.toLowerCase().startsWith(name.toLowerCase())) {
@@ -59,7 +62,7 @@ export function UnifiedIdeaCard({
     }
 
     const finalWebsite = idea.website || typeData?.officialWebsite || typeData?.website || extractedWebsite;
-    const finalTypeData = { ...typeData, website: finalWebsite };
+    const finalTypeData = { ...typeData, website: finalWebsite, watchUrl: typeData?.watchUrl || finalWebsite };
 
     const cleanedIdea = {
         ...idea,
