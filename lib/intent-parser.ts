@@ -34,8 +34,8 @@ export async function parseIntent(
         Rules:
         1. "intentAction": Categorize as 'BULK_GENERATE', 'ADD_SINGLE', 'LAUNCH_CONCIERGE', or 'UNKNOWN'.
            - If they mention a specific title (movie, book, restaurant name) but DON'T ask for a quantity or a search, use 'ADD_SINGLE'.
-           - If they ask for a list or a number of things, use 'BULK_GENERATE'.
-           - If they ask "What", "Where", "How", "Suggest", "Recommend", or "Find", use 'LAUNCH_CONCIERGE'.
+           - If they ask for a list or a number of things (including "Suggest 5..." or "Recommend 3..."), use 'BULK_GENERATE'.
+           - If they ask "What", "Where", "How", "Find" or open-ended "Suggest/Recommend" WITHOUT a specific quantity, use 'LAUNCH_CONCIERGE'.
         2. "conciergeTool": If 'LAUNCH_CONCIERGE', map to the best tool ID:
            - DINING (restaurants, food), BAR (pubs), MOVIE, BOOK, GAME, HOTEL, WELLNESS (spa/yoga), FITNESS (gym), THEATRE, SPORTS, HOLIDAY (travel/itinerary), ESCAPE_ROOM, SIMPLE (quotes, jokes, affirmations, ideas), YOUTUBE (videos, tutorials).
         3. "quantity": Extract number of ideas requested for BULK_GENERATE. Default to 5.

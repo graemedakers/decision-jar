@@ -160,6 +160,7 @@ export function StandardizedIdeaHeader({
                                 size="sm"
                                 variant="ghost"
                                 className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap font-medium"
+                                type="button"
                                 onClick={() => {
                                     const query = cinemaName ? `${cinemaName} ${address}` : `${name} ${address}`;
                                     window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
@@ -171,6 +172,7 @@ export function StandardizedIdeaHeader({
                                 size="sm"
                                 variant="ghost"
                                 className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap font-medium"
+                                type="button"
                                 onClick={() => {
                                     const destination = address || name;
                                     trackRideShareClicked('uber', destination, category || 'RESTAURANT');
@@ -184,6 +186,7 @@ export function StandardizedIdeaHeader({
                                 size="sm"
                                 variant="ghost"
                                 className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap font-medium"
+                                type="button"
                                 onClick={() => {
                                     const destination = address || name;
                                     trackRideShareClicked('lyft', destination, category || 'RESTAURANT');
@@ -201,6 +204,7 @@ export function StandardizedIdeaHeader({
                             size="sm"
                             variant="ghost"
                             className="text-xs text-orange-600 dark:text-orange-400 h-7 px-2 whitespace-nowrap font-bold hover:bg-orange-50 dark:hover:bg-orange-500/10"
+                            type="button"
                             onClick={() => {
                                 // Standard Google Search is the most reliable "middleman".
                                 // "I'm Feeling Lucky" triggers annoying redirect warnings.
@@ -221,6 +225,7 @@ export function StandardizedIdeaHeader({
                             size="sm"
                             variant="ghost"
                             className="text-xs text-emerald-600 dark:text-emerald-400 h-7 px-2 whitespace-nowrap font-bold hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+                            type="button"
                             onClick={() => {
                                 if (menuUrl) {
                                     window.open(menuUrl, '_blank');
@@ -239,6 +244,7 @@ export function StandardizedIdeaHeader({
                             size="sm"
                             variant="ghost"
                             className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap font-medium"
+                            type="button"
                             onClick={() => window.open(website, '_blank')}
                         >
                             <ExternalLink className="w-3 h-3 mr-1" /> {showtimes ? 'Tickets' : 'Web'}
@@ -249,6 +255,7 @@ export function StandardizedIdeaHeader({
                             size="sm"
                             variant="ghost"
                             className="text-xs text-slate-600 dark:text-slate-300 h-7 px-2 whitespace-nowrap font-medium"
+                            type="button"
                             onClick={() => {
                                 let query = name + " " + (address || "");
                                 // Smart Context for Escape Rooms (Explicit category or detected from content)

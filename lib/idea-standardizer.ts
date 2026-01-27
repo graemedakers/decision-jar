@@ -112,12 +112,18 @@ export function suggestIdeaType(idea: any): string | null {
     }
 
     // Bars / Nightlife
-    if (['COCKTAIL', 'PUB', 'WINE_BAR', 'ROOFTOP', 'SPEAKEASY', 'BAR', 'NIGHTLIFE', 'DANCE_CLUB', 'LOUNGE', 'CLUB'].includes(category)) {
+    // FIX: Be strict about "CLUB". Golf Clubs are not Nightclubs.
+    // We check for exact matches or safe suffix matches like " NIGHTCLUB"
+    if (['COCKTAIL', 'PUB', 'WINE_BAR', 'ROOFTOP', 'SPEAKEASY', 'BAR', 'NIGHTLIFE', 'DANCE_CLUB', 'LOUNGE', 'RAVE', 'DISCO'].includes(category)) {
+        return 'dining';
+    }
+    // Only map partial "CLUB" if it's explicitly "NIGHTCLUB" or "DANCE CLUB"
+    if (category === 'CLUB' || category.includes('NIGHTCLUB') || category.includes('DANCE_CLUB')) {
         return 'dining';
     }
 
-    // Wellness / Fitness -> Activity
-    if (['MEDITATION', 'SPA', 'WALK', 'DETOX', 'CARDIO', 'STRENGTH', 'YOGA', 'OUTDOOR_SPORT', 'WELLNESS', 'FITNESS', 'RELAXATION'].includes(category)) {
+    // Wellness / Fitness / Sport -> Activity
+    if (['MEDITATION', 'SPA', 'WALK', 'DETOX', 'CARDIO', 'STRENGTH', 'YOGA', 'OUTDOOR_SPORT', 'WELLNESS', 'FITNESS', 'RELAXATION', 'SPORT', 'GOLF', 'TENNIS', 'SQUASH', 'BADMINTON', 'RACQUETBALL', 'PILATES', 'SWIMMING', 'HIKE', 'HIKING', 'RUNNING'].includes(category) || category.includes('SPORT')) {
         return 'activity';
     }
 

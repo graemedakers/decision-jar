@@ -17,8 +17,12 @@ export const DEFAULT_FORM_DATA = {
     weather: "ANY",
     requiresTravel: false,
     photoUrls: [] as string[],
-    ideaType: undefined as string | undefined, // NEW
-    typeData: undefined as any, // NEW
+    ideaType: undefined as string | undefined,
+    typeData: undefined as any,
+    website: undefined as string | undefined, // NEW
+    address: undefined as string | undefined, // NEW
+    googleRating: undefined as number | undefined, // NEW
+    openingHours: undefined as string | undefined, // NEW
 };
 
 interface UseIdeaFormProps {
@@ -52,8 +56,12 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 weather: initialData.weather || DEFAULT_FORM_DATA.weather,
                 requiresTravel: initialData.requiresTravel ?? DEFAULT_FORM_DATA.requiresTravel,
                 photoUrls: initialData.photoUrls || [],
-                ideaType: initialData.ideaType || undefined, // NEW
-                typeData: initialData.typeData || undefined, // NEW
+                ideaType: initialData.ideaType || undefined,
+                typeData: initialData.typeData || undefined,
+                website: initialData.website || undefined,
+                address: initialData.address || undefined,
+                googleRating: initialData.googleRating || undefined,
+                openingHours: initialData.openingHours || undefined,
             });
         } else {
             setFormData({
@@ -127,6 +135,10 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 photoUrls: formData.photoUrls,
                 ideaType: formData.ideaType, // NEW
                 typeData: formData.typeData, // NEW
+                website: formData.website,
+                address: formData.address,
+                googleRating: formData.googleRating,
+                openingHours: formData.openingHours,
             };
 
             if (isEditing) {

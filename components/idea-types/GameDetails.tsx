@@ -64,22 +64,23 @@ export function GameDetails({ data, compact, idea }: { data: GameTypeData; compa
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
-                        if (data.playUrl) {
-                            window.open(data.playUrl, '_blank', 'noopener,noreferrer');
+                        if (data.playUrl || idea?.website) {
+                            window.open(data.playUrl || idea?.website, '_blank', 'noopener,noreferrer');
                         } else {
                             // Fallback: Search for the game online
-                            const gameTitle = data.title || idea?.title || idea?.name || "";
+                            const gameTitle = data.title || idea?.title || idea?.name || idea?.description || "";
                             const query = `Play ${gameTitle} online`;
                             window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
                         }
                     }}
+                    type="button"
                     className="w-full flex items-center justify-center gap-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-200 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-300 font-bold py-2.5 rounded-lg transition-all shadow-sm text-sm group"
                 >
                     <Gamepad2 className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
                     Play Now
                 </button>
                 <p className="text-[10px] text-center text-slate-400 mt-1">
-                    {data.playUrl ? "Opens game in new tab" : "Search for game online"}
+                    {data.playUrl || idea?.website ? "Opens game in new tab" : "Search for game online"}
                 </p>
             </div>
 

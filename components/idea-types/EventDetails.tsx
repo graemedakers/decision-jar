@@ -65,7 +65,7 @@ export function EventDetails({ data, compact, idea }: { data: EventTypeData; com
                     </div>
                 )}
 
-                {idea?.description && idea.description.toLowerCase().trim() !== data.eventName.toLowerCase().trim() && (
+                {idea?.description && idea.description.toLowerCase().trim() !== (data.eventName || "").toLowerCase().trim() && (
                     <div className="bg-white/40 dark:bg-black/20 p-3 rounded-lg border border-pink-100/50 dark:border-white/5 mt-2">
                         <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic whitespace-pre-wrap">
                             {idea.description}

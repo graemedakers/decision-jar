@@ -31,6 +31,16 @@ export const getConciergePromptAndMock = (
     extraInstructions: string,
     isSecretMode?: boolean
 ): PromptGeneratorResponse => {
+    // Normalize price for AI consumption
+    const priceMap: Record<string, string> = {
+        'any': 'Any',
+        'cheap': '$ (Budget/Affordable)',
+        'moderate': '$$ (Mid-range/Standard)',
+        'expensive': '$$$ (Upscale/Luxury)'
+    };
+    const normalizedPrice = priceMap[inputs.price] || inputs.price || 'Any';
+    const activeInputs: Record<string, any> = { ...inputs, price: normalizedPrice };
+
     switch (toolKey) {
         case 'DINING':
             return {
@@ -41,11 +51,15 @@ export const getConciergePromptAndMock = (
                 
                 ${getExactNamePriorityRule(extraInstructions)}
                 
-                ${inputs.cuisine || inputs.vibe || inputs.price ? `
+                ${activeInputs.cuisine || activeInputs.vibe || activeInputs.price ? `
                 FILTER CONSTRAINTS:
-                - Preferred Cuisine: ${inputs.cuisine || "Any"}
-                - Target Vibe: ${inputs.vibe || "Any"}
-                - Budget: ${inputs.price || "Any"}
+                - Preferred Cuisine: ${activeInputs.cuisine || "Any"}
+                - Target Vibe: ${activeInputs.vibe || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "cheap", focus on casual eats, cafes, and food trucks. EXCLUDE fine dining.
+                - If budget is "moderate", suggest standard restaurants. EXCLUDE high-end "Chef's Table" or "Hatted" restaurants.
                 ` : ''}
 
                 YOUR MISSION:
@@ -133,10 +147,12 @@ export const getConciergePromptAndMock = (
                 ` : ''}
                 
                 Additional context:
-                - Mood: ${inputs.mood || "Any"}
-                - Company: ${inputs.company || "Any"}
-                - Duration: ${inputs.duration || "Any"}
-                - Budget: ${inputs.price || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - STRICTLY follow the User's budget selection.
+                - If "cheap", avoid upscale venues. If "expensive", prioritize premium experiences.
+                - If "moderate", exclude luxury/fine-dining and focus on mid-range options.
 
                 ⚠️ STEP 1 - UNDERSTAND WHAT THE USER WANTS:
                 Read their request carefully and determine the CATEGORY:
@@ -289,9 +305,13 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Drinks Preference: ${inputs.drinks || "Any"}
-                - Vibe: ${inputs.vibe || "Any"}
-                - Price: ${inputs.price || "Any"}
+                - Drinks Preference: ${activeInputs.drinks || "Any"}
+                - Vibe: ${activeInputs.vibe || "Any"}
+                - Price: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If "cheap", suggest pubs, local breweries, or dive bars. EXCLUDE cocktail lounges with $25+ drinks.
+                - If "moderate", suggest standard bars and lively spots. EXCLUDE exclusive VIP lounges or upscale hotel bars.
                 
                 Ensure they are real, currently open businesses with accurate physical addresses.
                 ⚠️ CRITICAL OUTPUT RULES:
@@ -355,10 +375,14 @@ export const getConciergePromptAndMock = (
                 ` : ''}
                 
                 Preferences:
-                - Theme: ${inputs.theme || "Any"}
-                - Stops: ${inputs.stops || "4"}
-                - Vibe: ${inputs.vibe || "Any"}
-                - Budget: ${inputs.price || "Any"}
+                - Theme: ${activeInputs.theme || "Any"}
+                - Stops: ${activeInputs.stops || "4"}
+                - Vibe: ${activeInputs.vibe || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "moderate", suggest routes where drinks and entry typically match mid-range spending.
+                - Avoid routes that only include extremely expensive "bottle service" clubs or high-end hotel bars if not requested.
                 
                 INSTRUCTIONS:
                 1. Create a logical walking or short-drive route between venues.
@@ -427,26 +451,34 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Style: ${inputs.style || "Any"}
-                - Must-Have Amenities: ${inputs.amenities || "Any"}
-                - Budget: ${inputs.price || "Any"}
+                - Style: ${activeInputs.style || "Any"}
+                - Must-Have Amenities: ${activeInputs.amenities || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+                ${activeInputs.dates_start ? `- Check-in: ${activeInputs.dates_start}` : ''}
+                ${activeInputs.dates_end ? `- Check-out: ${activeInputs.dates_end}` : ''}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "moderate", EXCLUDE 5-star luxury hotels (e.g. Crown Towers, The Langham, Ritz-Carlton).
+                - Suggest hotels that typically fall into the requested price category.
+                - If you are unsure of the price, prioritize matching the Style and Amenities, but skew away from extreme luxury if not requested.
                 
                 ⚠️ CRITICAL OUTPUT RULES:
                 1. Return JSON with a "recommendations" array.
                 2. Every recommendation MUST have "ideaType": "travel" and a "typeData" object.
                 3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
                    - These root fields are used for the main card display.
-                4. 🎯 LINK ACCURACY: For the root "website" field:
-                   - 🛑 STOP! DO NOT GUESS DOMAINS.
-                   - ALWAYS use a Google Search URL.
-                   - Format: https://www.google.com/search?q=[Venue+Name]+official+website
+                4. 🎯 DEEP LINKING: For the root "website" field:
+                   - PRIORITY 1: Direct link to the hotel on Booking.com or TripAdvisor.
+                   - PRIORITY 2: If you cannot find a direct link, use a deep search:
+                     https://www.google.com/search?q=[Hotel+Name]+booking.com+${activeInputs.dates_start ? `checkin+${activeInputs.dates_start}` : ''}
+                   - Format: https://www.google.com/search?q=[Hotel+Name]+${targetLocation}+booking.com
                 
                 "typeData" Schema:
                 {
                   "accommodationName": "Hotel Name",
                   "travelType": "hotel",
                   "amenities": ["Spa", "Free WiFi"],
-                  "priceRange": "$$$",
+                  "priceRange": "$$",
                   "rating": 4.5,
                   "destination": { "name": "Address/City" }
                 }
@@ -488,9 +520,13 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Music: ${inputs.music || "Any"}
-                - Vibe: ${inputs.vibe || "Any"}
-                - Price: ${inputs.price || "Any"}
+                - Music: ${activeInputs.music || "Any"}
+                - Vibe: ${activeInputs.vibe || "Any"}
+                - Price: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If "cheap", suggest pubs, local breweries, or dive bars. EXCLUDE cocktail lounges with $25+ drinks.
+                - If "moderate", suggest standard bars and lively spots. EXCLUDE exclusive VIP lounges or upscale hotel bars.
                 
                 ⚠️ CRITICAL OUTPUT RULES:
                 1. Return JSON with a "recommendations" array.
@@ -536,7 +572,7 @@ export const getConciergePromptAndMock = (
 
         case 'MOVIE':
             // Movie is special: Logic for Streaming vs Cinema
-            const isCinema = inputs.watchMode === 'Cinema';
+            const isCinema = activeInputs.watchMode === 'Cinema';
             // URL-encode location for Google search
             const encodedLocation = encodeURIComponent(targetLocation);
             return {
@@ -553,7 +589,7 @@ export const getConciergePromptAndMock = (
                 you MUST include that exact movie as the FIRST recommendation, regardless of whether it's currently in cinemas.
                 ` : ''}
                 
-                - Watch Mode: ${inputs.watchMode}
+                - Watch Mode: ${activeInputs.watchMode}
                 ${isCinema ? `
                 CINEMA MODE INSTRUCTIONS:
                 ${extraInstructions ? `
@@ -574,10 +610,10 @@ export const getConciergePromptAndMock = (
                 - If movie is showing: all nearby cinemas with showtimes and booking links
                 - If movie is NOT showing: user sees "no showtimes" and can explore alternatives
                 ` : ''}
-                - Genre: ${inputs.genre || "Any"}
-                - Mood: ${inputs.mood || "Any"}
-                - Era: ${inputs.era || "Any"}
-                ${!isCinema && inputs.streamingServices ? `- Streaming on: ${inputs.streamingServices}` : ''}
+                - Genre: ${activeInputs.genre || "Any"}
+                - Mood: ${activeInputs.mood || "Any"}
+                - Era: ${activeInputs.era || "Any"}
+                ${!isCinema && activeInputs.streamingServices ? `- Streaming on: ${activeInputs.streamingServices}` : ''}
                 
                 ${!isCinema ? `
                 STREAMING MODE INSTRUCTIONS:
@@ -650,10 +686,10 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Genre: ${inputs.genre || "Any"}
-                - Vibe: ${inputs.vibe || "Any"}
-                - Length: ${inputs.length || "Any"}
-                - Era: ${inputs.era || "Any"}
+                - Genre: ${activeInputs.genre || "Any"}
+                - Vibe: ${activeInputs.vibe || "Any"}
+                - Length: ${activeInputs.length || "Any"}
+                - Era: ${activeInputs.era || "Any"}
                 
                 
                 ⚠️ CRITICAL OUTPUT RULES:
@@ -715,9 +751,12 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Activity: ${inputs.activity || "Any"}
-                - Vibe: ${inputs.vibe || "Any"}
-                - Price: ${inputs.price || "Any"}
+                - Activity: ${activeInputs.activity || "Any"}
+                - Vibe: ${activeInputs.vibe || "Any"}
+                - Price: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "moderate", focus on standard studios and community wellness centers. EXCLUDE ultra-luxury private spas or elite wellness clubs.
                 
                 ⚠️ CRITICAL OUTPUT RULES:
                 1. Return JSON with a "recommendations" array.
@@ -776,9 +815,12 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Activity: ${inputs.activity || "Any"}
-                - Level: ${inputs.level || "Any"}
-                - Price: ${inputs.price || "Any"}
+                - Activity: ${activeInputs.activity || "Any"}
+                - Level: ${activeInputs.level || "Any"}
+                - Price: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "cheap", focus on public parks, community centers, or budget gyms. EXCLUDE high-end "boutique" fitness studios.
                 
                 ⚠️ CRITICAL OUTPUT RULES:
                 1. Return JSON with a "recommendations" array.
@@ -836,9 +878,13 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Type: ${inputs.type || "Any"}
-                - Vibe: ${inputs.vibe || "Any"}
-                - Price: ${inputs.price || "Any"}
+                - Type: ${activeInputs.type || "Any"}
+                - Vibe: ${activeInputs.vibe || "Any"}
+                - Price: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If "moderate", focus on general admission or gallery seating. EXCLUDE premium box seats or VIP packages.
+                - Suggest venues and shows where standard seating falls into the requested category.
                 
                 ⚠️ CRITICAL DATE REQUIREMENTS:
                 - ONLY recommend shows that are CURRENTLY RUNNING or UPCOMING (opening soon).
@@ -908,8 +954,8 @@ export const getConciergePromptAndMock = (
                 ${extraInstructions}
                 ` : ''}
                 
-                - Artist/Genre: ${inputs.artist || "Any"}
-                - Type: ${inputs.type || "Album or Concert"}
+                - Artist/Genre: ${activeInputs.artist || "Any"}
+                - Type: ${activeInputs.type || "Album or Concert"}
                 
                 ⚠️ CRITICAL OUTPUT RULES:
                 1. Return JSON with a "recommendations" array.
@@ -963,10 +1009,14 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Genre: ${inputs.genre || "Any"}
-                - Players: ${inputs.players || "Any"}
-                - Budget: ${inputs.budget || "Any"}
-                - Duration: ${inputs.duration || "Any"}
+                - Genre: ${activeInputs.genre || "Any"}
+                - Players: ${activeInputs.players || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+                - Duration: ${activeInputs.duration || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If "cheap", prioritize free-to-play or low-cost indie games.
+                - If "moderate", focus on standard AAA titles. EXCLUDE "Collectors Editions" or expensive deluxe bundles.
                 
                 ⚠️ CRITICAL OUTPUT RULES:
                 1. Return JSON with a "recommendations" array.
@@ -1035,9 +1085,13 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Theme: ${inputs.themes || "Any"}
-                - Difficulty: ${inputs.difficulty || "Any"}
-                - Group Size: ${inputs.groupSize || "Any"}
+                - Theme: ${activeInputs.themes || "Any"}
+                - Difficulty: ${activeInputs.difficulty || "Any"}
+                - Group Size: ${activeInputs.groupSize || "Any"}
+                - Price: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - Ensure the requested price range is respected for the group size.
                 
                 ⚠️ CRITICAL OUTPUT RULES:
                 1. Return JSON with a "recommendations" array.
@@ -1095,15 +1149,22 @@ export const getConciergePromptAndMock = (
                 YOU MUST ensure ALL recommendations fully align with these specific requirements.
                 ` : ''}
                 
-                - Sport: ${inputs.sport || "Any"}
-                - Type: ${inputs.type || "Watch or Play"}
-                - Membership: ${inputs.membership || "Any"}
+                - Sport: ${activeInputs.sport || "Any"}
+                - Type: ${activeInputs.type || "Watch or Play"}
+                - Membership: ${activeInputs.membership || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "cheap", suggest public courts, free fields, or affordable local matches. EXCLUDE premium club access.
+                - If "moderate", focus on standard ticket prices or standard venue hire. EXCLUDE VIP boxes or corporate suites.
                 
                 ⚠️ CRITICAL OUTPUT RULES:
                 1. Return JSON with a "recommendations" array.
                 2. Every recommendation MUST have "ideaType": "event" and "typeData".
-                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating. 
+                3. Every recommendation MUST also include root fields: name, description, address, price, google_rating, website. 
                    - These root fields are used for the main card display.
+                4. 🎯 LINK ACCURACY: For the root "website" field:
+                   - ALWAYS use a Google Search URL: https://www.google.com/search?q=[Venue+Name]+${targetLocation}+sports+tickets
                 
                 "typeData" Schema:
                 {
@@ -1156,12 +1217,17 @@ export const getConciergePromptAndMock = (
                 "${extraInstructions || 'Recipe ideas'}"
                 
                 USER PREFERENCES:
-                - Occasion: ${inputs.occasion || "Everyday Cooking"}
-                - Guests: ${inputs.guests || "2-4 People"}
-                - Cuisine: ${inputs.cuisine || "Any"}
-                - Courses: ${inputs.courses || "Main Dish Only"}
-                - Effort: ${inputs.complexity || "Quick & Easy"}
-                - Dietary: ${inputs.dietary || "None"}
+                - Occasion: ${activeInputs.occasion || "Everyday Cooking"}
+                - Guests: ${activeInputs.guests || "2-4 People"}
+                - Cuisine: ${activeInputs.cuisine || "Any"}
+                - Courses: ${activeInputs.courses || "Main Dish Only"}
+                - Effort: ${activeInputs.complexity || "Quick & Easy"}
+                - Dietary: ${activeInputs.dietary || "None"}
+                - Budget: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "cheap", focus on cost-effective ingredients and pantry staples.
+                - If "moderate", use standard quality ingredients. EXCLUDE ultra-premium luxury ingredients (e.g. Wagyu, Truffles, Saffron) unless requested.
                 
                 ${isSecretMode ? `🤫 SECRET MODE: Keep dish names vague.` : ''}
 
@@ -1263,10 +1329,14 @@ export const getConciergePromptAndMock = (
                 ` : ''}
                 
                 User Preferences:
-                - Vibe: ${inputs.vibe || "Any"}
-                - Structure: ${inputs.structure || "Any"}
-                - Cuisine: ${inputs.cuisine || "Any"}
-                - Budget: ${inputs.price || "Any"}
+                - Vibe: ${activeInputs.vibe || "Any"}
+                - Structure: ${activeInputs.structure || "Any"}
+                - Cuisine: ${activeInputs.cuisine || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "moderate", EXCLUDE multi-course hatted restaurant pairings or 5-star luxury hotel activities.
+                - Focus on high-quality mid-range experiences that feel special without breaking the bank.
 
                 INSTRUCTIONS:
                 1. Each plan must be a logical sequence of events (e.g. Pre-dinner drink -> Dinner -> Dessert/Activity).
@@ -1333,10 +1403,15 @@ export const getConciergePromptAndMock = (
                 ` : ''}
  
                 Preferences:
-                - Vibe: ${inputs.mood || "Any"}
-                - Company: ${inputs.company || "Any"}
-                - Specific Day: ${inputs.day || "Any"}
-                - Budget: ${inputs.price || "Any"}
+                - Vibe: ${activeInputs.mood || "Any"}
+                - Company: ${activeInputs.company || "Any"}
+                - Specific Day: ${activeInputs.day || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - STRICTLY follow the User's budget selection.
+                - If "cheap", avoid upscale venues. If "expensive", prioritize premium experiences.
+                - If "moderate", exclude luxury/fine-dining and focus on mid-range options.
  
                 INSTRUCTIONS:
                 1. PRIORITY HIERARCHY (CRITICAL): You MUST prioritize events based on their scarcity:
@@ -1410,13 +1485,17 @@ export const getConciergePromptAndMock = (
                 ` : ''}
                 
                 TRIP DETAILS:
-                - Dates: ${inputs.dates_start || "Unspecified"} to ${inputs.dates_end || "Unspecified"}
-                - Travel Party: ${inputs.party || "Any"}
-                - Transport Mode: ${inputs.transport || "Any"}
-                - Max Travel Distance / Time: ${inputs.maxDistance || "Any"}
-                - Dining Preferences: ${inputs.dining || "Any"}
-                - Interests / Vibe: ${inputs.interests || "Any"}
-                - Budget: ${inputs.price || "Any"}
+                - Dates: ${activeInputs.dates_start || "Unspecified"} to ${activeInputs.dates_end || "Unspecified"}
+                - Travel Party: ${activeInputs.party || "Any"}
+                - Transport Mode: ${activeInputs.transport || "Any"}
+                - Max Travel Distance / Time: ${activeInputs.maxDistance || "Any"}
+                - Dining Preferences: ${activeInputs.dining || "Any"}
+                - Interests / Vibe: ${activeInputs.interests || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If budget is "moderate", EXCLUDE luxury resorts and first-class travel options.
+                - Focus on comfortable, well-rated 3-4 star accommodations and affordable local activities.
 
                 INSTRUCTIONS:
                 1. Maximize the time available.
@@ -1505,10 +1584,15 @@ export const getConciergePromptAndMock = (
                 "${extraInstructions || 'Recipe ideas'}"
                 
                 USER PREFERENCES:
-                - Meal Type: ${inputs.mealType || "Any"}
-                - Cuisine: ${inputs.cuisine || "Any"}
-                - Dietary: ${inputs.dietary || "None"}
-                - Prep Time: ${inputs.time || "Any"}
+                - Meal Type: ${activeInputs.mealType || "Any"}
+                - Cuisine: ${activeInputs.cuisine || "Any"}
+                - Dietary: ${activeInputs.dietary || "None"}
+                - Prep Time: ${activeInputs.time || "Any"}
+                - Budget: ${activeInputs.price || "Any"}
+                
+                ⚠️ BUDGET ADHERENCE (CRITICAL):
+                - If "cheap", prioritize budget-friendly ingredients and bulk cooking.
+                - If "moderate", exclude gourmet/luxury specialty ingredients unless relevant.
                 
                 ${isSecretMode ? `🤫 SECRET MODE: Keep dish names vague.` : ''}
 

@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
         let rawResponse: any = null;
         let promptValue = '';
         let isRecipeRequest = false;
+        let bestLocation: string | null = null; // Lifted scope
 
         // --- BRANCH 1: Natural Language Prompt ---
         if (body.prompt) {
@@ -108,7 +109,36 @@ export async function POST(request: NextRequest) {
                 intent = { quantity: 5, topic: promptValue, isLocationDependent: false };
             }
 
-            const bestLocation = intent.location || nlRequest.location || user.homeTown || jar.location;
+            // Location Prioritization Logic
+            // Location Prioritization Logic
+
+            // 1. Explicit Intent (e.g. "in Paris")
+            // Ignore if intent.location is just "local" or "near me" - we handle that via logic
+            if (intent.location && !/local|near\s*me/i.test(intent.location)) {
+                bestLocation = intent.location;
+            }
+
+            const hasNearMe = /near\s*me/i.test(promptValue);
+            const hasLocal = /local/i.test(promptValue);
+
+            // 2. "Near Me" -> Prioritize GPS
+            if (!bestLocation && hasNearMe) {
+                bestLocation = nlRequest.location || null;
+            }
+
+            // 3. "Local" or Default -> Prioritize Home Town, then GPS
+            if (!bestLocation) {
+                if (user.homeTown) {
+                    bestLocation = user.homeTown;
+                } else if (nlRequest.location) {
+                    bestLocation = nlRequest.location;
+                }
+            }
+
+            // 4. Fallback to Jar Location or generic
+            if (!bestLocation) {
+                bestLocation = jar.location || "their local area";
+            }
 
             // Detect if this is a recipe/cooking request (should NOT use search)
             isRecipeRequest = /recipe|cook|meal|dish|ingredient|what.*(to|should).*(cook|make|prepare)|dinner idea|lunch idea|breakfast idea/i.test(promptValue);
@@ -154,41 +184,50 @@ export async function POST(request: NextRequest) {
                 Context: Viewing jar "${context.jarTopic}" in "${bestLocation || "their local area"}".
                 Current Date: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 
-                CRITICAL:
-                1. If user asks for "cinema", "theaters", "playing now", or "new", you MUST uses Google Search to find movies CURRENTLY showing. Do not invent showtimes for old movies.
-                2. Return ONLY a valid JSON array of objects.
-                3. Each item must have: 
-                   - "title"
-                   - "description" (20-40 words)
-                   - "ideaType" (one of: 'movie', 'book', 'game', 'music', 'dining', 'activity', 'event', 'travel')
-                   - "category" (short 1-2 word tag, e.g. "Sci-Fi", "Italian", "Hiking")
-                   - "website" (URL)
-                   - "typeData" (OPTIONAL: detailed metadata if applicable)
-                3. If the topic is YouTube, provide real video links as "website".
-                4. For physical places, include "address" and "rating".
-                5. For SPECIFIC TYPES, provide detailed "typeData":
-                   - Movie: { "year": 2024, "director": "Name", "cast": ["Actor A"], "runtime": 120, "rating": "PG-13", "watchMode": "cinema" (if new) or "streaming", "showtimesUrl": "link" }
-                   - Book: { "author": "Name", "pages": 300, "genre": "Fiction", "yearPublished": 2023 }
-                   - Game: { "title": "Game Name", "gameType": "video_game" | "board_game", "platform": ["PC", "PS5"], "minPlayers": 1, "coop": true }
-                   - Music: { "artist": "Name", "type": "album" | "concert", "releaseYear": 2024, "genre": ["Pop"] }
-                   - Event: { "eventName": "Name", "eventType": "concert" | "sports", "date": "ISO-Date", "ticketUrl": "link" }
-                   - Travel: { "travelType": "hotel" | "camping", "destination": { "name": "City" }, "amenities": ["Pool"] }
-                   - Dining: { "cuisine": "Italian", "priceRange": "$$", "rating": 4.5, "menuUrl": "link" }
+                CRITICAL INSTRUCTIONS:
+                1. STRICTLY ADHERE to all user constraints in the request (e.g. "Public", "Under $50", "Kid-friendly", "Indoor"). If no suitable options stick to constraints (e.g. valid public vs private), say so or find the best match.
+                2. If user asks for "cinema", "playing now", or "theatre", use Google Search context to find specific venues/movies.
+                3. website: Provide a DIRECT DEEP LINK if known. DO NOT provide generic homepages like "ticketek.com.au" or "eventbrite.com".
+                4. If you don't have a specific deep link, leave "website" empty (null or "") so the system can fetch it accurately.
+                5. If Ticketek is the only choice, prefer the booking subdomain: "https://premier.ticketek.com.au/".
+                6. Return ONLY a valid JSON array of objects.
+                7. "ideaType" MUST be one of: 'movie', 'book', 'game', 'music', 'dining', 'activity', 'event', 'travel'. Use 'activity' for sports/golf.
+                8. "indoor": Boolean. True if the activity is primarily indoors, False if outdoors.
+                9. "category": A short, 1-2 word tag (e.g. "Golf", "Musical", "Theatre").
 
                 FORMAT:
                 [
                   {
-                    "title": "Dune: Part Two",
-                    "description": "Paul Atreides unites with Chani and the Fremen while on a warpath of revenge.",
-                    "ideaType": "movie",
-                    "category": "Sci-Fi",
-                    "website": "https://www.imdb.com/title/tt15239678/",
+                    "title": "Place Name or Title",
+                    "description": "Engaging 20-40 word description.",
+                    "ideaType": "activity",
+                    "category": "Golf",
+                    "indoor": false,
+                    "cost": "$$",
+                    "website": "https://example.com",
+                    "address": "123 Main St, City",
+                5. For SPECIFIC TYPES, provide detailed "typeData" matching our schemas:
+                   - Activity: { "activityType": "hiking", "duration": 2, "participants": { "min": 1, "max": 4 }, "equipmentNeeded": ["boots"], "bookingRequired": false }
+                   - Game: { "gameType": "board_game", "minPlayers": 2, "coop": false, "playtime": 60 }
+                   - Movie: { "year": 2024, "director": "Name", "runtime": 120, "watchMode": "cinema" }
+                   - Dining: { "cuisine": "Italian", "priceRange": "$$", "menuHighlights": ["Pizza"] }
+
+                FORMAT:
+                [
+                  {
+                    "title": "Place Name or Title",
+                    "description": "Engaging 20-40 word description.",
+                    "ideaType": "activity",
+                    "category": "Golf",
+                    "indoor": false,
+                    "cost": "$$",
+                    "website": "https://example.com/booking",
+                    "address": "123 Main St, City",
                     "typeData": {
-                      "year": 2024,
-                      "director": "Denis Villeneuve",
-                      "cast": ["Timothée Chalamet", "Zendaya"],
-                      "runtime": 166,
-                      "watchMode": "Cinema"
+                       "activityType": "Golf", 
+                       "duration": 4, 
+                       "participants": { "min": 1, "max": 4 },
+                       "bookingRequired": true
                     }
                   }
                 ]
@@ -256,12 +295,43 @@ export async function POST(request: NextRequest) {
 
         // --- SAVE MODE ---
         const createdIdeas = await Promise.all(
-            generatedIdeas.map((idea: any) => {
+            generatedIdeas.map(async (idea: any) => {
                 const title = idea.title || idea.name || idea.eventName || idea.activityName || "New Idea";
                 const description = idea.description || idea.summary || idea.details || "No description provided.";
-                const website = idea.website || idea.link || idea.url || idea.watchUrl || null;
-                const rating = (idea.googleRating || idea.google_rating || idea.rating) ? parseFloat(String(idea.googleRating || idea.google_rating || idea.rating)) : null;
-                const address = idea.address || (typeof idea.location === 'string' ? idea.location : (idea.location?.address || null));
+
+                // --- ENHANCED URL LOOKUP ---
+                // If the AI didn't provide a website, or provided a generic or ticket homepage, try to find the real one.
+                const isGenericTicketSite = idea.website && (/ticketek\.com\.au(\/)?$/i.test(idea.website) || /ticketmaster\.com\.au(\/)?$/i.test(idea.website));
+                const needsBetterUrl = !idea.website || idea.website.includes('google.com/search') || isGenericTicketSite;
+                const isOnline = idea.ideaType === 'recipe' || idea.ideaType === 'movie' || idea.ideaType === 'book' || idea.ideaType === 'game'; // Don't search for recipes/movies as places
+
+                let website = idea.website || idea.link || idea.url || idea.watchUrl || null;
+                let address = idea.address || (typeof idea.location === 'string' ? idea.location : (idea.location?.address || null));
+                let rating = (idea.googleRating || idea.google_rating || idea.rating) ? parseFloat(String(idea.googleRating || idea.google_rating || idea.rating)) : null;
+                let placeId: string | undefined = undefined;
+
+                if (needsBetterUrl && !isOnline) {
+                    try {
+                        // Import dynamically to avoid circular deps if any (though route.ts is fine)
+                        const { findPlaceUrl } = await import('@/lib/google-places');
+
+                        // Construct a strong query: "Title City" or "Title Address"
+                        const searchContext = address ? `${title} ${address}` : `${title} ${bestLocation}`;
+                        console.log(`[BulkGenerate] Searching Places for: ${searchContext}`);
+
+                        const placeData = await findPlaceUrl(searchContext);
+                        if (placeData) {
+                            if (placeData.website) website = placeData.website;
+                            else if (placeData.googleMapsUrl && !website) website = placeData.googleMapsUrl; // Fallback to Maps if official site missing
+
+                            if (placeData.placeId) placeId = placeData.placeId; // Store? (Prisma schema check needed, usually stored contextually)
+                            if (placeData.rating) rating = placeData.rating;
+                            if (placeData.address) address = placeData.address; // Use official address
+                        }
+                    } catch (searchErr) {
+                        console.warn("[BulkGenerate] Places search failed:", searchErr);
+                    }
+                }
 
                 // 1. Prefer AI's explicit category, fall back to heuristics
                 let finalCategory = getBestCategoryFit(idea.category?.toUpperCase() || 'ACTIVITY', jar.topic).toUpperCase();
@@ -301,7 +371,7 @@ export async function POST(request: NextRequest) {
                         description: title,
                         details: description,
                         category: finalCategory,
-                        indoor: idea.indoor ?? true,
+                        indoor: typeof idea.indoor === 'boolean' ? idea.indoor : (idea.ideaType === 'movie' || idea.ideaType === 'dining'), // Smart default
                         duration: parseFloat(String(idea.duration || '1')),
                         cost: idea.cost || '$',
                         activityLevel: idea.activityLevel || 'MEDIUM',
@@ -353,8 +423,12 @@ function isProUser(user: any): boolean {
 function inferIdeaType(category: string, title?: string, description?: string, website?: string, explicitType?: string): string | null {
     // 0. Explicit Override (AI knows best)
     if (explicitType && explicitType !== 'null' && explicitType !== 'undefined') {
-        const types = ['recipe', 'dining', 'movie', 'book', 'game', 'activity', 'event', 'travel', 'youtube', 'music'];
-        if (types.includes(explicitType.toLowerCase())) {
+        // Full list from IdeaTypeEnum in idea-schemas.ts
+        const validTypes = [
+            'recipe', 'movie', 'book', 'activity', 'dining', 'music',
+            'game', 'event', 'travel', 'itinerary', 'simple', 'youtube'
+        ];
+        if (validTypes.includes(explicitType.toLowerCase())) {
             return explicitType.toLowerCase();
         }
     }
@@ -380,7 +454,10 @@ function inferIdeaType(category: string, title?: string, description?: string, w
     if (cat.includes('BOOK') || t.includes('book') || t.includes('novel') || d.includes('author') || d.includes('published')) return 'book';
     if (cat.includes('GAME') || t.includes('game') || d.includes('gameplay') || d.includes('console')) return 'game';
 
-    // 4. YouTube (Low Priority - only if no other strong signal)
+    // 4. Activity / Sport (NEW)
+    if (cat.includes('SPORT') || cat.includes('GOLF') || cat.includes('TENNIS') || cat.includes('HIKE') || cat.includes('WALK') || cat.includes('SQUASH') || cat.includes('BADMINTON') || cat.includes('RACQUETBALL') || cat.includes('PILATES') || cat.includes('YOGA')) return 'activity';
+
+    // 5. YouTube (Low Priority - only if no other strong signal)
     // Many movies/games have youtube trailers, that doesn't make them "YouTube" ideas.
     if (cat.includes('YOUTUBE') || t.includes('youtube') || t.includes('video')) return 'youtube';
     if (w.includes('youtube.com') || w.includes('youtu.be')) {

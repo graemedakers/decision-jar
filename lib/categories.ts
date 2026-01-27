@@ -344,6 +344,16 @@ export const getBestCategoryFit = (requestedId: string, topic: string | null | u
         'HIKE': ['ACTIVITY', 'OUTDOOR', 'FITNESS', 'WELLNESS'],
         'SHOW': ['MOVIE', 'CULTURAL', 'ENTERTAINMENT', 'SOCIAL'],
         'THEATRE': ['CULTURAL', 'ENTERTAINMENT', 'SOCIAL', 'ACTIVITY'],
+        // Sports
+        'GOLF': ['OUTDOOR_SPORT', 'SPORT', 'ACTIVITY', 'OUTDOOR', 'FITNESS'],
+        'TENNIS': ['OUTDOOR_SPORT', 'SPORT', 'ACTIVITY', 'OUTDOOR', 'FITNESS'],
+        'SQUASH': ['OUTDOOR_SPORT', 'SPORT', 'ACTIVITY', 'FITNESS', 'INDOOR'], // Mapped to OUTDOOR_SPORT for Trophy icon, even if indoor
+        'BADMINTON': ['OUTDOOR_SPORT', 'SPORT', 'ACTIVITY', 'FITNESS'],
+        'RACQUETBALL': ['OUTDOOR_SPORT', 'SPORT', 'ACTIVITY', 'FITNESS'],
+        'PILATES': ['YOGA', 'FITNESS', 'ACTIVITY', 'WELLNESS'],
+        'SPORT': ['OUTDOOR_SPORT', 'ACTIVITY', 'FITNESS', 'OUTDOOR'],
+        'SPORTS': ['OUTDOOR_SPORT', 'ACTIVITY', 'FITNESS', 'OUTDOOR'],
+        'SWIM': ['FITNESS', 'ACTIVITY', 'WELLNESS'],
         // Movie Genres
         'ACTION': ['MOVIE', 'CINEMA', 'FILM', 'ENTERTAINMENT'],
         'SCI-FI': ['MOVIE', 'CINEMA', 'FILM', 'SCI_FI', 'ENTERTAINMENT'],
