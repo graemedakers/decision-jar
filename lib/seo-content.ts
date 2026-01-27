@@ -415,14 +415,14 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
         slug: "date-night-ideas-for-couples",
         category: "Date Ideas",
         title: "50 Best Date Night Ideas for Couples in 2026 (Budget-Friendly to Luxe)",
-        description: "Never run out of date ideas again! From romantic dinners to adventure dates, we've curated 50 amazing date night ideas for every couple, budget, and preference.",
+        description: "Stuck on date night ideas? Discover 50+ romantic, fun, and unique things to do for couples. From cheap dates to luxury experiences, find your next adventure here.",
         icon: Heart,
         readTime: "12 min",
         structuredData: {
             "@context": "https://schema.org",
             "@type": "Article",
             "headline": "50 Best Date Night Ideas for Couples in 2026",
-            "description": "Comprehensive guide to date night ideas across all budgets, from romantic to adventurous.",
+            "description": "The ultimate list of date night ideas. Filter by budget, energy level, and vibe to find the perfect couples activity.",
             "datePublished": "2026-01-05",
             "author": {
                 "@type": "Organization",

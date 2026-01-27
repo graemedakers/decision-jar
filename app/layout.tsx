@@ -28,7 +28,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'),
   title: {
-    default: "Decision Jar | AI Collective Decision Maker",
+    default: "Decision Jar | Date Night Ideas & AI Decision Maker",
     template: "%s | Decision Jar",
   },
   description: "Never waste 30 minutes deciding where to eat. Your AI-powered decision maker for date nights, friend hangs, and family adventures. We find perfect places, you spin to decide. No more arguments.",
