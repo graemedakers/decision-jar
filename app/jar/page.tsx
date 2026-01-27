@@ -330,7 +330,7 @@ export default function JarPage() {
                         <p className="text-slate-400">Opening your jar...</p>
                     </div>
                 ) : activeIdeas.length === 0 ? (
-                    <div className="space-y-6 max-w-2xl mx-auto w-full">
+                    <div className="space-y-6 max-w-2xl mx-auto w-full relative z-20">
                         <SmartPromptInput
                             jarTopic={userData?.jarTopic || 'General'}
                             onGenerate={handleSmartPrompt}

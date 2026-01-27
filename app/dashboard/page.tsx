@@ -762,7 +762,7 @@ function DashboardContent() {
 
                             {/* EXTRA TOOLS SECTION */}
                             {!showEmptyState && !showNoJars && (
-                                <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col gap-6" id="smart-prompt-input">
+                                <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 flex flex-col gap-6 relative z-30" id="smart-prompt-input">
                                     <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl rounded-[2.5rem] p-6 lg:p-8 border border-white/40 dark:border-white/10 shadow-xl ring-1 ring-black/5">
                                         <div className="flex items-center gap-2 mb-4 ml-2">
                                             <Sparkles className="w-4 h-4 text-primary animate-pulse" />
