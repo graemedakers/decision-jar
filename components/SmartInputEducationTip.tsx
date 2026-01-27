@@ -40,7 +40,7 @@ export function SmartInputEducationTip({ onDismiss, onTryExample, className }: S
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 5, scale: 0.95 }}
                     transition={{ duration: 0.4, type: "spring" }}
-                    className={cn("absolute -top-[140px] sm:-top-32 left-0 right-0 mx-auto w-[95%] sm:w-full max-w-sm z-50 pointer-events-none", className)}
+                    className={cn("absolute bottom-full left-0 right-0 mx-auto w-[95%] sm:w-full max-w-sm z-[100] pointer-events-none pb-4", className)}
                 >
                     <div className="relative bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-sm text-white p-4 rounded-2xl shadow-xl border border-purple-500/30 pointer-events-auto">
 
@@ -72,10 +72,10 @@ export function SmartInputEducationTip({ onDismiss, onTryExample, className }: S
 
                             <button
                                 onClick={handleDismiss}
-                                className="text-slate-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
+                                className="text-slate-400 hover:text-white transition-colors p-3 hover:bg-white/10 rounded-full -mr-2"
                                 aria-label="Dismiss tip"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
                     </div>
