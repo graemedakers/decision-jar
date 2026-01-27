@@ -241,7 +241,7 @@ export default function JarPage() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     {userData?.activeJarId && isAdmin && (
                         <Button
                             onClick={() => openModal('GIFT_JAR', {
@@ -265,19 +265,6 @@ export default function JarPage() {
                         >
                             <Share className="w-4 h-4" />
                             <span className="hidden sm:inline">Share Jar</span>
-                        </Button>
-                    )}
-
-                    {/* Add Idea button removed */}
-
-                    {userData?.activeJarId && isAdmin && (
-                        <Button
-                            onClick={() => openModal('JAR_MEMBERS')}
-                            variant="outline"
-                            className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 flex items-center gap-2"
-                        >
-                            <Users className="w-4 h-4" />
-                            <span className="hidden sm:inline">Members</span>
                         </Button>
                     )}
 
