@@ -139,44 +139,17 @@ export async function DELETE(
             return NextResponse.json({ error: "Forbidden: Only admins can delete a jar." }, { status: 403 });
         }
 
-        // Clean up all related records in a transaction to satisfy Foreign Keys
+        // Clean up all related records in a transaction
+        // Most related records (Ideas, Members, Votes, etc.) now use onDelete: Cascade
         await prisma.$transaction(async (tx) => {
-            // 1. Clear activeJarId for users who had this jar active
+            // 1. Clear activeJarId for users who had this jar active (Cross-model, no cascade)
             await tx.user.updateMany({
                 where: { activeJarId: id },
                 data: { activeJarId: null }
             });
 
-            // 2. Delete Votes (Must be before VoteSession and Idea)
-            await tx.vote.deleteMany({
-                where: {
-                    OR: [
-                        { session: { jarId: id } },
-                        { idea: { jarId: id } }
-                    ]
-                }
-            });
-
-            // 3. Delete Vote Sessions
-            await tx.voteSession.deleteMany({ where: { jarId: id } });
-
-            // 4. Delete Unlocked Achievements
-            await tx.unlockedAchievement.deleteMany({ where: { jarId: id } });
-
-            // 5. Delete Favorite Venues
-            await tx.favoriteVenue.deleteMany({ where: { jarId: id } });
-
-            // 6. Delete Deleted Logs
-            await tx.deletedLog.deleteMany({ where: { jarId: id } });
-
-            // 7. Delete Ideas (Ratings cascade automatically)
-            await tx.idea.deleteMany({ where: { jarId: id } });
-
-            // 8. Delete Memberships
-            await tx.jarMember.deleteMany({ where: { jarId: id } });
-
-            // 9. Cleanup GiftTokens where this jar is the source
-            // Search for all gifts from this jar
+            // 2. Cleanup GiftTokens where this jar is the source
+            // Any jars cloned from these gifts will have their sourceGiftId set to null
             const gifts = await tx.giftToken.findMany({
                 where: { sourceJarId: id },
                 select: { id: true }
@@ -184,26 +157,22 @@ export async function DELETE(
             const giftIds = gifts.map(g => g.id);
 
             if (giftIds.length > 0) {
-                // a. Remove links from any jars cloned from these gifts
+                // Remove links from any jars cloned from these gifts
                 await tx.jar.updateMany({
                     where: { sourceGiftId: { in: giftIds } },
                     data: { sourceGiftId: null }
                 });
 
-                // b. Delete the gift tokens themselves
+                // Delete the gift tokens themselves (GiftToken relation to Jar is Cascade, but we do it explicitly here for clarity of the gifts we're also cleaning up links for)
                 await tx.giftToken.deleteMany({
                     where: { id: { in: giftIds } }
                 });
             }
 
-            // 10. Clear pointers to gifts that were gifted to this jar (optional but clean)
-            await tx.jar.update({
-                where: { id },
-                data: { sourceGiftId: null }
-            });
-
-            // 11. Finally, Delete the Jar
+            // 3. Finally, Delete the Jar (This triggers all database-level cascades)
             await tx.jar.delete({ where: { id: id } });
+        }, {
+            timeout: 20000 // Increase timeout to 20s for large jars
         });
 
         return NextResponse.json({ success: true });

@@ -69,7 +69,7 @@ model UnlockedAchievement {
   jarId         String
   achievementId String
   unlockedAt    DateTime @default(now())
-  jar           Jar      @relation(fields: [jarId], references: [id])
+  jar           Jar      @relation(fields: [jarId], references: [id], onDelete: Cascade)
 
   @@unique([jarId, achievementId])
 }
@@ -77,7 +77,7 @@ model UnlockedAchievement {
 model DeletedLog {
   id          String   @id @default(uuid())
   jarId       String
-  jar         Jar      @relation(fields: [jarId], references: [id])
+  jar         Jar      @relation(fields: [jarId], references: [id], onDelete: Cascade)
   description String
   deletedBy   String   // Name of the user who deleted it
   deletedAt   DateTime @default(now())
@@ -88,7 +88,7 @@ model JarMember {
   userId    String
   user      User       @relation(fields: [userId], references: [id])
   jarId     String
-  jar       Jar        @relation(fields: [jarId], references: [id])
+  jar        Jar        @relation(fields: [jarId], references: [id], onDelete: Cascade)
   role      MemberRole @default(MEMBER)
   status    MemberStatus @default(ACTIVE)
   joinedAt  DateTime   @default(now())
@@ -257,7 +257,7 @@ model Idea {
   category       String   @default("ACTIVITY") // ACTIVITY, MEAL, EVENT
   
   jarId          String
-  jar            Jar      @relation(fields: [jarId], references: [id])
+  jar            Jar      @relation(fields: [jarId], references: [id], onDelete: Cascade)
   
   createdById    String
   createdBy      User     @relation("CreatedBy", fields: [createdById], references: [id])
@@ -324,7 +324,7 @@ model Rating {
 model FavoriteVenue {
   id          String   @id @default(uuid())
   jarId       String
-  jar         Jar      @relation(fields: [jarId], references: [id])
+  jar         Jar      @relation(fields: [jarId], references: [id], onDelete: Cascade)
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   
@@ -343,7 +343,7 @@ model FavoriteVenue {
 model VoteSession {
   id              String         @id @default(uuid())
   jarId           String
-  jar             Jar            @relation(fields: [jarId], references: [id])
+  jar             Jar            @relation(fields: [jarId], references: [id], onDelete: Cascade)
   
   status          VoteStatus     @default(ACTIVE)
   startTime       DateTime       @default(now())
@@ -365,13 +365,13 @@ model VoteSession {
 model Vote {
   id        String   @id @default(uuid())
   sessionId String
-  session   VoteSession @relation(fields: [sessionId], references: [id])
+  session   VoteSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   
   ideaId    String
-  idea      Idea     @relation(fields: [ideaId], references: [id])
+  idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
   
   createdAt DateTime @default(now())
 
