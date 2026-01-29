@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/Button";
 import { Loader2, Play, Users, Clock, AlertTriangle, Check, Trophy, RefreshCcw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
@@ -39,6 +39,8 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
     const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
+    const activeRef = useRef(false);
+
     const fetchStatus = async () => {
         try {
             const res = await fetch(`/api/jars/${jarId}/vote`, {
@@ -49,10 +51,11 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                 const data = await res.json();
 
                 // If we transition from an active vote to a completed one via polling/sync
-                if (status?.active && !data.active && data.lastResult?.winner) {
+                if (activeRef.current && !data.active && data.lastResult?.winner) {
                     openModal('DATE_REVEAL', { idea: data.lastResult.winner, isViewOnly: true });
                 }
 
+                activeRef.current = !!data.active;
                 setStatus(data);
             }
         } catch (e) {

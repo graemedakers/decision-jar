@@ -3,6 +3,44 @@ import { auth } from './next-auth-helper';
 
 export async function getSession() {
     try {
+        // E2E Test Bypass
+        if (process.env.NODE_ENV !== 'production') {
+            const { headers } = await import('next/headers');
+            const headerList = await headers();
+            if (headerList.get('x-e2e-bypass') === 'true') {
+                // Return the seeded mocked session if bypass is active
+                // We try to find the user by email if provided, or just the first user
+                const email = headerList.get('x-e2e-user-email');
+                let user;
+
+                if (email) {
+                    user = await prisma.user.findFirst({ where: { email } });
+                }
+
+                if (!user) {
+                    // Fallback to any test user if specific one not found or not provided
+                    user = await prisma.user.findFirst({
+                        where: { email: { contains: 'test-user' } }
+                    });
+                }
+
+                if (user) {
+                    return {
+                        user: {
+                            id: user.id,
+                            email: user.email,
+                            name: user.name,
+                            activeJarId: user.activeJarId,
+                            isLifetimePro: user.isLifetimePro,
+                            stripeSubscriptionId: user.stripeSubscriptionId,
+                            subscriptionStatus: user.subscriptionStatus
+                        },
+                        expires: new Date(Date.now() + 86400000).toISOString()
+                    };
+                }
+            }
+        }
+
         const nextAuthSession = await auth();
 
         if (nextAuthSession?.user?.email) {

@@ -4,6 +4,7 @@ import { BookTypeData, MovieTypeData } from '@/lib/types/idea-types';
  * Detects if an idea should be a certain type based on its category
  */
 export function suggestIdeaType(idea: any): string | null {
+    if (!idea) return null;
     const category = idea.categoryId || idea.category;
 
     // Check keywords if category is ambiguous or mismatched
@@ -170,6 +171,7 @@ export function suggestIdeaType(idea: any): string | null {
  * Favor AI-provided typeData above all else.
  */
 export function getStandardizedData(idea: any): any {
+    if (!idea) return null;
     // 1. Direct hit - AI already provided structured data
     if (idea.typeData && Object.keys(idea.typeData).length > 0) {
         // SPECIAL CASE: If it's a youtube type but missing videoId, allow recovery logic below

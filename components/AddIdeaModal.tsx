@@ -138,12 +138,18 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     const cateringPlan = getCateringPlan(formData.details);
     const venueDetails = getVenueDetails(formData.details);
     const hasMarkdown = formData.details && (formData.details.includes("###") || formData.details.includes("**"));
-    const showPreviewToggle = !!effectiveType || !!itinerary || !!cateringPlan || !!venueDetails || !!hasMarkdown;
+    const showPreviewToggle = !!effectiveType || !!itinerary || !!cateringPlan || !!venueDetails || !!hasMarkdown || !!formData.description || !!formData.details || !!initialData?.id;
 
     useEffect(() => {
         if (isOpen) {
             setIsWizardMode(!initialData?.id && initialMode !== 'magic');
-            setViewMode('EDIT');
+
+            // Default to Formatted View (PREVIEW) if it's an existing idea that has content to show
+            if (initialData?.id && showPreviewToggle) {
+                setViewMode('PREVIEW');
+            } else {
+                setViewMode('EDIT');
+            }
 
             if (initialMode === 'magic' && !initialData?.id) {
                 // Small delay to ensure hook is ready

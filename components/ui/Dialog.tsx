@@ -92,7 +92,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     return createPortal(content, document.body);
 }
 
-interface DialogContentProps {
+interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
     className?: string;
     /**
@@ -102,7 +102,7 @@ interface DialogContentProps {
     raw?: boolean;
 }
 
-export function DialogContent({ children, className, raw = false }: DialogContentProps) {
+export function DialogContent({ children, className, raw = false, ...props }: DialogContentProps) {
     const contentRef = React.useRef<HTMLDivElement>(null);
 
     // Scroll to top on mount
@@ -112,7 +112,7 @@ export function DialogContent({ children, className, raw = false }: DialogConten
 
     if (raw) {
         return (
-            <div className={cn("flex flex-col flex-1 overflow-hidden", className)}>
+            <div className={cn("flex flex-col flex-1 overflow-hidden", className)} {...props}>
                 {children}
             </div>
         );
@@ -126,6 +126,7 @@ export function DialogContent({ children, className, raw = false }: DialogConten
                 "custom-scrollbar",
                 className
             )}
+            {...props}
         >
             {children}
         </div>

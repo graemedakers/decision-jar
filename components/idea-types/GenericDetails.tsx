@@ -2,6 +2,8 @@ import React from 'react';
 import { FileText, Info } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 
+import { ItineraryMarkdownRenderer } from '../ItineraryMarkdownRenderer';
+
 interface GenericDetailsProps {
     data?: any;
     idea?: any; // Fallback if data is not structured
@@ -45,8 +47,7 @@ export function GenericDetails({ data, idea, compact }: GenericDetailsProps) {
 
                 {notes && (
                     <div className="mt-3 pt-3 border-t border-slate-200 dark:border-white/10">
-                        <h4 className="text-xs font-semibold text-slate-500 uppercase mb-1">Notes</h4>
-                        <div className="whitespace-pre-wrap">{notes}</div>
+                        <ItineraryMarkdownRenderer markdown={notes} variant="sections" />
                     </div>
                 )}
             </div>

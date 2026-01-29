@@ -165,6 +165,11 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
         setIsLoadingAI(false);
     }
 
+    // Standardize Data for View
+    // We always want to default to the "Formatted" (Unified) view
+    const effectiveType = idea ? (idea.ideaType || suggestIdeaType(idea) || 'generic') : 'generic';
+    const typeData = idea ? (idea.typeData || getStandardizedData(idea) || { _standardized: true }) : null;
+
     // Animation Variants
     const desktopVariants = {
         hidden: { scale: 0.8, y: 50, opacity: 0 },
@@ -201,6 +206,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                 ? 'rounded-t-[2rem] rounded-b-none max-h-[85vh] h-auto pb-safe pb-8'
                                 : 'max-w-lg max-h-[90vh] rounded-2xl'
                             } z-[100]`}
+                        data-testid="date-reveal-modal"
                     >
                         {/* Mobile Drag Handle */}
                         {isMobile && (
@@ -225,48 +231,34 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                     {isViewOnly ? "Idea Details" : "It's Decided!"}
                                 </h2>
 
-                                {(() => {
-                                    const effectiveType = idea.ideaType || suggestIdeaType(idea);
-                                    const typeData = idea.typeData || getStandardizedData(idea);
-
-                                    return (
-                                        <div className="text-left">
-                                            <UnifiedIdeaCard
-                                                idea={idea}
-                                                effectiveType={effectiveType || undefined}
-                                                typeData={typeData}
-                                            />
-                                        </div>
-                                    );
-                                })()}
+                                <div className="text-left">
+                                    <UnifiedIdeaCard
+                                        idea={idea}
+                                        effectiveType={effectiveType}
+                                        typeData={typeData}
+                                    />
+                                </div>
                             </div>
 
                             {/* Actions below the card */}
-                            {(() => {
-                                const effectiveType = idea.ideaType || suggestIdeaType(idea);
-                                const typeData = idea.typeData || getStandardizedData(idea);
-
-                                return (
-                                    <div className="pt-2">
-                                        <IdeaTypeActions
-                                            type={effectiveType || ""}
-                                            data={typeData}
-                                            title={idea.description}
-                                        />
-                                    </div>
-                                );
-                            })()}
+                            <div className="pt-2">
+                                <IdeaTypeActions
+                                    type={effectiveType}
+                                    data={typeData}
+                                    title={idea.description}
+                                />
+                            </div>
 
                             {/* Only show AI recommendations if not already handled by typed data and NOT a digital/book/work category */}
                             {!(idea.website || idea.address || idea.openingHours) && (
                                 <>
                                     {/* Legacy Layouts (only if no structured data was rendered above) */}
                                     {(() => {
-                                        const typeData = idea.typeData || getStandardizedData(idea);
                                         if (typeData) return null; // Already rendered beautiful view above
 
+                                        // Fallbacks for items that have structured metadata in text but no typeData
                                         if (itinerary) return (
-                                            <div className="space-y-2">
+                                            <div className="space-y-4">
                                                 <div className="flex justify-end">
                                                     <Button
                                                         onClick={handleExportPdf}
@@ -279,14 +271,14 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                                         Export Itinerary PDF
                                                     </Button>
                                                 </div>
-                                                <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl">
+                                                <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
                                                     <ItineraryPreview itinerary={itinerary} />
                                                 </div>
                                             </div>
                                         );
 
                                         if (cateringPlan || idea.details?.includes('Shopping List')) return (
-                                            <div className="space-y-2">
+                                            <div className="space-y-4">
                                                 <div className="flex justify-end">
                                                     <Button
                                                         onClick={handleExportShoppingPdf}
@@ -299,7 +291,7 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                                         Shopping List
                                                     </Button>
                                                 </div>
-                                                <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl">
+                                                <div ref={contentRef} className="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
                                                     <CateringPreview plan={cateringPlan} />
                                                 </div>
 
@@ -312,43 +304,12 @@ export function DateReveal({ idea, onClose, userLocation, onFindDining, isViewOn
                                         );
 
                                         if (venueDetails) return (
-                                            <div className="bg-white dark:bg-slate-900 p-2 rounded-xl">
+                                            <div className="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
                                                 <VenuePreview venue={venueDetails} />
                                             </div>
                                         );
 
-                                        return (
-                                            <div className="bg-slate-100 dark:bg-white/5 rounded-xl p-6 border border-slate-200 dark:border-white/10 text-left">
-                                                <h4 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                                    <Sparkles className="w-4 h-4 text-secondary" />
-                                                    The Plan
-                                                </h4>
-                                                <div className="text-slate-700 dark:text-slate-200 leading-relaxed break-words">
-                                                    {idea.details && (idea.details.includes('###') || idea.details.includes('**')) ? (
-                                                        <ItineraryMarkdownRenderer
-                                                            markdown={idea.details}
-                                                            variant={idea.details.includes('### Day') ? 'accordion' : 'sections'}
-                                                            theme={{ sectionHeaderColor: 'text-secondary' }}
-                                                        />
-                                                    ) : (
-                                                        <p className="whitespace-pre-wrap">
-                                                            {idea.details ? (
-                                                                idea.details.split(/(https?:\/\/[^\s]+)/g).map((part, i) => (
-                                                                    part.match(/https?:\/\/[^\s]+/) ? (
-                                                                        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline break-all inline-block">
-                                                                            {part}
-                                                                        </a>
-                                                                    ) : part
-                                                                ))
-                                                            ) : "No specific details provided. Be spontaneous!"}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <div className="mt-4 flex flex-wrap gap-2">
-                                                    {/* ... (meta info) */}
-                                                </div>
-                                            </div>
-                                        );
+                                        return null; // UnifiedIdeaCard handles the generic plain text now
                                     })()}
 
                                     {onFindDining && idea.address && (

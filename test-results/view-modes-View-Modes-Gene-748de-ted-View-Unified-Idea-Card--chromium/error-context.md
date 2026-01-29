@@ -1,0 +1,46 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - region "Notifications alt+T"
+  - generic [ref=e2]:
+    - img [ref=e4]
+    - heading "Oops! The Jar Cracked." [level=2] [ref=e6]
+    - paragraph [ref=e7]: Something went wrong while displaying this section. Don't worry, your data is safe.
+    - button "Reload Jar" [ref=e9] [cursor=pointer]:
+      - img [ref=e10]
+      - text: Reload Jar
+  - generic [ref=e17]:
+    - link "Jar" [ref=e18] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e19]
+      - generic [ref=e22]: Jar
+    - link "List" [ref=e23] [cursor=pointer]:
+      - /url: /jar
+      - img [ref=e24]
+      - generic [ref=e28]: List
+    - link "Explore" [ref=e29] [cursor=pointer]:
+      - /url: /explore
+      - img [ref=e30]
+      - generic [ref=e33]: Explore
+    - link "Vault" [ref=e34] [cursor=pointer]:
+      - /url: /memories
+      - img [ref=e35]
+      - generic [ref=e39]: Vault
+  - generic:
+    - generic: Logged in as View Test User
+  - button "Help & Manual" [ref=e40] [cursor=pointer]:
+    - img [ref=e41]
+  - generic [ref=e48] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e49]:
+      - img [ref=e50]
+    - generic [ref=e53]:
+      - button "Open issues overlay" [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]: "0"
+          - generic [ref=e57]: "1"
+        - generic [ref=e58]: Issue
+      - button "Collapse issues badge" [ref=e59]:
+        - img [ref=e60]
+  - alert [ref=e62]
+```

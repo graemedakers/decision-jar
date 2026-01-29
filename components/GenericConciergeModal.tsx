@@ -15,6 +15,7 @@ import { useDemoConcierge } from "@/lib/use-demo-concierge";
 import { DemoUpgradePrompt } from "./DemoUpgradePrompt";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog";
 import { trackAIToolUsed, trackConciergeSkillSelected, trackIntentDetectionResult, trackModalAbandoned } from "@/lib/analytics";
+import { showError } from "@/lib/toast";
 import { useConciergeActions } from "@/hooks/useConciergeActions";
 import { getCurrentLocation } from "@/lib/utils";
 import { ConciergeSkillPicker } from "./ConciergeSkillPicker";
@@ -511,11 +512,11 @@ export function GenericConciergeModal({
                 }
             } else {
                 const errorData = await res.json().catch(() => ({}));
-                alert(`Error: ${errorData.error || "Failed to fetch recommendations."}`);
+                showError(errorData.error || "Failed to fetch recommendations.");
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred.");
+            showError("An error occurred.");
         } finally {
             setIsLoading(false);
         }

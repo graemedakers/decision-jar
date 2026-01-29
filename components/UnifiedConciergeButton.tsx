@@ -17,11 +17,11 @@ export function UnifiedConciergeButton({ isPremium }: UnifiedConciergeButtonProp
             openModal('PREMIUM');
             return;
         }
-        
+
         // Track path 2 selection
         trackPathSelected('2_need_inspiration', { trigger: 'unified_concierge_button' });
         trackModalOpened('concierge', { triggered_by: 'unified_concierge_button' });
-        
+
         // Open with no toolId to show skill picker
         openModal('CONCIERGE', {});
     };
@@ -30,6 +30,7 @@ export function UnifiedConciergeButton({ isPremium }: UnifiedConciergeButtonProp
         <div className="space-y-4">
             {/* Main CTA */}
             <motion.button
+                data-testid="unified-concierge-btn"
                 onClick={handleClick}
                 whileHover={{ scale: 1.01, y: -2 }}
                 whileTap={{ scale: 0.99 }}
@@ -37,7 +38,7 @@ export function UnifiedConciergeButton({ isPremium }: UnifiedConciergeButtonProp
             >
                 {/* Gradient Background */}
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-3xl opacity-75 group-hover:opacity-100 transition duration-500 blur" />
-                
+
                 {/* Content */}
                 <div className="relative bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl p-8 shadow-2xl">
                     <div className="flex items-center justify-between">
@@ -46,7 +47,7 @@ export function UnifiedConciergeButton({ isPremium }: UnifiedConciergeButtonProp
                             <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                                 <Sparkles className="w-8 h-8 text-white" />
                             </div>
-                            
+
                             {/* Text */}
                             <div className="text-left">
                                 <h3 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
@@ -80,20 +81,20 @@ export function UnifiedConciergeButton({ isPremium }: UnifiedConciergeButtonProp
                             '"Book recommendations"',
                             '"Best bars downtown"'
                         ].map((prompt, idx) => (
-                            <span 
+                            <span
                                 key={idx}
                                 className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-lg text-xs text-white font-medium border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     if (isPremium) {
-                                        trackPathSelected('2_need_inspiration', { 
+                                        trackPathSelected('2_need_inspiration', {
                                             trigger: 'example_prompt',
                                             previous_path: 'unified_concierge_button'
                                         });
                                         trackModalOpened('concierge', { triggered_by: 'example_prompt' });
-                                        
+
                                         // Open with initialPrompt for intent detection, no toolId to allow auto-detection
-                                        openModal('CONCIERGE', { 
+                                        openModal('CONCIERGE', {
                                             initialPrompt: prompt.replace(/"/g, '')
                                         });
                                     }

@@ -684,6 +684,7 @@ function DashboardContent() {
                                                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                                 className="relative shrink-0 flex items-center justify-center"
                                                 data-tour="jar-visual"
+                                                data-testid="jar-visual"
                                             >
                                                 <div
                                                     onClick={() => router.push('/jar')}

@@ -146,7 +146,7 @@ export function LocationInput({
     return (
         <div className="relative group">
             <Input
-                ref={apiKey ? (materialRef as any) : undefined}
+                ref={materialRef as any}
                 value={value}
                 onChange={handleInputChange}
                 onBlur={onInputBlur}
