@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach, vi, beforeAll, afterAll } from 'vitest';
 import React from 'react';
 
 // Cleanup after each test
@@ -60,7 +60,7 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
 
 // --- MSW Setup ---
 import { server } from './mocks/server';
-import { beforeAll, afterAll, afterEach } from 'vitest';
+
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
