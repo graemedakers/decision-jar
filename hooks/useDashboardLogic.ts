@@ -196,6 +196,7 @@ export function useDashboardLogic() {
                     break;
                 case 'settings': openModal('SETTINGS'); break;
                 case 'invite': openModal('SETTINGS'); break;
+                case 'tools': openModal('TOOLS'); break;
                 case 'capture':
                     if (ideaId) {
                         const i = data.ideas.find((x: any) => x.id === ideaId);

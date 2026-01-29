@@ -49,7 +49,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
 
     // Default to wizard for new ideas, form for edits
     const [isWizardMode, setIsWizardMode] = useState(!initialData?.id && initialMode !== 'magic');
-    const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('PREVIEW');
+    const [viewMode, setViewMode] = useState<'PREVIEW' | 'EDIT'>('EDIT');
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
     const [isExportingShopping, setIsExportingShopping] = useState(false);
@@ -130,15 +130,27 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         }
     };
 
+    // Enhanced preview detection
+    const effectiveType = (formData.ideaType || suggestIdeaType(formData))?.toLowerCase();
+    const typeData = formData.typeData || getStandardizedData(formData);
+    const hasStructuredData = !!(effectiveType && typeData);
+    const itinerary = getItinerary(formData.details);
+    const cateringPlan = getCateringPlan(formData.details);
+    const venueDetails = getVenueDetails(formData.details);
+    const hasMarkdown = formData.details && (formData.details.includes("###") || formData.details.includes("**"));
+    const showPreviewToggle = !!effectiveType || !!itinerary || !!cateringPlan || !!venueDetails || !!hasMarkdown;
+
     useEffect(() => {
         if (isOpen) {
-            setViewMode('PREVIEW');
+            setIsWizardMode(!initialData?.id && initialMode !== 'magic');
+            setViewMode('EDIT');
+
             if (initialMode === 'magic' && !initialData?.id) {
                 // Small delay to ensure hook is ready
                 setTimeout(() => randomize(), 100);
             }
         }
-    }, [isOpen, initialData?.id]);
+    }, [isOpen, initialData?.id, initialMode, showPreviewToggle]);
 
     // Track modal open time for abandonment analytics
     useEffect(() => {
@@ -217,17 +229,7 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
         await handleSubmit(e);
     };
 
-    const effectiveType = (formData.ideaType || suggestIdeaType(formData))?.toLowerCase();
-    const typeData = formData.typeData || getStandardizedData(formData);
-    const hasStructuredData = !!(effectiveType && typeData);
 
-    const itinerary = getItinerary(formData.details);
-    const cateringPlan = getCateringPlan(formData.details);
-    const venueDetails = getVenueDetails(formData.details);
-    const hasMarkdown = formData.details && (formData.details.includes("###") || formData.details.includes("**"));
-
-    // Show preview toggle for ideas with structured type data OR special content formats
-    const showPreviewToggle = !!effectiveType || !!itinerary || !!cateringPlan || !!venueDetails || !!hasMarkdown;
 
 
     return (

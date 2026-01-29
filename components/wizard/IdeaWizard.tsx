@@ -50,7 +50,7 @@ export function IdeaWizard({ formData, setFormData, categories, onSubmit, onCanc
             setDirection(1);
             setCurrentStep(prev => prev + 1);
         } else {
-            onSubmit({ preventDefault: () => { } });
+            onSubmit({ preventDefault: () => { }, stopPropagation: () => { } });
         }
     };
 

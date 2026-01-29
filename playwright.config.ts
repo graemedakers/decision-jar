@@ -11,6 +11,7 @@ export default defineConfig({
     use: {
         baseURL: 'http://localhost:3000',
         trace: 'on-first-retry',
+        video: 'on-first-retry',
     },
     projects: [
         {
@@ -18,9 +19,13 @@ export default defineConfig({
             use: { ...devices['Desktop Chrome'] },
         },
     ],
-    webServer: {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-    },
+    // webServer: {
+    //     command: 'npx next dev . --webpack',
+    //     url: 'http://localhost:3000',
+    //     reuseExistingServer: true,
+    //     env: {
+    //         NEXTAUTH_URL: 'http://localhost:3000',
+    //         AUTH_TRUST_HOST: 'true'
+    //     }
+    // },
 });

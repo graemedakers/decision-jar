@@ -523,7 +523,7 @@ export function GenericConciergeModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent raw className="bg-white dark:bg-slate-900 border-none max-h-[90vh] flex flex-col overflow-hidden">
+            <DialogContent raw data-testid="concierge-modal" className="bg-white dark:bg-slate-900 border-none max-h-[90vh] flex flex-col overflow-hidden">
                 {/* HEADER */}
                 <DialogHeader showClose={false} className="pb-4">
                     <div className="flex justify-between items-center bg-gradient-to-r from-transparent via-transparent to-white/5">
@@ -751,6 +751,7 @@ export function GenericConciergeModal({
                             <div className="py-2">
                                 <Button
                                     type="button"
+                                    data-testid="concierge-generate-btn"
                                     onClick={handleGetRecommendations}
                                     disabled={isLoading}
                                     className={`w-full text-white shadow-lg transition-all duration-300 ${theme.button} border-none ring-offset-0 !bg-gradient-to-r`}
@@ -758,7 +759,7 @@ export function GenericConciergeModal({
                                     {isLoading ? (
                                         <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Thinking...</>
                                     ) : (
-                                        <><Sparkles className="w-5 h-5 mr-2" /> Recommendations</>
+                                        <><Sparkles className="w-5 h-5 mr-2" /> Start Planning</>
                                     )}
                                 </Button>
                             </div>
@@ -777,7 +778,7 @@ export function GenericConciergeModal({
                                             {isPrivate ? "Secret Mode On" : "Public Mode"}
                                         </button>
                                     </div>
-                                    <div className="grid grid-cols-1 gap-4">
+                                    <div className="grid grid-cols-1 gap-4" data-testid="concierge-results-container">
                                         {recommendations.map((rec, index) => {
                                             const isHoliday = config.id === 'holiday_concierge';
                                             const isChef = config.id === 'chef_concierge';

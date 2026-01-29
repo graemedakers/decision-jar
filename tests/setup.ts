@@ -57,3 +57,11 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
     unobserve: vi.fn(),
     disconnect: vi.fn(),
 }));
+
+// --- MSW Setup ---
+import { server } from './mocks/server';
+import { beforeAll, afterAll, afterEach } from 'vitest';
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());

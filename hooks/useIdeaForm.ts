@@ -109,8 +109,11 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
     const { addIdea, updateIdea, deleteIdea } = useIdeaMutations();
     const isLoading = addIdea.isPending || updateIdea.isPending || deleteIdea.isPending;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent, isDirectSubmit = false) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
         try {
             const isEditing = initialData && initialData.id;
@@ -151,9 +154,8 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
 
             if (onSuccess) onSuccess();
             onClose();
-
         } catch (error) {
-            console.error(error);
+            console.error("[useIdeaForm] Error:", error);
         }
     };
 

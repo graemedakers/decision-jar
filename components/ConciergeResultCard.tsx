@@ -93,7 +93,7 @@ export function ConciergeResultCard({
     renderExpandedContent
 }: ConciergeResultCardProps) {
     return (
-        <div className="glass p-4 rounded-xl flex flex-col hover:bg-slate-50 dark:hover:bg-white/5 transition-colors relative bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
+        <div data-testid="concierge-result-card" className="glass p-4 rounded-xl flex flex-col hover:bg-slate-50 dark:hover:bg-white/5 transition-colors relative bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
             <div className="flex flex-col sm:flex-row gap-4 mb-2">
                 <button
                     onClick={() => onFavorite(rec, categoryType)}
@@ -184,6 +184,7 @@ export function ConciergeResultCard({
 
                     <Button
                         size="sm"
+                        data-testid="add-to-jar-btn"
                         disabled={rec.isAdded || isAddingToJar}
                         onClick={() => onAddToJar(rec, categoryType, isPrivate)}
                         className={`text-xs h-7 px-2 transition-all whitespace-nowrap ${rec.isAdded
@@ -195,7 +196,7 @@ export function ConciergeResultCard({
                         {isAddingToJar ? (
                             <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> {ACTION_LABELS.ADDING}</>
                         ) : rec.isAdded ? (
-                            <><Check className="w-3 h-3 mr-1" /> {ACTION_LABELS.ADDED}</>
+                            <span data-testid="added-badge" className="flex items-center"><Check className="w-3 h-3 mr-1" /> {ACTION_LABELS.ADDED}</span>
                         ) : (
                             <><Plus className="w-3 h-3 mr-1" /> {ACTION_LABELS.JAR}</>
                         )}

@@ -48,7 +48,7 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
     }
 
     try {
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, selectedAt, notes, address, website, googleRating, openingHours, rating, photoUrls, selectedDate, isPrivate, weather, requiresTravel } = data;
+        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, selectedAt, notes, address, website, googleRating, openingHours, rating, photoUrls, selectedDate, isPrivate, weather, requiresTravel, ideaType, typeData, metadata, schemaVersion } = data;
 
         if (!description) {
             return { success: false, error: 'Description is required', status: 400 };
@@ -92,6 +92,10 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
             weather: weather || 'ANY',
             requiresTravel: Boolean(requiresTravel),
             status: ideaStatus as any,
+            ideaType: ideaType || null,
+            typeData: typeData || null,
+            metadata: metadata || null,
+            schemaVersion: schemaVersion || "1.0",
         };
 
         const idea = await prisma.idea.create({
@@ -144,7 +148,7 @@ export async function updateIdea(id: string, data: any): Promise<ActionResponse<
     }
 
     try {
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, isPrivate, weather, requiresTravel } = data;
+        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, isPrivate, weather, requiresTravel, ideaType, typeData, metadata } = data;
         const safeDuration = typeof duration === 'string' ? parseFloat(duration) : Number(duration);
 
         const updated = await prisma.idea.update({
@@ -160,7 +164,10 @@ export async function updateIdea(id: string, data: any): Promise<ActionResponse<
                 category,
                 isPrivate: Boolean(isPrivate),
                 weather,
-                requiresTravel: Boolean(requiresTravel)
+                requiresTravel: Boolean(requiresTravel),
+                ideaType: ideaType || undefined,
+                typeData: typeData || undefined,
+                metadata: metadata || undefined,
             }
         });
 

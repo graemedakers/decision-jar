@@ -55,6 +55,7 @@ export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, onTem
                     {/* AI Concierge */}
                     <button
                         onClick={handleUseAI}
+                        data-tour="surprise-me-button"
                         className="p-6 rounded-2xl border-2 border-purple-200 dark:border-purple-500/30 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 hover:from-purple-100 hover:to-indigo-100 dark:hover:from-purple-900/30 dark:hover:to-indigo-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-purple-500/10"
                     >
                         <div className="flex items-start gap-4">
@@ -98,6 +99,7 @@ export function EnhancedEmptyState({ jarTopic, jarName, jarId, inviteCode, onTem
                     {/* Add Manually */}
                     <button
                         onClick={onAddIdeaClick}
+                        data-tour="add-idea-button"
                         className="p-6 rounded-2xl border-2 border-emerald-200 dark:border-emerald-500/30 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 hover:from-emerald-100 hover:to-teal-100 dark:hover:from-emerald-900/30 dark:hover:to-teal-900/30 transition-all text-left group hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/10"
                     >
                         <div className="flex items-start gap-4">

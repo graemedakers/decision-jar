@@ -270,3 +270,23 @@ body {
 .preserve-3d {
   transform-style: preserve-3d;
 }
+
+/* Smart Input & Progress Animations */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes active-generating-pulse {
+  0%, 100% { border-color: rgba(168, 85, 247, 0.4); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.2); }
+  50% { border-color: rgba(168, 85, 247, 0.7); box-shadow: 0 0 0 6px rgba(168, 85, 247, 0.1); }
+}
+
+.active-generating-pulse {
+  animation: active-generating-pulse 2s infinite ease-in-out;
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}

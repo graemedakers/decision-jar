@@ -87,6 +87,7 @@
     "prisma": "^6.0.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "vitest-mock-extended": "^3.1.0"
   }
 }

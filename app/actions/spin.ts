@@ -110,6 +110,7 @@ export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea
         // Fetch ideas
         const candidateIdeas = await prisma.idea.findMany({ where: whereClause });
 
+
         // 3. Apply Multi-dimensional Filters
         const filteredIdeas = candidateIdeas.filter(idea => {
             // excludeIds

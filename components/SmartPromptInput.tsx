@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Mic, MicOff, Wand2, Sparkles, Image as ImageIcon, BookOpen, Plus, Loader2, Link as LinkIcon } from "lucide-react";
+import { Mic, MicOff, Wand2, Sparkles, Image as ImageIcon, BookOpen, Plus, Loader2, Link as LinkIcon, CornerDownLeft } from "lucide-react";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -59,6 +59,11 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
     const { openModal } = useModalSystem();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Debugging persistent loading state
+    useEffect(() => {
+        console.log('[SmartPromptInput] isGenerating prop changed:', isGenerating);
+    }, [isGenerating]);
+
     const suggestions = SUGGESTION_MAP[jarTopic] || SUGGESTION_MAP["General"];
     const currentPlaceholder = `Ex: "${suggestions[placeholderIndex]}..."`;
 
@@ -94,28 +99,11 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
     };
 
     /**
-     * Detect if input is a request/question vs an actual idea
+     * Detect if input is a request (everything except URLs is now treated as "Magic Add" / AI Request)
      */
     const isRequest = (text: string): boolean => {
-        const lowerText = text.toLowerCase().trim();
-        const questionStarters = [
-            'find', 'where', 'what', 'how', 'show', 'suggest', 'recommend',
-            'need', 'want', 'looking for', 'help me', 'can you', 'could you',
-            'any ideas', 'give me', 'tell me', 'show me', 'i need', 'i want',
-            'create', 'generate', 'idea', 'plan', 'search', 'browse'
-        ];
-
-        // Keywords that strongly imply a request/search even if not at the start
-        const requestKeywords = ['ideas', 'suggestions', 'recommendations', 'places', 'restaurants', 'movies', 'books', 'recipes', 'itinerary', 'trip'];
-
-        // Also check if it's purely a number + keywords (e.g. "10 ideas")
-        const numberStart = /^\d+\s/.test(lowerText);
-
-        const startsWithQuestion = questionStarters.some(starter => lowerText.startsWith(starter));
-        const containsRequestKeywords = requestKeywords.some(kw => lowerText.includes(kw) && lowerText.split(' ').length > 1);
-        const isQuestion = text.trim().endsWith('?');
-
-        return startsWithQuestion || isQuestion || numberStart || lowerText.includes('ideas') || containsRequestKeywords;
+        // Relaxed rule: If it's not a URL, treat it as potential AI input
+        return !isUrl(text);
     };
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,13 +156,15 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
         }
     };
 
-    const handleSubmit = (e?: React.FormEvent) => {
+    const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!prompt.trim()) return;
 
         if (isRequest(prompt)) {
             // Smart Generate
-            onGenerate(prompt);
+            // Wait for generation to complete before clearing
+            await onGenerate(prompt);
+            setPrompt("");
         } else if (isUrl(prompt)) {
             // Add Link
             openModal('ADD_IDEA', {
@@ -196,13 +186,13 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
     };
 
     // Determine button label/icon
-    const showGenerate = isRequest(prompt) || prompt === ""; // Default to generate if empty?
+    // Logic: If it's a URL, show Link. Otherwise, it's always "Magic Add" (Generate)
     const showLink = isUrl(prompt);
 
     // Main button is different based on context
-    const ButtonIcon = isGenerating ? Loader2 : (showLink ? LinkIcon : (showGenerate ? Wand2 : Plus));
-    const ButtonText = isGenerating ? "Generating..." : (showLink ? "Add Link" : (showGenerate ? "Generate" : "Add Idea"));
-    const ButtonColor = showGenerate ? "from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" : "bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900"; // Manual add is simpler
+    const ButtonIcon = isGenerating ? Loader2 : (showLink ? LinkIcon : Wand2);
+    const ButtonText = isGenerating ? "Generating..." : (showLink ? "Add Link" : "Magic Add");
+    const ButtonColor = (showLink) ? "bg-slate-900" : "bg-gradient-to-r from-purple-600 to-indigo-600"; // Magic add gets the gradient
 
     return (
         <div className={cn("space-y-3 relative", className)}>
@@ -215,7 +205,24 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
                 onChange={handleFileSelect}
             />
 
-            <form onSubmit={handleSubmit} className="relative flex items-center bg-white dark:bg-slate-900 shadow-xl rounded-2xl p-1.5 border border-slate-200 dark:border-white/10 transition-all focus-within:ring-2 focus-within:ring-purple-500/20">
+            <form onSubmit={handleSubmit} className={cn(
+                "relative flex items-center bg-white dark:bg-slate-900 shadow-xl rounded-2xl p-1.5 border transition-all focus-within:ring-2 focus-within:ring-purple-500/20 overflow-hidden",
+                isGenerating ? "border-purple-500/50 ring-2 ring-purple-500/20 active-generating-pulse" : "border-slate-200 dark:border-white/10"
+            )}>
+                {/* Generation Progress Bar */}
+                <AnimatePresence>
+                    {isGenerating && (
+                        <motion.div
+                            key="shimmer"
+                            initial={{ width: 0 }}
+                            animate={{ width: "100%" }}
+                            exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                            className="absolute top-0 left-0 h-[3px] bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 z-50 bg-[length:200%_100%]"
+                            style={{ animation: 'shimmer 2s linear infinite' }}
+                        />
+                    )}
+                </AnimatePresence>
 
                 {/* Left Actions Toolbar */}
                 <div className="flex items-center gap-0 sm:gap-0.5 px-0.5 sm:px-1 shrink-0 border-r border-slate-100 dark:border-slate-800 mr-1 sm:mr-2">
@@ -294,9 +301,10 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
                                 exit={{ scale: 0.8, opacity: 0 }}
                                 type="submit"
                                 disabled={isGenerating}
+                                data-tour="surprise-me-button"
                                 className={cn(
                                     "h-10 px-4 rounded-xl font-semibold text-sm shadow-md transition-all flex items-center gap-2 text-white",
-                                    showGenerate ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" : "bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900"
+                                    ButtonColor
                                 )}
                             >
                                 {isGenerating ? (
@@ -307,13 +315,16 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
                                 <span className="hidden sm:inline">{ButtonText}</span>
                             </motion.button>
                         ) : (
-                            // Placeholder "Press Enter" indicator or nothing
+                            // Placeholder "Press Enter" indicator
                             <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="pr-3 hidden sm:block text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase select-none"
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="pr-4 hidden sm:flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest select-none pointer-events-none"
                             >
-                                Press Enter
+                                <span>Press Enter</span>
+                                <div className="p-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10">
+                                    <CornerDownLeft className="w-3 h-3" />
+                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>

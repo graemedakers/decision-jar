@@ -97,6 +97,7 @@ export function useSpin({ ideas, onSpinComplete, disabled }: UseSpinProps) {
             };
             const res = await spinJar(spinFilters);
 
+
             // 5. Stop Animation
             stopSpinAnimation();
 

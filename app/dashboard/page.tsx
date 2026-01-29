@@ -178,8 +178,9 @@ function DashboardContent() {
             topic: m.jar.topic,
         }));
 
-    const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0;
-    const showEmptyState = userData?.activeJarId && ideas.length === 0;
+    const isInitiallyLoadingIdeas = ideas.length === 0 && (isLoadingIdeas || isFetchingIdeas);
+    const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0 && !isLoadingUser;
+    const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isInitiallyLoadingIdeas;
     const showAdminStatus = isAdminPickMode;
     const showStatusSection = showNoJars || showAdminStatus || showEmptyState;
 
@@ -441,6 +442,19 @@ function DashboardContent() {
                                 >
                                     <Download className="w-4 h-4" />
                                     <span className="text-sm font-bold">Install App</span>
+                                </Button>
+                            )}
+
+                            {userData?.activeJarId && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleAddIdeaClick}
+                                    data-tour="add-idea-button"
+                                    className="hidden md:flex gap-2 rounded-full border-primary/20 text-primary hover:bg-primary/5 transition-colors px-4 h-11"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    <span className="text-sm font-bold">Add Idea</span>
                                 </Button>
                             )}
 
@@ -710,6 +724,7 @@ function DashboardContent() {
                                                     <div className="flex items-center gap-3 w-full">
                                                         <Button
                                                             size="lg"
+                                                            data-testid="spin-button"
                                                             className="flex-1 h-14 md:h-16 lg:h-16 xl:h-20 rounded-2xl md:rounded-[1.75rem] bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 shadow-[0_20px_40px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_40px_rgba(236,72,153,0.5)] text-lg md:text-xl xl:text-2xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] border-none text-white ring-2 ring-white/20 px-8"
                                                             onClick={() => handleSpinJar()}
                                                             disabled={ideas.length === 0 || isSpinning}
@@ -781,13 +796,15 @@ function DashboardContent() {
                                         <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl rounded-[2rem] p-4 lg:p-6 border border-white/40 dark:border-white/10 shadow-lg ring-1 ring-black/5 flex flex-col justify-center transform transition-all hover:scale-[1.01]">
                                             <UnifiedConciergeButton isPremium={isPremium} />
                                         </div>
-                                        <div className="bg-indigo-50/60 dark:bg-indigo-950/20 backdrop-blur-2xl rounded-[2rem] p-4 lg:p-6 border border-indigo-200/50 dark:border-indigo-500/10 shadow-lg ring-1 ring-black/5 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-indigo-100/70 dark:hover:bg-indigo-950/40 transition-all hover:scale-[1.01]" onClick={() => openModal('TOOLS')}>
-                                            <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                <Sparkles className="w-5 h-5 text-indigo-500" />
+                                        <Link href="/explore" className="block">
+                                            <div className="h-full bg-indigo-50/60 dark:bg-indigo-950/20 backdrop-blur-2xl rounded-[2rem] p-4 lg:p-6 border border-indigo-200/50 dark:border-indigo-500/10 shadow-lg ring-1 ring-black/5 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-indigo-100/70 dark:hover:bg-indigo-950/40 transition-all hover:scale-[1.01]" data-tour="explore-button">
+                                                <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                    <Sparkles className="w-5 h-5 text-indigo-500" />
+                                                </div>
+                                                <span className="text-[10px] font-black text-indigo-900 dark:text-indigo-300 uppercase tracking-widest">Explore All Tools</span>
+                                                <p className="text-[10px] text-indigo-600/70 dark:text-indigo-400/70 mt-1 font-medium italic">Discover specialized planners</p>
                                             </div>
-                                            <span className="text-[10px] font-black text-indigo-900 dark:text-indigo-300 uppercase tracking-widest">All AI Tools</span>
-                                            <p className="text-[10px] text-indigo-600/70 dark:text-indigo-400/70 mt-1 font-medium italic">Explore all planners</p>
-                                        </div>
+                                        </Link>
                                     </div>
                                 </div>
                             )}
@@ -797,7 +814,7 @@ function DashboardContent() {
                         <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-8 order-last lg:order-none">
 
                             {/* XP & Trophies - Moved to Sidebar on Desktop */}
-                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-6 border border-white/20 dark:border-white/10 shadow-xl space-y-6">
+                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-6 border border-white/20 dark:border-white/10 shadow-xl space-y-6" data-tour="trophy-case">
                                 <MiniProgressBar xp={xp || 0} level={level} />
                                 <div className="pt-2">
                                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Your Progress</h3>

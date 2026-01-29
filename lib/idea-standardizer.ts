@@ -31,23 +31,9 @@ export function suggestIdeaType(idea: any): string | null {
         }
     }
 
-    // Check if address is "At Home" (strong indicator for recipe)
-    const address = (idea.address || "").toLowerCase();
-    if (address === 'at home' || address.includes('home')) {
-        // Also check for recipe keywords in text
-        if (textToCheck.includes('recipe') || textToCheck.includes('ingredient') ||
-            textToCheck.includes('cook') || textToCheck.includes('prep') ||
-            textToCheck.includes('serve') || textToCheck.includes('minute') ||
-            /\d+\s*(g|kg|oz|cup|tbsp|tsp|ml|l)\b/.test(textToCheck)) { // Quantity patterns
-            return 'recipe';
-        }
-    }
-
-    // Check for explicit recipe patterns in text (even without category)
-    const hasRecipePattern = /### ingredients|### instructions|step \d+:|prep time:|cook time:|serves \d+/i.test(idea.details || '');
-    if (hasRecipePattern) {
-        return 'recipe';
-    }
+    // ---------------------------------------------------------
+    // 1. EXPLICIT CATEGORY CHECKS (Strong Signals)
+    // ---------------------------------------------------------
 
     // Books
     if (['FICTION', 'NON_FICTION', 'SCI_FI', 'MYSTERY', 'ROMANCE', 'BIOGRAPHY', 'SELF_HELP'].includes(category)) {
@@ -72,6 +58,59 @@ export function suggestIdeaType(idea: any): string | null {
     // Travel / Hotels
     if (['WEEKEND', 'ABROAD', 'STAYCATION', 'ROADTRIP', 'BOUTIQUE', 'RESORT', 'BUDGET', 'LUXURY', 'BNB', 'TRAVEL', 'HOTEL'].includes(category)) {
         return 'travel';
+    }
+
+    // Wellness / Fitness / Sport -> Activity
+    if (['MEDITATION', 'SPA', 'WALK', 'DETOX', 'CARDIO', 'STRENGTH', 'YOGA', 'OUTDOOR_SPORT', 'WELLNESS', 'FITNESS', 'RELAXATION', 'SPORT', 'GOLF', 'TENNIS', 'SQUASH', 'BADMINTON', 'RACQUETBALL', 'PILATES', 'SWIMMING', 'HIKE', 'HIKING', 'RUNNING'].includes(category) || category.includes('SPORT')) {
+        return 'activity';
+    }
+
+    // Escape Rooms
+    if (['ESCAPE_ROOM', 'PUZZLE'].includes(category) || textToCheck.includes('escape room')) {
+        return 'activity';
+    }
+
+    // Events
+    if (['SOCIAL', 'EVENT', 'FESTIVAL', 'THEATRE', 'COMEDY', 'SHOW', 'PERFORMANCE', 'EXHIBITION', 'SPORTS', 'MATCH', 'GAME_WATCH'].includes(category) || textToCheck.includes('theatre') || textToCheck.includes('tickets')) {
+        return 'event';
+    }
+
+    // Itineraries
+    if (category === 'ITINERARY' || textToCheck.includes('itinerary') || textToCheck.includes('schedule') || textToCheck.includes('plan')) {
+        return 'itinerary';
+    }
+
+    // Simple / Text-Only
+    if (['SIMPLE', 'QUOTE', 'JOKE', 'AFFIRMATION', 'NOTE'].includes(category) || textToCheck.match(/\b(quote|affirmation|joke|dad joke)\b/)) {
+        return 'simple';
+    }
+
+    // YouTube (Category Check)
+    if (['YOUTUBE', 'VIDEO', 'TUTORIAL'].includes(category)) {
+        return 'youtube';
+    }
+
+    // ---------------------------------------------------------
+    // 2. HEURISTICS & FALLBACKS (Weak Signals)
+    // ---------------------------------------------------------
+
+    // Fallback: Check if address is "At Home" (Indicator for recipe, but only if not caught above)
+    const address = (idea.address || "").toLowerCase();
+    if (address === 'at home' || address.includes('home')) {
+        // Also check for recipe keywords in text
+        if (textToCheck.includes('recipe') || textToCheck.includes('ingredient') ||
+            textToCheck.includes('cook') || textToCheck.includes('prep') ||
+            textToCheck.includes('serve') || textToCheck.includes('minute') ||
+            /\d+\s*(g|kg|oz|cup|tbsp|tsp|ml|l)\b/.test(textToCheck)) { // Quantity patterns
+            return 'recipe';
+        }
+    }
+
+    // Check for explicit recipe patterns in text (even without category)
+    // Only if we haven't matched a stronger category already
+    const hasRecipePattern = /### ingredients|### instructions|step \d+:|prep time:|cook time:|serves \d+/i.test(idea.details || '');
+    if (hasRecipePattern) {
+        return 'recipe';
     }
 
     // Recipes vs Dining
@@ -102,6 +141,7 @@ export function suggestIdeaType(idea: any): string | null {
 
         // Ambiguous Fallback: If it's physically located (has address != home), assume dining.
         // Otherwise, if it sounds like food, assume recipe.
+        // Note: "At Home" check above might have already caught home recipes.
         const address = (idea.address || "").toLowerCase();
         if (address && address !== 'at home' && address.length > 5) {
             return 'dining';
@@ -120,36 +160,6 @@ export function suggestIdeaType(idea: any): string | null {
     // Only map partial "CLUB" if it's explicitly "NIGHTCLUB" or "DANCE CLUB"
     if (category === 'CLUB' || category.includes('NIGHTCLUB') || category.includes('DANCE_CLUB')) {
         return 'dining';
-    }
-
-    // Wellness / Fitness / Sport -> Activity
-    if (['MEDITATION', 'SPA', 'WALK', 'DETOX', 'CARDIO', 'STRENGTH', 'YOGA', 'OUTDOOR_SPORT', 'WELLNESS', 'FITNESS', 'RELAXATION', 'SPORT', 'GOLF', 'TENNIS', 'SQUASH', 'BADMINTON', 'RACQUETBALL', 'PILATES', 'SWIMMING', 'HIKE', 'HIKING', 'RUNNING'].includes(category) || category.includes('SPORT')) {
-        return 'activity';
-    }
-
-    // Escape Rooms
-    if (['ESCAPE_ROOM', 'PUZZLE'].includes(category) || textToCheck.includes('escape room')) {
-        return 'activity';
-    }
-
-    // Events
-    if (['SOCIAL', 'EVENT', 'FESTIVAL', 'THEATRE', 'COMEDY', 'SHOW', 'PERFORMANCE', 'EXHIBITION', 'SPORTS', 'MATCH', 'GAME_WATCH'].includes(category) || textToCheck.includes('theatre') || textToCheck.includes('tickets')) {
-        return 'event';
-    }
-
-    // Itineraries
-    if (category === 'ITINERARY' || textToCheck.includes('itinerary') || textToCheck.includes('schedule') || textToCheck.includes('plan')) {
-        return 'itinerary';
-    }
-
-    // Simple / Text-Only
-    if (['SIMPLE', 'QUOTE', 'JOKE', 'AFFIRMATION', 'NOTE'].includes(category) || textToCheck.match(/\b(quote|affirmation|joke|dad joke)\b/)) {
-        return 'simple';
-    }
-
-    // YouTube
-    if (['YOUTUBE', 'VIDEO', 'TUTORIAL'].includes(category)) {
-        return 'youtube';
     }
 
     return null;

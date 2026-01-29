@@ -442,7 +442,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-slate-600 dark:text-slate-400">
-                Join <strong className="text-slate-800 dark:text-white">{reviews.length > 50 ? reviews.length + "+" : "500+"} couples</strong> making decisions effortlessly
+                Join <strong className="text-slate-800 dark:text-white">{reviews.length > 50 ? reviews.length + "+" : "500+"} users</strong> making decisions effortlessly
               </p>
             </div>
           </motion.div>

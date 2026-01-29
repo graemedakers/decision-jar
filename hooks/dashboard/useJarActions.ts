@@ -14,6 +14,7 @@ import { useIdeaMutations } from "@/hooks/mutations/useIdeaMutations";
 import { useOnboarding } from "@/hooks/features/useOnboarding";
 
 import { ModalType } from "@/components/ModalProvider";
+import { getBestCategoryFit } from "@/lib/categories";
 
 // Types override (simplification)
 interface JarActionsProps {
@@ -178,10 +179,64 @@ export function useJarActions({
 
                 if (intent.intentAction === 'ADD_SINGLE') {
                     setIsGeneratingSmartIdeas(false);
+                    const jarTopic = userData?.jarTopic || 'Activities';
+                    const promptLow = prompt.toLowerCase();
+
+                    // Simple inference for common fields
+                    const isOutdoor = (promptLow.includes('walk') || promptLow.includes('hike') || promptLow.includes('outdoor') || promptLow.includes('nature') || promptLow.includes('park') || promptLow.includes('beach') || promptLow.includes('lake') || promptLow.includes('swim'));
+                    const isDrink = promptLow.includes('drink') || promptLow.includes('beer') || promptLow.includes('wine') || promptLow.includes('cocktail') || promptLow.includes('bar');
+
+                    const detectedCategory = isDrink ? 'BAR' : (intent.targetCategory || 'ACTIVITY');
+                    const bestCategory = typeof getBestCategoryFit === 'function' ? getBestCategoryFit(detectedCategory, jarTopic) : detectedCategory;
+
+                    const ideaType = (() => {
+                        const cat = (intent.targetCategory || 'activity').toLowerCase();
+                        if (['restaurant', 'dining', 'meal', 'cafe', 'bar'].includes(cat) || isDrink) return 'dining';
+                        if (['movie', 'film', 'cinema'].includes(cat)) return 'movie';
+                        if (['book', 'reading'].includes(cat)) return 'book';
+                        if (['travel', 'trip', 'stay', 'vacation'].includes(cat)) return 'travel';
+                        if (['recipe', 'cooking', 'baking', 'food'].includes(cat)) return 'recipe';
+                        if (['game', 'gaming'].includes(cat)) return 'game';
+                        if (['event', 'show', 'concert'].includes(cat)) return 'event';
+                        return 'activity';
+                    })();
+
+                    // Normalize the description to use the FULL user prompt
+                    const displayDescription = prompt.charAt(0).toUpperCase() + prompt.slice(1);
+
+                    // Clean up the activity type for specialized forms (concise name like "Swim")
+                    const cleanActivityType = (topic: string) => {
+                        // 1. Remove common action prefixes
+                        let cleaned = topic.replace(/^(go for a|go to a|go to the|let's|take a|take the|a|the)\s+/i, '');
+
+                        // 2. Extract core activity (take everything before common prepositions)
+                        const coreMatch = cleaned.match(/^(.+?)\s+(in|at|to|on|with|near|by)\b/i);
+                        if (coreMatch) {
+                            cleaned = coreMatch[1];
+                        }
+
+                        // 3. Capitalize and return
+                        return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+                    };
+
+                    const activityTypeValue = ideaType === 'activity'
+                        ? (intent.topic ? cleanActivityType(intent.topic) : (detectedCategory === 'OUTDOOR' ? 'Walk' : 'Activity'))
+                        : undefined;
+
                     openModal('ADD_IDEA', {
                         initialData: {
-                            description: intent.topic || prompt,
-                            category: intent.targetCategory || 'ACTIVITY'
+                            description: displayDescription,
+                            category: bestCategory,
+                            ideaType: ideaType,
+                            indoor: !isOutdoor,
+                            duration: promptLow.includes('long') || promptLow.includes('day') ? "2.0" : "1.0",
+                            typeData: {
+                                // Pre-fill specialized fields if possible
+                                activityType: activityTypeValue,
+                                cuisine: ideaType === 'dining' ? (intent.topic ? cleanActivityType(intent.topic) : (isDrink ? "Bars" : undefined)) : undefined,
+                                establishmentName: ideaType === 'dining' ? displayDescription : undefined,
+                                name: ideaType === 'dining' ? displayDescription : undefined
+                            }
                         }
                     });
                     return;
@@ -211,17 +266,20 @@ export function useJarActions({
 
             if (response.ok) {
                 const data = await response.json();
-                await fetchAIUsage();
+
+                // Data refresh happens in 'finally' block to prevent UI lag.
 
                 if (data.success) {
                     if (data.preview) {
+                        setIsGeneratingSmartIdeas(false);
                         openModal('BULK_IDEA_PREVIEW', {
                             ideas: data.ideas,
                             jarId: data.jarId,
                             originalPrompt: prompt
                         });
                     } else {
-                        await fetchIdeas();
+                        setIsGeneratingSmartIdeas(false);
+                        // Success! Toast immediately.
                         showSuccess(`✨ ${data.count} ideas added to your jar!`);
                     }
                 }
@@ -233,6 +291,14 @@ export function useJarActions({
             showError('An error occurred.');
         } finally {
             setIsGeneratingSmartIdeas(false);
+
+            // Refresh background data safely
+            try {
+                Promise.allSettled([
+                    fetchAIUsage(),
+                    fetchIdeas()
+                ]).catch(console.error);
+            } catch (e) { console.error(e); }
         }
     }, [userData?.jarTopic, userData?.activeJarId, openModal, fetchIdeas, setIsGeneratingSmartIdeas, fetchAIUsage]);
 

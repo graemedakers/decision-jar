@@ -100,7 +100,9 @@ export async function POST(request: Request) {
             openingHours: openingHours || null,
             rating: rating ? parseInt(String(rating)) : null,
             photoUrls: photoUrls || [],
-            isPrivate: isPrivate !== undefined ? Boolean(isPrivate) : Boolean((jar as any).defaultIdeaPrivate),
+            isPrivate: body.isPrivate !== undefined
+                ? Boolean(body.isPrivate)
+                : ((jar as any).defaultIdeaPrivate ? Boolean((jar as any).defaultIdeaPrivate) : false),
             weather: weather || 'ANY',
             requiresTravel: Boolean(requiresTravel),
             status: ideaStatus as any, // Cast to any to avoid Prisma stale type issues

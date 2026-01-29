@@ -386,7 +386,8 @@ export async function POST(request: NextRequest) {
                         // @ts-ignore
                         ideaType: inferredType || null,
                         // @ts-ignore
-                        typeData: finalTypeData ? JSON.parse(JSON.stringify(finalTypeData)) : null
+                        typeData: finalTypeData ? JSON.parse(JSON.stringify(finalTypeData)) : null,
+                        isPrivate: (jar as any).defaultIdeaPrivate ? Boolean((jar as any).defaultIdeaPrivate) : false
                     }
                 });
             })

@@ -12,7 +12,14 @@ export interface ParsedIntent {
     contentFormat?: 'DEFAULT' | 'MARKDOWN_RECIPE' | 'MARKDOWN_ITINERARY';
     requiresVenueLookup?: boolean;
     venueType?: 'DINING' | 'BAR' | 'ACTIVITY' | 'NIGHTCLUB';
+
     isLocationDependent?: boolean;
+    enrichment?: {
+        category: string;
+        cost: string; // $, $$, $$$, $$$$
+        duration: number; // minutes
+        vibe: string;
+    };
 }
 
 export async function parseIntent(
@@ -43,6 +50,11 @@ export async function parseIntent(
         5. "location": Extract specific location if mentioned (e.g., "in Paris").
         6. "requiresVenueLookup": Set to true IF the request needs physical addresses (Restaurants, Bars, Gyms).
         7. "isLocationDependent": True if physical location is required to fulfill.
+        8. "enrichment": IF 'ADD_SINGLE', extract:
+           - "category": Best fit from [DINING, ACTIVITY, MOVIE, BOOK, RECIPE, WELLNESS, TRAVEL, CHORE, SYSTEM].
+           - "cost": Estimated price $, $$, $$$, or $$$$.
+           - "duration": Estimated duration in minutes (e.g. Movie = 120, Dinner = 90).
+           - "vibe": A single adjective describing the activity (e.g. "Relaxed", "Energetic", "Funny").
 
         Return ONLY a valid JSON object.
         `;
