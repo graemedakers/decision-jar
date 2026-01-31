@@ -24,6 +24,7 @@ import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 import { ACTION_LABELS } from "@/lib/ui-constants";
 import { useUser } from "@/hooks/useUser";
 import { TrialBadge } from "./TrialBadge";
+import { useModalSystem } from "@/components/ModalProvider";
 
 // --- Configuration Interfaces ---
 
@@ -237,6 +238,7 @@ export function GenericConciergeModal({
     const resultsRef = useRef<HTMLDivElement>(null);
     const [viewingItem, setViewingItem] = useState<any | null>(null);
     const [expandedRecIndex, setExpandedRecIndex] = useState<number | null>(null);
+    const shouldScrollRef = useRef(false);
 
     // Abandonment tracking
     const [modalOpenTime, setModalOpenTime] = useState<number | null>(null);
@@ -372,14 +374,16 @@ export function GenericConciergeModal({
 
     // Scroll to results when recommendations appear
     useEffect(() => {
-        if (recommendations.length > 0 && resultsRef.current) {
+        if (recommendations.length > 0 && resultsRef.current && shouldScrollRef.current) {
             setTimeout(() => {
                 resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                shouldScrollRef.current = false;
             }, 100);
         }
     }, [recommendations]);
 
     // Concierge action handlers
+    const { openModal, closeModal } = useModalSystem();
     const { handleAddToJar, handleGoTonight: handleGoTonightFromHook, handleFavorite, addingItemName } = useConciergeActions({
         onIdeaAdded,
         onGoTonight,
@@ -387,7 +391,9 @@ export function GenericConciergeModal({
         onClose,
         setRecommendations,
         availableJars,
-        currentJarId
+        currentJarId,
+        openModal,
+        closeModal
     });
 
     const onGoAction = (rec: any) => {
@@ -499,6 +505,7 @@ export function GenericConciergeModal({
             if (res.ok) {
                 const data = await res.json();
                 const recs = data.recommendations || [];
+                shouldScrollRef.current = true; // Set flag to scroll on next render
                 setRecommendations(recs);
 
                 if (recs.length === 0) {

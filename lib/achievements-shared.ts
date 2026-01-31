@@ -12,12 +12,12 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     { id: 'IDEA_10', title: 'The Architect', description: 'Add 10 ideas', icon: 'Hammer', category: 'CREATION', targetCount: 10 },
     { id: 'IDEA_25', title: 'Idea Machine', description: 'Add 25 ideas', icon: 'Warehouse', category: 'CREATION', targetCount: 25 },
 
-    { id: 'SPIN_1', title: 'Roll the Dice', description: 'Spin the jar for the first time', icon: 'Dices', category: 'ACTION', targetCount: 1 },
-    { id: 'SPIN_10', title: 'Fate Tempter', description: 'Spin the jar 10 times', icon: 'RefreshCw', category: 'ACTION', targetCount: 10 },
+    { id: 'SPIN_1', title: 'Jar Spinner', description: 'Spin the jar for the first time', icon: 'RotateCcw', category: 'ACTION', targetCount: 1 },
+    { id: 'SPIN_10', title: 'Spin Veteran', description: 'Spin the jar 10 times', icon: 'RotateCcw', category: 'ACTION', targetCount: 10 },
 
     { id: 'RATE_1', title: 'Memory Maker', description: 'Complete and rate your first entry', icon: 'Heart', category: 'COMPLETION', targetCount: 1 },
-    { id: 'RATE_5', title: 'Consistent Cooker', description: 'Complete 5 entries', icon: 'Flame', category: 'COMPLETION', targetCount: 5 },
-    { id: 'RATE_20', title: 'Collection King/Queen', description: 'Complete 20 entries', icon: 'Crown', category: 'COMPLETION', targetCount: 20 },
+    { id: 'RATE_5', title: 'Regular Resolver', description: 'Complete 5 entries', icon: 'Flame', category: 'COMPLETION', targetCount: 5 },
+    { id: 'RATE_20', title: 'Decision Master', description: 'Complete 20 entries', icon: 'Crown', category: 'COMPLETION', targetCount: 20 },
 
     { id: 'STREAK_7', title: 'Week Warrior', description: 'Maintain a 7-day streak', icon: 'Flame', category: 'STREAK', targetCount: 7 },
     { id: 'STREAK_14', title: 'Fortnight Champion', description: 'Keep it up for 14 days', icon: 'Award', category: 'STREAK', targetCount: 14 },

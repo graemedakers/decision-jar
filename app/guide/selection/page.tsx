@@ -2,7 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, RefreshCw, Vote, Filter } from 'lucide-react';
+import { Compass, Sparkles, History, ArrowLeft, ArrowRight, MousePointer2, Users, RefreshCw, Vote, Filter } from "lucide-react";
 
 export default function GuideSelection() {
     return (
@@ -77,6 +77,29 @@ export default function GuideSelection() {
                         Planning a meal? Pro users can now generate full AI recipes for any food-related idea, complete with ingredients and cooking methods.
                     </p>
                 </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-100 dark:border-blue-900/30 p-6 rounded-2xl mb-8">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-primary" /> Voting Rounds (Squad Mode)
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                    The ultimate collaborative experience. Admins can start a <strong>Voting Session</strong> where everyone in the squad participates in real-time.
+                </p>
+                <ul className="space-y-3">
+                    <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                        <span><strong>Real-time Presence:</strong> See who is active and voting at any moment.</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                        <span><strong>Fairness Guards:</strong> You can't vote for your own ideas, ensuring a truly democratic outcome.</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                        <span><strong>Winner Reveal:</strong> A shared "Celebration Moment" triggers for the whole squad once the final vote is cast.</span>
+                    </li>
+                </ul>
             </div>
 
             <div className="flex justify-between pt-12 border-t border-slate-200 dark:border-white/10">

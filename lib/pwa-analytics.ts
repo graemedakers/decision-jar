@@ -76,6 +76,8 @@ export function trackPWAEvent(
     });
 }
 
+
+import { trackEvent as trackServerEvent } from "@/app/actions/analytics";
 import { logger } from "@/lib/logger";
 
 /**
@@ -102,7 +104,21 @@ function trackEvent(eventName: string, properties?: Record<string, any>) {
         (window as any).posthog.capture(eventName, properties);
     }
 
-    // Custom analytics endpoint (optional)
+    // Server Action for internal DB
+    trackServerEvent({
+        type: 'PWA_EVENT',
+        name: eventName,
+        metadata: properties,
+        path: window.location.pathname
+    }).catch(err => {
+        // Silently fail
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to track PWA event server-side:', err);
+        }
+    });
+
+    // Custom analytics endpoint (optional) - Legacy support removed in favor of Server Action
+    /*
     if (process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT) {
         fetch(process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT, {
             method: 'POST',
@@ -116,6 +132,7 @@ function trackEvent(eventName: string, properties?: Record<string, any>) {
             // Silently fail - don't break app if analytics is down
         });
     }
+    */
 }
 
 /**

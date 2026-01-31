@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { Trash2, LogOut, Users, Loader2, Crown, LayoutGrid, Calendar, Pencil, Check, UserPlus, Sparkles, X } from "lucide-react";
-import { getApiUrl } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { JarMembersModal } from "./JarMembersModal";
 import { showError, showSuccess } from "@/lib/toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
+import { getJars, leaveJar, deleteJar, updateJar } from "@/app/actions/jars";
 
 interface JarSummary {
     id: string;
@@ -45,13 +45,15 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
     const fetchJars = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(getApiUrl('/api/jars/list'));
-            if (res.ok) {
-                const data = await res.json();
-                setJars(data);
+            const res = await getJars();
+            if (res.success && res.data) {
+                setJars(res.data as JarSummary[]);
+            } else {
+                showError("Failed to load jars");
             }
         } catch (error) {
             console.error(error);
+            showError("An error occurred loading jars");
         } finally {
             setIsLoading(false);
         }
@@ -72,16 +74,17 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
         if (!confirm("Are you sure you want to leave this Jar?")) return;
         setProcessingId(jarId);
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${jarId}/leave`), {
-                method: 'POST'
-            });
-            if (res.ok) {
+            const res = await leaveJar(jarId);
+            if (res.success) {
                 setJars(prev => prev.filter(j => j.id !== jarId));
                 if (onRefresh) onRefresh();
                 router.refresh();
+            } else {
+                showError(res.error || "Failed to leave jar");
             }
         } catch (e) {
             console.error(e);
+            showError("An unexpected error occurred.");
         } finally {
             setProcessingId(null);
         }
@@ -96,17 +99,14 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
 
         setProcessingId(jarId);
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${jarId}`), {
-                method: 'DELETE'
-            });
-            if (res.ok) {
+            const res = await deleteJar(jarId);
+            if (res.success) {
                 setJars(prev => prev.filter(j => j.id !== jarId));
                 showSuccess("✅ Jar deleted successfully");
                 if (onRefresh) onRefresh();
                 router.refresh();
             } else {
-                const data = await res.json();
-                showError(data.error || "Failed to delete jar.");
+                showError(res.error || "Failed to delete jar.");
             }
         } catch (e) {
             console.error(e);
@@ -120,20 +120,15 @@ export function JarManagerModal({ isOpen, onClose, onRefresh }: JarManagerModalP
         if (!editName.trim()) return;
         setProcessingId(jarId);
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${jarId}`), {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: editName.trim() }),
-            });
-            if (res.ok) {
+            const res = await updateJar(jarId, { name: editName.trim() });
+            if (res.success) {
                 setJars(prev => prev.map(j => j.id === jarId ? { ...j, name: editName.trim() } : j));
                 setEditingId(null);
                 setEditName("");
                 showSuccess("✏️ Jar renamed successfully");
                 router.refresh();
             } else {
-                const data = await res.json();
-                showError(data.error || "Failed to rename jar.");
+                showError(res.error || "Failed to rename jar.");
             }
         } catch (e) {
             console.error(e);

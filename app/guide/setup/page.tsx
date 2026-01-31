@@ -6,9 +6,11 @@ import { ArrowLeft, ArrowRight, UserPlus, ShieldCheck, Settings, Users, MapPin }
 export default function GuideSetup() {
     return (
         <div>
-            <h1 className="text-4xl font-extrabold tracking-tight mb-4">Setup & Jars</h1>
-            <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
-                Every decision starts with a Jar. Think of a Jar as a shared container for a specific topic or group of people.
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+                Setting Up Your <span className="text-primary italic">Squad</span> Jar
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 font-medium mb-8">
+                The foundation of every group adventure is a well-configured Jar. We call this **Squad Mode**. Think of a Jar as a shared container for a specific topic or group of people.
             </p>
 
             <h2 className="text-2xl font-bold mb-4">Choosing a Topic</h2>
@@ -33,9 +35,9 @@ export default function GuideSetup() {
                     </p>
                 </div>
                 <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
-                    <h3 className="font-bold text-emerald-700 dark:text-emerald-400 mb-2">Living Well</h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
-                        The <strong>Millers</strong> used the <strong>Wellness</strong> topic for their reward ideas, focusing on things like "Walk in the Park" or "Extra Play Time".
+                    <h3 className="font-bold text-slate-900 dark:text-white mb-2">Invite Your Squad</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                        A jar is better with friends. Open the Member Management tool to share your unique invite code. When others join, they immediately enter **Squad Mode** for that specific jar.
                     </p>
                 </div>
                 <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/20">

@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { showSuccess, showError, showInfo } from "@/lib/toast";
 
-import { startVote, castVote, cancelVote, extendVote, resolveVote } from "@/app/actions/vote";
+import { startVote, castVote, cancelVote, extendVote, resolveVote, getVoteStatus } from "@/app/actions/vote";
+import { vetoIdea } from "@/app/actions/veto";
 
 import { Idea } from "@/lib/types";
 import { useModalSystem } from "@/components/ModalProvider";
@@ -43,21 +44,16 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
 
     const fetchStatus = async () => {
         try {
-            const res = await fetch(`/api/jars/${jarId}/vote`, {
-                cache: 'no-store',
-                headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
-            });
-            if (res.ok) {
-                const data = await res.json();
+            const data = await getVoteStatus(jarId);
 
-                // If we transition from an active vote to a completed one via polling/sync
-                if (activeRef.current && !data.active && data.lastResult?.winner) {
-                    openModal('DATE_REVEAL', { idea: data.lastResult.winner, isViewOnly: true });
-                }
-
-                activeRef.current = !!data.active;
-                setStatus(data);
+            // If we transition from an active vote to a completed one via polling/sync
+            if (activeRef.current && !data.active && data.lastResult?.winner) {
+                openModal('DATE_REVEAL', { idea: data.lastResult.winner, isViewOnly: true });
             }
+
+            activeRef.current = !!data.active;
+            setStatus(data);
+
         } catch (e) {
             console.error("Failed to fetch vote status", e);
         } finally {
@@ -229,6 +225,36 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
         }
     };
 
+    const handleVeto = async (ideaId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm("Use a Veto Card to reject this idea? This cannot be undone.")) return;
+        setSubmitting(true);
+        try {
+            const res = await vetoIdea(ideaId, jarId);
+            if (res.success) {
+                showSuccess("Veto card used! Idea rejected.");
+
+                // Trigger presence toast
+                try {
+                    await fetch(`/api/jar/${jarId}/presence`, {
+                        method: 'POST',
+                        body: JSON.stringify({ activity: { type: 'vetoing' }, status: 'online' })
+                    });
+                } catch { }
+
+                window.dispatchEvent(new CustomEvent('decision-jar:broadcast', {
+                    detail: { jarId, event: 'content-update' }
+                }));
+                fetchStatus();
+                fetchIdeas();
+            } else {
+                showError(res.error || "Failed to veto");
+            }
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     if (loading) return <div className="p-8 text-center text-slate-500"><Loader2 className="w-6 h-6 animate-spin mx-auto" /> Loading Voting System...</div>;
 
     // SCENARIO 1: No Active Vote
@@ -369,6 +395,14 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                     </div>
                 </div>
 
+                {/* Veto Status Header */}
+                <div className="flex items-center justify-between px-2 pb-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                        <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Veto Cards: {status.vetoCardsRemaining ?? 0}</span>
+                    </div>
+                </div>
+
                 <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
                     {voteIdeas?.filter(i => !session?.eligibleIdeaIds || session.eligibleIdeaIds.length === 0 || session.eligibleIdeaIds.includes(i.id)).map(idea => {
                         const isOwnIdea = idea.createdById === userId;
@@ -386,15 +420,30 @@ export function VotingManager({ jarId, isAdmin, userId, onVoteComplete, onAddIde
                                     }`}
                             >
                                 <div className="flex justify-between items-start">
-                                    <div>
+                                    <div className="flex-1 pr-2">
                                         <div className={`font-medium ${isOwnIdea ? 'text-slate-500' : ''}`}>{idea.description}</div>
                                         <div className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-bold">{idea.category}</div>
                                     </div>
-                                    {isOwnIdea && (
-                                        <span className="text-[10px] bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-foreground/80 px-2.5 py-1 rounded-full font-black uppercase tracking-widest border border-primary/20">
-                                            Your Idea
-                                        </span>
-                                    )}
+                                    <div className="flex flex-col items-end gap-2">
+                                        {isOwnIdea && (
+                                            <span className="text-[10px] bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-foreground/80 px-2.5 py-1 rounded-full font-black uppercase tracking-widest border border-primary/20">
+                                                Your Idea
+                                            </span>
+                                        )}
+                                        {/* Veto Button */}
+                                        {!isOwnIdea && status.vetoCardsRemaining > 0 && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="h-6 px-2 text-[10px] text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                onClick={(e) => handleVeto(idea.id, e)}
+                                                disabled={submitting}
+                                                title="Veto this idea"
+                                            >
+                                                Veto
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         );

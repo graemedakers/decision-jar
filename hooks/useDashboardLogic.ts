@@ -50,7 +50,7 @@ export function useDashboardLogic() {
                     : null;
 
                 try {
-                    const res = await fetch('/api/jars/join', {
+                    const res = await fetch('/api/jar/join', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ code, premiumToken }),
@@ -62,7 +62,7 @@ export function useDashboardLogic() {
                         else if (resData.message !== "Already a member, switched to jar.") showSuccess("Joined jar!");
 
                         if (jarIdToDelete && resData.jarId !== jarIdToDelete) {
-                            try { fetch(`/api/jars/${jarIdToDelete}`, { method: 'DELETE' }); } catch (e) { }
+                            try { fetch(`/api/jar/${jarIdToDelete}`, { method: 'DELETE' }); } catch (e) { }
                         }
                         sessionStorage.setItem('email_invite_signup', 'true');
 
@@ -107,7 +107,7 @@ export function useDashboardLogic() {
                     const hasMyFirstJar = data.userData.jarName === "My First Jar" && data.ideas.length === 0;
                     const myFirstJarId = hasMyFirstJar ? data.userData.activeJarId : null;
 
-                    const joinRes = await fetch('/api/jars/join', {
+                    const joinRes = await fetch('/api/jar/join', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ code: pendingCode, premiumToken: pendingToken }),
@@ -116,7 +116,7 @@ export function useDashboardLogic() {
 
                     if (joinRes.ok) {
                         if (myFirstJarId) {
-                            try { await fetch(`/api/jars/${myFirstJarId}`, { method: 'DELETE' }); } catch (e) { }
+                            try { await fetch(`/api/jar/${myFirstJarId}`, { method: 'DELETE' }); } catch (e) { }
                         }
 
                         if (joinData.premiumGifted) showSuccess("Welcome! Joined & Upgraded!");

@@ -181,17 +181,13 @@ export function GooglePhotosPicker({ onPhotoSelected, onLoading, isPro }: Google
 
     const uploadToCloudinary = async (sourceUrl: string) => {
         try {
-            const res = await fetch('/api/upload-cloudinary', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: sourceUrl })
-            });
-            const data = await res.json();
+            const { uploadFromUrl } = await import('@/app/actions/upload');
+            const res = await uploadFromUrl(sourceUrl);
 
-            if (data.success) {
-                onPhotoSelected(data.url);
+            if (res.success && res.url) {
+                onPhotoSelected(res.url);
             } else {
-                showError("Failed to upload photo from Google: " + (data.error || "Unknown error"));
+                showError("Failed to upload photo from Google: " + (res.error || "Unknown error"));
             }
         } catch (e) {
             console.error(e);

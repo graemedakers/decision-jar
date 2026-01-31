@@ -24,22 +24,17 @@ export function JoinJarModal({ isOpen, onClose, onSuccess }: JoinJarModalProps) 
         setError(null);
 
         try {
-            const res = await fetch('/api/jars/join', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code }),
-            });
+            const { joinJar } = await import('@/app/actions/jars');
+            const res = await joinJar(code);
 
-            const data = await res.json();
-
-            if (res.ok) {
+            if (res.success) {
                 if (onSuccess) {
                     onSuccess();
                 } else {
                     window.location.reload();
                 }
             } else {
-                setError(data.error || "Failed to join jar");
+                setError(res.error || "Failed to join jar");
             }
         } catch (error) {
             console.error("Error joining jar:", error);

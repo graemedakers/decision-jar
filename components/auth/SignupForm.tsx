@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
 import { signIn } from "next-auth/react";
 import { trackSignup, identifyUser } from "@/lib/analytics";
+import { validateInviteCode } from "@/app/actions/jars";
 
 export function SignupForm() {
     const router = useRouter();
@@ -31,15 +32,14 @@ export function SignupForm() {
     useEffect(() => {
         if (inviteCode) {
             setIsValidating(true);
-            fetch('/api/jars/validate-invite', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: inviteCode })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.valid) {
-                        setCodeError(data.error || "Invalid invite code");
+            validateInviteCode(inviteCode)
+                .then(res => {
+                    if (res.success && res.data) {
+                        if (!res.data.valid) {
+                            setCodeError(res.data.error || "Invalid invite code");
+                        }
+                    } else {
+                        setCodeError(res.error || "Failed to validate code");
                     }
                 })
                 .catch(err => {

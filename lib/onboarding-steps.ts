@@ -22,14 +22,14 @@ const COMMON_WELCOME_STEPS: OnboardingStep[] = [
         id: 'add-idea',
         title: '💡 Add Your First Idea',
         description: 'Start by adding ideas to your jar. Click here to add anything from simple activities to epic adventures!',
-        targetElement: '[data-tour="add-idea-button"]',
+        targetElement: '[data-tour="add-idea-button"], [data-tour="smart-prompt-input"]',
         position: 'top'
     },
     {
         id: 'surprise-me',
         title: '✨ AI-Powered Ideas',
         description: 'Stuck for ideas? Click this Sparkles button to let our AI surprise you with personalized suggestions based on your preferences!',
-        targetElement: '[data-tour="surprise-me-button"]',
+        targetElement: '[data-tour="surprise-me-button"], [data-tour="smart-prompt-input"]',
         position: 'top'
     },
     {

@@ -20,6 +20,10 @@ export function isUserRedirecting() {
     return isRedirecting;
 }
 
+export function resetRedirectState() {
+    isRedirecting = false;
+}
+
 // Fetcher
 const fetchUserApi = async (redirectToLogin: boolean = true) => {
     // ✅ If already redirecting, immediately throw to prevent further requests

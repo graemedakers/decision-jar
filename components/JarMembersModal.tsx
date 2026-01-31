@@ -51,7 +51,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
     const fetchMembers = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${jarId}/members`));
+            const res = await fetch(getApiUrl(`/api/jar/${jarId}/members?t=${Date.now()}`));
             if (res.ok) {
                 const data = await res.json();
                 setMembers(data.members || []);
@@ -82,7 +82,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
 
         setProcessingId(member.userId);
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${jarId}/members/${member.userId}`), {
+            const res = await fetch(getApiUrl(`/api/jar/${jarId}/members/${member.userId}`), {
                 method: 'DELETE'
             });
 
@@ -133,7 +133,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
 
         setProcessingId(member.userId);
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${jarId}/members/${member.userId}`), {
+            const res = await fetch(getApiUrl(`/api/jar/${jarId}/members/${member.userId}`), {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: newRole }),
@@ -171,7 +171,7 @@ export function JarMembersModal({ isOpen, onClose, jarId, jarName, currentUserRo
 
             <DialogContent className="max-w-lg">
                 <div className="space-y-6">
-                    {['OWNER', 'ADMIN'].includes(currentUserRole) && inviteCode && (
+                    {inviteCode && (
                         <div className="bg-violet-50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-800/30 p-5 rounded-2xl animate-in fade-in zoom-in duration-300">
                             <h4 className="text-[10px] font-black text-violet-600 dark:text-violet-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                                 <UserPlus className="w-3.5 h-3.5" /> Invite Others

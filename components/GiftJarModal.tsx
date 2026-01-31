@@ -59,7 +59,7 @@ export function GiftJarModal({ jarId, jarName, ideaCount }: GiftJarModalProps) {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await fetch(`/api/jars/${jarId}/gift`, {
+            const res = await fetch(`/api/jar/${jarId}/gift`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

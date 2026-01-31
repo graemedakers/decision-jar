@@ -31,19 +31,23 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
 
     // Better: Import and use directly
     const fetchCategories = async (initialCat?: string) => {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-        if (data.user) {
-            const { getCategoriesForTopic } = await import('@/lib/categories');
-            const cats = getCategoriesForTopic(data.user.jarTopic, data.user.customCategories);
-            setAllowedCategories(cats);
+        try {
+            const { getUserDetails } = await import('@/app/actions/user');
+            const res = await getUserDetails();
+            if (res.success && res.data?.user) {
+                const { getCategoriesForTopic } = await import('@/lib/categories');
+                const cats = getCategoriesForTopic(res.data.user.jarTopic, res.data.user.customCategories);
+                setAllowedCategories(cats);
 
-            // Priority: provided initial category, else current category if valid, else first available
-            if (initialCat && cats.some(c => c.id === initialCat)) {
-                setCategory(initialCat);
-            } else if (!category && cats.length > 0) {
-                setCategory(cats[0].id);
+                // Priority: provided initial category, else current category if valid, else first available
+                if (initialCat && cats.some(c => c.id === initialCat)) {
+                    setCategory(initialCat);
+                } else if (!category && cats.length > 0) {
+                    setCategory(cats[0].id);
+                }
             }
+        } catch (error) {
+            console.error("Failed to fetch user details for categories", error);
         }
     };
 
@@ -99,22 +103,14 @@ export function AddMemoryModal({ isOpen, onClose, onSuccess, isPro, initialData 
             const formData = new FormData();
             formData.append('file', compressedFile);
 
-            const res = await fetch('/api/upload-cloudinary', {
-                method: 'POST',
-                body: formData
-            });
+            const { uploadImage } = await import('@/app/actions/upload');
+            const res = await uploadImage(formData);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(errorText || `Upload failed with status ${res.status}`);
-            }
-
-            const data = await res.json();
-            if (data.success) {
-                setPhotoUrls(prev => [...prev, data.url]);
+            if (res.success && res.url) {
+                setPhotoUrls(prev => [...prev, res.url!]);
                 showSuccess(`Image compressed (${originalSizeKB}KB → ${compressedSizeKB}KB)`);
             } else {
-                throw new Error(data.error || "Upload failed");
+                throw new Error(res.error || "Upload failed");
             }
         } catch (error) {
             console.error('Upload failed', error);

@@ -10,6 +10,7 @@ import { Confetti } from "@/components/Confetti";
 import { useRouter } from "next/navigation";
 import { showSuccess, showError } from "@/lib/toast";
 import { JoinJarModal } from "@/components/JoinJarModal";
+import { WizardFrame } from "@/components/WizardFrame";
 
 interface OnboardingWizardProps {
     onComplete: () => void;
@@ -35,7 +36,7 @@ export function OnboardingWizard({ onComplete, userName }: OnboardingWizardProps
 
         try {
             // 1. Create the Jar
-            const createRes = await fetch('/api/jars', {
+            const createRes = await fetch('/api/jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -86,206 +87,204 @@ export function OnboardingWizard({ onComplete, userName }: OnboardingWizardProps
         }
     };
 
-    // Step 1: Choose Goal
-    const renderStep1 = () => (
-        <motion.div
-            key="step1"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+    // Wrapper for content
+    const framework = (
+        <WizardFrame
+            isOpen={true} // Always open as it is inline
+            mode="inline"
+            onClose={() => { }} // No close action
+            hideClose={true}
+            title={
+                step === 1 ? `Welcome${userName ? `, ${userName}` : ''}! 👋` :
+                    step === 2 ? "Confirm Selection" :
+                        "You're All Set! 🚀"
+            }
+            subtitle={
+                step === 1 ? "Let's get you started. What kind of decisions do you want to make?" :
+                    step === 2 ? `Great choice! We'll set up your ${selectedTemplate?.label} Jar.` :
+                        "Your jar is ready. Spin the wheel to make your first decision!"
+            }
+            icon={
+                step === 1 ? Sparkles :
+                    step === 2 ? Check :
+                        CheckCircle2
+            }
+            iconColor={
+                step === 1 ? "text-primary" :
+                    step === 2 ? "text-green-500" :
+                        "text-green-500"
+            }
+            maxWidth="max-w-4xl"
         >
-            <JoinJarModal
-                isOpen={isJoinOpen}
-                onClose={() => setIsJoinOpen(false)}
-            />
-
-            <div className="text-center space-y-2">
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white">
-                    Welcome{userName ? `, ${userName}` : ''}! 👋
-                </h2>
-                <p className="text-lg text-slate-600 dark:text-slate-400">
-                    Let's get you started. What kind of decisions do you want to make?
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                {ONBOARDING_TEMPLATES.map((template) => (
-                    <motion.button
-                        key={template.id}
-                        onClick={() => handleTemplateSelect(template)}
-                        whileHover={{ scale: 1.03, y: -5 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`p-6 rounded-3xl border-2 text-left transition-all duration-300 relative group overflow-hidden
-                            ${selectedTemplate?.id === template.id
-                                ? 'border-primary ring-4 ring-primary/20 bg-primary/5 dark:bg-primary/10'
-                                : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-primary/50 dark:hover:border-primary/50 shadow-sm hover:shadow-xl'
-                            }
-                        `}
+            <AnimatePresence mode="wait">
+                {step === 1 && (
+                    <motion.div
+                        key="step1"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-6"
                     >
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4 bg-gradient-to-br transition-colors
-                             ${template.theme === 'pink' ? 'from-pink-100 to-rose-100 text-pink-600 dark:from-pink-500/20 dark:to-rose-500/20 dark:text-pink-300' :
-                                template.theme === 'amber' ? 'from-amber-100 to-orange-100 text-amber-600 dark:from-amber-500/20 dark:to-orange-500/20 dark:text-amber-300' :
-                                    template.theme === 'purple' ? 'from-purple-100 to-indigo-100 text-purple-600 dark:from-purple-500/20 dark:to-indigo-500/20 dark:text-purple-300' :
-                                        template.theme === 'green' ? 'from-green-100 to-emerald-100 text-green-600 dark:from-green-500/20 dark:to-emerald-500/20 dark:text-green-300' :
-                                            'from-blue-100 to-cyan-100 text-blue-600 dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300'
-                            }
-                        `}>
-                            {template.icon}
+                        <JoinJarModal
+                            isOpen={isJoinOpen}
+                            onClose={() => setIsJoinOpen(false)}
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {ONBOARDING_TEMPLATES.map((template) => (
+                                <motion.button
+                                    key={template.id}
+                                    onClick={() => handleTemplateSelect(template)}
+                                    whileHover={{ scale: 1.03, y: -5 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className={`p-6 rounded-3xl border-2 text-left transition-all duration-300 relative group overflow-hidden
+                                        ${selectedTemplate?.id === template.id
+                                            ? 'border-primary ring-4 ring-primary/20 bg-primary/5 dark:bg-primary/10'
+                                            : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-primary/50 dark:hover:border-primary/50 shadow-sm hover:shadow-xl'
+                                        }
+                                    `}
+                                >
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4 bg-gradient-to-br transition-colors
+                                         ${template.theme === 'pink' ? 'from-pink-100 to-rose-100 text-pink-600 dark:from-pink-500/20 dark:to-rose-500/20 dark:text-pink-300' :
+                                            template.theme === 'amber' ? 'from-amber-100 to-orange-100 text-amber-600 dark:from-amber-500/20 dark:to-orange-500/20 dark:text-amber-300' :
+                                                template.theme === 'purple' ? 'from-purple-100 to-indigo-100 text-purple-600 dark:from-purple-500/20 dark:to-indigo-500/20 dark:text-purple-300' :
+                                                    template.theme === 'green' ? 'from-green-100 to-emerald-100 text-green-600 dark:from-green-500/20 dark:to-emerald-500/20 dark:text-green-300' :
+                                                        'from-blue-100 to-cyan-100 text-blue-600 dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300'
+                                        }
+                                    `}>
+                                        {template.icon}
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-primary transition-colors">
+                                        {template.label}
+                                    </h3>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">
+                                        {template.description}
+                                    </p>
+                                </motion.button>
+                            ))}
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-primary transition-colors">
-                            {template.label}
-                        </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">
-                            {template.description}
-                        </p>
-                    </motion.button>
-                ))}
-            </div>
 
-            <div className="flex flex-col items-center gap-4 mt-8">
-                <button
-                    onClick={() => setIsJoinOpen(true)}
-                    className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 hover:bg-primary/10 transition-colors"
-                >
-                    Have an invite code? Join a Jar
-                </button>
+                        <div className="flex flex-col items-center gap-4 mt-8">
+                            <button
+                                onClick={() => setIsJoinOpen(true)}
+                                className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 hover:bg-primary/10 transition-colors"
+                            >
+                                Have an invite code? Join a Jar
+                            </button>
 
-                <button
-                    onClick={onComplete} // Skip wizard
-                    className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 underline underline-offset-4"
-                >
-                    I'll set it up myself manually
-                </button>
-            </div>
-        </motion.div>
-    );
+                            <button
+                                onClick={onComplete} // Skip wizard
+                                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 underline underline-offset-4"
+                            >
+                                I'll set it up myself manually
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
 
-    // Step 2: Preview
-    const renderStep2 = () => {
-        if (!selectedTemplate) return null;
-
-        return (
-            <motion.div
-                key="step2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="max-w-xl mx-auto space-y-8"
-            >
-                <div className="text-center space-y-2">
-                    <button
-                        onClick={() => setStep(1)}
-                        className="text-sm text-slate-400 hover:text-primary mb-2 flex items-center justify-center gap-1 mx-auto transition-colors"
+                {step === 2 && selectedTemplate && (
+                    <motion.div
+                        key="step2"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-6"
                     >
-                        ← Back to choices
-                    </button>
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-white">
-                        Great choice! {selectedTemplate.icon}
-                    </h2>
-                    <p className="text-lg text-slate-600 dark:text-slate-400">
-                        We'll create a <strong>{selectedTemplate.label} Jar</strong> with these starter ideas:
-                    </p>
-                </div>
-
-                <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 p-2 shadow-xl shadow-slate-200/50 dark:shadow-none">
-                    {selectedTemplate.starterIdeas.map((idea, i) => (
-                        <div key={i} className="flex items-center gap-4 p-4 border-b border-slate-100 dark:border-white/5 last:border-0">
-                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center text-green-600 dark:text-green-400 shrink-0">
-                                <Check className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1 text-left">
-                                <p className="font-semibold text-slate-900 dark:text-white">{idea.description}</p>
-                                <div className="flex gap-2 mt-1">
-                                    {idea.tags.map(tag => (
-                                        <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 font-medium">
-                                            {tag}
-                                        </span>
-                                    ))}
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 font-medium">
-                                        {idea.cost}
-                                    </span>
+                        <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 p-2 shadow-xl shadow-slate-200/50 dark:shadow-none">
+                            {selectedTemplate.starterIdeas.map((idea, i) => (
+                                <div key={i} className="flex items-center gap-4 p-4 border-b border-slate-100 dark:border-white/5 last:border-0">
+                                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center text-green-600 dark:text-green-400 shrink-0">
+                                        <Check className="w-4 h-4" />
+                                    </div>
+                                    <div className="flex-1 text-left">
+                                        <p className="font-semibold text-slate-900 dark:text-white">{idea.description}</p>
+                                        <div className="flex gap-2 mt-1">
+                                            {idea.tags.map(tag => (
+                                                <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 font-medium">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 font-medium">
+                                                {idea.cost}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
+                            ))}
+                            <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl mt-2 text-center text-sm text-slate-500 flex items-center justify-center gap-2 border border-dashed border-slate-200 dark:border-white/10">
+                                <PlusIcon className="w-4 h-4" />
+                                <span>You can add unlimited ideas later</span>
                             </div>
                         </div>
-                    ))}
-                    <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl mt-2 text-center text-sm text-slate-500 flex items-center justify-center gap-2 border border-dashed border-slate-200 dark:border-white/10">
-                        <PlusIcon className="w-4 h-4" />
-                        <span>You can add unlimited ideas later</span>
-                    </div>
-                </div>
 
-                <div className="space-y-3">
-                    <Button
-                        size="lg"
-                        onClick={handleCreateJar}
-                        disabled={isCreating}
-                        className="w-full text-lg h-14 bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20"
+                        <div className="flex gap-3">
+                            <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                                Back
+                            </Button>
+                            <Button
+                                size="lg"
+                                onClick={handleCreateJar}
+                                disabled={isCreating}
+                                className="flex-[2] text-lg bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20"
+                            >
+                                {isCreating ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                        Setting up...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="w-5 h-5 mr-2 fill-white/20" />
+                                        Create {selectedTemplate.label} Jar
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </motion.div>
+                )}
+
+                {step === 3 && (
+                    <motion.div
+                        key="step3"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center space-y-8 py-4"
                     >
-                        {isCreating ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                                Setting up your jar...
-                            </>
-                        ) : (
-                            <>
-                                <Sparkles className="w-5 h-5 mr-2 fill-white/20" />
-                                Create My Jar
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </motion.div>
-        );
-    };
+                        <Confetti />
 
-    // Step 3: Success
-    const renderStep3 = () => (
-        <motion.div
-            key="step3"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="max-w-md mx-auto text-center space-y-8 py-10"
-        >
-            <Confetti />
+                        <motion.div
+                            initial={{ scale: 0, rotate: -20 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: "spring", delay: 0.2 }}
+                            className="w-32 h-32 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-500/30"
+                        >
+                            <CheckCircle2 className="w-16 h-16 text-white" />
+                        </motion.div>
 
-            <motion.div
-                initial={{ scale: 0, rotate: -20 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", delay: 0.2 }}
-                className="w-32 h-32 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-500/30"
-            >
-                <CheckCircle2 className="w-16 h-16 text-white" />
-            </motion.div>
+                        <div className="space-y-4">
+                            <p className="text-lg text-slate-600 dark:text-slate-400">
+                                Your <strong>{selectedTemplate?.label} Jar</strong> is ready. <br />
+                                Spin the wheel to make your first decision!
+                            </p>
+                        </div>
 
-            <div className="space-y-4">
-                <h2 className="text-4xl font-black text-slate-900 dark:text-white">
-                    You're All Set! 🚀
-                </h2>
-                <p className="text-lg text-slate-600 dark:text-slate-400">
-                    Your <strong>{selectedTemplate?.label} Jar</strong> is ready. <br />
-                    Spin the wheel to make your first decision!
-                </p>
-            </div>
-
-            <Button
-                size="lg"
-                onClick={onComplete}
-                className="w-full h-14 text-lg bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
-            >
-                <Dices className="w-5 h-5 mr-3" />
-                Go to Dashboard
-            </Button>
-        </motion.div>
+                        <Button
+                            size="lg"
+                            onClick={onComplete}
+                            className="w-full h-14 text-lg bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                        >
+                            <Dices className="w-5 h-5 mr-3" />
+                            Go to Dashboard
+                        </Button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </WizardFrame>
     );
 
     return (
-        <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
-            <AnimatePresence mode="wait">
-                {step === 1 && renderStep1()}
-                {step === 2 && renderStep2()}
-                {step === 3 && renderStep3()}
-            </AnimatePresence>
+        <div className="min-h-[80vh] flex flex-col items-center justify-center p-4 w-full">
+            {framework}
         </div>
     );
 }

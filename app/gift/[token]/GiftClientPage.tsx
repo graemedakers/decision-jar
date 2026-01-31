@@ -12,6 +12,8 @@ interface GiftData {
     gifterName: string;
     gifterAvatar: string | null;
     personalMessage: string | null;
+    isMysteryMode: boolean;
+    revealPace?: string;
     jar: {
         name: string;
         topic: string;
@@ -148,13 +150,22 @@ export function GiftClientPage({
     if (error || !gift) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 font-outfit">
-                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-6 rounded-2xl max-w-md text-center space-y-4">
-                    <AlertCircle className="w-12 h-12 mx-auto" />
-                    <h1 className="text-xl font-bold">Oops! Something went wrong.</h1>
-                    <p>{error || "We couldn't find that gift."}</p>
-                    <Button onClick={() => router.push('/')} variant="outline" className="mt-4">
-                        Go Home
-                    </Button>
+                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-8 rounded-3xl max-w-md text-center space-y-4 border border-red-200 dark:border-red-800/30 shadow-xl shadow-red-500/5">
+                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center mx-auto mb-2 text-red-600 dark:text-red-400">
+                        <AlertCircle className="w-8 h-8" />
+                    </div>
+                    <h1 className="text-2xl font-black tracking-tight">Something's not quite right</h1>
+                    <p className="text-lg font-medium opacity-90 leading-relaxed">
+                        {error || "We couldn't find the gift you're looking for."}
+                    </p>
+                    <div className="pt-4 flex flex-col gap-3">
+                        <Button onClick={() => window.location.reload()} className="w-full h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 border-none transition-all">
+                            Try Refreshing
+                        </Button>
+                        <Button onClick={() => router.push('/')} variant="ghost" className="w-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+                            Back to Home
+                        </Button>
+                    </div>
                 </div>
             </div>
         );
@@ -196,8 +207,8 @@ export function GiftClientPage({
                             {gift.jar.topic}
                         </div>
                         <div className="flex items-start gap-4 mb-4">
-                            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary text-xl shadow-inner">
-                                🫙
+                            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shadow-inner">
+                                <Gift className="w-6 h-6" />
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">

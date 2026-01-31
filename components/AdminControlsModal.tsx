@@ -24,7 +24,7 @@ export function AdminControlsModal({ isOpen, onClose, jarId, onAllocated }: Admi
         setResult(null);
 
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${jarId}/allocate`), {
+            const res = await fetch(getApiUrl(`/api/jar/${jarId}/allocate`), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ amountPerUser: Number(amount) }),

@@ -18,6 +18,8 @@ interface ConciergeActionProps {
     setRecommendations: React.Dispatch<React.SetStateAction<any[]>>;
     availableJars?: { id: string; name: string; topic?: string }[];
     currentJarId?: string | null;
+    openModal?: (type: any, props?: any) => void;
+    closeModal?: () => void;
 }
 
 export function useConciergeActions({
@@ -27,7 +29,9 @@ export function useConciergeActions({
     onClose,
     setRecommendations,
     availableJars = [],
-    currentJarId = null
+    currentJarId = null,
+    openModal,
+    closeModal
 }: ConciergeActionProps) {
     // Track which specific item is being added
     const [addingItemName, setAddingItemName] = useState<string | null>(null);
@@ -61,7 +65,6 @@ export function useConciergeActions({
                     };
 
                     addDemoIdea(demoIdea);
-
                     setRecommendations(prev => prev.map(item =>
                         (item.name === rec.name) ? { ...item, isAdded: true } : item
                     ));
@@ -76,76 +79,41 @@ export function useConciergeActions({
                 }
             }
 
-            // 2. JAR AUTO-SWITCHING LOGIC
-            let targetJarId: string | null = null;
-            let targetJarName: string | null = null;
+            // Internal helper for actual API call
+            const performAdd = async (r: any, cat: string, priv: boolean) => {
+                const normalizedRec = normalizeRecipeData(r);
+                const res = await apiAddIdea({
+                    description: getIdeaTitle(normalizedRec),
+                    details: formatDetails(normalizedRec),
+                    indoor: true,
+                    duration: "2.0",
+                    activityLevel: "LOW",
+                    cost: determineCost(normalizedRec.price),
+                    timeOfDay: "EVENING",
+                    category: cat,
+                    isPrivate: priv,
+                    address: normalizedRec.address || null,
+                    ideaType: normalizedRec.ideaType || null,
+                    typeData: normalizedRec.typeData || normalizedRec.data || null,
+                    schemaVersion: "1.0"
+                });
 
-            if (availableJars.length > 1 && currentJarId) {
-                const match = findBestMatchingJar(category, availableJars, currentJarId);
-
-                if (match) {
-                    const shouldSwitch = window.confirm(getSuggestionMessage(match, category));
-
-                    if (shouldSwitch) {
-                        const switchResult = await apiSwitchJar(match.jar.id);
-                        if (switchResult.success) {
-                            targetJarId = match.jar.id;
-                            targetJarName = match.jar.name;
-
-                            trackEvent('jar_auto_switched', {
-                                from_jar_id: currentJarId,
-                                to_jar_id: targetJarId,
-                                to_jar_name: targetJarName,
-                                category: category,
-                                reason: match.reason
-                            });
-                        }
-                    }
-                }
-            }
-
-            // 3. DATA NORMALIZATION (Extract Ingredients, etc.)
-            const normalizedRec = normalizeRecipeData(rec);
-
-            // 4. API CALL
-            const res = await apiAddIdea({
-                description: getIdeaTitle(normalizedRec),
-                details: formatDetails(normalizedRec),
-                indoor: true,
-                duration: "2.0",
-                activityLevel: "LOW",
-                cost: determineCost(normalizedRec.price),
-                timeOfDay: "EVENING",
-                category: category,
-                isPrivate: isPrivate,
-                address: normalizedRec.address || null,
-                ideaType: normalizedRec.ideaType || null,
-                typeData: normalizedRec.typeData || normalizedRec.data || null,
-                schemaVersion: "1.0"
-            });
-
-            if (res.success) {
-                trackIdeaAdded('ai', `concierge_${category}`);
-
-                setRecommendations(prev => prev.map(item =>
-                    (item.name === rec.name) ? { ...item, isAdded: true } : item
-                ));
-
-                if (onIdeaAdded) onIdeaAdded();
-
-                if (targetJarName) {
-                    showSuccess(`✅ Added to "${targetJarName}"!`);
-                } else {
+                if (res.success) {
+                    trackIdeaAdded('ai', `concierge_${cat}`);
+                    setRecommendations(prev => prev.map(item =>
+                        (item.name === r.name) ? { ...item, isAdded: true } : item
+                    ));
+                    if (onIdeaAdded) onIdeaAdded();
                     showSuccess("✅ Added to jar!");
+                } else {
+                    await handleAddError(res, r, cat, priv);
                 }
-            } else {
-                // 5. ERROR HANDLING & AUTO-CREATE FLOW
-                const err = res.error; // { error: string }
+            };
 
-                // Check for "No active jar" errors
+            // Internal helper for complex error flows (auto-create, etc.)
+            const handleAddError = async (res: any, r: any, cat: string, priv: boolean) => {
+                const err = res.error;
                 if (err.error && (err.error.includes('No active jar') || err.error.includes('Jar not found'))) {
-
-                    // A. Check for existing jars to switch to
                     const jarsRes = await apiListJars();
                     if (jarsRes.success && jarsRes.jars && jarsRes.jars.length > 0) {
                         const jars = jarsRes.jars;
@@ -158,43 +126,14 @@ export function useConciergeActions({
                             `• OK: Use "${jars[0].name}"\n` +
                             `• Cancel: Create a new jar`;
 
-                        const useExisting = window.confirm(message);
-
-                        if (useExisting) {
+                        if (window.confirm(message)) {
                             await apiSwitchJar(jars[0].id);
-
-                            // Retry Add
-                            const retryRes = await apiAddIdea({
-                                description: getIdeaTitle(rec),
-                                details: formatDetails(rec),
-                                indoor: true,
-                                duration: "2.0",
-                                activityLevel: "LOW",
-                                cost: determineCost(rec.price),
-                                timeOfDay: "EVENING",
-                                category: category,
-                                isPrivate: isPrivate
-                            });
-
-                            if (retryRes.success) {
-                                trackEvent('idea_added_to_existing_jar', {
-                                    jar_name: jars[0].name,
-                                    category: category
-                                });
-                                alert(`✅ Added to "${jars[0].name}"!`);
-                                if (onIdeaAdded) onIdeaAdded();
-                                return;
-                            }
+                            await performAdd(r, cat, priv);
+                            return;
                         }
                     }
 
-                    // B. Auto-Create Flow
-                    const userWantsToCreateJar = window.confirm(
-                        "Create a new jar for this idea?\n\n" +
-                        "We'll set it up automatically!"
-                    );
-
-                    if (userWantsToCreateJar) {
+                    if (window.confirm("Create a new jar for this idea?\n\nWe'll set it up automatically!")) {
                         try {
                             const loadingMsg = document.createElement('div');
                             loadingMsg.id = 'jar-creation-loading';
@@ -202,112 +141,68 @@ export function useConciergeActions({
                             loadingMsg.innerHTML = '⏳ Creating jar...<br><span style="font-size:14px;opacity:0.8;margin-top:8px;display:block;">Please wait</span>';
                             document.body.appendChild(loadingMsg);
 
-                            // Determine Topic
                             let jarTopic = "Activities";
                             let jarName = "My Ideas";
+                            if (cat === "MEAL") { jarTopic = "Dining"; jarName = "Dining Ideas"; }
+                            else if (cat === "DRINK") { jarTopic = "Nightlife"; jarName = "Bar & Drinks"; }
 
-                            if (category === "MEAL") {
-                                jarTopic = "Dining";
-                                jarName = "Dining Ideas";
-                            } else if (category === "DRINK") {
-                                jarTopic = "Nightlife";
-                                jarName = "Bar & Drinks";
-                            } else if (category === "ACTIVITY" || category === "EVENT") {
-                                jarTopic = "Activities";
-                                jarName = "Activity Ideas";
-                            }
-
-                            // Create Jar
-                            const createRes = await apiCreateJar({
-                                name: jarName,
-                                type: 'GENERIC',
-                                topic: jarTopic,
-                                selectionMode: 'RANDOM'
-                            });
-
+                            const createRes = await apiCreateJar({ name: jarName, type: 'GENERIC', topic: jarTopic, selectionMode: 'RANDOM' });
                             if (!createRes.success) {
                                 document.getElementById('jar-creation-loading')?.remove();
-
-                                // Jar Limit Handling
-                                if (createRes.status === 403 && createRes.error.error && createRes.error.error.includes('Limit reached')) {
-
-                                    const upgradeNow = window.confirm(
-                                        '🔒 Jar Limit Reached\n\n' +
-                                        `You've hit your jar limit on the Free plan.\n\n` +
-                                        `${createRes.error.error}\n\n` +
-                                        `Upgrade to Pro for unlimited jars plus premium AI tools!\n\n` +
-                                        `Click OK to see pricing, or Cancel to stay.`
-                                    );
-
-                                    if (upgradeNow) {
+                                if (createRes.status === 403 && createRes.error.error?.includes('Limit reached')) {
+                                    if (window.confirm('🔒 Jar Limit Reached\n\nUpgrade to Pro for unlimited jars!')) {
                                         window.location.href = '/dashboard?upgrade=pro';
                                     }
-
-                                    trackEvent('jar_limit_upgrade_prompt', {
-                                        source: 'concierge_auto_create',
-                                        category: category,
-                                        user_clicked_upgrade: upgradeNow
-                                    });
                                     return;
                                 }
-
                                 throw new Error(createRes.error.error || 'Failed to create jar');
                             }
 
-                            // Add to new Jar
-                            // Note: apiCreateJar likely auto-switches on backend or we rely on it being the "active" jar for the next call?
-                            // The original code assumed explicit switching wasn't needed if the create API sets it as active?
-                            // Actually, checking original code: it assumed `fetch` calls would work. The backend usually sets new jar as active if it's the first one.
-
-                            const addRes = await apiAddIdea({
-                                description: getIdeaTitle(rec),
-                                details: formatDetails(rec),
-                                indoor: true,
-                                duration: "2.0",
-                                activityLevel: "LOW",
-                                cost: determineCost(rec.price),
-                                timeOfDay: "EVENING",
-                                category: category,
-                                isPrivate: isPrivate,
-                                ideaType: rec.ideaType || null,
-                                typeData: rec.typeData || rec.data || null,
-                                schemaVersion: "1.0"
-                            });
-
+                            await performAdd(r, cat, priv);
                             document.getElementById('jar-creation-loading')?.remove();
-
-                            if (addRes.success) {
-                                trackEvent('jar_auto_created_success', {
-                                    jar_name: jarName,
-                                    jar_topic: jarTopic,
-                                    category: category,
-                                    idea_name: rec.name
-                                });
-
-                                alert(`✅ Created "${jarName}" jar and added your idea!\n\nReturning to dashboard...`);
-                                if (onIdeaAdded) onIdeaAdded();
-                                window.location.href = '/dashboard';
-                            } else {
-                                alert(`Jar created, but failed to add idea:\n${addRes.error?.error || 'Unknown error'}`);
-                            }
-
+                            alert(`✅ Created "${jarName}" and added your idea!`);
+                            window.location.href = '/dashboard';
                         } catch (error: any) {
                             document.getElementById('jar-creation-loading')?.remove();
                             logger.error('Failed to auto-create jar:', error);
-                            alert(`Failed to create jar automatically:\n${error.message || error}\n\nPlease check console for details.`);
+                            alert(`Failed to create jar automatically.`);
                             window.location.href = '/dashboard';
                         }
-                    } else {
-                        trackEvent('jar_auto_create_declined', {
-                            category: category,
-                            idea_name: rec.name
-                        });
                     }
                     return;
                 }
-
                 showError(`Failed to add: ${err.error || 'Server error'}`);
+            };
+
+            // 2. JAR AUTO-SWITCHING LOGIC
+            if (availableJars.length > 1 && currentJarId && openModal && closeModal) {
+                const match = findBestMatchingJar(category, availableJars, currentJarId);
+                if (match) {
+                    const currentJar = availableJars.find(j => j.id === currentJarId);
+                    openModal('JAR_SUGGESTION', {
+                        suggestedJar: { id: match.jar.id, name: match.jar.name, reason: match.reason },
+                        currentJarName: currentJar?.name || 'Current',
+                        ideaCount: 1,
+                        onConfirm: async (targetJarId: string) => {
+                            closeModal();
+                            const switchResult = await apiSwitchJar(targetJarId);
+                            if (switchResult.success) {
+                                trackEvent('jar_auto_switched', { from_jar_id: currentJarId, to_jar_id: targetJarId, to_jar_name: match.jar.name, category, reason: match.reason });
+                                await performAdd(rec, category, isPrivate);
+                            }
+                        },
+                        onStay: async () => {
+                            closeModal();
+                            await performAdd(rec, category, isPrivate);
+                        }
+                    });
+                    return;
+                }
             }
+
+            // Default path: Just add it
+            await performAdd(rec, category, isPrivate);
+
         } catch (error) {
             logger.error("Failed to add to jar:", error);
             showError("Failed to add to jar.");

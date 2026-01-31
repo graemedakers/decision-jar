@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock, Trash2, Activity, Utensils, Calendar, Moon, Loader2, Crown, Layers, Move, Clock, CheckCircle, XCircle, Users, Gift, Book, Popcorn, Gamepad2, ChefHat, Plane, Ticket, Music, Youtube, Map as MapIcon, ListChecks, Check, Share, Heart, Wine, ExternalLink } from "lucide-react";
+import { ArrowLeft, Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar, Activity, Utensils, Check, Star, ArrowRight, History, Layers, Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Filter, Image as ImageIcon, Loader2, Download, Gift, Wand2, Search, X, CheckCircle, XCircle, Move, Clock, Music, Youtube, Map as MapIcon, Plane, Ticket, ListChecks, Wine, ExternalLink, Book, Popcorn, Gamepad2, ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EnhancedEmptyState } from "@/components/EnhancedEmptyState";
 import { useUser } from "@/hooks/useUser";
@@ -14,7 +14,7 @@ import { SmartPromptInput } from "@/components/SmartPromptInput";
 import { useSmartPrompt } from "@/hooks/features/useSmartPrompt";
 import { useFavorites } from "@/hooks/useFavorites";
 import { ACTION_LABELS } from "@/lib/ui-constants";
-import { getCategoryDef } from "@/lib/categories";
+import { getCategoryDef, getThemeForTopic, getCategoriesForTopic } from "@/lib/categories";
 import { getVenueDetails, getShortHours } from "@/lib/utils";
 import { getStandardizedData, suggestIdeaType } from "@/lib/idea-standardizer";
 import { showInfo, showError, showSuccess } from "@/lib/toast";
@@ -42,6 +42,8 @@ export default function JarPage() {
     const [userLocation, setUserLocation] = useState<string | null>(null);
     const [showConfetti, setShowConfetti] = useState(false);
     const [availableJars, setAvailableJars] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
     // Bulk Actions State
     const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -73,7 +75,7 @@ export default function JarPage() {
     useEffect(() => {
         const fetchAvailableJars = async () => {
             try {
-                const res = await fetch('/api/jars/list');
+                const res = await fetch('/api/jar/list');
                 if (res.ok) {
                     const data = await res.json();
                     setAvailableJars(data || []);
@@ -151,7 +153,7 @@ export default function JarPage() {
             if (res.ok) {
                 fetchIdeas();
             } else {
-                alert("Failed to approve idea.");
+                showError("Failed to approve idea.");
             }
         } catch (e) {
             console.error(e);
@@ -160,58 +162,83 @@ export default function JarPage() {
 
     const handleReject = async (e: React.MouseEvent, ideaId: string) => {
         e.stopPropagation();
-        if (!confirm("Are you sure you want to reject this submission? It will be archived.")) return;
-        try {
-            const res = await fetch(`/api/ideas/${ideaId}/reject`, { method: 'POST' });
-            if (res.ok) {
-                fetchIdeas();
-            } else {
-                alert("Failed to reject idea.");
+        openModal('DELETE_CONFIRM', {
+            title: "Reject Idea",
+            description: "Are you sure you want to reject this submission? It will be archived.",
+            onConfirm: async () => {
+                try {
+                    const res = await fetch(`/api/ideas/${ideaId}/reject`, { method: 'POST' });
+                    if (res.ok) {
+                        fetchIdeas();
+                        closeModal();
+                    } else {
+                        showError("Failed to reject idea.");
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
             }
-        } catch (e) {
-            console.error(e);
-        }
+        });
     };
 
-    const toggleSelection = (e: React.MouseEvent, id: string) => {
+    const toggleSelection = (e: React.MouseEvent, idea: any) => {
         e.stopPropagation();
+        if (!idea.canDelete) {
+            showInfo("You can only select items you have permission to delete.");
+            return;
+        }
         const newSet = new Set(selectedIds);
-        if (newSet.has(id)) {
-            newSet.delete(id);
+        if (newSet.has(idea.id)) {
+            newSet.delete(idea.id);
         } else {
-            newSet.add(id);
+            newSet.add(idea.id);
         }
         setSelectedIds(newSet);
     };
 
     const handleBulkDelete = async () => {
         if (selectedIds.size === 0) return;
-        if (!confirm(`Are you sure you want to delete ${selectedIds.size} ideas? This cannot be undone.`)) return;
 
-        try {
-            const res = await fetch('/api/ideas/bulk-delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ideaIds: Array.from(selectedIds) })
-            });
+        openModal('DELETE_CONFIRM', {
+            title: "Delete Multiple Ideas",
+            description: `Are you sure you want to delete ${selectedIds.size} ideas? This cannot be undone.`,
+            onConfirm: async () => {
+                try {
+                    const res = await fetch('/api/ideas/bulk-delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ideaIds: Array.from(selectedIds) })
+                    });
 
-            if (res.ok) {
-                const data = await res.json();
-                // alert(data.message); // Optional: show success message
-                setSelectedIds(new Set());
-                setIsSelectionMode(false);
-                fetchIdeas();
-            } else {
-                const err = await res.json();
-                alert(`Failed to delete: ${err.error || 'Unknown error'}`);
+                    if (res.ok) {
+                        setSelectedIds(new Set());
+                        setIsSelectionMode(false);
+                        fetchIdeas();
+                        closeModal();
+                    } else {
+                        const err = await res.json();
+                        showError(`Failed to delete: ${err.error || 'Unknown error'}`);
+                    }
+                } catch (error) {
+                    console.error('Bulk delete failed:', error);
+                    showError('Failed to delete ideas');
+                }
             }
-        } catch (error) {
-            console.error('Bulk delete failed:', error);
-            alert('Failed to delete ideas');
-        }
+        });
     };
 
     const activeIdeas = ideas.filter(i => !i.selectedAt);
+    const jarTopic = userData?.jarTopic || 'General';
+    const theme = getThemeForTopic(jarTopic);
+    const categories = getCategoriesForTopic(jarTopic);
+
+    const filteredIdeas = activeIdeas.filter(idea => {
+        const matchesSearch = idea.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (idea.notes || "").toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = selectedCategory === "ALL" || idea.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
     const isAdminPickMode = userData?.jarSelectionMode === 'ADMIN_PICK';
     const isAdmin = !!userData?.isCreator;
     const hasPartner = !!userData?.partnerName;
@@ -235,14 +262,32 @@ export default function JarPage() {
                     >
                         <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                     </Button>
-                    <div>
-                        <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">In the Jar</h1>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{isLoading ? '...' : activeIdeas.length} ideas waiting</p>
+                    <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl ${theme.bgBlob1} flex items-center justify-center text-${theme.primary} shadow-inner shrink-0`}>
+                            {(() => {
+                                const Icon = categories[0]?.icon || Sparkles;
+                                return <Icon className="w-6 h-6" />;
+                            })()}
+                        </div>
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1">
+                                {userData?.jarName || "In the Jar"}
+                            </h1>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-[10px] font-black uppercase tracking-widest text-${theme.primary} dark:text-${theme.primary}/80`}>
+                                    {jarTopic}
+                                </span>
+                                <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+                                <p className="text-slate-500 dark:text-slate-400 text-xs font-bold">
+                                    {isLoading ? '...' : activeIdeas.length} ideas waiting
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    {userData?.activeJarId && isAdmin && (
+                    {userData?.activeJarId && (
                         <Button
                             onClick={() => openModal('GIFT_JAR', {
                                 jarId: userData.activeJarId,
@@ -257,7 +302,7 @@ export default function JarPage() {
                         </Button>
                     )}
 
-                    {userData?.activeJarId && isAdmin && (
+                    {userData?.activeJarId && (
                         <Button
                             onClick={() => openModal('JAR_MEMBERS')}
                             variant="outline"
@@ -269,7 +314,7 @@ export default function JarPage() {
                     )}
 
                     {/* Bulk Actions Toggle */}
-                    {activeIdeas.length > 0 && isAdmin && (
+                    {activeIdeas.length > 0 && (
                         <>
                             <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-1" />
 
@@ -290,19 +335,19 @@ export default function JarPage() {
                                             setIsSelectionMode(false);
                                             setSelectedIds(new Set());
                                         }}
-                                        className="rounded-full h-11 w-11 p-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
+                                        className="rounded-full font-bold h-11 text-slate-500 dark:text-slate-400"
                                     >
-                                        <XCircle className="w-6 h-6" />
+                                        Cancel
                                     </Button>
                                 </>
                             ) : (
                                 <Button
-                                    variant="outline"
                                     onClick={() => setIsSelectionMode(true)}
-                                    className="border-slate-200 dark:border-white/10 rounded-full font-bold h-11 w-11 p-0 flex items-center justify-center text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white"
-                                    title="Select Multiple"
+                                    variant="ghost"
+                                    className="rounded-full h-11 w-11 p-0 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5"
+                                    title="Bulk Actions"
                                 >
-                                    <ListChecks className="w-5 h-5" />
+                                    <Shield className="w-5 h-5" />
                                 </Button>
                             )}
                         </>
@@ -310,33 +355,101 @@ export default function JarPage() {
                 </div>
             </div>
 
+            {/* Filtering & Search Bar */}
+            <div className="mb-8 flex flex-col md:flex-row gap-4 relative z-10">
+                <div className="relative flex-1 group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                    <input
+                        type="text"
+                        placeholder={`Search ${activeIdeas.length} ideas...`}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full h-12 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-white/10 rounded-2xl pl-11 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery("")}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-400"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                        </button>
+                    )}
+                </div>
+
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar shrink-0">
+                    <button
+                        onClick={() => setSelectedCategory("ALL")}
+                        className={`h-12 px-5 rounded-2xl text-xs font-black uppercase tracking-tight transition-all border shrink-0 ${selectedCategory === "ALL"
+                            ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                            : 'bg-white dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                            }`}
+                    >
+                        All
+                    </button>
+                    {categories.map((cat) => (
+                        <button
+                            key={cat.id}
+                            onClick={() => setSelectedCategory(cat.id)}
+                            className={`h-12 px-5 rounded-2xl text-xs font-black uppercase tracking-tight transition-all border shrink-0 flex items-center gap-2 ${selectedCategory === cat.id
+                                ? `bg-${theme.primary} text-white border-${theme.primary} shadow-lg`
+                                : 'bg-white dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                                }`}
+                        >
+                            <cat.icon className="w-3.5 h-3.5" />
+                            {cat.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {
                 isLoading ? (
-                    <div className="flex flex-col items-center justify-center min-h-[400px]">
-                        <Loader2 className="w-8 h-8 text-white animate-spin mb-4" />
-                        <p className="text-slate-400">Opening your jar...</p>
+                    <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
+                        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                        <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Gathering your ideas...</p>
                     </div>
-                ) : activeIdeas.length === 0 ? (
+                ) : filteredIdeas.length === 0 ? (
                     <div className="space-y-6 max-w-2xl mx-auto w-full relative z-20">
-                        <SmartPromptInput
-                            jarTopic={userData?.jarTopic || 'General'}
-                            onGenerate={handleSmartPrompt}
-                            isGenerating={isGeneratingSmartIdeas}
-                            aiUsage={aiUsage}
-                            className="w-full"
-                        />
-                        <EnhancedEmptyState
-                            jarTopic={userData?.jarTopic || 'General'}
-                            jarName={userData?.jarName || 'Your Jar'}
-                            jarId={userData?.activeJarId || ''}
-                            inviteCode={userData?.coupleReferenceCode || userData?.referenceCode}
-                            onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
-                            onAddIdeaClick={() => openModal('ADD_IDEA')}
-                        />
+                        {searchQuery || selectedCategory !== "ALL" ? (
+                            <div className="flex flex-col items-center justify-center min-h-[40vh] text-center p-8 bg-white/50 dark:bg-white/5 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-white/10 mb-12">
+                                <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mb-6">
+                                    <Filter className="w-10 h-10 text-slate-300 dark:text-slate-700" />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No matching ideas</h3>
+                                <p className="text-slate-500 dark:text-slate-400 max-w-xs mx-auto mb-8">
+                                    Try adjusting your filters or search query to find what you're looking for.
+                                </p>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => { setSearchQuery(""); setSelectedCategory("ALL"); }}
+                                    className="rounded-full px-8"
+                                >
+                                    Reset All Filters
+                                </Button>
+                            </div>
+                        ) : (
+                            <>
+                                <SmartPromptInput
+                                    jarTopic={userData?.jarTopic || 'General'}
+                                    onGenerate={handleSmartPrompt}
+                                    isGenerating={isGeneratingSmartIdeas}
+                                    aiUsage={aiUsage}
+                                    className="w-full"
+                                />
+                                <EnhancedEmptyState
+                                    jarTopic={userData?.jarTopic || 'General'}
+                                    jarName={userData?.jarName || 'Your Jar'}
+                                    jarId={userData?.activeJarId || ''}
+                                    inviteCode={userData?.coupleReferenceCode || userData?.referenceCode}
+                                    onTemplateClick={() => openModal('TEMPLATE_BROWSER')}
+                                    onAddIdeaClick={() => openModal('ADD_IDEA')}
+                                />
+                            </>
+                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {activeIdeas.map((idea) => (
+                        {filteredIdeas.map((idea) => (
                             <motion.div
                                 layout
                                 initial={{ opacity: 0, scale: 0.9 }}
@@ -344,7 +457,7 @@ export default function JarPage() {
                                 key={idea.id}
                                 onClick={(e) => {
                                     if (isSelectionMode) {
-                                        toggleSelection(e, idea.id);
+                                        toggleSelection(e, idea);
                                     } else if (idea.isMasked) {
                                         showInfo(isAdminPickMode
                                             ? "It's a mystery! Use the 'Pick Mystery' button to select it."
@@ -369,7 +482,9 @@ export default function JarPage() {
                                     <div className="absolute top-3 left-3 z-30">
                                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedIds.has(idea.id)
                                             ? 'bg-indigo-500 border-indigo-500 text-white'
-                                            : 'border-slate-300 dark:border-white/20 bg-white dark:bg-black/40'
+                                            : idea.canDelete
+                                                ? 'border-slate-300 dark:border-white/20 bg-white dark:bg-black/40'
+                                                : 'border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-black/10 opacity-30 cursor-not-allowed'
                                             }`}>
                                             {selectedIds.has(idea.id) && <Check className="w-3.5 h-3.5" />}
                                         </div>
@@ -395,7 +510,7 @@ export default function JarPage() {
                                             <Move className="w-4 h-4" />
                                         </button>
                                     )}
-                                    {idea.canEdit && !idea.isMasked && (
+                                    {idea.canDelete && !idea.isMasked && (
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -412,10 +527,10 @@ export default function JarPage() {
                                                                 closeModal();
                                                             } else {
                                                                 const data = await res.json();
-                                                                alert(`Failed to delete idea: ${data.error || "Unknown error"}`);
+                                                                showError(`Failed to delete idea: ${data.error || "Unknown error"}`);
                                                             }
                                                         } catch (error: any) {
-                                                            alert(`Error deleting idea: ${error.message}`);
+                                                            showError(`Error deleting idea: ${error.message}`);
                                                         }
                                                     }
                                                 });
@@ -731,3 +846,4 @@ export default function JarPage() {
 }
 
 const DashboardModals = dynamic(() => import("@/components/DashboardModals").then(m => m.DashboardModals), { ssr: false });
+

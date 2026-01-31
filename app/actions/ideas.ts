@@ -9,6 +9,7 @@ import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { getBestCategoryFit } from '@/lib/categories';
 import { notifyJarMembers } from '@/lib/notifications';
 import { revalidatePath } from 'next/cache';
+import { ideaSchema } from '@/lib/validations/idea';
 
 export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea }>> {
     const session = await getSession();
@@ -48,54 +49,22 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
     }
 
     try {
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, selectedAt, notes, address, website, googleRating, openingHours, rating, photoUrls, selectedDate, isPrivate, weather, requiresTravel, ideaType, typeData, metadata, schemaVersion } = data;
+        // ✅ Use Zod to validate and extract fields
+        const validatedData = ideaSchema.parse(data);
+        const { duration, category, selectedAt, selectedDate, ...restData } = validatedData;
 
-        if (!description) {
-            return { success: false, error: 'Description is required', status: 400 };
-        }
-
-        const requestedCategory = category || 'ACTIVITY';
-        const finalCategory = getBestCategoryFit(requestedCategory, jar.topic, (jar as any).customCategories as any[]);
-
-        // Community logic
-        const membership = await prisma.jarMember.findUnique({
-            where: {
-                userId_jarId: { userId: session.user.id, jarId: currentJarId }
-            }
-        });
-        const isAdmin = (membership as any)?.role === 'ADMIN' || (membership as any)?.role === 'OWNER';
-        const ideaStatus = 'APPROVED';
-
-        const safeDuration = typeof duration === 'string' ? parseFloat(duration) : Number(duration);
+        const finalCategory = getBestCategoryFit(category || 'ACTIVITY', jar.topic, (jar as any).customCategories as any[]);
 
         const createData: Prisma.IdeaUncheckedCreateInput = {
-            description,
-            details: details || null,
-            indoor: Boolean(indoor),
-            duration: isNaN(safeDuration) ? 2.0 : safeDuration,
-            activityLevel,
-            cost,
-            timeOfDay: timeOfDay || 'ANY',
+            ...restData,
+            duration: duration || 2.0,
             category: finalCategory,
             selectedAt: selectedAt ? new Date(selectedAt) : null,
             selectedDate: selectedDate ? new Date(selectedDate) : (selectedAt ? new Date(selectedAt) : null),
             jarId: currentJarId,
             createdById: session.user.id,
-            notes: notes || null,
-            address: address || null,
-            website: website || null,
-            googleRating: googleRating ? parseFloat(String(googleRating)) : null,
-            openingHours: openingHours || null,
-            rating: rating ? parseInt(String(rating)) : null,
-            photoUrls: photoUrls || [],
-            isPrivate: Boolean(isPrivate),
-            weather: weather || 'ANY',
-            requiresTravel: Boolean(requiresTravel),
-            status: ideaStatus as any,
-            ideaType: ideaType || null,
-            typeData: typeData || null,
-            metadata: metadata || null,
-            schemaVersion: schemaVersion || "1.0",
+            status: 'APPROVED',
+            schemaVersion: (data as any).schemaVersion || "1.0",
         };
 
         const idea = await prisma.idea.create({
@@ -113,10 +82,10 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
 
         // Send push notification to other jar members (non-blocking)
         // Hide details if idea is private or a surprise
-        const isSecretIdea = Boolean(isPrivate) || Boolean(data.isSurprise);
+        const isSecretIdea = Boolean(restData.isPrivate) || Boolean(data.isSurprise);
         notifyJarMembers(currentJarId, session.user.id, {
             title: `💡 ${session.user.name || 'Someone'} added a new idea`,
-            body: isSecretIdea ? '🤫 It\'s a secret... spin to find out!' : (description.length > 60 ? description.substring(0, 57) + '...' : description),
+            body: isSecretIdea ? '🤫 It\'s a secret... spin to find out!' : (restData.description.length > 60 ? restData.description.substring(0, 57) + '...' : restData.description),
             url: '/jar',
             icon: '/icon-192.png'
         }, 'notifyIdeaAdded').catch(err => console.error("Notification error:", err));
@@ -148,26 +117,15 @@ export async function updateIdea(id: string, data: any): Promise<ActionResponse<
     }
 
     try {
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, isPrivate, weather, requiresTravel, ideaType, typeData, metadata } = data;
-        const safeDuration = typeof duration === 'string' ? parseFloat(duration) : Number(duration);
+        // ✅ Use Zod to validate and extract fields (prevent silent dropping)
+        const validatedData = ideaSchema.partial().parse(data);
+        const { duration, ...restData } = validatedData;
 
         const updated = await prisma.idea.update({
             where: { id },
             data: {
-                description,
-                details: details || null,
-                indoor: Boolean(indoor),
-                duration: isNaN(safeDuration) ? 2.0 : safeDuration,
-                activityLevel,
-                cost,
-                timeOfDay,
-                category,
-                isPrivate: Boolean(isPrivate),
-                weather,
-                requiresTravel: Boolean(requiresTravel),
-                ideaType: ideaType || undefined,
-                typeData: typeData || undefined,
-                metadata: metadata || undefined,
+                ...restData,
+                duration: duration !== undefined ? duration : undefined,
             }
         });
 
@@ -235,9 +193,14 @@ export async function duplicateIdea(id: string, targetJarId?: string): Promise<A
 
         if (!finalTargetJarId) return { success: false, error: 'No target jar found', status: 400 };
 
-        // Verify membership in target jar
+        // Verify membership and permissions in target jar
         const targetMembership = user.memberships.find(m => m.jarId === finalTargetJarId);
         if (!targetMembership) return { success: false, error: 'Not a member of target jar', status: 403 };
+
+        const isAuthorized = targetMembership.role === 'ADMIN' || targetMembership.role === 'OWNER' || user.isSuperAdmin;
+        if (!isAuthorized) {
+            return { success: false, error: 'Only admins or owners can add ideas to this jar', status: 403 };
+        }
 
         // Clone the data, resetting completion fields
         const { id: _, createdAt: __, updatedAt: ___, selectedAt: ____, selectedDate: _____, rating: ______, notes: _______, createdById: ________, jarId: _________, ...cloneData } = sourceIdea;

@@ -70,24 +70,6 @@ test.describe('Voting Cycle', () => {
             data: { selectionMode: 'VOTE' }
         });
 
-        // Override auth mock to reflect VOTE mode
-        await page.route('**/api/auth/me', async (route) => {
-            await route.fulfill({
-                status: 200,
-                json: {
-                    user: {
-                        ...user,
-                        isPremium: true,
-                        isCreator: true,
-                        activeJarId: jar.id,
-                        jarName: jar.name,
-                        jarSelectionMode: 'VOTE',
-                        memberships: [{ jarId: jar.id, role: 'OWNER', jar }]
-                    }
-                }
-            });
-        });
-
         await page.reload();
 
         // Now we should see the Voting Manager

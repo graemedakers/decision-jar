@@ -99,13 +99,15 @@ export function useLoadingState({
         }
 
         // If we have no ideas AND they're loading (first time, not refetch), show loading
-        if (ideas.length === 0 && isLoadingIdeas) {
+        // ✅ CRITICAL FIX: Only show loading if we have ZERO ideas AND it's the initial load.
+        // If we have existing ideas, we should show them while refreshing.
+        if ((!ideas || ideas.length === 0) && isLoadingIdeas) {
             return true;
         }
 
         // All other cases: don't show loading (we have enough data to show UI)
         return false;
-    }, [isLoadingUser, isLoadingIdeas, isFetchingIdeas, userData, ideas.length]);
+    }, [isLoadingUser, isLoadingIdeas, isFetchingIdeas, userData, ideas]);
 
     // Safety timeout: If stuck loading for >10 seconds, force show content/error
     useEffect(() => {

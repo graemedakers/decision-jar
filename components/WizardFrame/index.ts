@@ -3,3 +3,4 @@
  */
 
 export { WizardFrame } from './WizardFrame';
+export { AiWizardFrame } from './AiWizardFrame';

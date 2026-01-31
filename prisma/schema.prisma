@@ -96,6 +96,8 @@ model JarMember {
   @@unique([userId, jarId])
   @@index([userId])              // Speeds up "user's jars" queries
   @@index([status])              // Speeds up filtering active members
+  
+  vetoCardsRemaining Int @default(3) // Default 3 veto cards per jar
 }
 
 model User {

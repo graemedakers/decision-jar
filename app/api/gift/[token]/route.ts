@@ -38,10 +38,17 @@ export async function GET(
         });
 
         if (!gift || !gift.sourceJar || !gift.isActive) {
+            console.warn("[GIFT_GET] Gift not found, inactive, or missing source jar:", {
+                token,
+                found: !!gift,
+                active: gift?.isActive,
+                hasSource: !!gift?.sourceJar
+            });
             return new NextResponse("Gift not found or inactive", { status: 404 });
         }
 
         if (gift.expiresAt && new Date() > gift.expiresAt) {
+            console.warn("[GIFT_GET] Gift expired:", { token, expiresAt: gift.expiresAt });
             return new NextResponse("Gift has expired", { status: 410 });
         }
 
@@ -56,6 +63,8 @@ export async function GET(
                 gifterName: gift.giftedBy.name,
                 gifterAvatar: gift.giftedBy.image,
                 personalMessage: gift.personalMessage,
+                isMysteryMode: (gift as any).isMysteryMode,
+                revealPace: (gift as any).revealPace,
                 jar: {
                     name: gift.sourceJar.name,
                     topic: gift.sourceJar.topic,

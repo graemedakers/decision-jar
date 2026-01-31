@@ -356,3 +356,74 @@ async function getEligibleVoterCount(jarId: string, eligibleIdeaIds: string[]) {
     }
     return eligibleCount || 1; // Always at least 1 person or it shouldn't have started
 }
+
+export async function getVoteStatus(jarId: string) {
+    const session = await getSession();
+    const userId = session?.user?.id;
+
+    if (!userId) return { active: false };
+
+    const member = await prisma.jarMember.findUnique({
+        where: { userId_jarId: { userId, jarId } },
+        select: { role: true, vetoCardsRemaining: true }
+    });
+
+    if (!member) return { active: false, error: "Not a member" };
+
+    const activeSession = await prisma.voteSession.findFirst({
+        where: { jarId, status: 'ACTIVE' },
+        include: { votes: true }
+    });
+
+    if (!activeSession) {
+        const lastResult = await prisma.voteSession.findFirst({
+            where: { jarId, status: 'COMPLETED' },
+            orderBy: { updatedAt: 'desc' },
+            include: { winner: true }
+        });
+
+        return {
+            active: false,
+            adminName: 'Admin',
+            lastResult: lastResult ? { winner: lastResult.winner } : null,
+            vetoCardsRemaining: member.vetoCardsRemaining
+        };
+    }
+
+    const totalMembers = await getEligibleVoterCount(jarId, activeSession.eligibleIdeaIds);
+    const votesCast = activeSession.votes.length;
+
+    const hasVoted = activeSession.votes.some(v => v.userId === userId);
+
+    let isEligible = true;
+    let poolIds = activeSession.eligibleIdeaIds;
+
+    if (!poolIds || poolIds.length === 0) {
+        const ideas = await prisma.idea.findMany({
+            where: { jarId, status: 'APPROVED', selectedAt: null },
+            select: { id: true }
+        });
+        poolIds = ideas.map(i => i.id);
+    }
+
+    if (poolIds.length > 0) {
+        const ideas = await prisma.idea.findMany({
+            where: { id: { in: poolIds } },
+            select: { createdById: true }
+        });
+        const otherPeoplesIdeas = ideas.filter(i => i.createdById !== userId);
+        if (otherPeoplesIdeas.length === 0) {
+            isEligible = false;
+        }
+    }
+
+    return {
+        active: true,
+        session: activeSession,
+        hasVoted,
+        isEligible,
+        votesCast,
+        totalMembers,
+        vetoCardsRemaining: member.vetoCardsRemaining,
+    };
+}

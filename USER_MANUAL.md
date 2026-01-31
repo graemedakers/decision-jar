@@ -20,7 +20,7 @@ Welcome to **Decision Jar**, the application designed to take the indecision out
 
 ## 1. Introduction
 
-Decision Jar allows you to create shared collections of activity ideas with your partner, friends, or family. When you're ready for an adventure, simply "spin the jar" to get a random suggestion based on your current preferences.
+Decision Jar allows you to create shared collections of activity ideas with your partner, friends, or family. Whether you're in a couple or part of a larger crew (**Squad Mode**), simply "spin the jar" or start a vote to get the perfect suggestion for the moment.
 
 ---
 
@@ -33,11 +33,7 @@ Decision Jar allows you to create shared collections of activity ideas with your
 4.  **Location:** Enter your city (e.g., "New York, NY"). This helps our Concierge tools suggest relevant venues nearby.
     - **Smart Detection:** On mobile and supported browsers, the app will ask for permission to use your **GPS**. This ensures "nearby" searches are pinpoint accurate to your current location.
     - **Fallback:** If GPS is disabled, the app uses your Profile Location, then your Jar Location, then a general "local" context.
-5.  **Create Jar:**
-    - Choose a **Name** and **Topic** (e.g., "Dates", "Movies", "Food", "Activities").
-    - Select a **Selection Mode** (Random spin, Voting Session, or Task Allocation).
-
-**Note:** You can create and join up to 3 jars for free! Create separate jars for different contexts—romantic dates, friend activities, solo hobbies, or family outings. Switch between them easily using the header menu. Pro users can manage up to 50 jars.
+**Note:** You can create and join multiple jars! Decision Jar supports **Squad Mode**, meaning you can have separate jars for different contexts—romantic dates, friend circles, professional teams, or family outings. Switch between them instantly using the header menu.
 
 ---
 
@@ -185,17 +181,18 @@ Perfect for chores or assigning specific responsibilities.
 2.  **My Tasks:** Members see a **"View My Tasks"** button instead of a Spin button. They can only see the tasks assigned to them.
 3.  **Completion:** Members select their assigned tasks to mark them as done.
 
-### Voting Mode
-Great for group decisions on Movie Night or Dinner.
+### Voting Mode (Squad Decisions)
+**Democratic decision-making at its best.** Perfect for groups where everyone wants a say in the final choice.
 1.  **Start Vote:** Admin starts a session with a set of random options.
-    - **Smart Shortcuts:** If there's only one logical choice or a guaranteed tie in a 2-person group, the system resolves it immediately to save you time.
+    - **Collaborative Sync:** Everyone receives a real-time notification on their device. When you join the vote, your presence is visible to the rest of the squad.
+    - **Smart Shortcuts:** If there's only one logical choice or a guaranteed tie in a 2-person group, the system resolves it immediately.
 2.  **Cast Your Vote:** Choose your favorite from the shortlist.
-    - **Fair Play:** You cannot vote for your own suggestions.
+    - **Fair Play:** You cannot vote for your own suggestions. The system ensures total fairness.
     - **Sidelines:** If every option in a round was suggested by you, you'll be placed on the "Sidelines" to watch the real-time progress as others decide.
-3.  **Instant Reveal:** Once all eligible members have voted, the winner is revealed to everyone simultaneously with a high-energy transition. No page refresh required!
+3.  **Instant Reveal:** Once the final vote is cast, the winner is revealed to everyone simultaneously across all devices. No more waiting or guessing!
 4.  **Tie-Breaking:**
     - **Random Pick:** The system selects a winner from the top-voted ideas.
-    - **Run-off Round:** A new voting session starts automatically with only the tied ideas.
+    - **Run-off Round:** A new voting session starts automatically with only the tied ideas to force a final decision.
 
 ---
 

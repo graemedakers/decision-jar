@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -9,7 +9,7 @@ import Link from "next/link";
 import {
     Plus, Settings, LogOut, Sparkles, Lock, Trash2, Copy, Calendar,
     Activity, Utensils, Check, Star, ArrowRight, History, Layers,
-    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Dices, Filter, Image as ImageIcon, Loader2, Download, Gift, Wand2
+    Users, Crown, Shield, Share, Moon, Heart, HelpCircle, Filter, Image as ImageIcon, Loader2, Download, Gift, Wand2
 } from "lucide-react";
 import { SessionTracker } from "@/lib/session-tracker";
 
@@ -38,6 +38,7 @@ import { useLoadingState } from "@/hooks/useLoadingState";
 import { usePWA } from "@/hooks/usePWA";
 import { UnifiedConciergeButton } from "@/components/UnifiedConciergeButton";
 import { VerificationBanner } from "@/components/VerificationBanner";
+import { PresenceBar } from "@/components/presence/PresenceBar";
 
 // Lazy Loading
 const PreferenceQuizModal = dynamic(() => import("@/components/PreferenceQuizModal").then(m => m.PreferenceQuizModal), { ssr: false });
@@ -178,7 +179,7 @@ function DashboardContent() {
             topic: m.jar.topic,
         }));
 
-    const isInitiallyLoadingIdeas = ideas.length === 0 && (isLoadingIdeas || isFetchingIdeas);
+    const isInitiallyLoadingIdeas = ideas.length === 0 && isLoadingIdeas;
     const showNoJars = !userData?.activeJarId && userData?.memberships?.length === 0 && !isLoadingUser;
     const showEmptyState = userData?.activeJarId && ideas.length === 0 && !isInitiallyLoadingIdeas;
     const showAdminStatus = isAdminPickMode;
@@ -215,52 +216,47 @@ function DashboardContent() {
     // ✅ CRITICAL: Auto-prompt for users without personal jars
     // This covers: New users who sign up and only have access to community jars (Bug Reports, etc.)
     // ✅ CRITIONAL: Auto-accept pending gift in Dashboard (Protected Route)
+    const processedGiftToken = useRef<string | null>(null);
+
     useEffect(() => {
         const pendingToken = sessionStorage.getItem('pending_gift_token');
 
         // If we have a token and we are authenticated (userData exists)
-        if (pendingToken && userData) {
+        if (pendingToken && userData && processedGiftToken.current !== pendingToken) {
+            // Mark as processed immediately to prevent re-entry
+            processedGiftToken.current = pendingToken;
 
-            // Set a local loading state to block interaction
-            // Note: We're not using a state variable here to avoid re-renders,
-            // but effectively we want to perform this action ONCE.
+            // Clear token from session storage immediately
+            sessionStorage.removeItem('pending_gift_token');
 
             const acceptGift = async () => {
                 try {
-                    // Show a toast or just block UI?
-                    // Ideally we'd have a specific "Unwrapping..." state
-
                     const res = await fetch(`/api/gift/${pendingToken}/accept`, {
                         method: 'POST'
                     });
 
-                    // Clear token immediately to prevent retry loops
-                    sessionStorage.removeItem('pending_gift_token');
-
                     if (!res.ok) {
                         const data = await res.json();
+                        // If it fails, we might want to allow a retry later, but for now
+                        // we've already cleared the token to prevent infinite loops.
                         if (data.error === 'JAR_LIMIT_REACHED') {
                             alert("You've reached your jar limit! Please upgrade or delete a jar to accept this gift.");
                         } else {
                             console.error('[Dashboard] Gift acceptance failed:', data);
-                            // Optional: Toast error
                         }
                     } else {
                         const data = await res.json();
                         console.log('[Dashboard] Gift accepted successfully!', data.jarId);
-
                         // Refresh user data to show new jar
                         window.location.href = `/dashboard?newGift=${data.jarId}`;
                     }
 
                 } catch (err) {
                     console.error('[Dashboard] Error accepting gift:', err);
-                    sessionStorage.removeItem('pending_gift_token');
                 }
             };
 
             acceptGift();
-            return; // processed
         }
     }, [userData, router]); // Run when userData loads
 
@@ -427,6 +423,13 @@ function DashboardContent() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Social Presence Stack */}
+                        {userData?.activeJarId && (
+                            <div className="flex items-center justify-center flex-1 px-4 mb-2 md:mb-0">
+                                <PresenceBar jarId={userData.activeJarId} currentUser={userData as any} />
+                            </div>
+                        )}
 
                         {/* Center: Removed redundancy as stats are now in the sidebar */}
                         <div className="hidden xl:flex flex-1" />
@@ -643,6 +646,8 @@ function DashboardContent() {
                                                         isGenerating={isGeneratingSmartIdeas}
                                                         aiUsage={aiUsage}
                                                         className="w-full"
+                                                        jarId={userData?.activeJarId || undefined}
+                                                        user={userData as any}
                                                     />
                                                     <EnhancedEmptyState
                                                         jarTopic={userData?.jarTopic || 'General'}
@@ -790,6 +795,8 @@ function DashboardContent() {
                                             isGenerating={isGeneratingSmartIdeas}
                                             aiUsage={aiUsage}
                                             className="w-full"
+                                            jarId={userData?.activeJarId || undefined}
+                                            user={userData as any}
                                         />
                                     </div>
 

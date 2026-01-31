@@ -78,9 +78,16 @@ export default async function GiftLandingPage({ params }: { params: Promise<{ to
         });
 
         if (!gift || !gift.sourceJar || !gift.isActive) {
-            error = "Gift not found or inactive";
+            console.warn("[GIFT_PAGE_SERVER] Gift not found, inactive, or missing source:", {
+                token,
+                found: !!gift,
+                active: gift?.isActive,
+                hasSource: !!gift?.sourceJar
+            });
+            error = "Gift not found or inactive. Please check your link.";
         } else if (gift.expiresAt && new Date() > gift.expiresAt) {
-            error = "Gift has expired";
+            console.warn("[GIFT_PAGE_SERVER] Gift expired:", { token, expiresAt: gift.expiresAt });
+            error = "This gift has expired.";
         } else {
             const totalIdeas = await prisma.idea.count({
                 where: { jarId: gift.sourceJarId, status: 'APPROVED' }
@@ -91,20 +98,21 @@ export default async function GiftLandingPage({ params }: { params: Promise<{ to
                 gifterName: gift.giftedBy.name,
                 gifterAvatar: gift.giftedBy.image,
                 personalMessage: gift.personalMessage,
+                isMysteryMode: (gift as any).isMysteryMode,
+                revealPace: (gift as any).revealPace,
                 jar: {
                     name: gift.sourceJar.name,
                     topic: gift.sourceJar.topic,
                     ideaCount: totalIdeas,
                     previewIdeas: (gift as any).isMysteryMode ? [] : gift.sourceJar.ideas
                 },
-                isMysteryMode: (gift as any).isMysteryMode,
                 createdAt: gift.createdAt.toISOString(),
                 expiresAt: gift.expiresAt?.toISOString() || null
             };
         }
     } catch (e) {
-        console.error("[GIFT_PAGE_SERVER]", e);
-        error = "Internal Server Error";
+        console.error("[GIFT_PAGE_SERVER] Fatal Error:", e);
+        error = "An internal server error occurred. Please try again later.";
     }
 
     return (

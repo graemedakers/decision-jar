@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export default async function AnalyticsPage() {
     const session = await getSession();
 
-    if (session?.user?.email !== 'graemedakers@gmail.com') {
+    if (!session?.user?.isSuperAdmin) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 text-slate-500">
                 Access Denied

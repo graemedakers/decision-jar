@@ -20,8 +20,9 @@ export default auth(async (req) => {
     // 2. Protected Routes (Ensure we don't match public files like /jar-main.jpg)
     const isProtectedRoute =
         path.startsWith('/dashboard') ||
-        (path.startsWith('/jar/') || path === '/jar') || // Only match /jar as a route, not as a prefix for assets
-        path.startsWith('/memories');
+        path.startsWith('/jar') ||
+        path.startsWith('/memories') ||
+        path.startsWith('/explore');
 
     if (isProtectedRoute) {
         const isE2EBypass = req.headers.get('x-e2e-bypass') === 'true';

@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useUser } from '@/hooks/useUser';
+import { useUser, resetRedirectState } from '@/hooks/useUser';
 import { ReactNode } from 'react';
 
-// Mock fetch globally
-global.fetch = vi.fn();
+import { server } from '../mocks/server';
+import { http, HttpResponse } from 'msw';
+
+// NO manual fetch stubbing here, setup.ts handles it with MSW
 
 function createWrapper() {
     const queryClient = new QueryClient({
@@ -23,6 +25,7 @@ function createWrapper() {
 describe('useUser Hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        resetRedirectState();
     });
 
     it('should fetch user data successfully', async () => {
@@ -46,10 +49,11 @@ describe('useUser Hook', () => {
             },
         };
 
-        (global.fetch as any).mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockUserData,
-        });
+        server.use(
+            http.get('*/api/auth/me', () => {
+                return HttpResponse.json(mockUserData);
+            })
+        );
 
         const { result } = renderHook(() => useUser(), {
             wrapper: createWrapper(),
@@ -64,6 +68,9 @@ describe('useUser Hook', () => {
         });
 
         // Check user data
+        if (result.current.userData === undefined) {
+            console.error('Test Failed: userData is undefined. Error:', result.current.error);
+        }
         expect(result.current.userData).toEqual(mockUserData.user);
         expect(result.current.isPremium).toBe(true);
         expect(result.current.level).toBe(3);
@@ -71,23 +78,30 @@ describe('useUser Hook', () => {
     });
 
     it('should handle authentication errors by redirecting', async () => {
-        const mockWindowLocation = { href: '' };
-        delete (window as any).location;
-        window.location = mockWindowLocation as any;
-
-        (global.fetch as any).mockResolvedValueOnce({
-            ok: false,
-            status: 401,
-            json: async () => ({ error: 'Unauthorized' }),
+        resetRedirectState(); // Ensure clean state inside the test
+        const mockReplace = vi.fn();
+        vi.stubGlobal('location', {
+            replace: mockReplace,
+            href: 'http://localhost:3000/',
+            origin: 'http://localhost:3000'
         });
+
+        server.use(
+            http.get('*/api/auth/me', () => {
+                return new HttpResponse(JSON.stringify({ error: 'Unauthorized' }), {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            })
+        );
 
         const { result } = renderHook(() => useUser({ redirectToLogin: true }), {
             wrapper: createWrapper(),
         });
 
         await waitFor(() => {
-            expect(window.location.href).toBe('/api/auth/nuke-session');
-        });
+            expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('/api/auth/nuke-session'));
+        }, { timeout: 3000 });
     });
 
     it('should return default level of 1 when undefined', async () => {
@@ -100,10 +114,11 @@ describe('useUser Hook', () => {
             },
         };
 
-        (global.fetch as any).mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockUserData,
-        });
+        server.use(
+            http.get('*/api/auth/me', () => {
+                return HttpResponse.json(mockUserData);
+            })
+        );
 
         const { result } = renderHook(() => useUser(), {
             wrapper: createWrapper(),
@@ -167,19 +182,21 @@ describe('useUser Hook', () => {
     });
 
     it('should correctly calculate premium status', async () => {
+        const uniqueId = 'premium-check-' + Math.random();
         const mockUserData = {
             user: {
-                id: 'user-123',
+                id: uniqueId,
                 isPremium: false,
                 hasPaid: true,
                 isTrialEligible: false,
             },
         };
 
-        (global.fetch as any).mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockUserData,
-        });
+        server.use(
+            http.get('*/api/auth/me', () => {
+                return HttpResponse.json(mockUserData);
+            }, { once: true })
+        );
 
         const { result } = renderHook(() => useUser(), {
             wrapper: createWrapper(),

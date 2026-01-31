@@ -21,8 +21,9 @@ export default defineConfig({
                 '.next/',
             ],
         },
-        alias: {
-            '@': resolve(__dirname, './')
-        }
+        alias: [
+            { find: /^next\/server$/, replacement: resolve(__dirname, './tests/mocks/next-server.ts') },
+            { find: /^@\/(.*)$/, replacement: resolve(__dirname, './$1') },
+        ]
     },
 })

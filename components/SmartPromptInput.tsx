@@ -12,6 +12,9 @@ import { showError, showSuccess } from "@/lib/toast";
 import { SmartInputEducationTip } from "@/components/SmartInputEducationTip";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useJarPresence } from "@/hooks/features/useJarPresence";
+import { User } from "@prisma/client";
+
 interface SmartPromptInputProps {
     jarTopic: string;
     onGenerate: (prompt: string) => void;
@@ -22,9 +25,12 @@ interface SmartPromptInputProps {
         dailyLimit: number | null;
         isPro: boolean;
     };
+    jarId?: string;
+    user?: User | null;
 }
 
 const SUGGESTION_MAP: Record<string, string[]> = {
+    // ... (unchanged)
     // Core Categories
     "Food": ["5 quick weeknight dinners", "8 impressive date night recipes", "6 healthy lunch ideas", "10 local hidden gem restaurants"],
     "Restaurants": ["5 top-rated Italian spots nearby", "8 brunch places with outdoor seating", "10 cheap eats under $15", "6 romantic dinner venues"],
@@ -52,12 +58,22 @@ const SUGGESTION_MAP: Record<string, string[]> = {
     "General": ["5 ways to be more productive", "10 self-care ideas", "6 books to read this year", "8 random acts of kindness"]
 };
 
-export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className, aiUsage }: SmartPromptInputProps) {
+export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className, aiUsage, jarId, user }: SmartPromptInputProps) {
     const [prompt, setPrompt] = useState("");
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const { openModal } = useModalSystem();
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Presence & Typing Logic
+    const { updateActivity } = useJarPresence(jarId || "", user || null);
+
+    const handleTyping = (value: string) => {
+        setPrompt(value);
+        if (value.length > 0 && jarId) {
+            updateActivity('typing', 'typing...');
+        }
+    };
 
     // Debugging persistent loading state
     useEffect(() => {
@@ -195,8 +211,11 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
     const ButtonColor = (showLink) ? "bg-slate-900" : "bg-gradient-to-r from-purple-600 to-indigo-600"; // Magic add gets the gradient
 
     return (
-        <div className={cn("space-y-3 relative", className)}>
-            <SmartInputEducationTip onTryExample={setPrompt} />
+        <div
+            className={cn("space-y-3 relative", className)}
+            data-tour="smart-prompt-input"
+        >
+            <SmartInputEducationTip jarTopic={jarTopic} onTryExample={setPrompt} />
             <input
                 type="file"
                 ref={fileInputRef}
@@ -285,7 +304,7 @@ export function SmartPromptInput({ jarTopic, onGenerate, isGenerating, className
                     type="text"
                     placeholder={isListening ? "Listening..." : currentPlaceholder}
                     value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
+                    onChange={(e) => handleTyping(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none text-[15px] sm:text-lg text-slate-800 dark:text-white placeholder:text-slate-400 min-w-0"
                     disabled={isGenerating}
                 />

@@ -64,11 +64,11 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
                 return (
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-slate-800 dark:text-white">Welcome to Decision Jar!</h3>
-                        <p className="text-slate-600 dark:text-slate-300">
-                            Decision Jar is your ultimate tool for ending indecision. Whether you're planning a date night, a group hangout, or just trying to decide what's for dinner, we've got you covered.
+                        <p className="text-slate-600 dark:text-slate-300 font-medium">
+                            Decision Jar is the ultimate tool for ending indecision with your partner or your squad.
                         </p>
                         <p className="text-slate-600 dark:text-slate-300">
-                            Fill your Jar with ideas, use our AI-powered Concierges to find new adventures, and "Spin the Jar" to let fate decide your next activity.
+                            Fill your Jar with ideas, use our AI-powered Concierges to find adventures, and enter **Squad Mode** to decide together in real-time.
                         </p>
                     </div>
                 );
@@ -105,9 +105,9 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
             case "community":
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Managing Your Jars</h3>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Managing Your Squad Jars</h3>
                         <p className="text-slate-600 dark:text-slate-300">
-                            You can belong to multiple Jars at once! Click the Jar Name in the dashboard header to switch views or open the management tool.
+                            You can belong to multiple Jars at once! We call this **Squad Mode**. Each jar is a separate workspace for different groups or contexts.
                         </p>
                         <div className="space-y-4 mt-4">
                             <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
@@ -193,19 +193,19 @@ export function HelpModal({ isOpen, onClose, initialSection }: HelpModalProps) {
 
                             <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800/50">
                                 <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
-                                    <Users className="w-5 h-5" /> Voting Mode
+                                    <Users className="w-5 h-5" /> Voting Mode (Squad Mode)
                                 </h4>
                                 <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
                                     <strong>Best for:</strong> Friend groups, teams, democratic decisions (Requires 3+ Members)
                                 </p>
                                 <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
-                                    <strong>How it works:</strong>
+                                    <strong>Real-time Squad Dynamics:</strong>
                                 </p>
                                 <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300 ml-2">
-                                    <li><strong>Shortlist:</strong> Admin starts a vote session with up to 5 random ideas (configurable in Jar Settings).</li>
-                                    <li><strong>Cast Vote:</strong> Everyone votes on their favorite. For fairness, you cannot vote for ideas you suggested!</li>
-                                    <li><strong>Sidelines:</strong> If a round only has your ideas, you'll be placed on the sidelines to watch the live progress.</li>
-                                    <li><strong>Instant Reveal:</strong> Once the final vote is cast, the winner's card pops up for everyone simultaneously.</li>
+                                    <li><strong>Collaborative Sync:</strong> Everyone is notified and their presence is shown live as they join.</li>
+                                    <li><strong>Casting Votes:</strong> Choose your favorite. For fairness, you cannot vote for ideas you suggested!</li>
+                                    <li><strong>Sidelines:</strong> If a round only has your ideas, you'll be on the sidelines watching the squad decide.</li>
+                                    <li><strong>Instant Reveal:</strong> The winner is revealed to the whole squad simultaneously across all devices.</li>
                                 </ul>
                                 <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-800/20 rounded-lg text-[11px] text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700/30">
                                     <strong>⚠️ Constraints:</strong> Voting Mode is unavailable for <strong>Mystery Jars</strong> and requires at least <strong>3 active members</strong> in a standard jar. If members leave and your group drops to 2, the jar will automatically revert to Random Spin mode.

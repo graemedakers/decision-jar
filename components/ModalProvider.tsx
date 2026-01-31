@@ -39,6 +39,7 @@ export type ModalType =
     | 'GIFT_MANAGER'
     | 'MY_GIFTS'
     | 'BULK_IDEA_PREVIEW'
+    | 'JAR_SUGGESTION'
     | null;
 
 interface ModalInstance {

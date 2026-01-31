@@ -32,6 +32,7 @@ export async function getSession() {
                             name: user.name,
                             activeJarId: user.activeJarId,
                             isLifetimePro: user.isLifetimePro,
+                            isSuperAdmin: user.isSuperAdmin,
                             stripeSubscriptionId: user.stripeSubscriptionId,
                             subscriptionStatus: user.subscriptionStatus
                         },
@@ -58,6 +59,7 @@ export async function getSession() {
                         name: user.name,
                         activeJarId: user.activeJarId,
                         isLifetimePro: user.isLifetimePro,
+                        isSuperAdmin: user.isSuperAdmin,
                         stripeSubscriptionId: user.stripeSubscriptionId,
                         subscriptionStatus: user.subscriptionStatus
                     },

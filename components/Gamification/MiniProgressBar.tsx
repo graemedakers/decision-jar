@@ -6,6 +6,10 @@ import { getNextLevelProgress } from "@/lib/gamification-shared";
 import { Sparkles } from "lucide-react";
 import { trackProgressBarViewed } from "@/lib/analytics";
 
+// Module-level trackers to prevent rate limiting across remounts
+let lastTrackedTimestamp = 0;
+let lastTrackedData = "";
+
 interface MiniProgressBarProps {
     xp: number;
     level: number;
@@ -14,13 +18,26 @@ interface MiniProgressBarProps {
 export function MiniProgressBar({ xp, level }: MiniProgressBarProps) {
     const { progressPercent, xpToNext, nextTitle, currentTitle } = getNextLevelProgress(xp, level);
     const hasTracked = useRef(false);
-    
+
     const isMaxLevel = progressPercent === 100 && xpToNext === 0;
 
-    // Track progress bar view once on mount
+    // Track progress bar view once on mount, with global debounce to prevent rate limiting
     useEffect(() => {
-        if (!hasTracked.current) {
+        // Module-level check to prevent flooding if component remounts rapidly
+        const now = Date.now();
+        const dataKey = `${level}-${xp}`;
+
+        // Only track if:
+        // 1. Different data than last track OR
+        // 2. Same data but > 5 seconds have passed (user genuinely returned to view)
+        if (dataKey !== lastTrackedData || (now - lastTrackedTimestamp > 5000)) {
             trackProgressBarViewed(level, xp, progressPercent);
+
+            // Update global trackers
+            lastTrackedTimestamp = now;
+            lastTrackedData = dataKey;
+
+            // Update local ref (standard React behavior)
             hasTracked.current = true;
         }
     }, [level, xp, progressPercent]);
@@ -68,9 +85,9 @@ export function MiniProgressBar({ xp, level }: MiniProgressBarProps) {
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                         initial={{ x: "-100%" }}
                         animate={{ x: "200%" }}
-                        transition={{ 
-                            repeat: Infinity, 
-                            duration: 2, 
+                        transition={{
+                            repeat: Infinity,
+                            duration: 2,
                             ease: "linear",
                             repeatDelay: 1
                         }}

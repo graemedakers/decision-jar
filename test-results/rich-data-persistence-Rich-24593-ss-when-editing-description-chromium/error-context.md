@@ -1,0 +1,262 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - region "Notifications alt+T"
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - img [ref=e9]
+            - img [ref=e16]
+          - generic [ref=e18]:
+            - generic [ref=e19]:
+              - button "Switch Jar" [ref=e21] [cursor=pointer]:
+                - heading "Test User 1769774515915's Activities Jar" [level=1] [ref=e22]:
+                  - generic [ref=e23]: Test User 1769774515915's Activities Jar
+                  - img [ref=e24]
+              - img [ref=e27]
+            - paragraph [ref=e30]: make moments happen
+        - generic [ref=e33]:
+          - button "Add Idea" [ref=e34] [cursor=pointer]:
+            - img [ref=e35]
+            - generic [ref=e36]: Add Idea
+          - button "Smart Fill" [ref=e37] [cursor=pointer]:
+            - img [ref=e38]
+            - generic [ref=e41]: Smart Fill
+          - button "Gift Jar" [ref=e42] [cursor=pointer]:
+            - img [ref=e43]
+            - generic [ref=e47]: Gift Jar
+          - button "Favorites" [ref=e48] [cursor=pointer]:
+            - img [ref=e49]
+            - generic [ref=e51]: Favorites
+          - link "View Memories" [ref=e52] [cursor=pointer]:
+            - /url: /memories
+            - button [ref=e53]:
+              - img [ref=e54]
+          - button "Help" [ref=e58] [cursor=pointer]:
+            - img [ref=e59]
+          - button "Settings" [ref=e62] [cursor=pointer]:
+            - img [ref=e63]
+          - button "Logout" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+      - generic [ref=e71]:
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - generic [ref=e80]:
+              - img [ref=e82]
+              - generic [ref=e84]:
+                - heading "Power up your Jar! ⚡" [level=4] [ref=e86]
+                - paragraph [ref=e87]: "Did you know? You can ask AI to generate lists for you. Try typing:"
+                - button "\"Suggest 5 fun date nights under $50...\"" [ref=e88] [cursor=pointer]
+              - button "Dismiss tip" [ref=e89] [cursor=pointer]:
+                - img [ref=e90]
+            - generic [ref=e93]:
+              - generic [ref=e94]:
+                - button "Upload Image" [ref=e95] [cursor=pointer]:
+                  - img [ref=e96]
+                - button "Voice input" [ref=e100] [cursor=pointer]:
+                  - img [ref=e101]
+                - button "Browse Templates" [ref=e104] [cursor=pointer]:
+                  - img [ref=e105]
+                - button "Ask A.I. Concierge" [ref=e107] [cursor=pointer]:
+                  - img [ref=e108]
+              - 'textbox "Ex: \"10 free things to do in the city...\"" [ref=e110]'
+              - generic [ref=e111]:
+                - generic:
+                  - generic: Press Enter
+                  - generic:
+                    - img
+            - generic [ref=e112]:
+              - generic [ref=e113]:
+                - button "5 outdoor weekend activities" [ref=e114] [cursor=pointer]
+                - button "10 free things to do in the city" [ref=e115] [cursor=pointer]
+                - button "6 rainy day project ideas" [ref=e116] [cursor=pointer]
+              - generic "Premium Active" [ref=e118]:
+                - img [ref=e119]
+                - generic [ref=e121]: Unlimited
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - heading "Your Jar is Empty!" [level=3] [ref=e125]
+              - paragraph [ref=e126]: "Let's fill it with exciting ideas. Choose how you'd like to get started:"
+            - generic [ref=e127]:
+              - button "AI Concierge Get smart ideas tailored to your location Premium feature" [ref=e128] [cursor=pointer]:
+                - generic [ref=e129]:
+                  - img [ref=e131]
+                  - generic [ref=e133]:
+                    - heading "AI Concierge" [level=4] [ref=e134]
+                    - paragraph [ref=e135]: Get smart ideas tailored to your location
+                    - paragraph [ref=e136]: Premium feature
+              - button "Browse Templates Import pre-made idea collections for Activities" [ref=e137] [cursor=pointer]:
+                - generic [ref=e138]:
+                  - img [ref=e140]
+                  - generic [ref=e142]:
+                    - heading "Browse Templates" [level=4] [ref=e143]
+                    - paragraph [ref=e144]: Import pre-made idea collections for Activities
+              - button "Add Ideas Manually Start from scratch with your own suggestions" [ref=e145] [cursor=pointer]:
+                - generic [ref=e146]:
+                  - img [ref=e148]
+                  - generic [ref=e149]:
+                    - heading "Add Ideas Manually" [level=4] [ref=e150]
+                    - paragraph [ref=e151]: Start from scratch with your own suggestions
+              - button "Invite Others Share your jar so others can contribute ideas" [ref=e152] [cursor=pointer]:
+                - generic [ref=e153]:
+                  - img [ref=e155]
+                  - generic [ref=e160]:
+                    - heading "Invite Others" [level=4] [ref=e161]
+                    - paragraph [ref=e162]: Share your jar so others can contribute ideas
+        - complementary [ref=e163]:
+          - generic [ref=e164]:
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - generic [ref=e167]:
+                  - generic [ref=e168]: Level 1
+                  - generic [ref=e169]: →
+                  - generic [ref=e170]: Level 2
+                - generic [ref=e172]: 0%
+              - generic [ref=e177]:
+                - generic [ref=e178]: 0 XP
+                - generic [ref=e179]: 100 XP to next level
+            - generic [ref=e180]:
+              - heading "Your Progress" [level=3] [ref=e181]
+              - button "Level 1 0 Achievements" [ref=e183] [cursor=pointer]:
+                - generic [ref=e184]:
+                  - img [ref=e186]
+                  - generic [ref=e192]:
+                    - generic [ref=e193]: Level 1
+                    - generic [ref=e194]: 0 Achievements
+                - img [ref=e195]
+          - generic [ref=e198]:
+            - generic [ref=e199]:
+              - img [ref=e201]
+              - generic [ref=e206]:
+                - generic [ref=e207]: Invite Member
+                - code [ref=e208]: Y8DOKU
+            - button "Copy" [ref=e209] [cursor=pointer]:
+              - img [ref=e210]
+              - text: Copy
+          - generic [ref=e214]:
+            - button "Dismiss" [ref=e215] [cursor=pointer]:
+              - img [ref=e216]
+            - generic [ref=e219]:
+              - img [ref=e221]
+              - generic [ref=e224]:
+                - heading "Verify your email to unlock full features" [level=3] [ref=e225]
+                - paragraph [ref=e226]:
+                  - text: We sent a verification link to
+                  - strong [ref=e227]: e2e_user_1769774515915@example.com
+                  - text: . Verify your email to upgrade to Pro and customize notification preferences.
+                - button "Resend Verification Email" [ref=e228] [cursor=pointer]:
+                  - img [ref=e229]
+                  - text: Resend Verification Email
+  - generic [ref=e234]:
+    - link "Jar" [ref=e235] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e236]
+      - generic [ref=e239]: Jar
+    - link "List" [ref=e240] [cursor=pointer]:
+      - /url: /jar
+      - img [ref=e241]
+      - generic [ref=e245]: List
+    - link "Explore" [ref=e246] [cursor=pointer]:
+      - /url: /explore
+      - img [ref=e247]
+      - generic [ref=e250]: Explore
+    - link "Vault" [ref=e251] [cursor=pointer]:
+      - /url: /memories
+      - img [ref=e252]
+      - generic [ref=e256]: Vault
+  - generic:
+    - generic: Logged in as Test User 1769774515915
+  - button "Help & Manual" [ref=e257] [cursor=pointer]:
+    - img [ref=e258]
+  - button "Open Next.js Dev Tools" [ref=e266] [cursor=pointer]:
+    - img [ref=e267]
+  - alert [ref=e270]
+  - generic [ref=e274]:
+    - generic [ref=e275]:
+      - generic [ref=e276]:
+        - heading "Add New Idea" [level=2] [ref=e277]
+        - generic [ref=e279]:
+          - button "Switch to Preview Mode" [ref=e280] [cursor=pointer]: Formatted View
+          - button "Switch to Edit Mode" [ref=e281] [cursor=pointer]: Edit Details
+      - button [ref=e282] [cursor=pointer]:
+        - img [ref=e283]
+    - generic [ref=e287]:
+      - generic [ref=e289]:
+        - img [ref=e291]
+        - generic [ref=e293]:
+          - heading "The Concept" [level=2] [ref=e295]
+          - paragraph [ref=e296]: What's the big idea?
+      - generic [ref=e298]:
+        - generic [ref=e299]:
+          - generic [ref=e301]: "1"
+          - generic [ref=e305]: "2"
+          - generic [ref=e309]: "3"
+          - generic [ref=e313]: "4"
+        - generic [ref=e315]:
+          - generic [ref=e316]:
+            - generic [ref=e317]:
+              - generic [ref=e318]: Choose a Category
+              - generic [ref=e319]:
+                - combobox [ref=e320] [cursor=pointer]:
+                  - option "Activities" [selected]
+                  - option "Restaurants"
+                  - option "Bars"
+                  - option "Nightclubs"
+                  - option "Movies"
+                  - option "Travel"
+                  - option "Hotel Stays"
+                  - option "Wellness"
+                  - option "Fitness"
+                  - option "Cooking & Recipes"
+                  - option "Books"
+                  - option "Gaming"
+                  - option "Romantic"
+                  - option "System Development"
+                  - option "Custom"
+                - img
+            - generic [ref=e321]:
+              - button "Adventure" [ref=e322] [cursor=pointer]:
+                - img [ref=e323]
+                - generic [ref=e325]: Adventure
+              - button "Chill/Home" [ref=e326] [cursor=pointer]:
+                - img [ref=e327]
+                - generic [ref=e330]: Chill/Home
+              - button "Event" [ref=e331] [cursor=pointer]:
+                - img [ref=e332]
+                - generic [ref=e338]: Event
+              - button "Museum/Art" [ref=e339] [cursor=pointer]:
+                - img [ref=e340]
+                - generic [ref=e342]: Museum/Art
+              - button "Dining" [ref=e343] [cursor=pointer]:
+                - img [ref=e344]
+                - generic [ref=e347]: Dining
+              - button "Drinks" [ref=e348] [cursor=pointer]:
+                - img [ref=e349]
+                - generic [ref=e351]: Drinks
+              - button "Movie" [ref=e352] [cursor=pointer]:
+                - img [ref=e353]
+                - generic [ref=e358]: Movie
+              - button "Wellness" [ref=e359] [cursor=pointer]:
+                - img [ref=e360]
+                - generic [ref=e362]: Wellness
+              - button "Fitness" [ref=e363] [cursor=pointer]:
+                - img [ref=e364]
+                - generic [ref=e370]: Fitness
+              - button "Gaming" [ref=e371] [cursor=pointer]:
+                - img [ref=e372]
+                - generic [ref=e374]: Gaming
+          - generic [ref=e375]:
+            - generic [ref=e376]: What's the idea?
+            - generic [ref=e377]:
+              - textbox "e.g. Build a blanket fort" [active] [ref=e378]: Persistence Test Idea
+              - img [ref=e380]
+            - paragraph [ref=e382]: Give it a catchy name or short description.
+      - generic [ref=e384]:
+        - button "Cancel" [ref=e385] [cursor=pointer]
+        - button "Next Step" [ref=e386] [cursor=pointer]:
+          - text: Next Step
+          - img [ref=e387]
+```

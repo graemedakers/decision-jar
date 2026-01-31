@@ -98,22 +98,14 @@ export function RateDateModal({ isOpen, onClose, idea, isPro, initialMode = 'rat
             const formData = new FormData();
             formData.append('file', compressedFile);
 
-            const res = await fetch('/api/upload-cloudinary', {
-                method: 'POST',
-                body: formData
-            });
+            const { uploadImage } = await import('@/app/actions/upload');
+            const res = await uploadImage(formData);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(errorText || `Upload failed with status ${res.status}`);
-            }
-
-            const data = await res.json();
-            if (data.success) {
-                setPhotoUrls(prev => [...prev, data.url]);
+            if (res.success && res.url) {
+                setPhotoUrls(prev => [...prev, res.url!]);
                 showSuccess(`Image compressed (${originalSizeKB}KB → ${compressedSizeKB}KB)`);
             } else {
-                throw new Error(data.error || "Upload failed");
+                throw new Error(res.error || "Upload failed");
             }
         } catch (error) {
             console.error('Upload failed', error);

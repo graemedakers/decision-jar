@@ -586,8 +586,8 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
     {
         slug: "group-decision-making-consensus",
         category: "Social",
-        title: "The Consensus Engine: Solving Group Indecision Forever",
-        description: "How Voting Mode and Squad Dynamics turn the 'Where should we go?' argument into an instant win.",
+        title: "The Consensus Engine: Solving Group Indecision with Squad Mode",
+        description: "How Voting Mode and Squad Dynamics turn the 'Where should we go?' argument into an instant win for the whole crew.",
         icon: Users,
         readTime: "6 min",
         structuredData: {
@@ -598,8 +598,8 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
         },
         faqs: [
             {
-                question: "How does Voting Mode work for groups?",
-                answer: "An admin starts a session with a shortlist of ideas. Everyone gets a notification and can vote on their own device. The system combines the results and reveals the winner to everyone at once."
+                question: "How does Voting Mode work for squads?",
+                answer: "An admin starts a session with a shortlist of ideas. Everyone in the squad gets a real-time notification on their device. When you join, you see your squad-mates' presence live. Once everyone votes, the winner is revealed to all simultaneously."
             },
             {
                 question: "What if someone isn't eligible to vote?",
@@ -621,7 +621,7 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
             },
             {
                 title: "Real-Time Squad Sync",
-                content: "Old-school methods like group texts lead to 'fragmented consensus' where bits of the decision are scattered across dozens of messages. Decision Jar uses a real-time broadcast engine that keeps everyone's screen in sync. When the final vote is cast, the 'Winner Reveal' pops up for every member simultaneously, creating a moment of shared excitement instead of a chore."
+                content: "Old-school methods like group texts lead to 'fragmented consensus' where bits of the decision are scattered across dozens of messages. Decision Jar uses a real-time broadcast engine that keeps every squad member's screen in sync. When the final vote is cast, the 'Winner Reveal' pops up for every member simultaneously, creating a moment of shared excitement instead of a chore."
             },
             {
                 title: "Handling Tie-Breakers & Edge Cases",

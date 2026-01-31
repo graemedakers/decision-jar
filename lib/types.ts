@@ -36,6 +36,7 @@ export interface Idea {
     selectedAt?: string | null;
     selectedDate?: string | null;
     isMasked?: boolean;
+    photoUrls?: string[];
 
     // Frontend specific
     canEdit?: boolean;
@@ -57,6 +58,7 @@ export interface UserData {
 
     // Preferences / Profile
     isPremium?: boolean;
+    isSuperAdmin?: boolean;
     location?: string | null;
     homeTown?: string | null;
     interests?: string | null;

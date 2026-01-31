@@ -55,5 +55,19 @@ export const handlers = [
             dailyLimit: 20,
             isPro: true
         });
+    }),
+
+    // --- Auth Mocks ---
+    http.get('/api/auth/me', async () => {
+        return HttpResponse.json({
+            user: {
+                id: 'user-123',
+                email: 'test@example.com',
+                name: 'Test User',
+                isPremium: true,
+                hasPaid: true,
+                activeJarId: 'jar-456'
+            }
+        });
     })
 ];

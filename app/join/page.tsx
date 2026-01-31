@@ -3,6 +3,8 @@
 import { useEffect, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Loader2 } from "lucide-react";
+import { getUserDetails } from "@/app/actions/user";
+import { joinJar } from "@/app/actions/jars";
 
 function JoinRedirect() {
     const router = useRouter();
@@ -19,20 +21,16 @@ function JoinRedirect() {
             setIsProcessing(true);
             try {
                 // 1. Check if user is already logged in
-                const meRes = await fetch('/api/auth/me');
-                const meData = await meRes.json();
+                const meRes = await getUserDetails();
 
-                if (meData.user) {
+                if (meRes.success && meRes.data?.user?.id) {
                     // User is logged in!
                     if (code) {
                         setStatus("Joining the jar...");
-                        const joinRes = await fetch('/api/jars/join', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ code, premiumToken })
-                        });
+                        // Use joinJar server action
+                        const joinRes = await joinJar(code);
 
-                        if (joinRes.ok) {
+                        if (joinRes.success) {
                             setStatus("Redirecting to your dashboard...");
                             // Brief delay for success state
                             setTimeout(() => {
@@ -41,6 +39,9 @@ function JoinRedirect() {
                             return;
                         } else {
                             // If joining failed (e.g. jar full), redirect to signup to show the error state or dashboard
+                            // Append error to params if possible? 
+                            // router.replace(`/signup?${params}&error=${encodeURIComponent(joinRes.error || 'Failed to join')}`);
+                            // For backward compat, just redirect to signup which handles the code
                             router.replace(`/signup?${params}`);
                             return;
                         }

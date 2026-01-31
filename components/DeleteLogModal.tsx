@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, History } from "lucide-react";
 import { useState, useEffect } from "react";
+import { getDeletionLogs } from "@/app/actions/logs";
 
 interface DeleteLogModalProps {
     isOpen: boolean;
@@ -17,11 +18,10 @@ export function DeleteLogModal({ isOpen, onClose }: DeleteLogModalProps) {
     useEffect(() => {
         if (isOpen) {
             setIsLoading(true);
-            fetch('/api/logs')
-                .then(res => res.json())
-                .then(data => {
-                    if (Array.isArray(data)) {
-                        setLogs(data);
+            getDeletionLogs()
+                .then(res => {
+                    if (res.success && Array.isArray(res.data)) {
+                        setLogs(res.data);
                     }
                 })
                 .catch(err => console.error(err))

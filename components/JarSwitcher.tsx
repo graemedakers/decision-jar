@@ -56,6 +56,7 @@ const getJarColorClasses = (type: Jar['type']) => {
 interface Membership {
     jarId: string;
     role: "ADMIN" | "MEMBER";
+    status?: "ACTIVE" | "PENDING" | "REMOVED";
     jar: Jar;
 }
 
@@ -94,7 +95,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
 
     const activeMembership = user.memberships.find(m => m.jarId === user.activeJarId) || user.memberships[0];
     const activeJar = activeMembership?.jar;
-    const otherMemberships = user.memberships.filter(m => m.jarId !== activeJar?.id);
+    const otherMemberships = user.memberships.filter(m => m.jarId !== activeJar?.id && m.status !== 'REMOVED');
 
     // Calc hasRomanticJar
     const hasRomanticJar = user.memberships.some(m => m.jar.type === 'ROMANTIC');
@@ -127,7 +128,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
         queryClient.invalidateQueries({ queryKey: CacheKeys.ideas() });
 
         try {
-            const res = await fetch('/api/auth/switch-jar', {
+            const res = await fetch(`/api/jar/${jarId}/switch`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ jarId }),
@@ -164,7 +165,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
         // First check if user is the last member
         let isLastMember = false;
         try {
-            const checkRes = await fetch(`/api/jars/${jarId}/members`);
+            const checkRes = await fetch(`/api/jar/${jarId}/members`);
             if (checkRes.ok) {
                 const data = await checkRes.json();
                 isLastMember = data.length <= 1;
@@ -181,7 +182,7 @@ export function JarSwitcher({ user, className, variant = 'default', onSwitch }: 
 
         setIsLoading(true);
         try {
-            const res = await fetch(`/api/jars/${jarId}/leave`, {
+            const res = await fetch(`/api/jar/${jarId}/leave`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ jarId }),

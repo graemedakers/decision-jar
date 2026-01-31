@@ -28,6 +28,23 @@ vi.mock('next/navigation', () => ({
     usePathname: () => '/',
 }));
 
+// Mock next-auth/react
+vi.mock('next-auth/react', () => ({
+    useSession: () => ({ data: null, status: 'unauthenticated' }),
+    SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+}));
+
+// Mock next-auth for server-side
+vi.mock('next-auth', () => ({
+    auth: vi.fn(),
+    default: vi.fn(),
+}));
+
+// Mock next/server is handled via vitest alias in vitest.config.ts
+
+
 // Mock Capacitor
 vi.mock('@capacitor/core', () => ({
     Capacitor: {

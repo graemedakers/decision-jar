@@ -39,6 +39,11 @@ export default function MemoriesPage() {
     const [addingMemory, setAddingMemory] = useState(false);
     const [editingMemory, setEditingMemory] = useState<any>(null);
 
+    // Derived: Only allow duplication to jars where user is ADMIN/OWNER or if SuperAdmin
+    const authorizedMemberships = (userData?.memberships || []).filter((m: any) =>
+        ['ADMIN', 'OWNER'].includes(m.role) || userData?.isSuperAdmin
+    );
+
     const isLoading = isIdeasLoading || isUserLoading;
 
     const isFavorite = (idea: any) => {
@@ -226,7 +231,7 @@ export default function MemoriesPage() {
                                 >
                                     <Camera className="w-5 h-5" />
                                 </button>
-                                {userData?.memberships && userData.memberships.length > 1 ? (
+                                {authorizedMemberships.length > 1 ? (
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <button
@@ -239,7 +244,7 @@ export default function MemoriesPage() {
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
                                             <DropdownMenuLabel className="text-xs uppercase tracking-wider text-slate-500">Duplicate to Jar</DropdownMenuLabel>
-                                            {userData.memberships.map((m: any) => (
+                                            {authorizedMemberships.map((m: any) => (
                                                 <DropdownMenuItem
                                                     key={m.jarId}
                                                     onClick={() => handleDuplicate(idea, m.jarId)}
@@ -253,16 +258,16 @@ export default function MemoriesPage() {
                                             ))}
                                         </DropdownMenuContent>
                                     </DropdownMenu>
-                                ) : (
+                                ) : authorizedMemberships.length === 1 ? (
                                     <button
-                                        onClick={() => handleDuplicate(idea)}
+                                        onClick={() => handleDuplicate(idea, authorizedMemberships[0].jarId)}
                                         className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                                         title="Add Again"
                                         disabled={isDuplicating === idea.id}
                                     >
                                         {isDuplicating === idea.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Copy className="w-5 h-5" />}
                                     </button>
-                                )}
+                                ) : null}
                                 <CalendarButton idea={idea} />
                                 {idea.canEdit && (
                                     <button

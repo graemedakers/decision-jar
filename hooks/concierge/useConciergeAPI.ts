@@ -51,7 +51,7 @@ export const useConciergeAPI = () => {
 
     const apiCreateJar = async (params: CreateJarParams) => {
         try {
-            const res = await fetch('/api/jars', {
+            const res = await fetch('/api/jar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(params)
@@ -72,7 +72,7 @@ export const useConciergeAPI = () => {
 
     const apiSwitchJar = async (jarId: string) => {
         try {
-            await fetch('/api/auth/switch-jar', {
+            await fetch(`/api/jar/${jarId}/switch`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ jarId })
@@ -86,10 +86,10 @@ export const useConciergeAPI = () => {
 
     const apiListJars = async () => {
         try {
-            const res = await fetch('/api/jars/list');
+            const res = await fetch('/api/jar/list');
             if (res.ok) {
                 const data = await res.json();
-                return { success: true, jars: data.jars };
+                return { success: true, jars: data }; // Adjusted because /api/jar/list returns data directly
             }
             return { success: false, error: 'Failed to list jars' };
         } catch (err) {

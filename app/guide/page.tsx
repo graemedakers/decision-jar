@@ -7,12 +7,11 @@ import { ArrowRight, Sparkles, Users, Zap } from 'lucide-react';
 export default function GuideIntroduction() {
     return (
         <div>
-            <h1 className="text-4xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-500">
-                Welcome to Decision Jar
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+                The Ultimate <span className="text-primary italic">Decision Engine</span> for You & Your Squad
             </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
-                The ultimate platform for ending indecision. Whether you're planning a date, choosing a movie with friends,
-                or just trying to decide what's for dinner, we've got you covered.
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto font-medium">
+                Stop the endless scrolling and the "I don't knows." Whether it's a romantic date night or a full-blown **Squad Mode** hangout, we've built the tools to help you decide faster.
             </p>
 
             <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 mb-12 shadow-2xl">
@@ -34,8 +33,8 @@ export default function GuideIntroduction() {
                     </div>
                     <div>
                         <h3 className="font-bold text-lg mb-1">1. Create or Join a Jar</h3>
-                        <p className="text-slate-600 dark:text-slate-400">
-                            Build your own jar for a specific theme (like "Date Nights", "Friend Hangouts", or "Solo Adventures") and invite others using a unique invite code.
+                        <p className="text-slate-600 dark:text-slate-400 text-sm">
+                            Create a jar for dates, friends, or family. Share the code to enter **Squad Mode** and collaborate in real-time.
                         </p>
                     </div>
                 </div>

@@ -13,8 +13,9 @@ import { useSquadMode } from "@/hooks/features/useSquadMode";
 import { useIdeaMutations } from "@/hooks/mutations/useIdeaMutations";
 import { useOnboarding } from "@/hooks/features/useOnboarding";
 
-import { ModalType } from "@/components/ModalProvider";
+import { ModalType, useModalSystem } from "@/components/ModalProvider";
 import { getBestCategoryFit } from "@/lib/categories";
+import { findBestMatchingJar } from "@/lib/jar-topic-matcher";
 
 // Types override (simplification)
 interface JarActionsProps {
@@ -43,6 +44,7 @@ export function useJarActions({
 
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { closeModal } = useModalSystem();
     const { deleteIdea } = useIdeaMutations();
 
     // 1. Spin Logic
@@ -87,7 +89,8 @@ export function useJarActions({
     const { showOnboarding, setShowOnboarding, handleCompleteOnboarding, handleSkipOnboarding } = useOnboarding({
         userData,
         isLoadingUser,
-        canStartTour
+        canStartTour,
+        ideasCount: ideas.length
     });
 
     // 3. Idea Actions
@@ -142,6 +145,73 @@ export function useJarActions({
     // 5. Smart Prompt
     const handleSmartPrompt = useCallback(async (prompt: string) => {
         setIsGeneratingSmartIdeas(true);
+
+        const executeBulkGenerate = async (p: string, intent: any, loc: string | undefined, targetJarId: string) => {
+            try {
+                const response = await fetch('/api/ideas/bulk-generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: p,
+                        intent: intent,
+                        location: loc,
+                        jarId: targetJarId
+                    })
+                });
+
+                if (response.status === 403) {
+                    const error = await response.json();
+                    if (error.code === 'UPGRADE_REQUIRED') {
+                        setIsGeneratingSmartIdeas(false);
+                        openModal('PREMIUM');
+                        return;
+                    }
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        if (data.preview) {
+                            setIsGeneratingSmartIdeas(false);
+                            openModal('BULK_IDEA_PREVIEW', {
+                                ideas: data.ideas,
+                                jarId: data.jarId,
+                                originalPrompt: p
+                            });
+                        } else {
+                            setIsGeneratingSmartIdeas(false);
+                            showSuccess(`✨ ${data.count} ideas added!`);
+
+                            // If we added to a DIFFERENT jar, switch to it!
+                            if (targetJarId !== userData?.activeJarId) {
+                                try {
+                                    await fetch(`/api/jar/${targetJarId}/switch`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ jarId: targetJarId })
+                                    });
+                                    router.refresh();
+                                    await refreshUser();
+                                    await fetchIdeas();
+                                } catch (e) {
+                                    console.error("Failed to auto-switch jar:", e);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    showError('Failed to generate ideas. Please try again.');
+                }
+            } catch (error) {
+                console.error('Bulk generate error:', error);
+                showError('An error occurred.');
+            } finally {
+                setIsGeneratingSmartIdeas(false);
+                fetchAIUsage();
+                fetchIdeas();
+            }
+        };
+
         try {
             let userLocation: string | undefined = undefined;
             try {
@@ -243,69 +313,52 @@ export function useJarActions({
                 }
             }
 
-            // Bulk Generate
-            const response = await fetch('/api/ideas/bulk-generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    prompt,
-                    intent: detectedIntent,
-                    location: userLocation,
-                    jarId: userData?.activeJarId
-                })
-            });
+            // 1.5. Suggest Better Jar if multiple exist
+            const availableJars = userData?.memberships?.map((m: any) => m.jar) || [];
+            if (availableJars.length > 1 && userData?.activeJarId && (!detectedIntent || detectedIntent.intentAction === 'BULK_GENERATE' || detectedIntent.intentAction === 'UNKNOWN')) {
+                // Pass the most specific category data we have
+                const searchCategory = detectedIntent?.targetCategory || detectedIntent?.conciergeTool || detectedIntent?.topic || prompt;
+                const match = findBestMatchingJar(searchCategory, availableJars, userData.activeJarId);
 
-            if (response.status === 403) {
-                const error = await response.json();
-                if (error.code === 'UPGRADE_REQUIRED') {
+                if (match) {
                     setIsGeneratingSmartIdeas(false);
-                    openModal('PREMIUM');
+                    openModal('JAR_SUGGESTION', {
+                        suggestedJar: {
+                            id: match.jar.id,
+                            name: match.jar.name,
+                            reason: match.reason
+                        },
+                        ideaCount: detectedIntent?.quantity || 5,
+                        onConfirm: async (targetJarId: string) => {
+                            closeModal();
+                            setIsGeneratingSmartIdeas(true);
+                            await executeBulkGenerate(prompt, detectedIntent, userLocation, targetJarId);
+                        },
+                        onStay: async () => {
+                            closeModal();
+                            setIsGeneratingSmartIdeas(true);
+                            await executeBulkGenerate(prompt, detectedIntent, userLocation, userData.activeJarId);
+                        }
+                    });
                     return;
                 }
             }
 
-            if (response.ok) {
-                const data = await response.json();
+            // 2. Bulk Generate in current jar
+            await executeBulkGenerate(prompt, detectedIntent, userLocation, userData?.activeJarId);
 
-                // Data refresh happens in 'finally' block to prevent UI lag.
-
-                if (data.success) {
-                    if (data.preview) {
-                        setIsGeneratingSmartIdeas(false);
-                        openModal('BULK_IDEA_PREVIEW', {
-                            ideas: data.ideas,
-                            jarId: data.jarId,
-                            originalPrompt: prompt
-                        });
-                    } else {
-                        setIsGeneratingSmartIdeas(false);
-                        // Success! Toast immediately.
-                        showSuccess(`✨ ${data.count} ideas added to your jar!`);
-                    }
-                }
-            } else {
-                showError('Failed to generate ideas. Please try again.');
-            }
         } catch (error) {
             console.error('Smart prompt error:', error);
             showError('An error occurred.');
-        } finally {
             setIsGeneratingSmartIdeas(false);
-
-            // Refresh background data safely
-            try {
-                Promise.allSettled([
-                    fetchAIUsage(),
-                    fetchIdeas()
-                ]).catch(console.error);
-            } catch (e) { console.error(e); }
         }
-    }, [userData?.jarTopic, userData?.activeJarId, openModal, fetchIdeas, setIsGeneratingSmartIdeas, fetchAIUsage]);
+    }, [userData?.jarTopic, userData?.activeJarId, userData?.memberships, openModal, closeModal, fetchIdeas, setIsGeneratingSmartIdeas, fetchAIUsage, router, refreshUser]);
 
     // 6. User actions
     const handleLogout = async () => {
         await signOut({ redirect: false });
-        window.location.href = '/';
+        // Force a total cookie cleanup to prevent middleware from redirecting back to dashboard
+        window.location.href = '/api/auth/nuke-session?target=/';
     };
 
     return {

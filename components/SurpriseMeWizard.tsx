@@ -12,7 +12,7 @@
 
 "use client";
 
-import { WizardFrame } from "@/components/WizardFrame";
+import { AiWizardFrame } from "@/components/WizardFrame";
 import { SURPRISE_ME_CONFIG } from "@/lib/constants/planners";
 import { WizardConfig } from "@/lib/types/wizard";
 import { getCategoriesForTopic } from "@/lib/categories";
@@ -74,7 +74,7 @@ export function SurpriseMeWizard({
     }, [jarTopic, customCategories]);
 
     return (
-        <WizardFrame
+        <AiWizardFrame
             isOpen={isOpen}
             config={dynamicConfig}
             userLocation={initialLocation}

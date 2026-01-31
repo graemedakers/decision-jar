@@ -9,6 +9,7 @@ import { Loader2, Plus, X, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TOPIC_CATEGORIES } from "@/lib/categories";
 import { useModalSystem } from "@/components/ModalProvider";
+import { createJar } from "@/app/actions/jars";
 
 interface CreateJarModalProps {
     isOpen: boolean;
@@ -48,7 +49,6 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
             setIsLoading(false);
             setError(null);
             setName("");
-            setCustomTopicName("");
             setCustomTopicName("");
             setCustomCategories(["", "", ""]);
             setVoteCandidates(0);
@@ -142,30 +142,25 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
         const inferredType = inferTypeFromTopic(finalTopic);
 
         try {
-            const res = await fetch('/api/jars', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    type: inferredType,
-                    topic: finalTopic,
-                    customCategories: finalCustomCategories,
-                    selectionMode,
-                    voteCandidatesCount: voteCandidates,
-                    defaultIdeaPrivate
-                }),
+            const res = await createJar({
+                name,
+                type: inferredType,
+                topic: finalTopic,
+                customCategories: finalCustomCategories,
+                selectionMode,
+                voteCandidatesCount: voteCandidates,
+                defaultIdeaPrivate
             });
 
-            if (res.ok) {
-                const data = await res.json();
+            if (res.success && res.data) {
                 setSuccess(true);
+                const jarId = res.data.id;
                 setTimeout(() => {
                     onClose();
-                    if (onSuccess) onSuccess(data.jar.id);
+                    if (onSuccess) onSuccess(jarId);
                 }, 800);
             } else {
-                const data = await res.json();
-                setError(data.error || "Failed to create jar");
+                setError(res.error || "Failed to create jar");
                 setIsLoading(false);
             }
         } catch (error) {

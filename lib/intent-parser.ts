@@ -43,18 +43,30 @@ export async function parseIntent(
            - If they mention a specific title (movie, book, restaurant name) but DON'T ask for a quantity or a search, use 'ADD_SINGLE'.
            - If they ask for a list or a number of things (including "Suggest 5..." or "Recommend 3..."), use 'BULK_GENERATE'.
            - If they ask "What", "Where", "How", "Find" or open-ended "Suggest/Recommend" WITHOUT a specific quantity, use 'LAUNCH_CONCIERGE'.
-        2. "conciergeTool": If 'LAUNCH_CONCIERGE', map to the best tool ID:
-           - DINING (restaurants, food), BAR (pubs), MOVIE, BOOK, GAME, HOTEL, WELLNESS (spa/yoga), FITNESS (gym), THEATRE, SPORTS, HOLIDAY (travel/itinerary), ESCAPE_ROOM, SIMPLE (quotes, jokes, affirmations, ideas), YOUTUBE (videos, tutorials).
-        3. "quantity": Extract number of ideas requested for BULK_GENERATE. Default to 5.
-        4. "topic": The specific subject the user asked for.
-        5. "location": Extract specific location if mentioned (e.g., "in Paris").
-        6. "requiresVenueLookup": Set to true IF the request needs physical addresses (Restaurants, Bars, Gyms).
-        7. "isLocationDependent": True if physical location is required to fulfill.
-        8. "enrichment": IF 'ADD_SINGLE', extract:
-           - "category": Best fit from [DINING, ACTIVITY, MOVIE, BOOK, RECIPE, WELLNESS, TRAVEL, CHORE, SYSTEM].
+        2. "conciergeTool": If 'LAUNCH_CONCIERGE', map to the best tool ID.
+        3. "targetCategory": REQUIRED FOR ALL ACTIONS. Best fit from:
+           - BAR (bars, pubs, nightlife)
+           - MEAL (restaurants, food, dinner, breakfast)
+           - MOVIE (films, cinema)
+           - BOOK (reading)
+           - GAME (board games, video games)
+           - WELLNESS (spa, meditation, self-care)
+           - FITNESS (gym, yoga, sports)
+           - ACTIVITY (general fun, sightseeing, hobbies)
+           - TRAVEL (holidays, hotels, flights)
+           - EVENT (concerts, theatre, festivals)
+           - OUTDOORS (hiking, nature)
+           - CHORE (tasks, housework)
+           - RECIPE (cooking)
+        4. "quantity": Extract number of ideas requested for BULK_GENERATE. Default to 5.
+        5. "topic": The specific subject the user asked for (e.g., "Cosy rooftop bars").
+        6. "location": Extract specific location if mentioned (e.g., "Melbourne CBD").
+        7. "requiresVenueLookup": Set to true IF the request needs physical addresses (Restaurants, Bars, Gyms).
+        8. "isLocationDependent": True if physical location is required to fulfill.
+        9. "enrichment": IF 'ADD_SINGLE', extract:
            - "cost": Estimated price $, $$, $$$, or $$$$.
-           - "duration": Estimated duration in minutes (e.g. Movie = 120, Dinner = 90).
-           - "vibe": A single adjective describing the activity (e.g. "Relaxed", "Energetic", "Funny").
+           - "duration": Estimated duration in minutes.
+           - "vibe": A single adjective describing the activity.
 
         Return ONLY a valid JSON object.
         `;

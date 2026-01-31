@@ -1,7 +1,23 @@
 import posthog from 'posthog-js';
+import { trackEvent as trackServerEvent } from '@/app/actions/analytics';
 
 // Safe capture wrapper (handles DNS errors, PostHog not loaded, etc.)
 function safeCapture(eventName: string, properties?: Record<string, any>) {
+    // Server-side tracking via Action
+    try {
+        trackServerEvent({
+            type: 'ACTION', // Default type, could be refined
+            name: eventName,
+            metadata: properties,
+            // sessionId and path are handled in the component or defaulted, but here we are in a lib.
+            // sessionId is in sessionStorage usually.
+            sessionId: typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('sessionId') : null,
+            path: typeof window !== 'undefined' ? window.location.pathname : undefined
+        }).catch(() => { });
+    } catch (e) {
+        // Limit noise
+    }
+
     if (typeof window === 'undefined') return; // SSR guard
     try {
         if (posthog && posthog.capture) {
@@ -42,7 +58,7 @@ export const trackPathSelected = (pathType: 'smart_input' | 'concierge' | 'templ
 export const trackModalOpened = (modalType: string, data?: Record<string, any>) => {
     const sessionId = sessionStorage.getItem('sessionId');
     const sessionStartTime = sessionStorage.getItem('sessionStartTime');
-    
+
     safeCapture('modal_opened', {
         modal_type: modalType,
         session_id: sessionId,
@@ -53,13 +69,13 @@ export const trackModalOpened = (modalType: string, data?: Record<string, any>) 
 
 export const trackModalAbandoned = (modalType: string, reason: string | number, hadInteraction?: boolean | any, data?: any) => {
     const sessionId = sessionStorage.getItem('sessionId');
-    
+
     // Handle both old format (reason, data) and new format (timeOpenSeconds, hadInteraction, data)
     let properties: Record<string, any> = {
         modal_type: modalType,
         session_id: sessionId,
     };
-    
+
     if (typeof reason === 'string') {
         // Old format: trackModalAbandoned(modalType, reason, data)
         properties.reason = reason;
@@ -76,20 +92,20 @@ export const trackModalAbandoned = (modalType: string, reason: string | number, 
             properties = { ...properties, ...data };
         }
     }
-    
+
     safeCapture('modal_abandoned', properties);
 };
 
 // Concierge tracking
 export const trackConciergeSkillSelected = (
-    skillId: string, 
-    skillNameOrMethod: string, 
+    skillId: string,
+    skillNameOrMethod: string,
     methodOrData?: 'manual' | 'auto-routed' | Record<string, any>
 ) => {
     let properties: Record<string, any> = {
         skill_id: skillId,
     };
-    
+
     if (typeof methodOrData === 'object') {
         // New format: trackConciergeSkillSelected(skillId, method, data)
         properties.method = skillNameOrMethod;
@@ -99,21 +115,21 @@ export const trackConciergeSkillSelected = (
         properties.skill_name = skillNameOrMethod;
         properties.method = methodOrData || 'manual';
     }
-    
+
     safeCapture('concierge_skill_selected', properties);
 };
 
 export const trackIntentDetectionResult = (
-    input: string, 
-    topIntentId: string | null, 
-    topIntentScoreOrRouted: number | boolean, 
+    input: string,
+    topIntentId: string | null,
+    topIntentScoreOrRouted: number | boolean,
     thresholdOrCorrectedSkill?: number | string
 ) => {
     let properties: Record<string, any> = {
         input_text: input.substring(0, 100), // Limit PII
         top_intent_id: topIntentId,
     };
-    
+
     if (typeof topIntentScoreOrRouted === 'boolean') {
         // Simplified format: trackIntentDetectionResult(input, intentId, routed, correctedSkill?)
         properties.routed = topIntentScoreOrRouted;
@@ -127,7 +143,7 @@ export const trackIntentDetectionResult = (
         properties.threshold = threshold;
         properties.routed = topIntentScoreOrRouted >= threshold;
     }
-    
+
     safeCapture('intent_detection_result', properties);
 };
 
@@ -142,7 +158,7 @@ export const trackAIToolUsed = (toolName: string, properties?: Record<string, an
 export const trackIdeaAdded = (source: 'manual' | 'template' | 'concierge' | 'ai' | string, jarId: string) => {
     const sessionId = sessionStorage.getItem('sessionId');
     const sessionStartTime = sessionStorage.getItem('sessionStartTime');
-    
+
     // Calculate time to first idea if this is the first one
     const firstIdeaTracked = sessionStorage.getItem('firstIdeaTracked');
     let timeToFirstIdea = null;
@@ -151,7 +167,7 @@ export const trackIdeaAdded = (source: 'manual' | 'template' | 'concierge' | 'ai
         timeToFirstIdea = Date.now() - startTime;
         sessionStorage.setItem('firstIdeaTracked', 'true');
     }
-    
+
     safeCapture('idea_added', {
         source: source,
         jar_id: jarId,
@@ -174,7 +190,7 @@ export const trackTemplateUsed = (templateId: string, templateName: string, acti
         template_id: templateId,
         template_name: templateName,
     };
-    
+
     if (typeof actionOrIdeaCount === 'string') {
         // New format: trackTemplateUsed(templateId, templateName, action)
         properties.action = actionOrIdeaCount;
@@ -182,7 +198,7 @@ export const trackTemplateUsed = (templateId: string, templateName: string, acti
         // Old format: trackTemplateUsed(templateName, ideaCount) - for backward compatibility
         properties.idea_count = actionOrIdeaCount;
     }
-    
+
     safeCapture('template_used', properties);
 };
 
@@ -255,7 +271,7 @@ export const trackXpGained = (amount: number, source: string, newXp: number, new
 
 // Signup tracking
 export const trackSignup = (
-    method: 'email' | 'google' | 'facebook' | string, 
+    method: 'email' | 'google' | 'facebook' | string,
     utmSourceOrProperties?: string | Record<string, any>,
     utmMedium?: string,
     utmCampaign?: string
@@ -263,7 +279,7 @@ export const trackSignup = (
     let properties: Record<string, any> = {
         method: method,
     };
-    
+
     if (typeof utmSourceOrProperties === 'object') {
         // Format: trackSignup(method, properties)
         properties = { ...properties, ...utmSourceOrProperties };
@@ -273,7 +289,7 @@ export const trackSignup = (
         if (utmMedium) properties.utm_medium = utmMedium;
         if (utmCampaign) properties.utm_campaign = utmCampaign;
     }
-    
+
     safeCapture('signup', properties);
 };
 

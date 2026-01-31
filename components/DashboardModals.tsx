@@ -24,7 +24,7 @@ const RateDateModal = dynamic(() => import("@/components/RateDateModal").then(m 
 const DateReveal = dynamic(() => import("@/components/DateReveal").then(m => m.DateReveal), { ssr: false });
 const FavoritesModal = dynamic(() => import("@/components/FavoritesModal").then(m => m.FavoritesModal), { ssr: false });
 const AddIdeaModal = dynamic(() => import("@/components/AddIdeaModal").then(m => m.AddIdeaModal), { ssr: false });
-const SurpriseMeModal = dynamic(() => import("@/components/SurpriseMeModal").then(m => m.SurpriseMeModal), { ssr: false });
+const SurpriseMeWizard = dynamic(() => import("@/components/SurpriseMeWizard").then(m => m.SurpriseMeWizard), { ssr: false });
 const SpinFiltersModal = dynamic(() => import("@/components/SpinFiltersModal").then(m => m.SpinFiltersModal), { ssr: false });
 // ... (imports)
 const SettingsModal = dynamic(() => import("@/components/SettingsModal").then(m => m.SettingsModal), { ssr: false });
@@ -39,6 +39,7 @@ const JoinJarModal = dynamic(() => import("@/components/JoinJarModal").then(m =>
 const GiftJarModal = dynamic(() => import("@/components/GiftJarModal").then(m => m.GiftJarModal), { ssr: false });
 const MyGiftsModal = dynamic(() => import("@/components/MyGiftsModal").then(m => m.MyGiftsModal), { ssr: false });
 const BulkIdeaPreviewModal = dynamic(() => import("@/components/BulkIdeaPreviewModal").then(m => m.BulkIdeaPreviewModal), { ssr: false });
+const JarSuggestionModal = dynamic(() => import("@/components/JarSuggestionModal").then(m => m.JarSuggestionModal), { ssr: false });
 
 import { CONCIERGE_CONFIGS } from "@/lib/concierge-configs";
 
@@ -137,15 +138,14 @@ export function DashboardModals({
                 availableJars={availableJars}
             />
 
-            {/* Surprise Me - Using original modal (reverted from WizardFrame) */}
-            <SurpriseMeModal
+            {/* Surprise Me - Using WizardFrame Engine */}
+            <SurpriseMeWizard
                 isOpen={isModalOpen('SURPRISE_ME')}
                 onClose={closeModal}
                 onIdeaAdded={fetchIdeas}
                 initialLocation={userLocation || ""}
                 jarTopic={jarTopic}
                 customCategories={userData?.customCategories}
-                defaultIdeaPrivate={userData?.defaultIdeaPrivate}
             />
 
             <SpinFiltersModal
@@ -331,6 +331,8 @@ export function DashboardModals({
                 isOpen={isModalOpen('DELETE_CONFIRM')}
                 onClose={closeModal}
                 onConfirm={getModalProps('DELETE_CONFIRM')?.onConfirm}
+                title={getModalProps('DELETE_CONFIRM')?.title}
+                description={getModalProps('DELETE_CONFIRM')?.description}
             />
 
             {/* Trial Expired Modal - triggered via modal system */}
@@ -443,6 +445,18 @@ export function DashboardModals({
                     onRegenerate={getModalProps('BULK_IDEA_PREVIEW')?.onRegenerate}
                     isRegenerating={getModalProps('BULK_IDEA_PREVIEW')?.isRegenerating}
                     isSaving={getModalProps('BULK_IDEA_PREVIEW')?.isSaving}
+                />
+            )}
+
+            {isModalOpen('JAR_SUGGESTION') && (
+                <JarSuggestionModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    onConfirm={getModalProps('JAR_SUGGESTION')?.onConfirm}
+                    onStay={getModalProps('JAR_SUGGESTION')?.onStay}
+                    suggestedJar={getModalProps('JAR_SUGGESTION')?.suggestedJar}
+                    currentJarName={userData?.jarName || "Current Jar"}
+                    ideaCount={getModalProps('JAR_SUGGESTION')?.ideaCount || 0}
                 />
             )}
 

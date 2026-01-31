@@ -10,35 +10,35 @@ const CATEGORY_TO_TOPIC_MAP: Record<string, string[]> = {
     // Dining concierges
     'MEAL': ['Dining', 'Food', 'Restaurants', 'Cooking', 'Date Night'],
     'RESTAURANT': ['Dining', 'Food', 'Restaurants', 'Date Night'],
-    
+
     // Nightlife
     'DRINK': ['Nightlife', 'Bars', 'Drinks', 'Date Night', 'Social'],
     'BAR': ['Nightlife', 'Bars', 'Drinks', 'Social'],
     'CLUB': ['Nightlife', 'Bars', 'Drinks', 'Social'],
-    
+
     // Entertainment
     'MOVIE': ['Movies', 'Entertainment', 'Date Night', 'Activities'],
     'THEATRE': ['Theatre', 'Entertainment', 'Date Night', 'Activities', 'Culture'],
     'GAME': ['Games', 'Entertainment', 'Activities', 'Social'],
-    
+
     // Wellness & Fitness
     'WELLNESS': ['Wellness', 'Self-Care', 'Health', 'Relaxation'],
     'FITNESS': ['Fitness', 'Health', 'Activities', 'Wellness'],
     'SPA': ['Wellness', 'Self-Care', 'Relaxation', 'Date Night'],
-    
+
     // Activities & Events
     'ACTIVITY': ['Activities', 'Entertainment', 'Adventure', 'Social'],
     'EVENT': ['Events', 'Activities', 'Social', 'Entertainment'],
     'ADVENTURE': ['Adventure', 'Activities', 'Travel', 'Outdoors'],
-    
+
     // Travel & Outdoors
     'TRAVEL': ['Travel', 'Holidays', 'Adventure', 'Vacation'],
     'HOTEL': ['Travel', 'Holidays', 'Vacation'],
     'OUTDOORS': ['Outdoors', 'Adventure', 'Activities', 'Nature'],
-    
+
     // Books & Reading
     'BOOK': ['Books', 'Reading', 'Entertainment', 'Self-Care'],
-    
+
     // Default fallbacks
     'GENERIC': ['General', 'Activities', 'Ideas'],
 };
@@ -72,7 +72,15 @@ export function findBestMatchingJar(
     }
 
     const categoryUpper = category.toUpperCase();
-    const relevantTopics = CATEGORY_TO_TOPIC_MAP[categoryUpper] || CATEGORY_TO_TOPIC_MAP['GENERIC'];
+    let relevantTopics = CATEGORY_TO_TOPIC_MAP[categoryUpper];
+
+    // Keyword-based fallback if no direct category match
+    if (!relevantTopics) {
+        const foundCategory = Object.keys(CATEGORY_TO_TOPIC_MAP).find(key =>
+            categoryUpper.includes(key) || key.includes(categoryUpper)
+        );
+        relevantTopics = foundCategory ? CATEGORY_TO_TOPIC_MAP[foundCategory] : CATEGORY_TO_TOPIC_MAP['GENERIC'];
+    }
 
     let bestMatch: MatchResult | null = null;
 
@@ -89,7 +97,7 @@ export function findBestMatchingJar(
 
         for (let i = 0; i < relevantTopics.length; i++) {
             const topic = relevantTopics[i].toLowerCase();
-            
+
             // Higher score for earlier (more relevant) topics
             const topicScore = relevantTopics.length - i;
 

@@ -102,7 +102,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const body = await request.json();
-        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, isPrivate, weather, requiresTravel } = body;
+        const { description, indoor, duration, activityLevel, cost, timeOfDay, details, category, isPrivate, weather, requiresTravel, photoUrls } = body;
 
         // Verify ownership
         const idea = await prisma.idea.findUnique({
@@ -159,7 +159,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
                 category,
                 isPrivate: typeof isPrivate === 'boolean' ? isPrivate : undefined,
                 weather: weather || undefined,
-                requiresTravel: typeof requiresTravel === 'boolean' ? requiresTravel : undefined
+                requiresTravel: typeof requiresTravel === 'boolean' ? requiresTravel : undefined,
+                photoUrls: photoUrls || undefined
             },
         });
 

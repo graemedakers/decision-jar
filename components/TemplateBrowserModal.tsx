@@ -102,7 +102,7 @@ export function TemplateBrowserModal({
         setCreatingTemplate(templateId);
 
         try {
-            const response = await fetch('/api/jars/from-template', {
+            const response = await fetch('/api/jar/from-template', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ templateId })
@@ -146,7 +146,7 @@ export function TemplateBrowserModal({
         setCreatingTemplate(templateId);
 
         try {
-            const response = await fetch('/api/jars/add-template-ideas', {
+            const response = await fetch('/api/jar/add-template-ideas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ templateId, jarId: currentJarId })

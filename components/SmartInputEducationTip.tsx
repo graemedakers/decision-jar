@@ -9,10 +9,30 @@ interface SmartInputEducationTipProps {
     onDismiss?: () => void;
     onTryExample?: (text: string) => void;
     className?: string;
+    jarTopic?: string;
 }
 
-export function SmartInputEducationTip({ onDismiss, onTryExample, className }: SmartInputEducationTipProps) {
+const TAIRED_SUGGESTIONS: Record<string, string> = {
+    "Food": "Suggest 8 impressive date night recipes",
+    "Restaurants": "10 local hidden gem restaurants to visit",
+    "Bars": "Suggest 5 rooftop bars with a view nearby",
+    "Movies": "List 10 classic sci-fi movies for a marathon",
+    "Books": "Top 5 must-read modern classics",
+    "Activities": "5 fun outdoor weekend activities in the sun",
+    "Wellness": "5 morning mindfulness routines for a calm start",
+    "Fitness": "8 high-intensity home workouts for beginners",
+    "Travel": "5 weekend getaways within 3 hours of here",
+    "Hotel Stays": "5 unique boutique hotels with character",
+    "Cooking & Recipes": "8 healthy one-pot pasta recipes",
+    "System Development": "10 tech stack combinations for a new app"
+};
+
+const DEFAULT_SUGGESTION = "Suggest 5 fun date nights under $50";
+
+export function SmartInputEducationTip({ onDismiss, onTryExample, className, jarTopic }: SmartInputEducationTipProps) {
     const [isVisible, setIsVisible] = useState(false);
+
+    const suggestion = (jarTopic && TAIRED_SUGGESTIONS[jarTopic]) || DEFAULT_SUGGESTION;
 
     useEffect(() => {
         // Check if user has already seen/dismissed this tip
@@ -61,12 +81,12 @@ export function SmartInputEducationTip({ onDismiss, onTryExample, className }: S
                                 </p>
                                 <button
                                     onClick={(e) => {
-                                        if (onTryExample) onTryExample("Suggest 5 fun date nights under $50");
+                                        if (onTryExample) onTryExample(suggestion);
                                         handleDismiss(e);
                                     }}
                                     className="block w-full text-left mt-1.5 p-2 bg-white/5 hover:bg-white/10 transition-colors rounded-lg text-xs text-purple-200 italic border border-white/10"
                                 >
-                                    "Suggest 5 fun date nights under $50..."
+                                    "{suggestion}..."
                                 </button>
                             </div>
 

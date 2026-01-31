@@ -32,9 +32,10 @@ interface UseIdeaFormProps {
     customCategories?: any[];
     onSuccess?: () => void;
     onClose: () => void;
+    isOpen?: boolean;
 }
 
-export function useIdeaForm({ initialData, currentUser, jarTopic, customCategories, onSuccess, onClose }: UseIdeaFormProps) {
+export function useIdeaForm({ initialData, currentUser, jarTopic, customCategories, onSuccess, onClose, isOpen }: UseIdeaFormProps) {
     const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
 
     // Initialize form data when initialData changes
@@ -69,7 +70,15 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 isPrivate: currentUser?.defaultIdeaPrivate ?? DEFAULT_FORM_DATA.isPrivate
             });
         }
-    }, [initialData, currentUser?.defaultIdeaPrivate]);
+    }, [initialData, currentUser?.defaultIdeaPrivate, isOpen]);
+
+    // Topic Override Logic
+    const [topicOverride, setTopicOverride] = useState<string | null>(null);
+
+    // Reset topic override when modal opens/closes
+    useEffect(() => {
+        setTopicOverride(null);
+    }, [isOpen, initialData]);
 
     // Map ideaType to appropriate topic for category selection
     // This ensures books show book categories, movies show movie categories, etc.
@@ -91,7 +100,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
     };
 
     // Use ideaType-derived topic if available, otherwise fall back to jar topic
-    const effectiveTopic = getTopicFromIdeaType(formData.ideaType) || jarTopic;
+    const effectiveTopic = topicOverride || getTopicFromIdeaType(formData.ideaType) || jarTopic || 'Activities';
     const categories = getCategoriesForTopic(effectiveTopic, customCategories);
 
     // Ensure category is valid for topic
@@ -102,7 +111,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
                 setFormData(prev => ({ ...prev, category: categories[0].id }));
             }
         }
-    }, [jarTopic, categories]);
+    }, [effectiveTopic, categories]); // Updated dependency
 
 
 
@@ -180,6 +189,7 @@ export function useIdeaForm({ initialData, currentUser, jarTopic, customCategori
         handleSubmit,
         handleDelete,
         categories,
-
+        setTopicOverride,
+        currentTopic: effectiveTopic
     };
 }

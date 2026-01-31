@@ -1,10 +1,10 @@
 "use client";
 
 import { ACHIEVEMENTS } from "@/lib/achievements-shared";
-import { Hammer, Lightbulb, Dices, RefreshCw, Heart, Flame, Crown, Award, Warehouse } from "lucide-react";
+import { Hammer, Lightbulb, RotateCcw, Sparkles, Heart, Flame, Crown, Award, Warehouse } from "lucide-react";
 
 // Map icon strings to components
-const IconMap: any = { Hammer, Lightbulb, Dices, RefreshCw, Heart, Flame, Crown, Award, Warehouse };
+const IconMap: any = { Hammer, Lightbulb, RotateCcw, Sparkles, Heart, Flame, Crown, Award, Warehouse };
 
 export function AchievementCase({ unlockedIds }: { unlockedIds: string[] }) {
     const unlockedSet = new Set(unlockedIds);

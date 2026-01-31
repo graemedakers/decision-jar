@@ -60,13 +60,14 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
     const [hadInteraction, setHadInteraction] = useState(false);
     const ideaWasAdded = useRef(false);
 
-    const { formData, setFormData: originalSetFormData, isLoading, handleSubmit, handleDelete, categories } = useIdeaForm({
+    const { formData, setFormData: originalSetFormData, isLoading, handleSubmit, handleDelete, categories, setTopicOverride, currentTopic } = useIdeaForm({
         initialData,
         currentUser,
         jarTopic,
         customCategories,
         onSuccess,
-        onClose
+        onClose,
+        isOpen
     });
 
     // Wrapped setFormData to track interactions
@@ -375,6 +376,8 @@ export function AddIdeaModal({ isOpen, onClose, initialData, isPremium, onUpgrad
                             onSubmit={handleSubmitWithTracking}
                             onCancel={onClose}
                             isLoading={isLoading}
+                            onTopicChange={setTopicOverride}
+                            currentTopic={currentTopic}
                         />
                     ) : (
                         <form id="add-idea-form" onSubmit={handleSubmitWithTracking} className="space-y-6">

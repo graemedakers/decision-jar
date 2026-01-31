@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
     if (!process.env.RESEND_API_KEY) {
@@ -9,6 +9,7 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
     }
 
     try {
+        if (!resend) return;
         const data = await resend.emails.send({
             from: process.env.EMAIL_FROM || 'Decision Jar <onboarding@resend.dev>', // Uses env var or defaults to test domain
             to: [to],

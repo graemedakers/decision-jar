@@ -15,6 +15,11 @@ async function main() {
     const args = process.argv.slice(2);
     const command = args.join(' ');
 
+    // 0. Load Environment Variables manually (compatible with Next.js .env.local convention)
+    // We try .env.local first, then .env
+    require('dotenv').config({ path: '.env.local' });
+    require('dotenv').config({ path: '.env' });
+
     // 1. Get the DATABASE_URL that Prisma will actually see
     // (This priorities any shell variable already set)
     const databaseUrl = process.env.DATABASE_URL;

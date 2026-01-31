@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { getApiUrl, isCapacitor, getCurrentLocation } from "@/lib/utils";
+import { isCapacitor, getCurrentLocation } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteLogModal } from "@/components/DeleteLogModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
@@ -16,6 +16,8 @@ import { getJarLabels } from "@/lib/labels";
 import { NotificationToggle } from "./NotificationToggle";
 import { VerifyEmailGate } from "./VerifyEmailGate";
 import { useModalSystem } from "./ModalProvider";
+import { getUserDetails, updateUserSettings } from "@/app/actions/user";
+import { updateJar, emptyJar, regenerateJarCode, getJarDetails } from "@/app/actions/jars";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -72,52 +74,58 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
 
     useEffect(() => {
         if (isOpen) {
-            setLocation(currentLocation || "");
-            // Fetch user settings
-            fetch(getApiUrl('/api/auth/me'))
-                .then(res => res.json())
-                .then(data => {
-                    if (data?.user) {
-                        setLocation(data.user.homeTown || data.user.location || "");
-                        setInterests(data.user.interests || "");
-                        setIsSuperAdmin(!!data.user.isSuperAdmin);
-                        setActiveJarId(data.user.activeJarId);
-
-                        // Role-based Check
-                        const activeMembership = data.user.memberships?.find((m: any) => m.jarId === data.user.activeJarId);
-                        const isAdminRole = ['OWNER', 'ADMIN'].includes(activeMembership?.role);
-                        setIsAdmin(isAdminRole || !!data.user.isCreator || !!data.user.isSuperAdmin);
-
-                        setInviteCode(data.user.coupleReferenceCode || "");
-                        setIsPremium(!!data.user.isPremium);
-                        setIsLifetimePro(!!data.user.isLifetimePro);
-                        setHasPaid(!!data.user.hasPaid);
-                        if (data.user.jarType) setJarType(data.user.jarType);
-                        setJarName(data.user.jarName || "");
-                        setJarTopic(data.user.jarTopic || "");
-                        if (data.user.jarSelectionMode) setJarSelectionMode(data.user.jarSelectionMode);
-                        setJarVoteCandidates(data.user.jarVoteCandidatesCount || 0);
-                        setDefaultIdeaPrivate(!!data.user.defaultIdeaPrivate);
-
-                        // New Gifting settings
-                        if (data.user.activeJarId) {
-                            fetch(getApiUrl(`/api/jars/${data.user.activeJarId}`))
-                                .then(r => r.json())
-                                .then(jar => {
-                                    setIsGiftable(jar.isGiftable ?? true);
-                                    setIdeaCount(jar._count?.ideas || 0);
-                                    setMemberCount(jar.members?.length || 0);
-                                    setIsMysteryMode(!!jar.isMysteryMode);
-                                });
-                        }
-
-                        setCurrentUserEmail(data.user.email || "");
-                        setPremiumInviteToken(data.user.premiumInviteToken || "");
-                        setIsEmailVerified(!!data.user.emailVerified);
-                    }
-                });
+            loadUserData();
         }
     }, [isOpen, currentLocation]);
+
+    const loadUserData = async () => {
+        setLocation(currentLocation || "");
+        try {
+            const res = await getUserDetails();
+            const data = res.data;
+
+            if (res.success && data?.user) {
+                setLocation(data.user.homeTown || data.user.location || "");
+                setInterests(data.user.interests || "");
+                setIsSuperAdmin(!!data.user.isSuperAdmin);
+                setActiveJarId(data.user.activeJarId);
+
+                // Role-based Check
+                const activeMembership = data.user.memberships?.find((m: any) => m.jarId === data.user.activeJarId);
+                const isAdminRole = ['OWNER', 'ADMIN'].includes(activeMembership?.role);
+                setIsAdmin(isAdminRole || !!data.user.isCreator || !!data.user.isSuperAdmin);
+
+                setInviteCode(data.user.coupleReferenceCode || "");
+                setIsPremium(!!data.user.isPremium);
+                setIsLifetimePro(!!data.user.isLifetimePro);
+                setHasPaid(!!data.user.hasPaid);
+                if (data.user.jarType) setJarType(data.user.jarType);
+                setJarName(data.user.jarName || "");
+                setJarTopic(data.user.jarTopic || "");
+                if (data.user.jarSelectionMode) setJarSelectionMode(data.user.jarSelectionMode);
+                setJarVoteCandidates(data.user.jarVoteCandidatesCount || 0);
+                setDefaultIdeaPrivate(!!data.user.defaultIdeaPrivate);
+
+                setCurrentUserEmail(data.user.email || "");
+                setPremiumInviteToken(data.user.premiumInviteToken || "");
+                setIsEmailVerified(!!data.user.emailVerified);
+
+                // New Gifting settings
+                if (data.user.activeJarId) {
+                    const jarRes = await getJarDetails(data.user.activeJarId);
+                    if (jarRes.success && jarRes.data) {
+                        const jar = jarRes.data;
+                        setIsGiftable(jar.isGiftable ?? true);
+                        setIdeaCount(jar._count?.ideas || 0);
+                        setMemberCount(jar.members?.length || 0);
+                        setIsMysteryMode(!!jar.isMysteryMode);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error loading user data:", error);
+        }
+    };
 
     const [activeJarId, setActiveJarId] = useState("");
 
@@ -129,36 +137,27 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
 
         try {
             // Update user settings (location + interests)
-            const userRes = await fetch(getApiUrl('/api/user/settings'), {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    location,  // Save to user.homeTown
-                    interests
-                }),
-                credentials: 'include',
+            const userRes = await updateUserSettings({
+                location,
+                interests
             });
 
             // Update Jar settings if admin
-            if (isAdmin) {
-                await fetch(getApiUrl(`/api/jars/${activeJarId}`), {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: jarName,
-                        topic: jarTopic,
-                        selectionMode: jarSelectionMode,
-                        voteCandidatesCount: Number(jarVoteCandidates),
-                        defaultIdeaPrivate,
-                        isGiftable
-                    }),
-                    credentials: 'include',
+            let jarRes = null;
+            if (isAdmin && activeJarId) {
+                jarRes = await updateJar(activeJarId, {
+                    name: jarName,
+                    topic: jarTopic,
+                    selectionMode: jarSelectionMode,
+                    voteCandidatesCount: Number(jarVoteCandidates),
+                    defaultIdeaPrivate,
+                    isGiftable
                 });
             }
 
-            if (userRes.ok) {
+            if (userRes.success && (!isAdmin || (jarRes && jarRes.success))) {
                 // Real-time Sync: Notify other members in this jar to refresh their view
-                if (typeof window !== 'undefined') {
+                if (typeof window !== 'undefined' && isAdmin) {
                     window.dispatchEvent(new CustomEvent('decision-jar:broadcast', {
                         detail: { jarId: activeJarId, event: 'content-update' }
                     }));
@@ -169,8 +168,10 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                 onClose();
                 router.refresh();
             } else {
-                showError("Failed to update settings");
+                const error = userRes.error || (jarRes && jarRes.error) || "Failed to update settings";
+                showError(error);
             }
+
         } catch (error) {
             console.error(error);
             showError("Error updating settings");
@@ -192,32 +193,16 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
 
         setIsDeletingJar(true);
         try {
-            const url = getApiUrl(`/api/jars/${activeJarId}/reset`);
-            console.log("Emptying jar at:", url);
+            const res = await emptyJar(activeJarId);
 
-            const res = await fetch(url, {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            const contentType = res.headers.get("content-type");
-            if (res.ok) {
-                const data = contentType?.includes("application/json") ? await res.json() : {};
-                showSuccess(data.message || "Jar emptied successfully!");
+            if (res.success) {
+                showSuccess("Jar emptied successfully!");
                 setIsConfirmEmptyJarOpen(false);
                 onClose();
                 router.refresh();
                 window.location.reload();
             } else {
-                let errorMessage = "Unknown error";
-                if (contentType?.includes("application/json")) {
-                    const data = await res.json();
-                    errorMessage = data.details || data.error || JSON.stringify(data);
-                } else {
-                    errorMessage = await res.text();
-                }
-                console.error("Empty jar failed:", errorMessage);
-                showError(`Failed to empty jar: ${errorMessage}`);
+                showError(res.error || "Failed to empty jar");
             }
         } catch (error: any) {
             console.error("Handle empty jar error:", error);
@@ -234,20 +219,15 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const performRegenerateCode = async () => {
         setIsRegeneratingCode(true);
         try {
-            const res = await fetch(getApiUrl(`/api/jars/${activeJarId}/regenerate-code`), {
-                method: 'POST',
-                credentials: 'include',
-            });
+            const res = await regenerateJarCode(activeJarId);
 
-            if (res.ok) {
-                const data = await res.json();
-                showSuccess(`Success! Your new invite code is: ${data.newCode}`);
-                setInviteCode(data.newCode); // Update local state
+            if (res.success && res.data) {
+                showSuccess(`Success! Your new invite code is: ${res.data.newCode}`);
+                setInviteCode(res.data.newCode); // Update local state
                 setIsConfirmRegenCodeOpen(false);
                 router.refresh();
             } else {
-                const data = await res.json();
-                showError(`Failed to regenerate code: ${data.details || data.error || "Unknown error"}`);
+                showError(res.error || "Failed to regenerate code");
             }
         } catch (error) {
             console.error(error);
@@ -261,10 +241,16 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
         setIsConfirmRegenPremiumOpen(true);
     };
 
+    // Note: Leaving this as fetch as it is not a Jar/User action but a special token action. 
+    // Assuming api/user/premium-token exists or needs migration. 
+    // If it needs migration, I should migrate it but it wasn't on the critical list.
+    // Keeping as fetch for now to minimize scope creep unless broken.
     const performRegeneratePremiumToken = async () => {
         setIsRegeneratingPremium(true);
         try {
-            const res = await fetch(getApiUrl('/api/user/premium-token'), {
+            // NOTE: If we migrate premium-token to actions, update here.
+            // Using fetch for now.
+            const res = await fetch('/api/user/premium-token', {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -290,7 +276,8 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
     const handleManageSubscription = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(getApiUrl('/api/stripe/portal'), {
+            // Stripe portal is likely still an API route or separate. 
+            const res = await fetch('/api/stripe/portal', {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -308,12 +295,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
         }
     };
 
-
-
-
     const [activeTab, setActiveTab] = useState<'PERSONAL' | 'JAR'>('PERSONAL');
-
-    // ... (Keep existing handlers: handleSubmit, handleEmptyJar, handleRegenerateCode, handleRegeneratePremiumToken, handleManageSubscription, handleDeletePartner)
 
     return (
         <>
@@ -801,7 +783,7 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                 onClose={() => setIsConfirmRegenPremiumOpen(false)}
                 onConfirm={performRegeneratePremiumToken}
                 title="Regenerate Premium Token"
-                description="Are you sure? This will invalidate all previous premium invite links."
+                description="Are you sure you want to regenerate your premium token? The old token will stop working immediately."
             />
         </>
     );

@@ -63,34 +63,33 @@ export async function POST(
         // OR I will fix schema later. Ideally, `GiftAcceptance` join table is better.
         // For now: I'll check if `acceptedById` is null. If it is, set it (first person). If not, just increment count.
 
-        // 2. Check User Jar Limit
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            include: {
-                memberships: {
-                    include: { jar: true }
-                }
-            }
-        });
-
-        const isPro = user?.isLifetimePro || user?.subscriptionStatus === 'active';
-
-        // Refined jar counting: Exclude community jars if they exist
-        const personalJars = (user?.memberships || []).filter((m: any) => {
-            const refCode = m.jar?.referenceCode;
-            return refCode !== 'BUGRPT' && refCode !== 'FEATREQ';
-        });
-        const currentJars = personalJars.length;
-
-        if (!isPro && currentJars >= 2) {
-            return NextResponse.json({
-                error: "JAR_LIMIT_REACHED",
-                message: "You have reached the free jar limit."
-            }, { status: 403 });
-        }
-
         // 3. Clone Jar & Update State Atomically
         const result = await prisma.$transaction(async (tx) => {
+            // ✅ ATOMIC CHECK: Check User Jar Limit INSIDE transaction
+            const user = await tx.user.findUnique({
+                where: { id: userId },
+                include: {
+                    memberships: {
+                        include: { jar: true }
+                    }
+                }
+            });
+
+            const isPro = user?.isLifetimePro || user?.subscriptionStatus === 'active';
+
+            // Refined jar counting: Exclude community jars if they exist
+            const personalJars = (user?.memberships || []).filter((m: any) => {
+                const refCode = m.jar?.referenceCode;
+                // Exclude system/utility jars from the limit count
+                return refCode !== 'BUGRPT' && refCode !== 'FEATREQ';
+            });
+            const currentJars = personalJars.length;
+
+            if (!isPro && currentJars >= 2) {
+                // Return a specific error object that we can handle outside the transaction
+                throw new Error("JAR_LIMIT_REACHED");
+            }
+
             // Clone the jar (passing the transaction client)
             const newJar = await cloneJarForGift(gift.sourceJarId, userId, gift.id, tx);
 
@@ -121,7 +120,7 @@ export async function POST(
 
             return newJar;
         }, {
-            timeout: 10000 // 10s timeout for cloning process
+            timeout: 15000 // Increased timeout for heavy cloning
         });
 
         return NextResponse.json({
@@ -129,7 +128,13 @@ export async function POST(
             jarId: result.id
         });
 
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'JAR_LIMIT_REACHED') {
+            return NextResponse.json({
+                error: "JAR_LIMIT_REACHED",
+                message: "You have reached the free jar limit."
+            }, { status: 403 });
+        }
         console.error("[GIFT_ACCEPT]", error);
         return new NextResponse("Internal Error", { status: 500 });
     }

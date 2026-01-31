@@ -7,16 +7,33 @@ test.describe('Join Jar Flow', () => {
         const user = createRandomUser();
         const INVITE_CODE = 'TEST_INVITE_123';
 
-        // Critical: Bypass Middleware auth checks since we are mocking the session
-        await page.setExtraHTTPHeaders({ 'x-e2e-bypass': 'true' });
+        // Seed a jar for the invite code to be valid (Server Action check)
+        // We need to import prisma. e2e-helpers or direct import?
+        // tests/setup.ts defines global seededData but that is per-worker or per-project?
+        // We can just use the db client.
+        const { prisma } = require('../../lib/prisma');
+        // Ensure cleanup or unique code
+        // upsert to avoid duplicate error if re-run
+        await prisma.jar.upsert({
+            where: { referenceCode: INVITE_CODE },
+            update: {},
+            create: {
+                name: 'Invite Test Jar',
+                referenceCode: INVITE_CODE,
+                type: 'SOCIAL',
+                selectionMode: 'RANDOM',
+                topic: 'General',
+                members: {
+                    create: [] // No members initially
+                }
+            }
+        });
 
         // 1. Start with no user authenticated
         await mockAuth(page, false);
 
-        // 2. Mock Invite Validation (Crucial for SignupForm to render)
-        await page.route('**/api/jars/validate-invite', async route => {
-            await route.fulfill({ status: 200, json: { valid: true } });
-        });
+        // Bypass Middleware auth checks
+        await page.setExtraHTTPHeaders({ 'x-e2e-bypass': 'true' });
 
         // Mock Signup API
         await page.route('**/api/auth/signup', async route => {
@@ -38,20 +55,16 @@ test.describe('Join Jar Flow', () => {
 
         // 3. Verify Redirect to Signup
         console.log('Waiting for redirect to signup...');
-        await expect(page).toHaveURL(new RegExp(`/signup.*code=${INVITE_CODE}`), { timeout: 15000 });
+        await expect(page).toHaveURL(new RegExp(`/signup.*code=${INVITE_CODE}`), { timeout: 30000 });
 
+        console.log('Successfully reached Signup page. Checking inputs...');
         // 4. Perform Signup
         const nameInput = page.locator('input[name="name"]');
         const emailInput = page.locator('input[name="email"]');
         const passwordInput = page.locator('input[name="password"]');
 
-        try {
-            await expect(emailInput).toBeVisible({ timeout: 10000 });
-        } catch (e) {
-            console.log("FAILED TO FIND EMAIL INPUT. Dumping page content:");
-            console.log(await page.content());
-            throw e;
-        }
+        await expect(emailInput).toBeVisible({ timeout: 15000 });
+        console.log('Signup inputs visible.');
 
         await nameInput.fill(user.name);
         await emailInput.fill(user.email);

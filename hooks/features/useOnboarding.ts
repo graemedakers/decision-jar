@@ -3,7 +3,7 @@ import { trackEvent } from "@/lib/analytics";
 import { UserData } from "@/lib/types";
 import { useModalSystem } from "@/components/ModalProvider";
 
-export function useOnboarding({ userData, isLoadingUser, canStartTour = true }: { userData: UserData | null, isLoadingUser: boolean, canStartTour?: boolean }) {
+export function useOnboarding({ userData, isLoadingUser, ideasCount = 0, canStartTour = true }: { userData: UserData | null, isLoadingUser: boolean, ideasCount?: number, canStartTour?: boolean }) {
     const [showOnboarding, setShowOnboarding] = useState(false);
     const { activeModal } = useModalSystem(); // ✅ NEW: Check if modals are open
     const activeModalRef = useRef(activeModal); // ✅ Track current value
@@ -46,7 +46,8 @@ export function useOnboarding({ userData, isLoadingUser, canStartTour = true }: 
         // 5. ✅ NO MODALS ARE OPEN (don't interrupt other prompts)
         // 6. ✅ NOT an invite user
         // 7. ✅ canStartTour (UI is ready, e.g. jar is visible)
-        if (!hasCompletedOnboarding && !isLoadingUser && userData && hasPersonalJar && !activeModal && canStartTour) {
+        // 8. ✅ AT LEAST ONE IDEA (don't tour an empty jar)
+        if (!hasCompletedOnboarding && !isLoadingUser && userData && hasPersonalJar && !activeModal && canStartTour && ideasCount > 0) {
             setTimeout(() => {
                 // ✅ RE-CHECK: Only start tour if STILL no modal open
                 // Use ref to get CURRENT value, not stale closure value
@@ -55,7 +56,7 @@ export function useOnboarding({ userData, isLoadingUser, canStartTour = true }: 
                 }
             }, 1000); // ✅ Reduced delay slightly as we now wait for condition
         }
-    }, [isLoadingUser, userData, activeModal, canStartTour]); // ✅ Added activeModal and canStartTour dependency
+    }, [isLoadingUser, userData, activeModal, canStartTour, ideasCount]); // ✅ Added activeModal, canStartTour, and ideasCount dependency
 
     const handleCompleteOnboarding = () => {
         const userId = userData?.id;

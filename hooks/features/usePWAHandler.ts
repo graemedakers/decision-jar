@@ -37,7 +37,7 @@ export function usePWAHandler({ userData, isLoadingUser, isPremium, refreshUser 
             if (!userData.activeJarId && userData.memberships && userData.memberships.length > 0) {
                 const firstJar = userData.memberships[0];
                 try {
-                    await fetch('/api/jar/set-active', {
+                    await fetch(`/api/jar/${firstJar.jarId}/switch`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ jarId: firstJar.jarId }),
