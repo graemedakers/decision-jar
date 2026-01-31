@@ -1,5 +1,5 @@
-
 import { Resend } from 'resend';
+import { APP_URL, EMAIL_FROM } from '@/lib/config';
 import { logger } from './logger';
 
 // Helper to get a safe Resend instance
@@ -16,7 +16,8 @@ export async function sendVerificationEmail(email: string, token: string) {
     return;
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com';
+  // Use centralized config
+  const baseUrl = APP_URL;
   const verificationUrl = `${baseUrl}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`;
   const resend = getResend();
 
@@ -52,7 +53,7 @@ export async function sendDateNotificationEmail(recipients: string[], idea: any)
 
   try {
     await resend.emails.send({
-      from: process.env.EMAIL_FROM || `Spin the Jar <onboarding@${new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com').hostname}>`,
+      from: EMAIL_FROM,
       to: recipients,
       subject: `Plan Decided: ${idea.description}!`,
       html: `
@@ -88,7 +89,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
   try {
     await resend.emails.send({
-      from: process.env.EMAIL_FROM || `Spin the Jar <onboarding@${new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com').hostname}>`,
+      from: EMAIL_FROM,
       to: email,
       subject: `Reset your password for Spin the Jar`,
       html: `

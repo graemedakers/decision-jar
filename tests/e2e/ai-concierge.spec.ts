@@ -16,7 +16,7 @@ test.describe('AI Concierge Tools E2E', () => {
         const jarId = `jar_${timestamp}`;
 
         // 2. Proactively Mock API Routes BEFORE any navigation
-        console.log('Setting up proactive mocks...');
+
 
         // Mock: Session/User - FULLY POPULATED to prevent Dashboard crashes
         await page.route('**/api/auth/me', async (route) => {
@@ -95,7 +95,7 @@ test.describe('AI Concierge Tools E2E', () => {
                 const postData = reqWithBody.postDataJSON();
 
                 if (reqWithBody.url().includes('bulk-generate')) {
-                    console.log('Mocking AI Generation Response for:', postData);
+
                     await route.fulfill({
                         status: 200,
                         contentType: 'application/json',
@@ -132,7 +132,7 @@ test.describe('AI Concierge Tools E2E', () => {
         // 3. Monitor Console for Browser Crashes
         page.on('console', msg => {
             if (msg.type() === 'error') console.error(`[BROWSER ERROR] ${msg.text()}`);
-            else console.log(`[BROWSER] ${msg.text()}`);
+
         });
 
         page.on('pageerror', err => {
@@ -229,7 +229,7 @@ test.describe('AI Concierge Tools E2E', () => {
         });
 
         // 4. Direct Navigation with Middleware Bypass
-        console.log('Navigating to dashboard with E2E Bypass...');
+
         await page.setExtraHTTPHeaders({
             'x-e2e-bypass': 'true'
         });
@@ -237,7 +237,7 @@ test.describe('AI Concierge Tools E2E', () => {
         await page.goto('/dashboard');
 
         // 5. Robust Wait for Dashboard
-        console.log('Waiting for dashboard entry...');
+
         await page.waitForURL('**/dashboard', { timeout: 30000 });
         // Wait for user name or jar name from our mock
         await expect(page.locator('text=Test Jar')).toBeVisible({ timeout: 60000 });
@@ -245,23 +245,23 @@ test.describe('AI Concierge Tools E2E', () => {
 
     test('Dining Concierge should find and add a restaurant', async ({ page }) => {
         // Open Tools
-        console.log('Step 1: Opening Tools Modal...');
+
         // Direct navigation to tools page is more robust
         await page.goto('/explore');
-        console.log('Navigated to Explore Page');
+
 
         // Wait for page title
         await expect(page.locator('h1:has-text("Explore")')).toBeVisible({ timeout: 10000 });
 
         // Select Dining Concierge
-        console.log('Step 2: Selecting Dining Concierge...');
+
         await page.locator('button:has-text("Dining Concierge")').click();
 
         // Wait for Concierge Modal
         await expect(page.locator('h2:has-text("Dining Concierge")')).toBeVisible({ timeout: 20000 });
 
         // Fill Form-like elements
-        console.log('Step 3: Filling Preferences...');
+
         // Robust option selection
         const italianBtn = page.locator('button:has-text("Italian")');
         if (await italianBtn.isVisible()) await italianBtn.click({ force: true });
@@ -269,18 +269,18 @@ test.describe('AI Concierge Tools E2E', () => {
         if (await romanticBtn.isVisible()) await romanticBtn.click({ force: true });
 
         // Generate
-        console.log('Step 4: Generating...');
+
         const generateBtn = page.getByTestId('concierge-generate-btn');
         await expect(generateBtn).toBeVisible({ timeout: 20000 });
         await robustClick(page, generateBtn);
 
         // Wait for result card (Mocked)
-        console.log('Step 5: Waiting for Results...');
+
         // We can check for the results container or specific result card
         await expect(page.getByTestId('concierge-result-card').first()).toBeVisible({ timeout: 30000 });
 
         // Add to Jar
-        console.log('Step 6: Adding to Jar...');
+
         await robustClick(page, page.getByTestId('add-to-jar-btn').first());
 
         // Verify Success
@@ -293,7 +293,7 @@ test.describe('AI Concierge Tools E2E', () => {
         // Open Tools
         // Direct navigation to tools page
         await page.goto('/explore');
-        console.log('Navigated to Explore Page');
+
 
         // Wait for page title
         await expect(page.locator('h1:has-text("Explore")')).toBeVisible();
@@ -328,7 +328,7 @@ test.describe('AI Concierge Tools E2E', () => {
         // Open Tools
         // Direct navigation to tools page
         await page.goto('/explore');
-        console.log('Navigated to Explore Page');
+
 
         // Wait for page title
         await expect(page.locator('h1:has-text("Explore")')).toBeVisible({ timeout: 10000 });
@@ -337,8 +337,8 @@ test.describe('AI Concierge Tools E2E', () => {
             await page.locator('button:has-text("Dinner Party Chef")').click({ timeout: 5000 });
         } catch (e) {
             // Log body text if fails
-            console.log('--- CONTENT DEBUG ---');
-            console.log(await page.locator('body').innerText());
+
+
             throw e;
         }
 

@@ -107,10 +107,10 @@ describe('JarSwitcher Component', () => {
     });
 
     it('should switch jar when selecting from dropdown', async () => {
-        const mockReplace = vi.fn();
+        const mockReload = vi.fn();
         vi.stubGlobal('location', {
-            replace: mockReplace,
-            reload: vi.fn(),
+            replace: vi.fn(),
+            reload: mockReload,
             pathname: '/dashboard',
             origin: 'http://localhost:3000',
             href: 'http://localhost:3000/dashboard'
@@ -119,7 +119,7 @@ describe('JarSwitcher Component', () => {
         const user = userEvent.setup();
 
         server.use(
-            http.post('*/api/auth/switch-jar', () => {
+            http.post('*/api/jar/:jarId/switch', () => {
                 return HttpResponse.json({ success: true });
             })
         );
@@ -134,9 +134,9 @@ describe('JarSwitcher Component', () => {
         const dateNightOption = screen.getByText('Date Night');
         await user.click(dateNightOption);
 
-        // Should call replace to reload page
+        // Should call reload to reload page
         await waitFor(() => {
-            expect(mockReplace).toHaveBeenCalled();
+            expect(mockReload).toHaveBeenCalled();
         });
     });
 

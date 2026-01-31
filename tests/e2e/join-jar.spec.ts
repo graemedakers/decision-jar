@@ -37,7 +37,7 @@ test.describe('Join Jar Flow', () => {
 
         // Mock Signup API
         await page.route('**/api/auth/signup', async route => {
-            console.log('Intercepted /api/auth/signup');
+
             const body = JSON.parse(route.request().postData() || '{}');
             await route.fulfill({
                 status: 200,
@@ -50,21 +50,21 @@ test.describe('Join Jar Flow', () => {
         });
 
         // 3. Navigate to Join URL
-        console.log(`Navigating to /join?code=${INVITE_CODE}`);
+
         await page.goto(`/join?code=${INVITE_CODE}`);
 
         // 3. Verify Redirect to Signup
-        console.log('Waiting for redirect to signup...');
+
         await expect(page).toHaveURL(new RegExp(`/signup.*code=${INVITE_CODE}`), { timeout: 30000 });
 
-        console.log('Successfully reached Signup page. Checking inputs...');
+
         // 4. Perform Signup
         const nameInput = page.locator('input[name="name"]');
         const emailInput = page.locator('input[name="email"]');
         const passwordInput = page.locator('input[name="password"]');
 
         await expect(emailInput).toBeVisible({ timeout: 15000 });
-        console.log('Signup inputs visible.');
+
 
         await nameInput.fill(user.name);
         await emailInput.fill(user.email);
@@ -83,14 +83,14 @@ test.describe('Join Jar Flow', () => {
         // In a real env, the backend handles the cookie and session. 
         // Here we mainly verify the UI flow connects correctly.
 
-        console.log('Waiting for Dashboard...');
+
         await expect(page).toHaveURL(/.*dashboard/, { timeout: 30000 });
 
         // 6. Verify Dashboard Loaded
         // Just checking basic presence to confirm flow completion
         await expect(page.locator('text=Decision Jar')).toBeVisible({ timeout: 20000 });
 
-        console.log('Join flow completed successfully.');
+
     });
 
 });

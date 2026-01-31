@@ -255,6 +255,12 @@ export async function updateJar(jarId: string, data: UpdateJarInput): Promise<Ac
                 if (memberCount < 3) {
                     return { success: false, error: "Group voting requires at least 3 members", status: 400 };
                 }
+            } else if (membership.jar.selectionMode === 'VOTE' && data.selectionMode !== 'VOTE') {
+                // Changing FROM Vote TO something else -> Cancel active votes
+                await prisma.voteSession.updateMany({
+                    where: { jarId: jarId, status: 'ACTIVE' },
+                    data: { status: 'CANCELLED' }
+                });
             }
             updateData.selectionMode = data.selectionMode;
         }

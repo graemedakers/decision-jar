@@ -1,16 +1,11 @@
-import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/api/with-auth';
 import { prisma } from '@/lib/prisma';
 import { generateUniqueJarCode } from '@/lib/utils';
 import { JarType, SelectionMode, MemberRole, MemberStatus } from '@prisma/client';
 
-export async function POST(request: Request) {
+export const POST = withAuth(async (request, { user }) => {
     try {
-        const session = await getSession();
-        if (!session?.user?.id) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
         const body = await request.json();
         const { name, type, topic, selectionMode } = body;
 
@@ -28,7 +23,7 @@ export async function POST(request: Request) {
                     referenceCode,
                     members: {
                         create: {
-                            userId: session.user.id as string,
+                            userId: user.id,
                             role: MemberRole.OWNER,
                             status: MemberStatus.ACTIVE
                         }
@@ -38,7 +33,7 @@ export async function POST(request: Request) {
 
             // Set as active jar for the user
             await tx.user.update({
-                where: { id: session.user.id },
+                where: { id: user.id },
                 data: { activeJarId: jar.id }
             });
 
@@ -47,11 +42,12 @@ export async function POST(request: Request) {
 
         return NextResponse.json(result);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Create Jar API Error:", error);
+        const message = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
-            { error: "Internal Server Error", details: error.message },
+            { error: "Internal Server Error", details: message },
             { status: 500 }
         );
     }
-}
+});

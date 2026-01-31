@@ -52,7 +52,7 @@ test.describe('Premium Token Join Flow (Regression Test)', () => {
 
         // 5. Navigate to Join URL with Premium Token
         const joinUrl = `/join?code=${INVITE_CODE}&premiumToken=${PREMIUM_TOKEN}`;
-        console.log(`Navigating to ${joinUrl}`);
+
         await page.goto(joinUrl);
 
         // 6. Verify Redirect to Signup containing the token
@@ -62,7 +62,7 @@ test.describe('Premium Token Join Flow (Regression Test)', () => {
         expect(url).toContain(`code=${INVITE_CODE}`);
         expect(url).toContain(`premiumToken=${PREMIUM_TOKEN}`);
 
-        console.log('Successfully reached Signup page. Filling form...');
+
 
         // 7. Perform Signup
         await page.locator('input[name="name"]').fill(user.name);
@@ -84,7 +84,7 @@ test.describe('Premium Token Join Flow (Regression Test)', () => {
 
         expect(dbUser).not.toBeNull();
         expect(dbUser?.isLifetimePro).toBe(true); // Must be upgraded
-        console.log('Verified: User is Lifetime Pro');
+
 
         // 11. Verify Token Usage
         const dbToken = await prisma.premiumInviteToken.findUnique({
@@ -92,6 +92,6 @@ test.describe('Premium Token Join Flow (Regression Test)', () => {
         });
         expect(dbToken?.currentUses).toBe(1);
         expect(dbToken?.usedById).toBe(dbUser?.id);
-        console.log('Verified: Token usage recorded');
+
     });
 });

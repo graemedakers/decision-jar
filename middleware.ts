@@ -22,7 +22,8 @@ export default auth(async (req) => {
         path.startsWith('/dashboard') ||
         path.startsWith('/jar') ||
         path.startsWith('/memories') ||
-        path.startsWith('/explore');
+        path.startsWith('/explore') ||
+        path.startsWith('/developers');
 
     if (isProtectedRoute) {
         const isE2EBypass = req.headers.get('x-e2e-bypass') === 'true';

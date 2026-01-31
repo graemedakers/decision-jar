@@ -569,7 +569,7 @@ export default function Home() {
             <FeatureCard
               icon={Gamepad2}
               title="Game Guru"
-              description="Level up your social plans. Find board game cafes, arcades, and gaming venues for a fun group outing."
+              description="Find the perfect video game for solo play or group sessions. Get personalized picks by genre, player count, and budget."
               delay={0.75}
             />
 

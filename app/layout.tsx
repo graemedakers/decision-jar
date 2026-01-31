@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { UserStatus } from "@/components/UserStatus";
 import { HelpButton } from "@/components/HelpButton";
+import { APP_URL, APP_NAME } from '@/lib/config';
 import { BottomNav } from "@/components/BottomNav";
 import { PWAInstaller } from "@/components/PWAInstaller";
 import { InstallPrompt } from "@/components/InstallPrompt";
@@ -26,7 +27,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://spinthejar.com'),
+  metadataBase: new URL(APP_URL),
   title: {
     default: "Decision Jar | Date Night Ideas & AI Decision Maker",
     template: "%s | Decision Jar",

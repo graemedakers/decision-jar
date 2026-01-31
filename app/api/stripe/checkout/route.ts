@@ -57,7 +57,8 @@ export async function POST(req: Request) {
             metadata: {
                 userId: session.user.id,
                 jarId: (session.user as any).activeJarId || "",
-                type: isLifetime ? 'LIFETIME_CB' : 'SUBSCRIPTION_UPGRADE',
+                type: isLifetime ? 'LIFETIME_CB' : (mode === 'subscription' && body.metadata?.type === 'API_UPGRADE' ? 'API_UPGRADE' : 'SUBSCRIPTION_UPGRADE'),
+                apiKeyId: body.metadata?.apiKeyId || "", // Pass API Key ID if upgrading API
                 source: source || 'direct', // Track where the checkout came from
                 couponApplied: couponId || 'none'
             },

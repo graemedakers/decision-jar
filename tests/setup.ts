@@ -37,10 +37,19 @@ vi.mock('next-auth/react', () => ({
 }));
 
 // Mock next-auth for server-side
-vi.mock('next-auth', () => ({
-    auth: vi.fn(),
-    default: vi.fn(),
-}));
+vi.mock('next-auth', () => {
+    const mockAuth = () => ({
+        handlers: { GET: vi.fn(), POST: vi.fn() },
+        auth: vi.fn(),
+        signIn: vi.fn(),
+        signOut: vi.fn(),
+    });
+    return {
+        __esModule: true,
+        default: mockAuth,
+        auth: vi.fn(), // export { auth } from "next-auth" is also common
+    };
+});
 
 // Mock next/server is handled via vitest alias in vitest.config.ts
 

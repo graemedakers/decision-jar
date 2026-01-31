@@ -170,6 +170,9 @@ model User {
   lastGiftSentAt        DateTime?
   
   generationHistory     GenerationHistory[]
+  
+  // Developer API
+  apiKeys               ApiKey[]
 }
 
 model GiftToken {
@@ -530,4 +533,42 @@ enum SubscriptionStatus {
   PAST_DUE
   CANCELED
   EXPIRED
+}
+
+model ApiKey {
+  id            String   @id @default(uuid())
+  key           String   @unique // Public Identifier (pk_live_...)
+  secretHash    String   // Hashed Secret (sk_live_...)
+  tier          String   // "FREE", "STARTER", "PRO", "ENTERPRISE"
+  monthlyLimit  Int
+  usedThisMonth Int      @default(0)
+  resetAt       DateTime
+  isActive      Boolean  @default(true)
+  
+  // Billing
+  stripeSubscriptionId String? @unique
+  stripeCustomerId     String?
+
+  // Webhooks
+  webhookUrl            String?
+  lastNotificationLevel Int     @default(0) // 0, 80, 90, 100
+
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  
+  usageLogs     ApiUsage[]
+  createdAt     DateTime @default(now())
+  
+  @@index([key])
+}
+
+model ApiUsage {
+  id         String   @id @default(uuid())
+  apiKeyId   String
+  apiKey     ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  endpoint   String
+  tokensUsed Int?
+  createdAt  DateTime @default(now())
+  
+  @@index([apiKeyId])
 }

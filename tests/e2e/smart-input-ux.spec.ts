@@ -6,9 +6,7 @@ test.describe('Smart Input UX Improvements', () => {
         await page.setExtraHTTPHeaders({ 'x-e2e-bypass': 'true' });
 
         // Diagnostic Logging
-        page.on('request', request => console.log('>>', request.method(), request.url()));
-        page.on('response', response => console.log('<<', response.status(), response.url()));
-        page.on('console', msg => console.log('BROWSER:', msg.text()));
+
     });
 
     test('should show correct hints and loading states', async ({ page }) => {
@@ -20,7 +18,7 @@ test.describe('Smart Input UX Improvements', () => {
 
         // 1. Setup Specific Mocks
         await page.route('**/api/auth/session', async route => {
-            console.log('Fulfilling /api/auth/session');
+
             await route.fulfill({
                 status: 200,
                 json: {
@@ -31,7 +29,7 @@ test.describe('Smart Input UX Improvements', () => {
         });
 
         await page.route('**/api/auth/me', async route => {
-            console.log('Fulfilling /api/auth/me');
+
             await route.fulfill({
                 status: 200,
                 json: {
@@ -64,7 +62,7 @@ test.describe('Smart Input UX Improvements', () => {
             window.localStorage.setItem('jar_quickstart_dismissed', 'true');
         }, JAR_ID);
 
-        console.log('NAVIGATING TO DASHBOARD...');
+
         await page.goto('/dashboard');
 
         // Wait for input to be visible

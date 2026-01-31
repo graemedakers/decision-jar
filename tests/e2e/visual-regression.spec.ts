@@ -3,9 +3,7 @@ import { test, expect } from '../utils/playwright-extensions';
 test.describe('Visual Regression - Premium UI', () => {
     test.beforeEach(async ({ page, seededData }) => {
         // Debug: Log all console output
-        page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
-        page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
-        page.on('requestfailed', req => console.log(`REQUEST FAILED: ${req.url()} ${req.failure()?.errorText}`));
+
 
         // Standard setup: Bypass middleware and specify exact user for Server Actions
         await page.setExtraHTTPHeaders({
@@ -16,7 +14,7 @@ test.describe('Visual Regression - Premium UI', () => {
         // Mock ideas endpoint to return seeded data
         // The client-side useIdeas hook calls /api/ideas
         await page.route('**/api/ideas', async (route) => {
-            console.log('MOCK HIT: /api/ideas');
+
             await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
@@ -66,9 +64,9 @@ test.describe('Visual Regression - Premium UI', () => {
             // Check for error toasts if modal fails
             const toast = page.locator('ol[data-sonner-toaster] li[data-type="error"]');
             if (await toast.isVisible()) {
-                console.log('TEST FAILURE DEBUG - ERROR TOAST FOUND:', await toast.textContent());
+
             } else {
-                console.log('TEST FAILURE DEBUG - No error toast found, strictly modal visibility timeout.');
+
             }
             // Capture screenshot of failure state
             await page.screenshot({ path: 'C:/Users/graem/.gemini/antigravity/brain/684510af-87f9-4560-95d6-e0bd93713880/debug_failure.png', fullPage: true });

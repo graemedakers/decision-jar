@@ -20,10 +20,11 @@ export async function POST(req: Request) {
         );
         // Log successful signature verification
         logger.info(`[STRIPE_WEBHOOK] ✅ Verified: ${event.type} (${event.id})`);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
         // Log signature verification failures
         logger.error(`[STRIPE_WEBHOOK] ❌ Verification failed:`, error);
-        return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+        return new NextResponse(`Webhook Error: ${message}`, { status: 400 });
     }
 
     const session = event.data.object as Stripe.Checkout.Session;
@@ -62,6 +63,42 @@ export async function POST(req: Request) {
                 logger.info(`[STRIPE_WEBHOOK] ✅ Lifetime pro granted to user ${userId}`);
             } else {
                 logger.warn(`[STRIPE_WEBHOOK] ⚠️ LIFETIME_CB missing userId in metadata`);
+            }
+        } else if (metadata?.type === 'API_UPGRADE') {
+            const apiKeyId = metadata.apiKeyId;
+            const subscriptionId = session.subscription as string;
+
+            if (apiKeyId && subscriptionId) {
+                logger.info(`[STRIPE_WEBHOOK] Processing API upgrade for key ${apiKeyId}`);
+
+                // Determine Tier from Price ID (need to fetch subscription to get price)
+                // However, session object might have it? NO, session has line_items if expanded, or we fetch sub.
+                // Fetching subscription is safer.
+                const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+                const priceId = subscription.items.data[0].price.id;
+
+                // Map Price to Tier
+                let tier = 'FREE';
+                let limit = 100;
+
+                // Import config dynamically or re-declare map if simple
+                // We'll use the price IDs from env directly since we can't easily import from lib inside robust webhook without ensuring build
+                if (priceId === process.env.STRIPE_PRICE_API_STARTER) { tier = 'STARTER'; limit = 1000; }
+                else if (priceId === process.env.STRIPE_PRICE_API_PRO) { tier = 'PRO'; limit = 5000; }
+                else if (priceId === process.env.STRIPE_PRICE_API_ENTERPRISE) { tier = 'ENTERPRISE'; limit = -1; }
+
+                await prisma.apiKey.update({
+                    where: { id: apiKeyId },
+                    data: {
+                        stripeSubscriptionId: subscriptionId,
+                        stripeCustomerId: session.customer as string,
+                        tier: tier,
+                        monthlyLimit: limit
+                    }
+                });
+                logger.info(`[STRIPE_WEBHOOK] ✅ API Key ${apiKeyId} upgraded to ${tier}`);
+            } else {
+                logger.warn(`[STRIPE_WEBHOOK] ⚠️ API_UPGRADE missing apiKeyId or subscription`);
             }
         } else if (metadata?.type === 'NEW_COUPLE_SIGNUP') {
             const { name, email, passwordHash, location } = metadata;

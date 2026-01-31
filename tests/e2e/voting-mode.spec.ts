@@ -5,7 +5,7 @@ test.describe('Voting Mode Lifecycle', () => {
 
     test('should allow admin to start vote, cast vote, and resolve', async ({ page }) => {
         // Debugging logs from browser
-        page.on('console', msg => console.log('BROWSER LOG:', msg.text()));
+
 
         const user = createRandomUser();
         const JAR_ID = 'jar_123';

@@ -85,7 +85,7 @@ export default function GuidePro() {
                         </li>
                         <li>
                             <strong className="block text-slate-800 dark:text-white">🎲 Game Guru</strong>
-                            <span className="text-sm text-slate-600 dark:text-slate-400">Locate board game cafes, arcades, and gaming venues.</span>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Find the perfect video game for any occasion.</span>
                         </li>
                     </ul>
                 </div>

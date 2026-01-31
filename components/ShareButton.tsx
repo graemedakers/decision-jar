@@ -10,6 +10,7 @@ import {
     DropdownMenuLabel
 } from '@/components/ui/DropdownMenu';
 import { trackShareClicked } from '@/lib/analytics';
+import { APP_URL } from '@/lib/config';
 
 interface ShareButtonProps {
     title: string;
@@ -24,7 +25,7 @@ export function ShareButton({ title, description, url, className = '', source = 
     const [copiedText, setCopiedText] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
 
-    const shareUrl = url || (typeof window !== 'undefined' ? window.location.origin : 'https://spinthejar.com');
+    const shareUrl = url || (typeof window !== 'undefined' ? window.location.origin : APP_URL);
     const trackingUrl = `${shareUrl}?utm_source=share&utm_medium=social&utm_campaign=ai_concierge`;
     const shareText = `${title}\n\n${description}\n\nFound via Spin the Jar ✨\n${trackingUrl}`;
 

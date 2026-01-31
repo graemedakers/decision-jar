@@ -32,7 +32,7 @@ test.describe('Dashboard Stability', () => {
         let pollCount = 0;
         await page.route('**/api/ideas', async (route) => {
             pollCount++;
-            console.log(`[E2E] Polling /api/ideas - Count: ${pollCount}`);
+
             await route.fulfill({
                 status: 200,
                 json: [] // Always empty
@@ -40,7 +40,7 @@ test.describe('Dashboard Stability', () => {
         });
 
         // 3. Navigate to Dashboard
-        console.log('Navigating to dashboard...');
+
         await page.goto('/dashboard');
 
         // 4. Wait for Empty State & Input
@@ -49,20 +49,20 @@ test.describe('Dashboard Stability', () => {
         await expect(smartInput).toBeVisible({ timeout: 15000 });
 
         // 5. Type into Smart Input
-        console.log(`Typing test input: "${TEST_INPUT}"`);
+
         await smartInput.fill(TEST_INPUT);
 
         // 6. Wait for Polling to occur (>= 5 seconds to ensure at least one 4s poll happens)
-        console.log('Waiting for background polling...');
+
         await page.waitForTimeout(6000);
 
         // 7. Verify Input is still there
         const inputValue = await smartInput.inputValue();
-        console.log(`Input value after polling: "${inputValue}"`);
+
 
         expect(inputValue).toBe(TEST_INPUT);
         expect(pollCount).toBeGreaterThan(0);
 
-        console.log('Dashboard stability verified successfully.');
+
     });
 });
