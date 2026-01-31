@@ -29,5 +29,12 @@ The Code Review (Jan 9) identified several untested edge cases that led to bugs:
 Avoid generic `.toBeVisible()` checks for error states. Instead, check for specific toast messages using the Sonner-specific selectors if possible, or at least regex matching on the text:
 
 ```typescript
-await expect(page.locator('text=/only the jar owner/i')).toBeVisible();
-```
+
+## 6. Specific Gaps Identified (Jan 31 Analysis)
+Based on a renewed inspection of the `tests/e2e` directory:
+
+- **Premium Token Integration**: The `join-jar.spec.ts` heavily mocks the signup logic and does *not* test the critical `premiumToken` handling in `app/actions/jars.ts` or `app/api/auth/signup/route.ts`. A test using a real premium invite token and verifying the database state (user becomes `isLifetimePro: true`) is required.
+
+- **Real-World Multi-User Voting**: `voting-cycle.spec.ts` currently bypasses the UI for member voting, using direct DB injection instead. This misses potential bugs in the member's "Cast Vote" UI flow. Recommended to use Playwright's distinct BrowserContexts to realistically simulate two users interacting simultaneously.
+
+- **Backend Integration for Onboarding**: `template-onboarding.spec.ts` relies on API mocking (`page.route`). While good for speed, this masked recent type errors in `app/api/jar/add-template-ideas/route.ts`. A variant of this test should run against the real API/DB to catch schema mismatch regressions.
