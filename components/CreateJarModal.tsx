@@ -152,13 +152,18 @@ export function CreateJarModal({ isOpen, onClose, isPro, currentJarCount, onSucc
                 defaultIdeaPrivate
             });
 
-            if (res.success && res.data) {
-                setSuccess(true);
-                const jarId = res.data.id;
-                setTimeout(() => {
-                    onClose();
-                    if (onSuccess) onSuccess(jarId);
-                }, 800);
+            if (res.success) {
+                if (res.data) {
+                    setSuccess(true);
+                    const jarId = res.data.id;
+                    setTimeout(() => {
+                        onClose();
+                        if (onSuccess) onSuccess(jarId);
+                    }, 800);
+                } else {
+                    setError("Failed to create jar (No data returned)");
+                    setIsLoading(false);
+                }
             } else {
                 setError(res.error || "Failed to create jar");
                 setIsLoading(false);

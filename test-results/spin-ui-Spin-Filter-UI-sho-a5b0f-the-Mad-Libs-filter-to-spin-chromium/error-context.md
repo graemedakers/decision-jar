@@ -1,0 +1,183 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - region "Notifications alt+T"
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - img [ref=e9]
+            - img [ref=e16]
+          - generic [ref=e18]:
+            - generic [ref=e19]:
+              - button "Switch Jar" [ref=e21] [cursor=pointer]:
+                - heading "(No Jar Selected)" [level=1] [ref=e22]:
+                  - generic [ref=e23]: (No Jar Selected)
+                  - img [ref=e24]
+              - img [ref=e27]
+            - paragraph [ref=e30]: make moments happen
+        - generic [ref=e31]:
+          - button "Favorites" [ref=e32] [cursor=pointer]:
+            - img [ref=e33]
+            - generic [ref=e35]: Favorites
+          - link "View Memories" [ref=e36] [cursor=pointer]:
+            - /url: /memories
+            - button [ref=e37]:
+              - img [ref=e38]
+          - button "Help" [ref=e42] [cursor=pointer]:
+            - img [ref=e43]
+          - button "Settings" [ref=e46] [cursor=pointer]:
+            - img [ref=e47]
+          - button "Logout" [ref=e50] [cursor=pointer]:
+            - img [ref=e51]
+      - generic [ref=e55]:
+        - generic [ref=e61]:
+          - generic [ref=e63]:
+            - img [ref=e65]
+            - generic [ref=e67]:
+              - heading "Welcome, Spin Tester! 👋" [level=2] [ref=e69]
+              - paragraph [ref=e70]: Let's get you started. What kind of decisions do you want to make?
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - button "❤️ Date Night Spark romance with fun date ideas, from cozy nights in to adventures out." [ref=e74] [cursor=pointer]:
+                - generic [ref=e75]: ❤️
+                - heading "Date Night" [level=3] [ref=e76]
+                - paragraph [ref=e77]: Spark romance with fun date ideas, from cozy nights in to adventures out.
+              - button "👨‍👩‍👧‍👦 Family Fun Keep the kids entertained and build memories together." [ref=e78] [cursor=pointer]:
+                - generic [ref=e79]: 👨‍👩‍👧‍👦
+                - heading "Family Fun" [level=3] [ref=e80]
+                - paragraph [ref=e81]: Keep the kids entertained and build memories together.
+              - button "🎉 Friends Hangout Decide where to go or what to do with your squad." [ref=e82] [cursor=pointer]:
+                - generic [ref=e83]: 🎉
+                - heading "Friends Hangout" [level=3] [ref=e84]
+                - paragraph [ref=e85]: Decide where to go or what to do with your squad.
+              - button "🧘 Self Care Prioritize yourself with mindful activities and treats." [ref=e86] [cursor=pointer]:
+                - generic [ref=e87]: 🧘
+                - heading "Self Care" [level=3] [ref=e88]
+                - paragraph [ref=e89]: Prioritize yourself with mindful activities and treats.
+              - button "🚀 Team Building Energize the team with quick activities and lunches." [ref=e90] [cursor=pointer]:
+                - generic [ref=e91]: 🚀
+                - heading "Team Building" [level=3] [ref=e92]
+                - paragraph [ref=e93]: Energize the team with quick activities and lunches.
+            - generic [ref=e94]:
+              - button "Have an invite code? Join a Jar" [ref=e95] [cursor=pointer]
+              - button "I'll set it up myself manually" [ref=e96] [cursor=pointer]
+        - complementary [ref=e97]:
+          - generic [ref=e98]:
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - generic [ref=e101]:
+                  - generic [ref=e102]: Level 1
+                  - generic [ref=e103]: →
+                  - generic [ref=e104]: Level 2
+                - generic [ref=e106]: 0%
+              - generic [ref=e111]:
+                - generic [ref=e112]: 0 XP
+                - generic [ref=e113]: 100 XP to next level
+            - generic [ref=e114]:
+              - heading "Your Progress" [level=3] [ref=e115]
+              - button "Level 1 0 Achievements" [ref=e117] [cursor=pointer]:
+                - generic [ref=e118]:
+                  - img [ref=e120]
+                  - generic [ref=e126]:
+                    - generic [ref=e127]: Level 1
+                    - generic [ref=e128]: 0 Achievements
+                - img [ref=e129]
+          - generic [ref=e132]:
+            - button "Dismiss" [ref=e133] [cursor=pointer]:
+              - img [ref=e134]
+            - generic [ref=e137]:
+              - img [ref=e139]
+              - generic [ref=e142]:
+                - heading "Verify your email to unlock full features" [level=3] [ref=e143]
+                - paragraph [ref=e144]:
+                  - text: We sent a verification link to
+                  - strong [ref=e145]: spin_test_1769904035238@example.com
+                  - text: . Verify your email to upgrade to Pro and customize notification preferences.
+                - button "Resend Verification Email" [ref=e146] [cursor=pointer]:
+                  - img [ref=e147]
+                  - text: Resend Verification Email
+  - generic [ref=e152]:
+    - link "Jar" [ref=e153] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e154]
+      - generic [ref=e157]: Jar
+    - link "List" [ref=e158] [cursor=pointer]:
+      - /url: /jar
+      - img [ref=e159]
+      - generic [ref=e163]: List
+    - link "Explore" [ref=e164] [cursor=pointer]:
+      - /url: /explore
+      - img [ref=e165]
+      - generic [ref=e168]: Explore
+    - link "Vault" [ref=e169] [cursor=pointer]:
+      - /url: /memories
+      - img [ref=e170]
+      - generic [ref=e174]: Vault
+  - generic:
+    - generic: Logged in as Spin Tester
+  - button "Help & Manual" [ref=e175] [cursor=pointer]:
+    - img [ref=e176]
+  - button "Open Next.js Dev Tools" [ref=e184] [cursor=pointer]:
+    - img [ref=e185]
+  - alert [ref=e188]
+  - generic [ref=e191]:
+    - generic [ref=e192]:
+      - generic [ref=e193]:
+        - heading "Create New Jar" [level=2] [ref=e194]:
+          - generic [ref=e195]: Create New Jar
+          - img [ref=e196]
+        - paragraph [ref=e198]: A jar is a collection of ideas. Let's set up a new one!
+      - button [ref=e199] [cursor=pointer]:
+        - img [ref=e200]
+    - generic [ref=e204]:
+      - generic [ref=e205]:
+        - text: Jar Name
+        - textbox "Jar Name" [ref=e206]:
+          - /placeholder: e.g. Date Night Ideas, Weekend Fun...
+        - paragraph [ref=e207]:
+          - img [ref=e208]
+          - text: Give your jar a descriptive name.
+      - generic [ref=e210]:
+        - text: Selection Mode
+        - generic [ref=e211]:
+          - combobox "Select Mode" [ref=e212]:
+            - option "🎲 Spin (Lucky Dip) - Random surprise" [selected]
+            - option "👤 Admin Pick (Curated) - You choose what's next"
+            - option "🗳️ Vote (Consensus) - Group decides together"
+            - option "📋 Allocation (Tasks) - Assign to team members"
+          - generic:
+            - img
+      - generic [ref=e213]:
+        - generic [ref=e214]:
+          - generic [ref=e215]: Default Secret Mode
+          - paragraph [ref=e216]: New ideas added will be private by default
+        - checkbox "Default Secret Mode" [ref=e217] [cursor=pointer]
+      - generic [ref=e218]:
+        - text: Jar Topic
+        - generic [ref=e219]:
+          - combobox "Select Jar Topic" [ref=e220]:
+            - option "Activities" [selected]
+            - option "Romantic"
+            - option "Restaurants"
+            - option "Bars"
+            - option "Nightclubs"
+            - option "Movies"
+            - option "Wellness"
+            - option "Fitness"
+            - option "Travel"
+            - option "Hotel Stays"
+            - option "System Development"
+            - option "Cooking & Recipes"
+            - option "Books"
+            - option "Other / Custom..."
+          - generic:
+            - img
+    - generic [ref=e221]:
+      - button "Cancel" [ref=e222] [cursor=pointer]
+      - button "Create Jar" [ref=e223] [cursor=pointer]:
+        - img [ref=e224]
+        - text: Create Jar
+```

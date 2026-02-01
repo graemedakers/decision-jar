@@ -114,3 +114,17 @@ export const SELECTION_MODES = {
 export type ActionResponse<T = void> =
     | (T extends void ? { success: true } : { success: true } & T)
     | { success: false; error: string; status?: number };
+
+export interface SpinFilters {
+    minDuration?: number;
+    maxDuration?: number;
+    maxCost?: string;
+    maxActivityLevel?: string;
+    timeOfDay?: string;
+    category?: string;
+    weather?: string;
+    localOnly?: boolean;
+    ideaTypes?: string[];
+    userTimeZone?: string;
+    excludeIds?: string[];
+}

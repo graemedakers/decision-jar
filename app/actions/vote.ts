@@ -1,19 +1,21 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+
+import { checkActionAuth } from '@/lib/actions-utils';
+import { checkJarPermission } from '@/lib/permissions';
 
 // Reusable membership check
 async function checkAuth(jarId: string) {
-    const session = await getSession();
-    if (!session?.user?.id) return { error: "Unauthorized", status: 401 };
+    const auth = await checkActionAuth();
+    if (!auth.authorized) return { error: auth.error, status: auth.status };
+    const { session, user } = auth;
 
-    const membership = await prisma.jarMember.findUnique({
-        where: { userId_jarId: { userId: session.user.id, jarId } }
-    });
+    const result = await checkJarPermission(user.id, jarId, 'MEMBER');
+    if (!result.allowed) return { error: result.error, status: 403 };
 
-    if (!membership) return { error: "Not a member", status: 403 };
+    const membership = result.membership!;
     return { session, membership, isAdmin: membership.role === 'ADMIN' || membership.role === 'OWNER' };
 }
 
@@ -358,10 +360,9 @@ async function getEligibleVoterCount(jarId: string, eligibleIdeaIds: string[]) {
 }
 
 export async function getVoteStatus(jarId: string) {
-    const session = await getSession();
-    const userId = session?.user?.id;
-
-    if (!userId) return { active: false };
+    const auth = await checkActionAuth();
+    if (!auth.authorized) return { active: false };
+    const userId = auth.user.id;
 
     const member = await prisma.jarMember.findUnique({
         where: { userId_jarId: { userId, jarId } },

@@ -1,26 +1,19 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
 import { generateUniqueJarCode } from '@/lib/utils';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkActionAuth } from '@/lib/actions-utils';
 import { revalidatePath } from 'next/cache';
 import { Jar } from '@prisma/client';
 import { validatePremiumToken, recordTokenUsage } from '@/lib/premium-token-validator';
 
-export type ActionResponse<T = any> = {
-    success: boolean;
-    data?: T;
-    error?: string;
-    status?: number;
-    code?: string;
-};
+import { ActionResponse } from '@/lib/types';
 
-export async function removeMember(jarId: string, targetUserId: string): Promise<ActionResponse<void>> {
+export async function removeMember(jarId: string, targetUserId: string): Promise<ActionResponse> {
     try {
-        const auth = await checkAuthAndRateLimit();
-        if ('error' in auth) return { success: false, error: auth.error, status: auth.status };
-        const { userId } = auth;
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const userId = auth.user.id;
 
         // Verify that the person removing is an OWNER or ADMIN
         const currentUserMembership = await prisma.jarMember.findUnique({
@@ -60,11 +53,11 @@ export async function removeMember(jarId: string, targetUserId: string): Promise
     }
 }
 
-export async function updateMemberRole(jarId: string, targetUserId: string, newRole: "ADMIN" | "MEMBER"): Promise<ActionResponse<void>> {
+export async function updateMemberRole(jarId: string, targetUserId: string, newRole: "ADMIN" | "MEMBER"): Promise<ActionResponse> {
     try {
-        const auth = await checkAuthAndRateLimit();
-        if ('error' in auth) return { success: false, error: auth.error, status: auth.status };
-        const { userId } = auth;
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const userId = auth.user.id;
 
         // Verify that the person updating is an OWNER or ADMIN
         const currentUserMembership = await prisma.jarMember.findUnique({
@@ -125,30 +118,13 @@ export type UpdateJarInput = {
     isGiftable?: boolean;
 };
 
-// Helper: Check Auth & Rate Limit
-async function checkAuthAndRateLimit() {
-    const session = await getSession();
-    if (!session?.user?.id) {
-        return { error: "Unauthorized", status: 401 };
-    }
 
-    const userForLimit = {
-        id: session.user.id,
-        email: session.user.email || ""
-    };
-    const limitRes = await checkRateLimit(userForLimit);
-    if (!limitRes.allowed) {
-        return { error: "Too Many Requests", status: 429 };
-    }
 
-    return { session, userId: session.user.id };
-}
-
-export async function createJar(data: CreateJarInput): Promise<ActionResponse<Jar>> {
+export async function createJar(data: CreateJarInput): Promise<ActionResponse<{ data: Jar }>> {
     try {
-        const auth = await checkAuthAndRateLimit();
-        if ('error' in auth) return { success: false, error: auth.error, status: auth.status };
-        const { userId } = auth;
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const userId = auth.user.id;
 
         if (!data.name) return { success: false, error: "Name is required", status: 400 };
 
@@ -171,7 +147,6 @@ export async function createJar(data: CreateJarInput): Promise<ActionResponse<Ja
             return {
                 success: false,
                 error: `Plan limit reached. You can have up to ${maxJars} jars on your current plan.`,
-                code: "LIMIT_REACHED",
                 status: 403
             };
         }
@@ -213,10 +188,11 @@ export async function createJar(data: CreateJarInput): Promise<ActionResponse<Ja
     }
 }
 
-export async function updateJar(jarId: string, data: UpdateJarInput): Promise<ActionResponse<Jar>> {
+export async function updateJar(jarId: string, data: UpdateJarInput): Promise<ActionResponse<{ data: Jar }>> {
     try {
-        const session = await getSession();
-        if (!session?.user?.id) return { success: false, error: "Unauthorized", status: 401 };
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const { session } = auth;
 
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
@@ -280,10 +256,11 @@ export async function updateJar(jarId: string, data: UpdateJarInput): Promise<Ac
     }
 }
 
-export async function deleteJar(jarId: string): Promise<ActionResponse<void>> {
+export async function deleteJar(jarId: string): Promise<ActionResponse> {
     try {
-        const session = await getSession();
-        if (!session?.user?.id) return { success: false, error: "Unauthorized", status: 401 };
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const { session } = auth;
 
         const membership = await prisma.jarMember.findFirst({
             where: {
@@ -335,11 +312,11 @@ export async function deleteJar(jarId: string): Promise<ActionResponse<void>> {
     }
 }
 
-export async function leaveJar(jarId: string): Promise<ActionResponse<void>> {
+export async function leaveJar(jarId: string): Promise<ActionResponse> {
     try {
-        const auth = await checkAuthAndRateLimit();
-        if ('error' in auth) return { success: false, error: auth.error, status: auth.status };
-        const { userId } = auth;
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const userId = auth.user.id;
 
         // Check membership
         const membership = await prisma.jarMember.findUnique({
@@ -394,10 +371,11 @@ export async function leaveJar(jarId: string): Promise<ActionResponse<void>> {
     }
 }
 
-export async function emptyJar(jarId: string): Promise<ActionResponse<{ count: number }>> {
+export async function emptyJar(jarId: string): Promise<ActionResponse<{ data: { count: number } }>> {
     try {
-        const session = await getSession();
-        if (!session?.user?.id) return { success: false, error: "Unauthorized", status: 401 };
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const { session } = auth;
 
         const membership = await prisma.jarMember.findUnique({
             where: {
@@ -463,10 +441,11 @@ export async function emptyJar(jarId: string): Promise<ActionResponse<{ count: n
     }
 }
 
-export async function regenerateJarCode(jarId: string): Promise<ActionResponse<{ newCode: string }>> {
+export async function regenerateJarCode(jarId: string): Promise<ActionResponse<{ data: { newCode: string } }>> {
     try {
-        const session = await getSession();
-        if (!session?.user?.id) return { success: false, error: "Unauthorized", status: 401 };
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const { session } = auth;
 
         const membership = await prisma.jarMember.findUnique({
             where: {
@@ -497,10 +476,11 @@ export async function regenerateJarCode(jarId: string): Promise<ActionResponse<{
     }
 }
 
-export async function getJars(): Promise<ActionResponse<any[]>> {
+export async function getJars(): Promise<ActionResponse<{ data: any[] }>> {
     try {
-        const session = await getSession();
-        if (!session?.user?.id) return { success: false, error: "Unauthorized", status: 401 };
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const { session } = auth;
 
         const jars = await prisma.jar.findMany({
             where: {
@@ -542,10 +522,11 @@ export async function getJars(): Promise<ActionResponse<any[]>> {
     }
 }
 
-export async function getJarDetails(jarId: string): Promise<ActionResponse<any>> {
+export async function getJarDetails(jarId: string): Promise<ActionResponse<{ data: any }>> {
     try {
-        const session = await getSession();
-        if (!session?.user?.id) return { success: false, error: "Unauthorized", status: 401 };
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const { session } = auth;
 
         const jar = await prisma.jar.findUnique({
             where: { id: jarId },
@@ -589,11 +570,11 @@ export async function getJarDetails(jarId: string): Promise<ActionResponse<any>>
     }
 }
 
-export async function joinJar(code: string, premiumToken?: string): Promise<ActionResponse<{ jarId: string }>> {
+export async function joinJar(code: string, premiumToken?: string): Promise<ActionResponse<{ data: { jarId: string } }>> {
     try {
-        const auth = await checkAuthAndRateLimit();
-        if ('error' in auth) return { success: false, error: auth.error, status: auth.status };
-        const { userId } = auth;
+        const auth = await checkActionAuth();
+        if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+        const userId = auth.user.id;
 
         if (!code) return { success: false, error: "Code is required", status: 400 };
 
@@ -676,7 +657,7 @@ export async function joinJar(code: string, premiumToken?: string): Promise<Acti
     }
 }
 
-export async function validateInviteCode(code: string): Promise<ActionResponse<{ valid: boolean; error?: string }>> {
+export async function validateInviteCode(code: string): Promise<ActionResponse<{ data: { valid: boolean; error?: string } }>> {
     try {
         if (!code) return { success: false, error: "Code is required", status: 400 };
 

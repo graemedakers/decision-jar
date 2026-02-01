@@ -1,10 +1,11 @@
 'use server';
 
 import { ActionResponse } from '@/lib/types';
-import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { FavoriteVenue } from '@prisma/client';
+
+import { checkActionAuth } from '@/lib/actions-utils';
 
 export async function toggleFavorite(data: {
     name: string;
@@ -12,16 +13,17 @@ export async function toggleFavorite(data: {
     description?: string;
     type?: string;
 }): Promise<ActionResponse<{ added: boolean; favorite?: FavoriteVenue }>> {
-    const session = await getSession();
-    if (!session?.user?.id) {
-        return { success: false, error: 'Unauthorized', status: 401 };
+    const auth = await checkActionAuth();
+    if (!auth.authorized) {
+        return { success: false, error: auth.error, status: auth.status };
     }
+    const { session, user: sessionUser } = auth;
 
     const { name, address, description, type } = data;
     if (!name) return { success: false, error: 'Name is required' };
 
     const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
+        where: { id: sessionUser.id },
         include: { memberships: true }
     });
     if (!user) return { success: false, error: 'User not found' };
@@ -69,11 +71,12 @@ export async function toggleFavorite(data: {
 }
 
 export async function getFavorites(): Promise<ActionResponse<{ favorites: FavoriteVenue[] }>> {
-    const session = await getSession();
-    if (!session?.user?.id) return { success: false, error: 'Unauthorized' };
+    const auth = await checkActionAuth();
+    if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+    const { session, user: sessionUser } = auth;
 
     const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
+        where: { id: sessionUser.id },
         include: { memberships: true }
     });
     const jarId = user?.activeJarId || user?.memberships?.[0]?.jarId;

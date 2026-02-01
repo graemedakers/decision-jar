@@ -1,16 +1,12 @@
 import { prismaMock } from '../../libs/prisma';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createJar, updateJar, deleteJar } from '@/app/actions/jars';
-import { getSession } from '@/lib/auth';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkActionAuth } from '@/lib/actions-utils';
 
 // Mock dependencies
-vi.mock('@/lib/auth', () => ({
-    getSession: vi.fn(),
-}));
-
-vi.mock('@/lib/rate-limit', () => ({
-    checkRateLimit: vi.fn(),
+// Note: We don't mock getSession anymore because jars.ts doesn't use it directly.
+vi.mock('@/lib/actions-utils', () => ({
+    checkActionAuth: vi.fn(),
 }));
 
 vi.mock('next/cache', () => ({
@@ -27,7 +23,6 @@ vi.mock('@/lib/utils', () => ({
 
 describe('Jar Actions', () => {
     beforeEach(() => {
-        // prismaMock is reset in ../../libs/prisma.ts, but we clear other mocks here
         vi.clearAllMocks();
 
         // Default safe mocks
@@ -39,25 +34,23 @@ describe('Jar Actions', () => {
     });
 
     describe('createJar', () => {
-        it('should return 401 if not authenticated', async () => {
-            (getSession as any).mockResolvedValue(null);
+        it('should return 401 if not authorized', async () => {
+            (checkActionAuth as any).mockResolvedValue({ authorized: false, error: 'Unauthorized', status: 401 });
             const res = await createJar({ name: 'Test Jar' });
             expect(res.success).toBe(false);
             expect(res.status).toBe(401);
         });
 
-        it('should return 429 if rate limit exceeded', async () => {
-            (getSession as any).mockResolvedValue({ user: { id: 'user1', email: 'test@example.com' } });
-            (checkRateLimit as any).mockResolvedValue({ allowed: false });
-
-            const res = await createJar({ name: 'Test Jar' });
-            expect(res.success).toBe(false);
-            expect(res.status).toBe(429);
-        });
+        // Removed rate limit test because it's now internal to checkActionAuth, 
+        // effectively tested by checkActionAuth failure mock above.
 
         it('should create a jar successfully', async () => {
-            (getSession as any).mockResolvedValue({ user: { id: 'user1', email: 'test@example.com' } });
-            (checkRateLimit as any).mockResolvedValue({ allowed: true });
+            // Mock Auth Success
+            (checkActionAuth as any).mockResolvedValue({
+                authorized: true,
+                user: { id: 'user1', email: 'test@example.com' },
+                session: { user: { id: 'user1' } }
+            });
 
             // Mock user finding
             prismaMock.user.findUnique.mockResolvedValue({ id: 'user1' } as any);
@@ -79,13 +72,17 @@ describe('Jar Actions', () => {
             }
 
             expect(res.success).toBe(true);
-            expect(res.data).toEqual(mockJar);
+            expect(res.data).toEqual(mockJar); // Updated expectation for data wrapper
             expect(prismaMock.jar.create).toHaveBeenCalled();
         });
 
         it('should block creation if plan limit reached', async () => {
-            (getSession as any).mockResolvedValue({ user: { id: 'user1' } });
-            (checkRateLimit as any).mockResolvedValue({ allowed: true });
+            (checkActionAuth as any).mockResolvedValue({
+                authorized: true,
+                user: { id: 'user1' },
+                session: { user: { id: 'user1' } }
+            });
+
             prismaMock.user.findUnique.mockResolvedValue({ id: 'user1' } as any);
             // Mock that they already have 5 jars (equal to max)
             prismaMock.jarMember.count.mockResolvedValue(5);
@@ -99,7 +96,11 @@ describe('Jar Actions', () => {
 
     describe('updateJar', () => {
         it('should return 403 if user is not admin', async () => {
-            (getSession as any).mockResolvedValue({ user: { id: 'user1' } });
+            (checkActionAuth as any).mockResolvedValue({
+                authorized: true,
+                user: { id: 'user1' },
+                session: { user: { id: 'user1' } }
+            });
 
             prismaMock.user.findUnique.mockResolvedValue({
                 id: 'user1',
@@ -112,7 +113,11 @@ describe('Jar Actions', () => {
         });
 
         it('should update jar settings successfully', async () => {
-            (getSession as any).mockResolvedValue({ user: { id: 'user1' } });
+            (checkActionAuth as any).mockResolvedValue({
+                authorized: true,
+                user: { id: 'user1' },
+                session: { user: { id: 'user1' } }
+            });
 
             prismaMock.user.findUnique.mockResolvedValue({
                 id: 'user1',
@@ -132,13 +137,18 @@ describe('Jar Actions', () => {
 
     describe('deleteJar', () => {
         it('should perform transactional delete', async () => {
-            (getSession as any).mockResolvedValue({ user: { id: 'user1' } });
+            (checkActionAuth as any).mockResolvedValue({
+                authorized: true,
+                user: { id: 'user1' },
+                session: { user: { id: 'user1' } }
+            });
 
             prismaMock.jarMember.findFirst.mockResolvedValue({ role: 'OWNER' } as any);
 
             // Mock Transaction
             prismaMock.$transaction.mockImplementation(async (callback) => {
                 if (typeof callback === 'function') {
+                    // @ts-ignore
                     return callback(prismaMock);
                 }
                 return callback;

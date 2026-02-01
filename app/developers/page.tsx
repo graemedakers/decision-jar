@@ -11,6 +11,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Terminal, Copy, RefreshCcw, ShieldAlert, BookOpen } from "lucide-react";
 import { UpgradeButton } from "@/components/UpgradeButton";
 import { APP_URL } from "@/lib/config";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Developer Portal | Decision Jar",
+    description: "Manage your API keys, view usage, and access developer documentation.",
+};
 
 export default async function DeveloperPortal() {
     const session = await getSession();

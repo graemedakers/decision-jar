@@ -168,8 +168,13 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
                 onClose();
                 router.refresh();
             } else {
-                const error = userRes.error || (jarRes && jarRes.error) || "Failed to update settings";
-                showError(error);
+                let errorMessage = "Failed to update settings";
+                if (!userRes.success) {
+                    errorMessage = userRes.error || "Failed to update user settings";
+                } else if (jarRes && !jarRes.success) {
+                    errorMessage = jarRes.error || "Failed to update jar settings";
+                }
+                showError(errorMessage);
             }
 
         } catch (error) {
@@ -221,11 +226,15 @@ export function SettingsModal({ isOpen, onClose, currentLocation, onRestartTour,
         try {
             const res = await regenerateJarCode(activeJarId);
 
-            if (res.success && res.data) {
-                showSuccess(`Success! Your new invite code is: ${res.data.newCode}`);
-                setInviteCode(res.data.newCode); // Update local state
-                setIsConfirmRegenCodeOpen(false);
-                router.refresh();
+            if (res.success) {
+                if (res.data) {
+                    showSuccess(`Success! Your new invite code is: ${res.data.newCode}`);
+                    setInviteCode(res.data.newCode); // Update local state
+                    setIsConfirmRegenCodeOpen(false);
+                    router.refresh();
+                } else {
+                    showError("Failed to regenerate code (No data)");
+                }
             } else {
                 showError(res.error || "Failed to regenerate code");
             }

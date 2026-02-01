@@ -1,7 +1,8 @@
 'use server';
 
 import { ActionResponse, Idea } from '@/lib/types';
-import { getSession } from '@/lib/auth';
+import { checkActionAuth } from '@/lib/actions-utils';
+import { getEffectiveJarId } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { awardXp, updateStreak } from '@/lib/gamification';
@@ -11,27 +12,17 @@ import { notifyJarMembers } from '@/lib/notifications';
 import { revalidatePath } from 'next/cache';
 import { ideaSchema } from '@/lib/validations/idea';
 
+
 export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea }>> {
-    const session = await getSession();
-    if (!session?.user?.id) {
-        return { success: false, error: 'Unauthorized', status: 401 };
+    const auth = await checkActionAuth();
+    if (!auth.authorized) {
+        return { success: false, error: auth.error, status: auth.status };
     }
+    const { session, user: sessionUser } = auth;
 
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        include: { memberships: true }
-    });
-
-    if (!user) {
-        return { success: false, error: 'User not found', status: 404 };
-    }
-
-    // Priority: 1. activeJarId, 2. First membership
-    const currentJarId = user.activeJarId ||
-        (user.memberships?.[0]?.jarId);
-
+    const currentJarId = await getEffectiveJarId(sessionUser.id);
     if (!currentJarId) {
-        return { success: false, error: 'No active jar', status: 400 };
+        return { success: false, error: 'No active jar found', status: 400 };
     }
 
     const jar = await prisma.jar.findUnique({ where: { id: currentJarId } });
@@ -101,8 +92,9 @@ export async function createIdea(data: any): Promise<ActionResponse<{ idea: Idea
 }
 
 export async function updateIdea(id: string, data: any): Promise<ActionResponse<{ idea: Idea }>> {
-    const session = await getSession();
-    if (!session?.user?.id) return { success: false, error: 'Unauthorized', status: 401 };
+    const auth = await checkActionAuth();
+    if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+    const { session } = auth;
 
     const idea = await prisma.idea.findUnique({ where: { id } });
     if (!idea) return { success: false, error: 'Idea not found', status: 404 };
@@ -138,8 +130,9 @@ export async function updateIdea(id: string, data: any): Promise<ActionResponse<
 }
 
 export async function deleteIdea(id: string): Promise<ActionResponse> {
-    const session = await getSession();
-    if (!session?.user?.id) return { success: false, error: 'Unauthorized', status: 401 };
+    const auth = await checkActionAuth();
+    if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+    const { session } = auth;
 
     const idea = await prisma.idea.findUnique({ where: { id } });
     if (!idea) return { success: false, error: 'Idea not found', status: 404 };
@@ -164,8 +157,9 @@ export async function deleteIdea(id: string): Promise<ActionResponse> {
 }
 
 export async function duplicateIdea(id: string, targetJarId?: string): Promise<ActionResponse<{ idea: Idea }>> {
-    const session = await getSession();
-    if (!session?.user?.id) return { success: false, error: 'Unauthorized', status: 401 };
+    const auth = await checkActionAuth();
+    if (!auth.authorized) return { success: false, error: auth.error, status: auth.status };
+    const { session } = auth;
 
     try {
         const sourceIdea = await prisma.idea.findUnique({ where: { id } });

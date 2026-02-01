@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api-response';
 import { withAuth } from '@/lib/api/with-auth';
 import { prisma } from '@/lib/prisma';
 import { generateUniqueJarCode } from '@/lib/utils';
@@ -43,11 +44,6 @@ export const POST = withAuth(async (request, { user }) => {
         return NextResponse.json(result);
 
     } catch (error: unknown) {
-        console.error("Create Jar API Error:", error);
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return NextResponse.json(
-            { error: "Internal Server Error", details: message },
-            { status: 500 }
-        );
+        return handleApiError(error);
     }
 });

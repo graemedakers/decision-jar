@@ -34,11 +34,13 @@ export function SignupForm() {
             setIsValidating(true);
             validateInviteCode(inviteCode)
                 .then(res => {
-                    if (res.success && res.data) {
-                        if (!res.data.valid) {
+                    if (res.success) {
+                        // Success case: check the validation result in data
+                        if (res.data && !res.data.valid) {
                             setCodeError(res.data.error || "Invalid invite code");
                         }
                     } else {
+                        // Failure case: error exists here
                         setCodeError(res.error || "Failed to validate code");
                     }
                 })

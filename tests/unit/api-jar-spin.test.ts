@@ -12,6 +12,7 @@ vi.mock('@/lib/gamification', () => ({
 vi.mock('@/lib/mailer', () => ({ sendDateNotificationEmail: vi.fn() }));
 vi.mock('@/lib/achievements', () => ({ checkAndUnlockAchievements: vi.fn() }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
+vi.mock('@/lib/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue({ allowed: true }) }));
 
 import { getSession } from '@/lib/auth';
 import { awardXp } from '@/lib/gamification';

@@ -1,267 +1,104 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { checkJarPermission, getEffectiveJarId } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { MemberRole } from '@prisma/client';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
     prisma: {
         jarMember: {
             findUnique: vi.fn(),
-            findFirst: vi.fn(),
         },
         user: {
-            findUnique: vi.fn(),
-        },
-        jar: {
             findUnique: vi.fn(),
         },
     },
 }));
 
-import { prisma } from '@/lib/prisma';
-
-/**
- * Permission Helper Functions
- * These would typically be in a lib/permissions.ts file
- */
-async function isUserAdminOfJar(userId: string, jarId: string): Promise<boolean> {
-    const membership = await prisma.jarMember.findFirst({
-        where: {
-            userId,
-            jarId,
-            status: 'ACTIVE',
-            role: 'ADMIN',
-        },
-    });
-    return !!membership;
-}
-
-async function canUserAccessJar(userId: string, jarId: string): Promise<boolean> {
-    const membership = await prisma.jarMember.findFirst({
-        where: {
-            userId,
-            jarId,
-            status: 'ACTIVE',
-        },
-    });
-    return !!membership;
-}
-
-async function canUserEditIdea(userId: string, ideaId: string): Promise<boolean> {
-    const idea = await (prisma as any).idea?.findUnique({
-        where: { id: ideaId },
-        include: {
-            jar: {
-                include: {
-                    members: {
-                        where: {
-                            userId,
-                            status: 'ACTIVE',
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    if (!idea) return false;
-
-    // Creator can always edit
-    if (idea.createdById === userId) return true;
-
-    // Admin can edit any idea in their jar
-    const isAdmin = idea.jar.members.some((m: any) => m.role === 'ADMIN');
-    return isAdmin;
-}
-
-describe('Permission System', () => {
+describe('Permission Utilities', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    describe('isUserAdminOfJar', () => {
-        it('should return true for admin users', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue({
-                id: 'membership-1',
-                userId: 'user-123',
-                jarId: 'jar-456',
-                role: 'ADMIN',
-                status: 'ACTIVE',
+    describe('checkJarPermission', () => {
+        it('should return error if not a member', async () => {
+            (prisma.jarMember.findUnique as any).mockResolvedValue(null);
+
+            const result = await checkJarPermission('user1', 'jar1');
+
+            expect(result.allowed).toBe(false);
+            expect(result.error).toBe('Not a member of this jar');
+        });
+
+        it('should return error if membership is inctive', async () => {
+            (prisma.jarMember.findUnique as any).mockResolvedValue({
+                role: 'MEMBER',
+                status: 'INACTIVE',
+                jar: { id: 'jar1' }
             });
 
-            const result = await isUserAdminOfJar('user-123', 'jar-456');
-
-            expect(result).toBe(true);
-            expect(prisma.jarMember.findFirst).toHaveBeenCalledWith({
-                where: {
-                    userId: 'user-123',
-                    jarId: 'jar-456',
-                    status: 'ACTIVE',
-                    role: 'ADMIN',
-                },
-            });
+            const result = await checkJarPermission('user1', 'jar1');
+            expect(result.allowed).toBe(false);
+            expect(result.error).toBe('Membership is not active');
         });
 
-        it('should return false for member users', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue(null);
-
-            const result = await isUserAdminOfJar('user-123', 'jar-456');
-
-            expect(result).toBe(false);
-        });
-
-        it('should return false for inactive memberships', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue(null);
-
-            const result = await isUserAdminOfJar('user-123', 'jar-456');
-
-            expect(result).toBe(false);
-        });
-    });
-
-    describe('canUserAccessJar', () => {
-        it('should allow access for active members', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue({
-                id: 'membership-1',
-                userId: 'user-123',
-                jarId: 'jar-456',
+        it('should return error if role is insufficient', async () => {
+            (prisma.jarMember.findUnique as any).mockResolvedValue({
                 role: 'MEMBER',
                 status: 'ACTIVE',
+                jar: { id: 'jar1' }
             });
 
-            const result = await canUserAccessJar('user-123', 'jar-456');
-
-            expect(result).toBe(true);
+            // Require ADMIN
+            const result = await checkJarPermission('user1', 'jar1', 'ADMIN');
+            expect(result.allowed).toBe(false);
+            expect(result.error).toContain('Requires ADMIN access');
         });
 
-        it('should allow access for admin members', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue({
-                id: 'membership-1',
-                userId: 'user-123',
-                jarId: 'jar-456',
+        it('should allow if role is sufficient', async () => {
+            (prisma.jarMember.findUnique as any).mockResolvedValue({
                 role: 'ADMIN',
                 status: 'ACTIVE',
+                jar: { id: 'jar1' }
             });
 
-            const result = await canUserAccessJar('user-123', 'jar-456');
-
-            expect(result).toBe(true);
-        });
-
-        it('should deny access for non-members', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue(null);
-
-            const result = await canUserAccessJar('user-123', 'jar-456');
-
-            expect(result).toBe(false);
-        });
-
-        it('should deny access for removed members', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue(null);
-
-            const result = await canUserAccessJar('user-123', 'jar-456');
-
-            expect(result).toBe(false);
+            // Require MEMBER
+            const result = await checkJarPermission('user1', 'jar1', 'MEMBER');
+            expect(result.allowed).toBe(true);
+            expect(result.membership?.role).toBe('ADMIN');
         });
     });
 
-    describe('canUserEditIdea', () => {
-        it('should allow idea creator to edit', async () => {
-            const mockIdea = {
-                id: 'idea-1',
-                createdById: 'user-123',
-                jar: {
-                    members: [],
-                },
-            };
+    describe('getEffectiveJarId', () => {
+        it('should return activeJarId if set', async () => {
+            (prisma.user.findUnique as any).mockResolvedValue({
+                activeJarId: 'jar_active',
+                memberships: []
+            });
 
-            (prisma as any).idea = {
-                findUnique: vi.fn().mockResolvedValue(mockIdea),
-            };
-
-            const result = await canUserEditIdea('user-123', 'idea-1');
-
-            expect(result).toBe(true);
+            const jarId = await getEffectiveJarId('user1');
+            expect(jarId).toBe('jar_active');
         });
 
-        it('should allow jar admin to edit any idea', async () => {
-            const mockIdea = {
-                id: 'idea-1',
-                createdById: 'user-999',
-                jar: {
-                    members: [
-                        {
-                            userId: 'user-123',
-                            role: 'ADMIN',
-                            status: 'ACTIVE',
-                        },
-                    ],
-                },
-            };
+        it('should fallback to first membership if activeJarId is null', async () => {
+            (prisma.user.findUnique as any).mockResolvedValue({
+                activeJarId: null,
+                memberships: [{ jarId: 'jar_fallback' }]
+            });
 
-            (prisma as any).idea = {
-                findUnique: vi.fn().mockResolvedValue(mockIdea),
-            };
-
-            const result = await canUserEditIdea('user-123', 'idea-1');
-
-            expect(result).toBe(true);
+            const jarId = await getEffectiveJarId('user1');
+            expect(jarId).toBe('jar_fallback');
         });
 
-        it('should deny non-admin members from editing others ideas', async () => {
-            const mockIdea = {
-                id: 'idea-1',
-                createdById: 'user-999',
-                jar: {
-                    members: [
-                        {
-                            userId: 'user-123',
-                            role: 'MEMBER',
-                            status: 'ACTIVE',
-                        },
-                    ],
-                },
-            };
+        it('should return null if no jars found', async () => {
+            (prisma.user.findUnique as any).mockResolvedValue({
+                activeJarId: null,
+                memberships: []
+            });
 
-            (prisma as any).idea = {
-                findUnique: vi.fn().mockResolvedValue(mockIdea),
-            };
-
-            const result = await canUserEditIdea('user-123', 'idea-1');
-
-            expect(result).toBe(false);
-        });
-
-        it('should deny access for non-existent ideas', async () => {
-            (prisma as any).idea = {
-                findUnique: vi.fn().mockResolvedValue(null),
-            };
-
-            const result = await canUserEditIdea('user-123', 'idea-nonexistent');
-
-            expect(result).toBe(false);
-        });
-    });
-
-    describe('Edge Cases', () => {
-        it('should handle database errors gracefully', async () => {
-            (prisma.jarMember.findFirst as any).mockRejectedValue(new Error('Database error'));
-
-            await expect(isUserAdminOfJar('user-123', 'jar-456')).rejects.toThrow('Database error');
-        });
-
-        it('should handle null userId', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue(null);
-
-            const result = await canUserAccessJar('', 'jar-456');
-
-            expect(result).toBe(false);
-        });
-
-        it('should handle null jarId', async () => {
-            (prisma.jarMember.findFirst as any).mockResolvedValue(null);
-
-            const result = await canUserAccessJar('user-123', '');
-
-            expect(result).toBe(false);
+            const jarId = await getEffectiveJarId('user1');
+            expect(jarId).toBeNull();
         });
     });
 });
+

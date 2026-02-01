@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api-response';
 import { deleteJar } from '@/app/actions/jars';
 
 export async function DELETE(
@@ -21,7 +22,6 @@ export async function DELETE(
         }
 
     } catch (error) {
-        console.error("Delete Jar API Error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return handleApiError(error);
     }
 }

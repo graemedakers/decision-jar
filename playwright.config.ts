@@ -20,7 +20,7 @@ export default defineConfig({
         },
     ],
     // webServer: {
-    //     command: 'npx next dev . --webpack',
+    //     command: 'npm run start', // Reverted
     //     url: 'http://localhost:3000',
     //     reuseExistingServer: true,
     //     env: {

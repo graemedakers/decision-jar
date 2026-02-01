@@ -1,25 +1,26 @@
 "use server";
 
-import { ActionResponse, Idea } from '@/lib/types';
+import { ActionResponse, Idea, SpinFilters } from '@/lib/types';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { checkActionAuth } from '@/lib/actions-utils';
 import { notifyJarMembers } from '@/lib/notifications';
 import { awardXp, updateStreak } from '@/lib/gamification';
 import { checkAndUnlockAchievements } from '@/lib/achievements';
 import { COST_VALUES, ACTIVITY_VALUES } from '@/lib/constants';
 import { revalidatePath } from 'next/cache';
 
-export async function spinJar(filters: any): Promise<ActionResponse<{ idea: Idea }>> {
+export async function spinJar(filters: SpinFilters): Promise<ActionResponse<{ idea: Idea }>> {
     try {
-        const session = await getSession();
+        const auth = await checkActionAuth();
         const { minDuration, maxDuration, maxCost, maxActivityLevel, timeOfDay, category, weather, localOnly, ideaTypes } = filters;
         if (minDuration !== undefined && maxDuration !== undefined && minDuration > maxDuration) {
             return { success: false, error: 'Invalid duration range: maxDuration must be greater than minDuration', status: 400 };
         }
 
-        if (!session?.user?.id) {
-            return { success: false, error: 'Unauthorized', status: 401 };
+        if (!auth.authorized) {
+            return { success: false, error: auth.error, status: auth.status };
         }
+        const { session } = auth;
 
         // 1. Fetch User and Active Jar
         const user = await prisma.user.findUnique({

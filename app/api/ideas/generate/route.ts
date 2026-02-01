@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api-response';
 import { QuotaManager } from '@/lib/api/quota-manager';
 import { ConciergeService } from '@/lib/services/concierge-service';
 import { detectIntent } from '@/lib/intent-detection';
@@ -103,11 +104,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(response);
 
     } catch (error: unknown) {
-        console.error('[API] Generate Error:', error);
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return NextResponse.json(
-            { error: 'Internal Server Error', message },
-            { status: 500 }
-        );
+        return handleApiError(error);
     }
 }
