@@ -27,9 +27,65 @@ export async function parseIntent(
     userContext?: { location?: string; jarTopic?: string }
 ): Promise<ParsedIntent> {
     try {
+
+        const promptLower = prompt.toLowerCase();
+
+        // ---------------------------------------------------------
+        // POWER USER PREFIXES (Hardcoded for "Hidden Features" Blog)
+        // ---------------------------------------------------------
+        if (promptLower.startsWith("watch:") || promptLower.startsWith("movie:")) {
+            const topic = prompt.replace(/^(watch:|movie:)\s*/i, "").trim();
+            return {
+                intentAction: 'ADD_SINGLE',
+                conciergeTool: 'MOVIE',
+                targetCategory: 'MOVIE',
+                quantity: 1,
+                topic: topic,
+                enrichment: { category: 'Movie', cost: '$', duration: 120, vibe: 'Cinematic' }
+            };
+        }
+        if (promptLower.startsWith("eat:") || promptLower.startsWith("food:")) {
+            const topic = prompt.replace(/^(eat:|food:)\s*/i, "").trim();
+            return {
+                intentAction: 'ADD_SINGLE',
+                conciergeTool: 'DINING',
+                targetCategory: 'MEAL',
+                quantity: 1,
+                topic: topic,
+                requiresVenueLookup: true,
+                isLocationDependent: true,
+                enrichment: { category: 'Food', cost: '$$', duration: 90, vibe: 'Delicious' }
+            };
+        }
+        if (promptLower.startsWith("read:") || promptLower.startsWith("book:")) {
+            const topic = prompt.replace(/^(read:|book:)\s*/i, "").trim();
+            return {
+                intentAction: 'ADD_SINGLE',
+                conciergeTool: 'BOOK',
+                targetCategory: 'BOOK',
+                quantity: 1,
+                topic: topic,
+                enrichment: { category: 'Book', cost: '$', duration: 300, vibe: 'Intellectual' }
+            };
+        }
+        if (promptLower.startsWith("do:") || promptLower.startsWith("go:")) {
+            const topic = prompt.replace(/^(do:|go:)\s*/i, "").trim();
+            return {
+                intentAction: 'ADD_SINGLE',
+                conciergeTool: 'ACTIVITY',
+                targetCategory: 'ACTIVITY',
+                quantity: 1,
+                topic: topic,
+                requiresVenueLookup: true,
+                isLocationDependent: true,
+                enrichment: { category: 'Activity', cost: '$$', duration: 120, vibe: 'Fun' }
+            };
+        }
+        // ---------------------------------------------------------
+
         const systemPrompt = `
         You are an advanced intent parser for a "Decision Jar" app. 
-        Your goal is to categorize user requests into one of three distinct actions:
+        Your goal is to categorize user requests into three distinct actions:
         1. **BULK_GENERATE**: User wants to populate their jar with multiple ideas (e.g. "5 movies", "fill my jar with recipes").
         2. **ADD_SINGLE**: User wants to add one specific, named item (e.g. "Add Interstellar", "Titanic").
         3. **LAUNCH_CONCIERGE**: User is asking a question or requesting a search/service that requires specialized research (e.g. "Where can I eat Italian?", "Find me a movie to watch tonight", "Help me plan a holiday").

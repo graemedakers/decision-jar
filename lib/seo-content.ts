@@ -706,40 +706,32 @@ export interface BlogPost extends ResourceGuide {
 
 export const BLOG_POSTS: BlogPost[] = [
     {
-        slug: "5-hidden-power-features",
+        slug: "3-hidden-power-features",
         category: "Deep Dive",
-        title: "5 Hidden Power-User Features You Missed in Decision Jar",
-        description: "From 'Magic-Add' shortcuts to collaborative voting tricks, here are the features that will turn you into a Decision Jar pro.",
+        title: "3 Hidden Power-User Features You Missed in Decision Jar",
+        description: "From 'Magic-Add' shortcuts to native app installation, here are the tricks that will turn you into a Decision Jar pro.",
         author: "Graeme Dakers",
         datePublished: "2026-02-01",
         icon: Zap,
-        readTime: "4 min",
+        readTime: "3 min",
         structuredData: {
             "@context": "https://schema.org",
             "@type": "BlogPosting",
-            "headline": "5 Hidden Power-User Features You Missed in Decision Jar"
+            "headline": "3 Hidden Power-User Features You Missed in Decision Jar"
         },
         faqs: [],
         sections: [
             {
                 title: "1. The 'Magic Add' Prefixes",
-                content: "Did you know you don't have to select a category manually? When typing in the Smart Input bar, simple prefixes handle it for you. Type **'Watch: Inception'** to instantly categorize it as a Movie, or **'Eat: Tacos'** for Food. The AI recognizes these intents instantly, saving you 3 clicks per idea."
+                content: "Did you know you don't have to select a category manually? When typing in the Smart Input bar, simple prefixes handle it for you. Type **'Watch: Inception'** to instantly categorize it as a Movie, **'Eat: Tacos'** for Food, or **'Read: Dune'** for Books. The system recognizes these intents instantly, bypassing the AI processing queue for lightning-fast addition."
             },
             {
-                title: "2. The 'Shake' Gesture",
-                content: "On mobile devices, sometimes you just need a quick reshuffle. While in the Dashboard view, giving your phone a firm 'Shake' will trigger a subtle animation and re-order your visible jar cards. It's a small touch, but it brings a physical tactile feel to your digital collection."
+                title: "2. Install as a Native App",
+                content: "Decision Jar is built as a Progressive Web App (PWA). This means you don't need an App Store to get the native experience. On iOS, tap **Share -> Add to Home Screen**. On Android, tap the **Three Dots -> Install App**. This gives you full-screen immersion and removes the browser URL bar, making it feel just like a native app."
             },
             {
-                title: "3. Quick-Swipe Actions",
-                content: "In your Jar List usage, swiping LEFT on any idea card reveals quick actions like 'Edit' or 'Delete'. But swiping RIGHT triggers the 'Favorite' toggle instantly. It's the fastest way to curate your top picks before a big spin."
-            },
-            {
-                title: "4. Multi-Select in 'Mad Libs' Filter",
-                content: "Our new conversational filter looks like a sentence ('I want to Eat...'), but it's more powerful than it looks. When you click 'Eat', you aren't limited to one choice. You can multi-select 'Eat' AND 'Drink' to widen your net. The sentence adapts to say 'Eat or Drink', giving you granular control over the randomizer."
-            },
-            {
-                title: "5. The Secret 'Admin Pick' Mode",
-                content: "Sometimes democracy is slow. In a Squad Jar, the creator has a hidden 'Admin Pick' override. Long-press the 'Spin' button to bypass the randomizer and manually select the winner. Use this power wisely—great for birthdays or when you have insider knowledge of what the group *actually* needs."
+                title: "3. System-Sync Dark Mode",
+                content: "We've built a beautiful, high-contrast Dark Mode that respects your system settings automatically. Whether you're deciding on a late-night movie or a bright lunch spot, the interface adapts to reduce eye strain. If your phone switches to Dark Mode at sunset, Decision Jar follows suit instantly."
             }
         ]
     },
@@ -816,12 +808,12 @@ export const BLOG_POSTS: BlogPost[] = [
         faqs: [],
         sections: [
             {
-                title: "The 'Guest' Experience",
-                content: "We designed the 'Join Jar' flow to be frictionless. Unlike other apps that force a 5-step signup before you can see anything, Decision Jar treats invitees as 'Guests' first. When you click an invite link, you are instantly transported into the group's jar. You can see the ideas, see who is online, and feel the vibe before you even create a password. This 'Try before you Buy' philosophy significantly increases the likelihood of your friends actually joining up."
+                title: "The 'One-Click' Join",
+                content: "We know that getting your friends to download another app is a struggle. That's why Decision Jar uses deep-linking invite codes. One click transports your friend directly to the specific jar you shared. No searching for the group, no complex setups—just click, join, and start adding ideas immediately."
             },
             {
-                title: "Live Presence as a Nudge",
-                content: "Have you ever noticed the green dots on the jar dashboard? That's not just decoration; it's our 'Presence Engine'. Seeing that 'Sarah is online' or 'Nick is spinning the jar' creates a sense of immediate, low-stakes connection. It prompts you to jump in and vote, not because you got a push notification, but because you see activity happening live. It mimics the feeling of walking into a room where your friends are already hanging out."
+                title: "Collaborative Favorites",
+                content: "Even without running a formal vote, your group can influence the outcome. Every member can 'Heart' specific ideas in the jar. Our 'Weighted Randomness' algorithm notices these signals. While the spin is still random, ideas with multiple favorites form the group are statistically more likely to win. It's a subtle way to nudge the jar toward what everyone is secretly hoping for."
             },
             {
                 title: "Collaborative Memory",
