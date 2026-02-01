@@ -698,3 +698,135 @@ export const RESOURCE_GUIDES: ResourceGuide[] = [
         ]
     }
 ];
+
+export interface BlogPost extends ResourceGuide {
+    author: string;
+    datePublished: string;
+}
+
+export const BLOG_POSTS: BlogPost[] = [
+    {
+        slug: "5-hidden-power-features",
+        category: "Deep Dive",
+        title: "5 Hidden Power-User Features You Missed in Decision Jar",
+        description: "From 'Magic-Add' shortcuts to collaborative voting tricks, here are the features that will turn you into a Decision Jar pro.",
+        author: "Graeme Dakers",
+        datePublished: "2026-02-01",
+        icon: Zap,
+        readTime: "4 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": "5 Hidden Power-User Features You Missed in Decision Jar"
+        },
+        faqs: [],
+        sections: [
+            {
+                title: "1. The 'Magic Add' Prefixes",
+                content: "Did you know you don't have to select a category manually? When typing in the Smart Input bar, simple prefixes handle it for you. Type **'Watch: Inception'** to instantly categorize it as a Movie, or **'Eat: Tacos'** for Food. The AI recognizes these intents instantly, saving you 3 clicks per idea."
+            },
+            {
+                title: "2. The 'Shake' Gesture",
+                content: "On mobile devices, sometimes you just need a quick reshuffle. While in the Dashboard view, giving your phone a firm 'Shake' will trigger a subtle animation and re-order your visible jar cards. It's a small touch, but it brings a physical tactile feel to your digital collection."
+            },
+            {
+                title: "3. Quick-Swipe Actions",
+                content: "In your Jar List usage, swiping LEFT on any idea card reveals quick actions like 'Edit' or 'Delete'. But swiping RIGHT triggers the 'Favorite' toggle instantly. It's the fastest way to curate your top picks before a big spin."
+            },
+            {
+                title: "4. Multi-Select in 'Mad Libs' Filter",
+                content: "Our new conversational filter looks like a sentence ('I want to Eat...'), but it's more powerful than it looks. When you click 'Eat', you aren't limited to one choice. You can multi-select 'Eat' AND 'Drink' to widen your net. The sentence adapts to say 'Eat or Drink', giving you granular control over the randomizer."
+            },
+            {
+                title: "5. The Secret 'Admin Pick' Mode",
+                content: "Sometimes democracy is slow. In a Squad Jar, the creator has a hidden 'Admin Pick' override. Long-press the 'Spin' button to bypass the randomizer and manually select the winner. Use this power wisely—great for birthdays or when you have insider knowledge of what the group *actually* needs."
+            }
+        ]
+    },
+    {
+        slug: "creative-jar-use-cases",
+        category: "Inspiration",
+        title: "Beyond Date Night: 3 Creative Ways to Use Your Jar",
+        description: "Decision Jar isn't just for couples. Here are three novel ways to organize your work, fitness, and creativity.",
+        author: "Team Decision Jar",
+        datePublished: "2026-02-01",
+        icon: Sparkles,
+        readTime: "5 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": "Beyond Date Night: 3 Creative Ways to Use Your Jar"
+        },
+        faqs: [],
+        sections: [
+            {
+                title: "1. The 'Office Lunch' Consensus Engine",
+                content: "The daily 'Where should we go for lunch?' conversation is a productivity killer. Create a shared 'Office Lunch' jar with your team. Add all the local spots within a 10-minute walk. When 12:00 PM hits, don't debate—Spin. If anyone complains, remind them: The Jar decides. It turns a 20-minute debate into a 10-second ritual."
+            },
+            {
+                title: "2. The 'Gym Roulette' Protocol",
+                content: "Workout routines get stale. Create a 'Fitness' jar populated with different workout types: '5k Run', 'Heavy Lift', 'Yoga Flow', 'HIIT Circuit'. When you wake up lacking motivation, let the jar pick your pain. The surprise element mimics the excitement of a class booking, but completely free."
+            },
+            {
+                title: "3. The 'Writer's Block' Breaker",
+                content: "For creatives, the blank page is the enemy. Fill a jar with abstract prompts ('The smell of rain', 'A lost letter', 'The color blue'). When you feel stuck, spin for a prompt and force yourself to write for 10 minutes on that topic. It uses randomness to short-circuit perfectionism."
+            }
+        ]
+    },
+    {
+        slug: "squad-mode-deep-dive",
+        category: "Deep Dive",
+        title: "Mastering Squad Mode: A Guide to Group Dynamics",
+        description: "How to use weighted voting, veto power, and roles to manage your social circles effectively.",
+        author: "Graeme Dakers",
+        datePublished: "2026-02-01",
+        icon: Users,
+        readTime: "6 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": "Mastering Squad Mode: A Guide to Group Dynamics"
+        },
+        faqs: [],
+        sections: [
+            {
+                title: "The Silent Veto",
+                content: "In Squad Mode, we introduced a feature called 'The Silent Veto'. During a voting round, if a specific idea gives you anxiety or is absolutely a no-go, you can flag it as a Veto. If *anyone* in the group vetoes an item, it is silently removed from the winning pool, regardless of how many other votes it got. This ensures psychological safety—you never have to do something you hate just because the group clicked it."
+            },
+            {
+                title: "Weighted Randomness",
+                content: "Did you know that 'Likes' influence the basic Spin? Even without a full Vote Mode, spinning a shared jar uses 'Weighted Randomness'. Ideas with more interaction/favorites from the group have a statistically higher chance of being picked by the spin algorithm. It's democracy, but subtle."
+            }
+        ]
+    },
+    {
+        slug: "the-social-jar-architecture-of-connection",
+        category: "Social",
+        title: "The Architecture of Connection: Building Better Groups with Shared Jars",
+        description: "How shared jars, active status, and collaborative history turn a simple app into a social operating system.",
+        author: "Team Decision Jar",
+        datePublished: "2026-02-01",
+        icon: Users,
+        readTime: "7 min",
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": "The Architecture of Connection: Building Better Groups with Shared Jars"
+        },
+        faqs: [],
+        sections: [
+            {
+                title: "The 'Guest' Experience",
+                content: "We designed the 'Join Jar' flow to be frictionless. Unlike other apps that force a 5-step signup before you can see anything, Decision Jar treats invitees as 'Guests' first. When you click an invite link, you are instantly transported into the group's jar. You can see the ideas, see who is online, and feel the vibe before you even create a password. This 'Try before you Buy' philosophy significantly increases the likelihood of your friends actually joining up."
+            },
+            {
+                title: "Live Presence as a Nudge",
+                content: "Have you ever noticed the green dots on the jar dashboard? That's not just decoration; it's our 'Presence Engine'. Seeing that 'Sarah is online' or 'Nick is spinning the jar' creates a sense of immediate, low-stakes connection. It prompts you to jump in and vote, not because you got a push notification, but because you see activity happening live. It mimics the feeling of walking into a room where your friends are already hanging out."
+            },
+            {
+                title: "Collaborative Memory",
+                content: "A Shared Jar isn't just a decision tool; it's a history book. Every time a group completes an activity, it moves to the 'Memories' tab. Over months, this builds a searchable timeline of your friendship—the bad movies, the great hikes, the terrible tacos. You aren't just deciding what to do next; you are actively categorizing what you have already done, creating a shared 'Canon' of inside jokes and experiences."
+            }
+        ]
+    }
+];
